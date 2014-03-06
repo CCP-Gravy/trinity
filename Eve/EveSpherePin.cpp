@@ -186,7 +186,7 @@ void EveSpherePin::ReleaseCachedData( BlueAsyncRes* p )
 }
 
 // ------------------------------------------------------------------------------------------------------
-void EveSpherePin::Update( EveUpdateContext& updateContext )
+void EveSpherePin::UpdateSyncronous( EveUpdateContext& updateContext )
 {
 	if( !m_tree )
 	{
@@ -216,6 +216,11 @@ void EveSpherePin::Update( EveUpdateContext& updateContext )
 		}
 	}
 
+}
+
+// ------------------------------------------------------------------------------------------------------
+void EveSpherePin::UpdateAsyncronous( EveUpdateContext& updateContext )
+{
 	// don't forget the curves
 	if( !m_curveSets.empty() )
 	{
@@ -227,8 +232,10 @@ void EveSpherePin::Update( EveUpdateContext& updateContext )
 }
 
 // ------------------------------------------------------------------------------------------------------
-void EveSpherePin::UpdateWorldTransform( Be::Time time )
+void EveSpherePin::Update( EveUpdateContext& updateContext )
 {
+	UpdateSyncronous( updateContext );
+	UpdateAsyncronous( updateContext );
 }
 
 // ------------------------------------------------------------------------------------------------------

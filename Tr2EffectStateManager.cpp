@@ -385,6 +385,7 @@ void Tr2EffectStateManager::RenderBatchesSortedByEffect( ITriRenderBatchAccumula
 	
 	RenderingMode currentMode = RM_ANY;
 	const Tr2PerObjectData* curPerObjectData = nullptr;
+	unsigned int curShaderTypeMask = 0;
 
 	Tr2ConstantBufferAL*	perObjectConstantBuffers[CBUFFER_COUNT];
 	for( uint32_t i = 0; i != CBUFFER_COUNT; ++i )
@@ -499,10 +500,11 @@ void Tr2EffectStateManager::RenderBatchesSortedByEffect( ITriRenderBatchAccumula
 
 				// If the batch has per-object data, set it to the device
 				const Tr2PerObjectData* const perObjectData = batch->GetPerObjectData();
-				if( perObjectData && perObjectData != curPerObjectData )
+				if( perObjectData && ( ( perObjectData != curPerObjectData ) || ( currentShader->GetShaderTypeMask() != curShaderTypeMask ) ) )
 				{
 					D3DPERF_EVENT( L"Object - RenderBatchesSortedByEffect::SetPerObjectDataToDevice" );
 					curPerObjectData = perObjectData;
+					curShaderTypeMask = currentShader->GetShaderTypeMask();
 					perObjectData->SetPerObjectDataToDevice( perObjectConstantBuffers, currentShader->GetShaderTypeMask(), m_renderContext );
 				}
 
@@ -590,8 +592,6 @@ void Tr2EffectStateManager::RenderBatchesWithOverride( ITriRenderBatchAccumulato
 	}
 
 	D3DPERF_EVENT( L"Tr2EffectStateManager::RenderBatchesWithOverride" );
-
-	const Tr2PerObjectData* curPerObjectData = nullptr;
 
 	ITr2ShaderState* overrideShader = overrideEffect->GetShaderStateInterface();
 	if( !overrideShader )
@@ -1111,8 +1111,6 @@ namespace {
 
 void Tr2EffectStateManager::ApplyStandardStates( RenderingMode rm )
 {
-	USE_MAIN_THREAD_RENDER_CONTEXT();
-
 	if( rm > RM_ANY && rm < RM_COUNT )
 	{
 		if( applyCullMode[ rm ] )

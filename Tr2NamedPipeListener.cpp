@@ -93,7 +93,6 @@ bool Tr2NamedPipeListener::Listen( std::string pipeName )
 
 	if( m_pipeHandle == INVALID_HANDLE_VALUE )
 	{
-		DWORD dwError = ::GetLastError();
 		return false;
 	}
 	// We will be busy now

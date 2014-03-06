@@ -20,7 +20,8 @@ static const char* CURVE_LINE_SHADER = "Line3D";
 static const char* CURVE_PICK_SHADER = "Line3DPicking";
 
 Tr2InteriorCurveLineSet::Tr2InteriorCurveLineSet(IRoot* lockobj /*= NULL*/ ) :
-    m_perspectiveCorrection( true )
+    m_perspectiveCorrection( true ),
+	m_isVisible( true )
 {
 	// create line draw effect
 	Tr2ShaderSituation situation;

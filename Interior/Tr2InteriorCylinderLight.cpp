@@ -521,14 +521,12 @@ bool Tr2InteriorCylinderLight::TestCellIntersectionAndAdd( Tr2InteriorCell* cell
 	Matrix transformInv;
 	D3DXMatrixInverse( &transformInv, NULL, &cell->GetWorldTransform() );
 
-	bool intersects = false;
-
 	Vector3 scale, translation;
 	Quaternion rotation;
 	D3DXMatrixDecompose( &scale, &rotation, &translation, &cell->GetWorldTransform() );
 	Vector3 center = ( minBounds + maxBounds ) / 2 + translation;
 	Vector3 extents = maxBounds - center;
-	intersects = cell->IsUnbounded() || IntersectOrientedBoxOrientedBox( 
+	bool intersects = cell->IsUnbounded() || IntersectOrientedBoxOrientedBox( 
 											m_position, 
 											Vector3( m_radius, m_radius, m_length / 2.f + m_radius ), 
 											m_rotation, 

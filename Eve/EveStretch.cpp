@@ -27,11 +27,31 @@ EveStretch::EveStretch( IRoot* lockobj ) :
 	m_destinationTransform = Tr2Renderer::GetIdentityTransform();
 }
 
-void EveStretch::UpdateWorldTransform( Be::Time time )
+void EveStretch::UpdateSyncronous( EveUpdateContext& updateContext )
 {
+	Be::Time time = updateContext.GetTime();
+	if( !m_update )
+	{
+		return;
+	}
+
+	if( m_source )
+	{
+		m_source->Update( &m_sourcePosition, time );
+	}
+	else if( m_useTransformsForStretch )
+	{
+		m_sourcePosition = m_sourceTransform.GetTranslation();
+	}
+
+	if( m_dest )
+	{
+		m_dest->Update( &m_destinationPosition, time );
+	}
+
 }
 
-void EveStretch::Update( EveUpdateContext& updateContext )
+void EveStretch::UpdateAsyncronous( EveUpdateContext& updateContext )
 {
 	Be::Time time = updateContext.GetTime();
 	if( !m_update )
@@ -53,21 +73,6 @@ void EveStretch::Update( EveUpdateContext& updateContext )
 		}
 	}
 
-	if( m_source )
-	{
-		m_source->Update( &m_sourcePosition, time );
-	}
-	else if( m_useTransformsForStretch )
-	{
-		m_sourcePosition = m_sourceTransform.GetTranslation();
-	}
-
-	if( m_dest )
-	{
-		m_dest->Update( &m_destinationPosition, time );
-	}
-
-
 	Vector3 directionVec( m_destinationPosition - m_sourcePosition);
 	float scalingLength = D3DXVec3Length( &directionVec );
 	m_length->m_value = scalingLength;
@@ -88,6 +93,12 @@ void EveStretch::Update( EveUpdateContext& updateContext )
 	{
 		m_destObject->Update( updateContext );
 	}
+}
+
+void EveStretch::Update( EveUpdateContext& updateContext )
+{
+	UpdateSyncronous( updateContext );
+	UpdateAsyncronous( updateContext );
 }
 
 void EveStretch::RenderDebugInfo( Tr2RenderContext& renderContext )

@@ -62,6 +62,7 @@ Tr2SkinnedObject::Tr2SkinnedObject(IRoot* lockobj) :
 #endif
 	m_lastUpdateTime( 0 ),
 	m_lastTranslation( 0.0f, 0.0f, 0.0f ),
+	m_estimatedPixelDiameter( 0.0f ),
 	m_skeletonTag( 0 ),
 	m_useExplicitBounds( false ),
 	m_minBounds( 0.0f, 0.0f, 0.0f ),
@@ -698,7 +699,7 @@ void Tr2SkinnedObject::UpdatePerObjectData()
 	if( m_skinningMatrixCount )
 	{
 		// if the model is of type cpuskinned, then we can call ::deform
-		Tr2CpuSkinnedModel* cpuSkinnedModel = dynamic_cast<Tr2CpuSkinnedModel*>( (Tr2SkinnedModel*)m_visualModel );
+		Tr2CpuSkinnedModel* cpuSkinnedModel = dynamic_cast<Tr2CpuSkinnedModel*>( m_visualModel.p );
 		if( cpuSkinnedModel )
 		{
 			cpuSkinnedModel->deform( GetSkinningMatrices(), m_skinningMatrixCount );
@@ -959,11 +960,11 @@ void Tr2SkinnedObject::SetLOD( const TriFrustum* frustum )
 		}
 	}
 
-	const int oldLod = m_lod.GetCurrentLod();
-
 	Tr2SkinnedModel* model = m_lod.SetLOD( frustum, m_estimatedPixelDiameter );
 
 #if APEX_ENABLED
+	const int oldLod = m_lod.GetCurrentLod();
+
 	// trying to move to a lod without simulated cloth?  If so, delay that if there is a fade-out period.
 	if( !clothFadeFinishedThisFrame && oldLod <= g_maxClothLod && m_lod.GetCurrentLod() > g_maxClothLod )
 	{

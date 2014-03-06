@@ -11,6 +11,7 @@
 Tr2DistanceTracker::Tr2DistanceTracker( IRoot* lockobj ):
 	m_signedDistance( true ),
 	m_distanceToClosest( true ),
+	m_value( 0 ),
 	m_direction( 0, 0, 0 ),
 	m_sourcePosition( 0, 0, 0 ),
 	m_targetPosition( 0, 0, 0 )

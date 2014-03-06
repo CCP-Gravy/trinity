@@ -229,13 +229,13 @@ static PyObject* PySetItem( PyObject* self, PyObject* args )
 		return nullptr;
 	}
 
-	char* dataRaw = reinterpret_cast<char*>( pThis->GetData( pThis->GetCount() ) );
+	uint8_t* dataRaw = static_cast<uint8_t*>( pThis->GetData( pThis->GetCount() ) );
 	if( !dataRaw )
 	{
 		PyErr_SetString( PyExc_RuntimeError, "Could not lock data" );
 		return nullptr;
 	}
-	float* data = reinterpret_cast<float*>( dataRaw + pThis->GetStride() * index );
+	float* data = static_cast<float*>( static_cast<void*>( dataRaw + pThis->GetStride() * index ) );
 
 
 	for( size_t j = 0; j < def.m_items.size(); ++j )
@@ -355,13 +355,13 @@ static PyObject* PySetItemElement( PyObject* self, PyObject* args )
 		return nullptr;
 	}
 
-	char* dataRaw = reinterpret_cast<char*>( pThis->GetData( pThis->GetCount() ) );
+	uint8_t* dataRaw = reinterpret_cast<uint8_t*>( pThis->GetData( pThis->GetCount() ) );
 	if( !dataRaw )
 	{
 		PyErr_SetString( PyExc_RuntimeError, "Could not lock data" );
 		return nullptr;
 	}
-	float* data = reinterpret_cast<float*>( dataRaw + pThis->GetStride() * index + def.m_items[elementIndex].m_offset );
+	float* data = static_cast<float*>( static_cast<void*>( dataRaw + pThis->GetStride() * index + def.m_items[elementIndex].m_offset ) );
 
 	unsigned size = def.GetDataTypeSizeInMembers( def.m_items[elementIndex].m_dataType );
 	if( size == 1 )

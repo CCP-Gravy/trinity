@@ -115,9 +115,9 @@ void Tr2Sprite2dArc::GatherSprites( Tr2Sprite2dScene* renderer )
 		SetRegularRenderState( renderer );
 
 		m_renderVertexCapacity = GetVertexCount();
-		m_renderVertices = (Tr2Sprite2dD3DVertex*)CCP_MALLOC( 
+		m_renderVertices = static_cast<Tr2Sprite2dD3DVertex*>( CCP_MALLOC( 
 			"Tr2Sprite2dArc/m_renderVertices", 
-			m_renderVertexCapacity * sizeof( Tr2Sprite2dD3DVertex ) );
+			m_renderVertexCapacity * sizeof( Tr2Sprite2dD3DVertex ) ) );
 		m_renderVertexCount = 0;
 
 		float arcLength = (m_endAngle - m_startAngle) * m_radius;
@@ -214,9 +214,9 @@ void Tr2Sprite2dArc::GatherSprites( Tr2Sprite2dScene* renderer )
 			{
 				fillVertCount += 8;
 			}
-			Tr2Sprite2dVertexBase* verts = (Tr2Sprite2dVertexBase*)CCP_MALLOC( 
+			Tr2Sprite2dVertexBase* verts = static_cast<Tr2Sprite2dVertexBase*>( CCP_MALLOC( 
 				"Tr2Sprite2dArc/verts", 
-				fillVertCount * sizeof( Tr2Sprite2dVertexBase ) );
+				fillVertCount * sizeof( Tr2Sprite2dVertexBase ) ) );
 
 			unsigned int centerPointIx = m_renderVertexCount;
 

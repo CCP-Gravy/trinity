@@ -459,8 +459,8 @@ void Tr2GrannyAnimation::PrePhysicsAnimation( Be::Time time, const Matrix &model
 					int parentIx = m_skeleton->Bones[i].ParentIndex;
 					if( parentIx != -1 )
 					{
-						Matrix fromMat = *( (Matrix*)GrannyGetWorldPose4x4( m_worldPose, parentIx ) );
-						Matrix toMat = *( (Matrix*)GrannyGetWorldPose4x4( m_worldPose, i ) );
+						Matrix fromMat = *reinterpret_cast<Matrix*>( GrannyGetWorldPose4x4( m_worldPose, parentIx ) );
+						Matrix toMat = *reinterpret_cast<Matrix*>( GrannyGetWorldPose4x4( m_worldPose, i ) );
 
 						// Transform to our world coordinates
 						D3DXMatrixMultiply(&fromMat, &fromMat, &modelTransform);
@@ -475,7 +475,7 @@ void Tr2GrannyAnimation::PrePhysicsAnimation( Be::Time time, const Matrix &model
 				for( int i = 0; i < m_skeleton->BoneCount; ++i )
 				{
 					const char* name = m_skeleton->Bones[i].Name;
-					Matrix m = *( (Matrix*)GrannyGetWorldPose4x4( m_worldPose, i ) );
+					Matrix m = *reinterpret_cast<Matrix*>( GrannyGetWorldPose4x4( m_worldPose, i ) );
 
 					// Transform to our world coordinates
 					D3DXMatrixMultiply(&m, &m, &modelTransform);
@@ -490,6 +490,10 @@ void Tr2GrannyAnimation::PrePhysicsAnimation( Be::Time time, const Matrix &model
 float Tr2GrannyAnimation::GetAnimationChainCompleteTime()
 {
 	float startTime = Tr2Renderer::GetAnimationTime();
+	if( !m_modelInstance )
+	{
+		return startTime;
+	}
 
 	float maxRemaining = 0.0f;
 	for(	granny_model_control_binding *binding = GrannyModelControlsBegin( m_modelInstance ); 
@@ -503,10 +507,9 @@ float Tr2GrannyAnimation::GetAnimationChainCompleteTime()
 		int newLoopCount = loopCount + 1;
 
 		int loopsTotal = GrannyGetControlLoopCount( control );
-		float remaining = 0.f;
 		
 		GrannySetControlLoopCount( control, newLoopCount );
-		remaining = GrannyGetControlDurationLeft( control );
+		float remaining = GrannyGetControlDurationLeft( control );
 		GrannySetControlLoopCount( control, loopsTotal );
 		if( remaining > maxRemaining )
 		{
@@ -537,7 +540,7 @@ const Matrix* Tr2GrannyAnimation::GetAnimationTransforms()
 {
 	if( m_worldPose )
 	{
-		return (Matrix*)GrannyGetWorldPose4x4Array( m_worldPose );
+		return reinterpret_cast<Matrix*>( GrannyGetWorldPose4x4Array( m_worldPose ) );
 	}
 
 	return NULL;

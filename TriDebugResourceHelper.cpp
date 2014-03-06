@@ -8,6 +8,8 @@ static const char* DEBUG_LINE_EFFECT_PATH = "res:/Graphics/Effect/Managed/Utilit
 TriDebugResourceHelper g_debugResourceHelper;
 
 TriDebugResourceHelper::TriDebugResourceHelper()
+	:m_vertexPosColorDecl( Tr2EffectStateManager::UNINITIALIZED_DECLARATION ),
+	m_vertexPosDecl( Tr2EffectStateManager::UNINITIALIZED_DECLARATION )
 {
 }
 

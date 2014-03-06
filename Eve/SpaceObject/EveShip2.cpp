@@ -3,7 +3,7 @@
 #include "TriValueBinding.h"
 
 #include "EveShip2.h"
-#include "Eve/EveBoosterSet2.h"
+#include "Attachments/EveBoosterSet2.h"
 #include "Eve/EveTurretSet.h"
 #include "Eve/EveLocator2.h"
 #include "Curves/TriCurveSet.h"
@@ -28,13 +28,13 @@ EveShip2::~EveShip2()
 {
 }
 
-void EveShip2::Update( EveUpdateContext& updateContext )
+void EveShip2::UpdateSyncronous( EveUpdateContext& updateContext )
 {
 	if( !m_update )
 	{
 		return;
 	}
-	EveMobile::Update( updateContext );
+	EveMobile::UpdateSyncronous( updateContext );
 	Be::Time time = updateContext.GetTime();
 	float deltaT = updateContext.GetDeltaT();
 
@@ -53,6 +53,21 @@ void EveShip2::Update( EveUpdateContext& updateContext )
 	{
 		// call update with this ship's transform
 		m_boosters->Update( deltaT, time, &m_worldTransform, m_ballPosition, m_ballRotation );
+	}
+}
+
+void EveShip2::UpdateAsyncronous( EveUpdateContext& updateContext )
+{
+	if( !m_update )
+	{
+		return;
+	}
+	EveMobile::UpdateAsyncronous( updateContext );
+	if( m_boosters )
+	{
+		Be::Time time = updateContext.GetTime();
+		float deltaT = updateContext.GetDeltaT();
+		m_boosters->UpdateTrails( deltaT, time );
 	}
 }
 
@@ -144,7 +159,8 @@ void EveShip2::RebuildBoosterSet()
 		const char* locatorName = locator->GetName();
 		if( strncmp( locatorName, kLocatorPrefix, kLocatorPrefixLength ) == 0 )
 		{
-			m_boosters->Add( &locator->GetTransform() );
+			Vector4 functionality( 0.f, 1.f, 1.f, 1.f );
+			m_boosters->Add( &locator->GetTransform(), &functionality );
 		}
 	}
 

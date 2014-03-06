@@ -11,6 +11,7 @@ struct ViewDistanceInfo
 	ViewDistanceInfo( float nearClipMin, float farClipMax );
 
 	void UpdateClipPlanes( Vector4 boundingSphere, const TriFrustum& frustum );
+	void UpdateClipPlanesIfInFront( Vector4 boundingSphere, const TriFrustum& frustum );
 
 	float m_near;
 	float m_far;

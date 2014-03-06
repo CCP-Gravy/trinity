@@ -23,7 +23,9 @@ const unsigned NO_COMPRESSION = 0;
 //   Tr2BmpHandler constructor
 // --------------------------------------------------------------------------------------
 Tr2BmpHandler::Tr2BmpHandler( const wchar_t* sourceName )
-	:Tr2ImageHandler( sourceName )
+	:Tr2ImageHandler( sourceName ),
+	m_fileSize( 0 ),
+	m_imageSize( 0 )
 {
 }
 
@@ -55,7 +57,6 @@ bool Tr2BmpHandler::ReadHeader()
 	{
 		return false;
 	}
-	unsigned size = m_dibHeader.structSize - sizeof( MinDibHeader );
 	if( m_dibHeader.structSize >= sizeof( DibHeader ) )
 	{
 		if( m_source->Read( reinterpret_cast<char*>( &m_dibHeader ) + sizeof( MinDibHeader ), sizeof( DibHeader ) - sizeof( MinDibHeader ) ) != 
@@ -63,7 +64,6 @@ bool Tr2BmpHandler::ReadHeader()
 		{
 			return false;
 		}
-		size -= sizeof( DibHeader ) - sizeof( MinDibHeader );
 	}
 	else
 	{

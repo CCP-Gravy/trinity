@@ -15,7 +15,8 @@ class Tr2InteriorLightGeometryRenderBatch :
 {
 public:
 	Tr2InteriorLightGeometryRenderBatch()
-		:m_VB( nullptr ),
+		:m_vertexDecl( Tr2EffectStateManager::UNINITIALIZED_DECLARATION ),
+		m_VB( nullptr ),
 		m_IB( nullptr ),
 		m_isInside( false )
 	{
@@ -136,7 +137,7 @@ public:
 
 		static Tr2VertexBufferAL* vb = Tr2ConstGeometry::GetVB( vertexes, sizeof( vertexes ) );
 		static Tr2IndexBufferAL* ibRH = Tr2ConstGeometry::GetIB( IB_32BIT, indexesRH, 6 );
-		static Tr2IndexBufferAL* ibLH = Tr2ConstGeometry::GetIB( IB_32BIT, indexesRH, 6 );
+		static Tr2IndexBufferAL* ibLH = Tr2ConstGeometry::GetIB( IB_32BIT, indexesLH, 6 );
 
 		renderContext.SetTopology( TOP_TRIANGLES );        
 

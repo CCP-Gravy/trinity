@@ -78,7 +78,7 @@ void Tr2ScalarExprCurve::SetExpression( std::string expr )
 		// Generate the bytecode
 		m_expressionParser.Eval();
 	}
-	catch (mu::Parser::exception_type e)
+	catch( const mu::Parser::exception_type& e )
 	{
 		if ( m_expression.size() )
 		{

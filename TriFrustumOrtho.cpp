@@ -18,7 +18,7 @@ void TriFrustumOrtho::DeriveFrustum( const Matrix& view, const Vector3& minBound
 bool TriFrustumOrtho::IsSphereVisibleAndInsideNearPlane( const Vector4* sphere ) const
 {
 	Vector3 centerInView;
-	D3DXVec3TransformCoord( &centerInView, (Vector3*)sphere, &m_view );
+	D3DXVec3TransformCoord( &centerInView, reinterpret_cast<const Vector3*>( sphere ), &m_view );
 
 	if( centerInView.z - sphere->w > m_boundsMax.z )
 	{

@@ -216,7 +216,6 @@ void Tr2ManipulationTool::SelectAxis( std::string axisName )
 		if((*it)->m_name == axisName )
 		{
 			(*it)->SetCurrentColor((Color&)v4Yellow);
-			validName = true;
 		}
 	}
 	m_selectedAxis = axisName;
@@ -290,12 +289,11 @@ Vector3* Tr2ManipulationTool::GetConeTriangles( float height, float width, int s
 	Vector3 top( 0.0f, height, 0.0f );
 	float rad =  XM_PI/(subd*0.5f);
 	int numVerts = subd*6;
-	int offset = 0;
 	Vector3* triangles = new Vector3[numVerts];
 	*numVectors = numVerts;
 	for( int i = 0; i < subd; i++ )
 	{
-		offset = 6*i;
+		int offset = 6*i;
 		triangles[offset] = top;
 		triangles[offset+1] = Vector3( cos( ( i + 1 ) * rad ) * width, 0.0f, sin( ( i + 1 ) * rad ) * width );
 		triangles[offset+2] = Vector3( cos( i * rad ) * width, 0.0f, sin( i * rad ) * width );
@@ -337,12 +335,11 @@ Vector3* Tr2ManipulationTool::GetCircleTriangles( float radius, int subd, int* n
 	Vector3 top( radius, 0.0f, 0.0f );
 	float rad =  XM_PI/(subd*0.5f);
 	int numVerts = subd*3;
-	int offset = 0;
 	Vector3* verts = new Vector3[numVerts];
 	*numVectors = numVerts;
 	for( int i = 0; i < subd; i++ )
 	{
-		offset = 3*i;
+		int offset = 3*i;
 		verts[offset] = top;
 		verts[offset+1] = Vector3( cos( i * rad ) * radius, sin( i * rad ) * radius, 0.0f );
 		verts[offset+2] = Vector3( cos( ( i + 1 ) * rad ) * radius, sin( ( i + 1 ) * rad ) * radius, 0.0f );
@@ -354,12 +351,11 @@ Vector3* Tr2ManipulationTool::GetCirclePoints( float radius, int subd, int* numV
 {
 	float rad =  XM_PI/(subd*0.5f);
 	int numVerts = subd*2;
-	int offset = 0;
 	Vector3* verts = new Vector3[numVerts];
 	*numVectors = numVerts;
 	for( int i = 0; i < subd; i++ )
 	{
-		offset = 2*i;
+		int offset = 2*i;
 		verts[offset] = Vector3( cos( i * rad ) * radius, sin( i * rad ) * radius, 0.0f );
 		verts[offset+1] = Vector3( cos( ( i + 1 ) * rad ) * radius, sin( ( i + 1 ) * rad ) * radius, 0.0f );
 	}

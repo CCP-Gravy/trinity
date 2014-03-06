@@ -86,7 +86,6 @@ void TriLineSet::AddSphere( const Vector3& center, float radius, int segments, u
 
 	float step = (XM_PI * 2.0f) / (float)segments;
 	float halfStep = step * 0.5f;
-	float yStep = radius / (float)segments;
 
 	float curRadius = 0.0f;
 	float curY = 0.0f;
@@ -200,8 +199,6 @@ void TriLineSet::AddCylinder( const Vector3& start, const Vector3& end, float ra
 	float step = (XM_PI * 2.0f) / (float)segments;
 	for( int i = 0; i < segments; ++i )
 	{
-		float fi = (float)i;
-
 		float x = cosf( i*step );
 		float y = sinf( i*step );
 
@@ -287,8 +284,6 @@ void TriLineSet::AddCone( const Vector3& start, const Vector3& end, float radius
 	float step = (XM_PI * 2.0f) / (float)segments;
 	for( int i = 0; i < segments; ++i )
 	{
-		float fi = (float)i;
-
 		float x = cosf( i*step );
 		float y = sinf( i*step );
 

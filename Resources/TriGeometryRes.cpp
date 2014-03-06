@@ -453,7 +453,6 @@ bool TriGeometryRes::GetAreaBasis( unsigned int meshIx, unsigned int areaIx, Vec
 	uint8_t* pVertices;
 	uint8_t* pIndices;
 
-	int numVerts = pMesh->m_vertexCount;
 	int vertSize = pMesh->m_bytesPerVertex;
 	if( FAILED(pMesh->m_vertexBuffer.Lock(0, 0, (void**)&pVertices, LOCK_READONLY, renderContext ) ) )
 	{
@@ -711,8 +710,6 @@ void TriGeometryRes::DetermineAreaBoundsAndVertCount( TriGeometryResAreaData& ar
 
 	InitializeBounds( area.m_minBounds, area.m_maxBounds );
 
-	uint8_t* pVerts = (uint8_t*)myMesh->PrimaryVertexData->Vertices;
-
 	std::set<int> vertexIndicesSeen;
 
 	for( int vIx = 0; vIx < area.m_primitiveCount * 3; ++vIx )
@@ -882,7 +879,11 @@ bool TriGeometryRes::SetupMeshes( granny_file_info* gi )
 		{
 			// The mesh has extended data - ask Granny to convert it to our current version of the bounds
 			// info data structure.
-			mbi = (MeshBoundsInfo*)GrannyConvertTree( myMesh->ExtendedData.Type, myMesh->ExtendedData.Object, MeshBoundsInfoType, nullptr );
+#ifdef __ANDROID__
+			mbi = static_cast<MeshBoundsInfo*>( GrannyConvertTree( myMesh->ExtendedData.Type, myMesh->ExtendedData.Object, MeshBoundsInfoType, nullptr ) );
+#else
+			mbi = static_cast<MeshBoundsInfo*>( GrannyConvertTree( myMesh->ExtendedData.Type, myMesh->ExtendedData.Object, MeshBoundsInfoType, nullptr, nullptr ) );
+#endif
 			if( !mbi->typeName || (strcmp( mbi->typeName, "MeshBoundsInfo" ) != 0) )
 			{
 				// This extended data doesn't match our expectations
@@ -1164,7 +1165,7 @@ struct CalcMiniballContext
 
 void CalcMiniball( void* context, const Vector3& p1, const Vector3& p2, const Vector3& p3 )
 {	
-	CalcMiniballContext* ctx = (CalcMiniballContext*)context;
+	CalcMiniballContext* ctx = static_cast<CalcMiniballContext*>( context );
 
 	// Add points to the bounding object. We'll get duplicates, but this is ok.
 	float* point = new float[3];
@@ -1233,7 +1234,7 @@ struct CalcBoundingBoxContext
 
 void CalcBoundingBox( void* context, const Vector3& p1, const Vector3& p2, const Vector3& p3 )
 {
-	CalcBoundingBoxContext* ctx = (CalcBoundingBoxContext*)context;
+	CalcBoundingBoxContext* ctx = static_cast<CalcBoundingBoxContext*>( context );
 
 	Vector4 v[3];
 	v[0] = Vector4( p1.x, p1.y, p1.z, 1.0f );
@@ -1281,7 +1282,6 @@ void TriGeometryRes::ProcessMeshTriangles( int meshIx, PerTriangleCallback cb, v
 	uint8_t* pVertices;
 	uint8_t* pIndices;
 
-	int numVerts = m_meshes[i]->m_vertexCount;
 	int vertSize = m_meshes[i]->m_bytesPerVertex;
 	if (FAILED(m_meshes[i]->m_vertexBuffer.Lock(0, 0, (void**)&pVertices, LOCK_READONLY, renderContext )))
 	{
@@ -1493,7 +1493,6 @@ bool TriGeometryRes::GetIntersectionPoints( const Vector3* pos, const Vector3*di
 		uint8_t* pVertices;
 		uint8_t* pIndices;
 
-		int numVerts = m_meshes[i]->m_vertexCount;
 		int vertSize = m_meshes[i]->m_bytesPerVertex;
 		if (FAILED(m_meshes[i]->m_vertexBuffer.Lock(0, 0, (void**)&pVertices, LOCK_READONLY, renderContext )))
 		{
@@ -1643,8 +1642,6 @@ Enlighten::IPrecompPackedGeometry* TriGeometryRes::GetEnlightenPackedGeometry( E
 
 	// The conversion from our units (m) to theirs (cm)
 	const float enlightenUnitScale = 0.01f;
-	// The size of each Enlighten texel (width) in cm
-	const float enlightenOutputPixelSize = outputPixelSize/enlightenUnitScale;
 	// Always follows this formula (don't bother multiplying the by 100 after dividing by 100).
 	const float enlightenRadiosityPerPixelSurfaceArea = pow(outputPixelSize,2.0f);
 
@@ -1847,8 +1844,6 @@ void TriGeometryRes::ProjectEnlightenGeometry( Enlighten::IPrecompute* pPrecompu
 
 	// The conversion from our units (m) to theirs (cm)
 	const float enlightenUnitScale = 0.01f;
-	// The size of each Enlighten texel (width) in cm
-	const float enlightenOutputPixelSize = outputPixelSize/enlightenUnitScale;
 	// Always follows this formula (don't bother multiplying the by 100 after dividing by 100).
 	const float enlightenRadiosityPerPixelSurfaceArea = pow(outputPixelSize,2.0f);
 
@@ -2170,8 +2165,7 @@ Enlighten::IPrecompInputMesh* TriGeometryRes::CreateEnlightenInputMesh( int mesh
 		}
 
 
-		unsigned int newVertDecl = Tr2EffectStateManager::UNINITIALIZED_DECLARATION;
-		newVertDecl = Tr2EffectStateManager::GetVertexDeclarationHandle( extraUV );
+		unsigned int newVertDecl = Tr2EffectStateManager::GetVertexDeclarationHandle( extraUV );
 
 		Tr2VertexBufferAL	newVBuffer;
 		{
@@ -2553,14 +2547,6 @@ static bool IntersectRayAxisAlignedBox( const Vector3& rayOrigin,
 	if( tmin > tzmax || tzmin > tmax )
 	{
 		return false;
-	}
-	if( tzmin > tmin )
-	{
-		tmin = tzmin;
-	}
-	if (tzmax < tmax)
-	{
-		tmax = tzmax;
 	}
 	return true;
 }
@@ -3052,12 +3038,10 @@ bool TriGeometryRes::RenderAreas( unsigned int meshIx, unsigned int areaIx, unsi
     const TriGeometryResAreaData& area = pMesh->m_areas[areaIx];
 
     unsigned int primCount = area.m_primitiveCount;
-	unsigned int vertCount = area.m_vertexCount;
     for( unsigned int i = 1; i < areaCount; ++i )
     {
         const TriGeometryResAreaData& curArea = pMesh->m_areas[areaIx + i];
         primCount += curArea.m_primitiveCount;
-		vertCount += curArea.m_vertexCount;
     }
 
 	if( primCount )
@@ -3126,12 +3110,10 @@ bool TriGeometryRes::RenderAreasFromDynamicVertexBuffer( Tr2VertexBufferAL& vert
 	const TriGeometryResAreaData& area = pMesh->m_areas[areaIx];
 
 	unsigned int primCount = area.m_primitiveCount;
-	unsigned int vertCount = area.m_vertexCount;
 	for( unsigned int i = 1; i < areaCount; ++i )
 	{
 		const TriGeometryResAreaData& curArea = pMesh->m_areas[areaIx + i];
 		primCount += curArea.m_primitiveCount;
-		vertCount += curArea.m_vertexCount;
 	}
 
 	if( primCount )
@@ -3499,7 +3481,7 @@ bool TriGeometryRes::CreateSystemVertexBuffer(
 	}
 
 	// alloc special data for shared system-memory vertexlayoutinfo and the vertexbuffer itself
-	pMesh->m_pVertexData = (TriGeometryResVertexData*)CCP_MALLOC( "TriGeometryRes/pMesh/m_pVertexData", sizeof( TriGeometryResVertexData ) );
+	pMesh->m_pVertexData = static_cast<TriGeometryResVertexData*>( CCP_MALLOC( "TriGeometryRes/pMesh/m_pVertexData", sizeof( TriGeometryResVertexData ) ) );
 	if( !pMesh->m_pVertexData )
 	{
 		return false;
@@ -3725,7 +3707,7 @@ bool TriGeometryRes::SaveMeshToGrannyFile( TriGeometryResMeshData* pMesh, const 
 
 	std::wstring filenameW = (const wchar_t*)CA2W( filename );
 	std::wstring fullPath = BePaths->ResolvePathForWritingW( filenameW );
-	bool result = GrannyEndFile( Builder, CW2A( fullPath.c_str() ) );
+	GrannyEndFile( Builder, CW2A( fullPath.c_str() ) );
 
 	CCP_DELETE [] pMaterials;
 	CCP_DELETE [] myMesh.MaterialBindings;

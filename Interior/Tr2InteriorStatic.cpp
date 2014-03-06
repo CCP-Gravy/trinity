@@ -516,8 +516,6 @@ void Tr2InteriorStatic::RenderEnlightenMaterialTexture( const char* situationNam
 			continue;
 		}
 
-		bool success = false;
-
 		for( Tr2MeshAreaVector::iterator area = areas->begin(); area != areas->end(); ++area )
 		{
 			Tr2ShaderMaterial* material = dynamic_cast<Tr2ShaderMaterial*>( ( *area )->GetMaterialInterface() );

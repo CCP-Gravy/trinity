@@ -12,7 +12,7 @@
 #include "Tr2ParticleElementDeclaration.h"
 
 BLUE_DECLARE( Tr2ParticleSystem );
-BLUE_DECLARE( TriGeometryRes );
+BLUE_DECLARE( TriGrannyRes );
 
 // --------------------------------------------------------------------------------------
 // Description:
@@ -80,7 +80,7 @@ private:
 	// Path to geometry resource
 	std::string m_geometryResourcePath;
 	// Geometry resource containing particle data
-	TriGeometryResPtr m_geometryResource;
+	TriGrannyResPtr m_geometryResource;
 	// System to emit particles to
 	Tr2ParticleSystemPtr m_particleSystem;
 	// Did the emitter already emit particles

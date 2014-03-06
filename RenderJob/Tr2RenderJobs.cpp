@@ -13,6 +13,7 @@ Tr2RenderJobs::Tr2RenderJobs( IRoot* lockobj )
 	: PARENTLOCK( m_scheduledOnce )
 	, PARENTLOCK( m_scheduledRecurring )
 	, PARENTLOCK( m_scheduledChained )
+	, PARENTLOCK( m_updateRecurring )
 	, m_stop( false )
 {	
 }
@@ -273,4 +274,16 @@ void Tr2RenderJobs::Run( Be::Time time )
 		m_scheduledChained.Insert( -1, rj );
 	}
 	continuedJobs.Remove( -1 );
+}
+
+void Tr2RenderJobs::RunUpdate( Be::Time time )
+{
+	m_copyOfJobs.insert( m_copyOfJobs.end(), m_updateRecurring.begin(), m_updateRecurring.end() );	
+	ON_BLOCK_EXIT( [&]{ m_copyOfJobs.clear(); } );
+	for( auto it = m_copyOfJobs.cbegin(); it != m_copyOfJobs.cend(); ++it )
+	{
+		TriRenderJob* rj = *it;
+		TriRenderJobStatus status = rj->Run( time );
+        CCP_ASSERT( status != RJ_FAILED );
+	}
 }

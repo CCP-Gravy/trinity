@@ -34,6 +34,11 @@ static void DeconstructProjectionMatrix( const Matrix& proj, float& asp, float& 
 }
 
 TriFrustum::TriFrustum()
+	:m_halfWidthProjection( 0 ),
+	m_zNear( 0 ),
+	m_zFar( 0 ),
+	m_aspectRatio( 1.0f ),
+	m_fov( 1.0f )
 {
 #ifdef TRINITYDEV
 	m_frustumTestCounter = 0;
@@ -154,7 +159,7 @@ bool TriFrustum::IsSphereVisible( const Vector4* sphere, bool cullBackPlane ) co
 	// For some reason the old code ignored the back plane. I don't know why!!
 	for( int i = 0; i < (PLANE_COUNT - 1) + cullBackPlane; i++ )
 	{
-		if( D3DXPlaneDotCoord( &m_planes[i], (const Vector3*)sphere )  < -sphere->w )
+		if( D3DXPlaneDotCoord( &m_planes[i], reinterpret_cast<const Vector3*>( sphere ) )  < -sphere->w )
 		{
 #ifdef TRINITYDEV
 			m_frustumRejectionCounter++;
@@ -229,7 +234,7 @@ float TriFrustum::GetPixelSizeAccross( const Vector4* sphere ) const
 	
 	sphere	-	[xyz] center position, [w] radius of sphere
 */
-	Vector3 d( *( (Vector3*)sphere ) - m_viewPos );
+	Vector3 d( *reinterpret_cast<const Vector3*>( sphere ) - m_viewPos );
 
 	// cfr. the difference between D3DXMatrixLookAtLH and RH -- line of sight is basically reversed
 	if (Tr2Renderer::IsRightHanded())

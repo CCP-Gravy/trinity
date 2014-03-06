@@ -145,8 +145,10 @@ void EveEffectRoot::UpdateLOD( Be::Time time )
 	}
 }
 
-void EveEffectRoot::Update( EveUpdateContext& updateContext ) 
+void EveEffectRoot::UpdateSyncronous( EveUpdateContext& updateContext ) 
 {	
+	UpdateWorldTransform( updateContext.GetTime() );
+
 	D3DXMatrixTransformation( &m_localTransform, 0, 0, &m_scaling, 0, &m_rotation, &m_translation );
 	D3DXMatrixMultiply( &m_lastUpdateMatrix, &m_localTransform, &m_worldTransform );
 	
@@ -158,14 +160,19 @@ void EveEffectRoot::Update( EveUpdateContext& updateContext )
 		return;
 	}
 
-	m_effectObject->Update( updateContext );
-
 	for( TriObserverLocalVector::iterator it = m_observers.begin(); it != m_observers.end(); ++it )
 	{
 		(*it)->Update( m_lastUpdateMatrix );
 	}
 }
 
+void EveEffectRoot::UpdateAsyncronous( EveUpdateContext& updateContext ) 
+{	
+	if( m_effectObject )
+	{
+		m_effectObject->Update( updateContext );
+	}
+}
 
 void EveEffectRoot::RenderDebugInfo( Tr2RenderContext& renderContext ) 
 {

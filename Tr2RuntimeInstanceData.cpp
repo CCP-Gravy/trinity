@@ -512,15 +512,15 @@ void Tr2RuntimeInstanceData::Spawn()
 					if( j->isFloat16 )
 					{
 						std::copy( 
-							reinterpret_cast<D3DXFLOAT16*>( data + j->inOffset ), 
-							reinterpret_cast<D3DXFLOAT16*>( data + j->inOffset ) + j->length, 
+							static_cast<D3DXFLOAT16*>( static_cast<void*>( data + j->inOffset ) ), 
+							static_cast<D3DXFLOAT16*>( static_cast<void*>( data + j->inOffset ) ) + j->length, 
 							particle[j->buffer] + j->offset );
 					}
 					else
 					{
 						std::copy( 
-							reinterpret_cast<float*>( data + j->inOffset ), 
-							reinterpret_cast<float*>( data + j->inOffset ) + j->length, 
+							static_cast<float*>( static_cast<void*>( data + j->inOffset ) ), 
+							static_cast<float*>( static_cast<void*>( data + j->inOffset ) ) + j->length, 
 							particle[j->buffer] + j->offset );
 					}
 				}

@@ -36,11 +36,6 @@ EveTransform::EveTransform( IRoot* lockobj ) :
 {
 }
 
-
-void EveTransform::UpdateWorldTransform( Be::Time time )
-{
-}
-
 Tr2PerObjectData* EveTransform::GetPerObjectData( ITriRenderBatchAccumulator* accumulator )
 {
 	EveBasicPerObjectData* data = accumulator->Allocate<EveBasicPerObjectData>();
@@ -71,6 +66,42 @@ Tr2PerObjectData* EveTransform::GetPerObjectData( ITriRenderBatchAccumulator* ac
 
 void EveTransform::Update( EveUpdateContext& updateContext )
 {
+	UpdateSyncronous( updateContext );
+	UpdateAsyncronous( updateContext );
+}
+
+void EveTransform::UpdateSyncronous( EveUpdateContext& updateContext )
+{
+	// is this one here enabled?
+	if( m_hideOnLowQuality && Tr2Renderer::IsLowQuality() )
+	{
+		return;
+	}
+
+	if( !m_particleEmittersGPU.empty() )
+	{
+		Tr2GPUParticlePoolManager* manager = updateContext.GetParticlePoolManager();
+		if( manager != NULL )
+		{
+			Vector3 relativePos(0,0,0);
+			D3DXVec3TransformCoord( &relativePos, &relativePos, &m_worldTransform );
+			Matrix transformWithoutTranslation = m_worldTransform;
+			transformWithoutTranslation._41 = 0.f;
+			transformWithoutTranslation._42 = 0.f;
+			transformWithoutTranslation._43 = 0.f;
+			const Vector3 relativeVel = m_lastDeltaTime > 0.f ? (relativePos - m_lastRelativePosition) / m_lastDeltaTime : Vector3(0,0,0);
+			m_lastRelativePosition = relativePos;
+			for( auto it = m_particleEmittersGPU.begin(); it != m_particleEmittersGPU.end(); ++it )
+			{
+				(*it)->ApplyPool( manager );				
+				(*it)->UpdateTransform( relativePos, relativeVel, manager->GetLastEgoTranslation(), transformWithoutTranslation );
+			}
+		}
+	}
+}
+
+void EveTransform::UpdateAsyncronous( EveUpdateContext& updateContext )
+{
 	// is this one here enabled?
 	if( m_hideOnLowQuality && Tr2Renderer::IsLowQuality() )
 	{
@@ -100,28 +131,6 @@ void EveTransform::Update( EveUpdateContext& updateContext )
 		p->Update( updateContext );
 	}
 
-	Vector3d positionO( 0.0f, 0.0f, 0.0f );
-
-	if( !m_particleEmittersGPU.empty() )
-	{
-		Tr2GPUParticlePoolManager* manager = updateContext.GetParticlePoolManager();
-		if( manager != NULL )
-		{
-			Vector3 relativePos(0,0,0);
-			D3DXVec3TransformCoord( &relativePos, &relativePos, &m_worldTransform );
-			Matrix transformWithoutTranslation = m_worldTransform;
-			transformWithoutTranslation._41 = 0.f;
-			transformWithoutTranslation._42 = 0.f;
-			transformWithoutTranslation._43 = 0.f;
-			const Vector3 relativeVel = m_lastDeltaTime > 0.f ? (relativePos - m_lastRelativePosition) / m_lastDeltaTime : Vector3(0,0,0);
-			m_lastRelativePosition = relativePos;
-			for( auto it = m_particleEmittersGPU.begin(); it != m_particleEmittersGPU.end(); ++it )
-			{
-				(*it)->ApplyPool( manager );				
-				(*it)->UpdateTransform( relativePos, relativeVel, manager->GetLastEgoTranslation(), transformWithoutTranslation );
-			}
-		}
-	}
 
 	if( !m_isVisible )
 	{

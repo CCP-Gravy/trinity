@@ -565,8 +565,6 @@ public:
     // ITriCurveLength
     /////////////////////////////////////////////////////////////////////////////////////
     float Length();
-private:
-	float r,g,b,a;	
 };
 TYPEDEF_BLUECLASS(TriRGBAScalarSequencer);
 

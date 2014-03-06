@@ -73,13 +73,11 @@ BlueAsyncRes::LoadingResult Tr2ImageRes::DoLoad()
 		return LR_FAILED;
 	}
 
-	bool isOK = true;
-
 	m_imageHandler = CreateImageHandler( m_path );
 	CCP_ASSERT( m_imageHandler != NULL );
 
 	m_imageHandler->SetStream( m_dataStream );
-	isOK = m_imageHandler->ReadHeader();
+	bool isOK = m_imageHandler->ReadHeader();
 	if(isOK)
 	{
 		isOK = m_imageHandler->IsSupported();

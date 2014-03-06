@@ -21,7 +21,7 @@
 // See Also:
 //   Tr2PerObjectDataWithPersistentBuffers, Tr2PerObjectData
 // --------------------------------------------------------------------------------------
-template <typename Owner, Tr2RenderContextEnum::ShaderType shaderType>
+template <typename Owner>
 class Tr2PersistentPerObjectData
 #if TRINITY_PLATFORM == TRINITY_DIRECTX11
 	: public Tr2DeviceResource
@@ -56,7 +56,9 @@ public:
 	//     Tr2EffectStateManager); not used in DX11 as we have our own buffer in this case
 	//   renderContext - Current render context
 	// ----------------------------------------------------------------------------------
-	void SetPerObjectDataToDevice( Owner& owner, 
+	void SetPerObjectDataToDevice( 
+		Owner& owner, 
+		Tr2RenderContextEnum::ShaderType shaderType,
 		Tr2ConstantBufferAL** buffers, 
 		Tr2RenderContext& renderContext )
 	{
@@ -65,7 +67,7 @@ public:
 		{
 			renderContext.SetConstants( m_constantBuffer, 
 				shaderType, 
-				Tr2Renderer::GetPerObjectStartRegister<shaderType>() );
+				Tr2Renderer::GetPerObjectStartRegister( shaderType ) );
 			return;
 		}
 #endif
@@ -83,7 +85,7 @@ public:
 		{
 			owner.UpdatePerObjectBuffer( shaderType, size, data );
 			buffer.UpdateFromMirror( renderContext );
-			renderContext.SetConstants( buffer, shaderType, Tr2Renderer::GetPerObjectStartRegister<shaderType>() );
+			renderContext.SetConstants( buffer, shaderType, Tr2Renderer::GetPerObjectStartRegister( shaderType ) );
 		}
 #if TRINITY_PLATFORM == TRINITY_DIRECTX11
 		m_bufferDirty = false;
@@ -121,8 +123,8 @@ template <typename Owner>
 class Tr2PerObjectDataWithPersistentBuffers : public Tr2PerObjectData
 {
 public:
-	typedef Tr2PersistentPerObjectData<Owner, Tr2RenderContextEnum::VERTEX_SHADER> PerObjectDataVs;
-	typedef Tr2PersistentPerObjectData<Owner, Tr2RenderContextEnum::PIXEL_SHADER> PerObjectDataPs;
+	typedef Tr2PersistentPerObjectData<Owner> PerObjectDataVs;
+	typedef Tr2PersistentPerObjectData<Owner> PerObjectDataPs;
 
 	Tr2PerObjectDataWithPersistentBuffers()
 		:m_owner( nullptr ),
@@ -164,11 +166,16 @@ public:
 	{
 		if( ( constantTypeMask & ( 1 << Tr2RenderContextEnum::VERTEX_SHADER ) ) && m_perObjectDataVs )
 		{
-			m_perObjectDataVs->SetPerObjectDataToDevice( *m_owner, buffers, renderContext );
+			m_perObjectDataVs->SetPerObjectDataToDevice( *m_owner, Tr2RenderContextEnum::VERTEX_SHADER, buffers, renderContext );
+		}
+		if( SHADER_TYPE_EXISTS( Tr2RenderContextEnum::GEOMETRY_SHADER ) && 
+			( constantTypeMask & ( 1 << Tr2RenderContextEnum::GEOMETRY_SHADER ) ) && m_perObjectDataVs )
+		{
+			m_perObjectDataVs->SetPerObjectDataToDevice( *m_owner, Tr2RenderContextEnum::GEOMETRY_SHADER, buffers, renderContext );
 		}
 		if( ( constantTypeMask & ( 1 << Tr2RenderContextEnum::PIXEL_SHADER ) ) && m_perObjectDataPs )
 		{
-			m_perObjectDataPs->SetPerObjectDataToDevice( *m_owner, buffers, renderContext );
+			m_perObjectDataPs->SetPerObjectDataToDevice( *m_owner, Tr2RenderContextEnum::PIXEL_SHADER, buffers, renderContext );
 		}
 	}
 private:

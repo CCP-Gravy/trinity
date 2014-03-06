@@ -268,10 +268,6 @@ private:
 	ClipStack_t* m_clipStack;
 	StackOfStacks_t m_stackOfStacks;
 
-	// Set to true when clip rectangle changes. Clip state is
-	// not pushed to device until an actual draw call takes place.
-	bool m_isClipDirty;
-
 	// For performance analysis
 	bool m_ignoreClip;
 
@@ -321,14 +317,14 @@ private:
 	unsigned m_transformCurrent;
 
 	Tr2Sprite2dDisplayList* m_captureDisplayList;
-	Tr2Sprite2dD3DVertex* m_captureVertexData;
+	CcpAlignedMallocBuffer m_captureVertexData;
 
 	Tr2Sprite2dD3DVertex* m_preCaptureVertexData;
 	unsigned int m_captureVertexDataSize;
 	unsigned int m_captureVertexDataCapacity;
 	
 	unsigned int* m_preCaptureIndexData;
-	unsigned int* m_captureIndexData;
+	CcpAlignedMallocBuffer m_captureIndexData;
 	unsigned int m_captureIndexDataSize;
 	unsigned int m_captureIndexDataCapacity;
 	unsigned int m_captureStartIndex;

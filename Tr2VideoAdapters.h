@@ -11,6 +11,7 @@
 
 BLUE_DECLARE ( Tr2VideoAdapter );
 BLUE_DECLARE ( Tr2DisplayMode );
+BLUE_DECLARE ( Tr2VideoDriver );
 
 // --------------------------------------------------------------------------------------
 // Description:
@@ -86,6 +87,8 @@ public:
 	Tr2AdapterInfo m_info;
 
 	std::string GetDeviceIdentifierString() const;
+
+	ALResult GetDriverInfo( Tr2VideoDriver** info );
 };
 
 TYPEDEF_BLUECLASS ( Tr2VideoAdapter );
@@ -107,5 +110,23 @@ public:
 };
 
 TYPEDEF_BLUECLASS ( Tr2DisplayMode );
+
+
+// --------------------------------------------------------------------------------------
+// Description:
+//   Blue-exposed functionality of AL Tr2VideoDriverInfo structure with all fields being
+//   read-only.
+// See Also:
+//   Tr2VideoDriverInfo
+// --------------------------------------------------------------------------------------
+BLUE_CLASS( Tr2VideoDriver ): public IRoot
+{
+public:
+	EXPOSE_TO_BLUE();
+
+	Tr2VideoDriverInfo m_info;
+};
+
+TYPEDEF_BLUECLASS ( Tr2VideoDriver );
 
 #endif // Tr2VideoAdapters_H

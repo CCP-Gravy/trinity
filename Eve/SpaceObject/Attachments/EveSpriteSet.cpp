@@ -24,7 +24,6 @@ struct SpriteVertex
 
 EveSpriteSet::EveSpriteSet( IRoot* lockobj ) :
 	PARENTLOCK( m_sprites ),
-	m_bytesPerVertex( 0 ),
 	m_vertexCount( 0 ),
 	m_display( true ),
 	m_vertexDeclHandle( Tr2EffectStateManager::UNINITIALIZED_DECLARATION )
@@ -81,7 +80,6 @@ bool EveSpriteSet::OnPrepareResources()
 	}
 
 	m_vertexCount = (unsigned int)m_sprites.GetSize() * 6;
-	m_bytesPerVertex = sizeof( SpriteVertex );
 
 	std::vector<SpriteVertex> pVerts( m_vertexCount );
 
@@ -115,12 +113,7 @@ bool EveSpriteSet::OnPrepareResources()
 	}
 
 	USE_MAIN_THREAD_RENDER_CONTEXT();
-	CR_RETURN_VAL( 
-			m_vertexBuffer.Create(	m_vertexCount * m_bytesPerVertex, 
-									USAGE_IMMUTABLE, 
-									&pVerts[0], 
-									renderContext )
-			, false );
+	CR_RETURN_VAL( m_vertexBuffer.Create( m_vertexCount * sizeof( SpriteVertex ), USAGE_IMMUTABLE, &pVerts[0], renderContext ), false );
 
 	return true;
 }
@@ -165,7 +158,7 @@ void EveSpriteSet::Add( EveSpriteSetItemPtr newItem )
 void EveSpriteSet::SubmitGeometry( Tr2RenderContext& renderContext )
 {
 	renderContext.m_esm.ApplyVertexDeclaration( m_vertexDeclHandle );
-	renderContext.m_esm.ApplyStreamSource( 0, m_vertexBuffer, 0, m_bytesPerVertex );
+	renderContext.m_esm.ApplyStreamSource( 0, m_vertexBuffer, 0, sizeof( SpriteVertex ) );
 	
 	renderContext.SetTopology( TOP_TRIANGLES );
 	renderContext.DrawPrimitive( 0, m_vertexCount / 3 );

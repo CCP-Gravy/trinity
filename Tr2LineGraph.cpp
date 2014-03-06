@@ -24,6 +24,7 @@ Tr2LineGraph::Tr2LineGraph( IRoot* lockobj ) :
 	m_currentIx( 0 ),
 	m_color( 1.0f, 1.0f, 1.0f, 1.0f ),
 	m_isPrepared( false ),
+	m_maxValue( 0.0f ),
 	m_vertexDeclaration( Tr2EffectStateManager::UNINITIALIZED_DECLARATION )
 {
 	m_data.resize( 200 );

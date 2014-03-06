@@ -40,7 +40,7 @@ public:
 
 	/////////////////////////////////////////////////////////////////////////////////////
 	// Overrides of EveSpaceObject2 implementations
-	virtual void Update( EveUpdateContext& updateContext );
+	virtual void UpdateSyncronous( EveUpdateContext& updateContext );
 	virtual void GetRenderables( const TriFrustum& frustum, std::vector<ITr2Renderable*>& renderables, const Matrix& parentTransform );
 	virtual void RenderDebugInfo( Tr2RenderContext& renderContext );
 	virtual bool GetBoundingSphere( Vector4& sphere, BoundingSphereQuery query=EVE_BOUNDS_NORMAL ) const;

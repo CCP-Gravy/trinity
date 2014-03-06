@@ -14,6 +14,7 @@ extern std::vector<HANDLE> g_D3DCreatedHeaps;
 BLUE_DEFINE( Tr2VideoAdapters );
 BLUE_DEFINE( Tr2VideoAdapter );
 BLUE_DEFINE( Tr2DisplayMode );
+BLUE_DEFINE( Tr2VideoDriver );
 
 namespace
 {
@@ -53,6 +54,7 @@ const Be::ClassInfo* Tr2VideoAdapter::ExposeToBlue()
 		MAP_ATTRIBUTE( "subSystemID", m_info.subSystemID, "Video adapter sub-system ID", Be::READ )
 		MAP_ATTRIBUTE( "revision", m_info.subSystemID, "", Be::READ )
 		MAP_PROPERTY_READONLY( "deviceIdentifier", GetDeviceIdentifierString, "Device identifier GUID as a string" )
+		MAP_METHOD_AND_WRAP( "GetDriverInfo", GetDriverInfo, "Driver information for this adapter" )
 	EXPOSURE_END()
 }
 
@@ -68,6 +70,20 @@ const Be::ClassInfo* Tr2DisplayMode::ExposeToBlue()
 		MAP_ATTRIBUTE_WITH_CHOOSER( "format", m_mode.format, "Back buffer format", Be::READ | Be::ENUM, Tr2RenderContextEnum_PixelFormat_Chooser )
 		MAP_ATTRIBUTE_WITH_CHOOSER( "scanlineOrdering", m_mode.scanlineOrdering, "Scanline ordering", Be::READ, Tr2RenderContextEnum_ScanlineOrdering_Chooser )
 		MAP_ATTRIBUTE_WITH_CHOOSER( "scaling", m_mode.scaling, "Video scaling mode", Be::READ, Tr2RenderContextEnum_DisplayScaling_Chooser )
+	EXPOSURE_END()
+}
+
+const Be::ClassInfo* Tr2VideoDriver::ExposeToBlue()
+{
+	EXPOSURE_BEGIN( Tr2VideoDriver, "" )
+		MAP_INTERFACE( Tr2VideoDriver )
+		
+		MAP_ATTRIBUTE( "driverVersion", m_info.driverVersion, "Driver version as a 64 bit number", Be::READ )
+		MAP_ATTRIBUTE( "driverVersionString", m_info.driverVersionString, "Driver version as a string", Be::READ )
+		MAP_ATTRIBUTE( "driverVendor", m_info.driverVendor, "Driver vendor company", Be::READ )
+		MAP_ATTRIBUTE( "driverDate", m_info.driverDate, "Driver release date", Be::READ )
+		MAP_ATTRIBUTE( "isOptimus", m_info.isOptimus, "Is the machine running Optimus (Intel-nVidia mix)", Be::READ )
+		MAP_ATTRIBUTE( "isAmdDynamicSwitchable", m_info.isAmdDynamicSwitchable, "Is the machine running AMD Dynamic Switchable (Intel-AMD mix)", Be::READ )
 	EXPOSURE_END()
 }
 

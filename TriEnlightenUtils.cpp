@@ -177,7 +177,7 @@ bool NonAAVolume::Initialise(const NonAABoundingBox* bb, u32 resX, u32 resY, u32
 	{
 		return false;
 	}
-	*((NonAABoundingBox*)this)=*bb;
+	*static_cast<NonAABoundingBox*>( this ) = *bb;
 	m_XRes=resX;
 	m_YRes=resY;
 	m_ZRes=resZ;
@@ -191,7 +191,7 @@ bool NonAAVolume::Initialise(const NonAABoundingBox* bb, u32 resX, u32 resY, u32
 //-------------------------------------------------------------------------------------------------
 bool NonAAVolume::operator==(const NonAAVolume& other) const
 {
-	if ( !( *(NonAABoundingBox*)this == *(NonAABoundingBox*)&other ) ) return false;
+	if ( !( *static_cast<const NonAABoundingBox*>( this ) == *static_cast<const NonAABoundingBox*>( &other ) ) ) return false;
 	if ( !(m_XRes==other.m_XRes && m_YRes==other.m_YRes && m_ZRes==other.m_ZRes) ) return false;
 	return true;
 }

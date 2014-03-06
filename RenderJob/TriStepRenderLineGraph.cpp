@@ -47,8 +47,6 @@ void TriStepRenderLineGraph::py__init__(
 
 TriStepResult TriStepRenderLineGraph::Execute( Be::Time time, Tr2RenderContext& renderContext )
 {
-	int x = 2;
-
 	if( m_autoScale )
 	{
 		float maxValue = 0.0f;
@@ -115,6 +113,7 @@ TriStepResult TriStepRenderLineGraph::Execute( Be::Time time, Tr2RenderContext& 
 
 	if( m_showLegend )
 	{
+		int x = 2;
 		y = 0;
 		for( Tr2LineGraphVector::iterator it = m_lineGraphs.begin(); it != m_lineGraphs.end(); ++it )
 		{

@@ -79,29 +79,6 @@ void Tr2Sprite2dContainerBase::OnListModified( long event, /* BLUELISTEVENT valu
 	}
 }
 
-unsigned int Tr2Sprite2dContainerBase::GetVertexCount()
-{
-	CCP_STATS_ZONE( __FUNCTION__ );
-
-	if( !m_display )
-	{
-		return 0;
-	}
-
-	unsigned int vertexCount = 0;
-
-	for( auto it = m_background.rbegin(); it != m_background.rend(); ++it )
-	{
-		vertexCount += (*it)->GetVertexCount();
-	}
-	for( auto it = m_children.rbegin(); it != m_children.rend(); ++it )
-	{
-		vertexCount += (*it)->GetVertexCount();
-	}
-
-	return vertexCount;
-}
-
 Tr2Sprite2dContainer::Tr2Sprite2dContainer( IRoot* lockobj ) :
 	Tr2Sprite2dContainerBase( lockobj ),
 	m_depthMin( -1.0f ),

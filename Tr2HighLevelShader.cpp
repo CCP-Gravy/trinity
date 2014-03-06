@@ -439,7 +439,7 @@ Tr2EffectDefine* Tr2HighLevelShader::CreateDefinesFromSituation(
 
 	unsigned int size = ((unsigned int)m_permuteTags.size() + 1) * sizeof( Tr2EffectDefine );
 	Tr2EffectDefine* macros =
-		( Tr2EffectDefine* )CCP_MALLOC( "ShaderMacro", size  );
+		static_cast<Tr2EffectDefine*>( CCP_MALLOC( "ShaderMacro", size ) );
 
 	memset( macros, 0, size );
 

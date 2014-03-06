@@ -7,7 +7,7 @@ EveRootTransform::EveRootTransform( IRoot* lockobj ):
 	m_lastUpdateMatrix = Tr2Renderer::GetIdentityTransform();
 }
 
-void EveRootTransform::Update( EveUpdateContext& updateContext )
+void EveRootTransform::UpdateSyncronous( EveUpdateContext& updateContext )
 {
 	Quaternion rotation;
 	Vector3 translation;
@@ -46,8 +46,18 @@ void EveRootTransform::Update( EveUpdateContext& updateContext )
 		D3DXVec3TransformCoord( &modelTranslation, &modelTranslation, &m_lastUpdateMatrix );
 		m_lastUpdateMatrix.GetTranslation() = modelTranslation;
 	}
+	EveTransform::UpdateSyncronous( updateContext );
+}
 
-	EveTransform::Update( updateContext );
+void EveRootTransform::UpdateAsyncronous( EveUpdateContext& updateContext )
+{
+	EveTransform::UpdateAsyncronous( updateContext );
+}
+
+void EveRootTransform::Update( EveUpdateContext& updateContext )
+{
+	UpdateSyncronous( updateContext );
+	UpdateAsyncronous( updateContext );
 }
 
 void EveRootTransform::UpdateViewDependentData( const Matrix& /*parentTransform*/ )
@@ -93,8 +103,4 @@ void EveRootTransform::GetMissPosition( const Vector3* hit, const Vector3* sourc
 		const Vector3 off = local * m_boundingSphereRadius * 1.125f;
 		*out += off;
 	}
-}
-
-void EveRootTransform::UpdateWorldTransform( Be::Time time )
-{
 }

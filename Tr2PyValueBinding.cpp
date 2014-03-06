@@ -5,6 +5,7 @@
 #include "Tr2PyValueBinding.h"
 
 Tr2PyValueBinding::Tr2PyValueBinding( IRoot* lockobj )
+	:m_isValid( false )
 {
 	m_sourceObject = Py_None;
 	Py_INCREF( m_sourceObject );

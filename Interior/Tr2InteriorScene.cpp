@@ -844,9 +844,6 @@ void Tr2InteriorScene::VisibilityQuery( Tr2VisibilityResults* results )
     //this is to assist in tracking down the crash that's been popping up in this function.
     //The bools are here just in case logging breaks during the crash
     const size_t dynamicsSize = m_dynamics.size();
-    bool break1 = false;
-    bool break2 = false;
-	bool break3 = false;
 
 	m_debugInsideSetLOD = true;
 
@@ -854,18 +851,15 @@ void Tr2InteriorScene::VisibilityQuery( Tr2VisibilityResults* results )
 	{
         if( dynamicsSize != m_dynamics.size() )
         {
-            break1 = true;
             CCP_LOGERR("VisibilityQuery-m_dynamics changed size while we iterated over it! (before setlod)");
         }
 		if( !*it )
 		{
-			break3 = true;
             CCP_LOGERR("VisibilityQuery-null pointer in m_dynamics");
 		}
 		( *it )->SetLOD( &frustum );
         if( dynamicsSize != m_dynamics.size() )
         {
-            break2=true;
             CCP_LOGERR("VisibilityQuery-m_dynamics changed size while we iterated over it! (after setlod)");
         }
 	}
@@ -1824,10 +1818,6 @@ void Tr2InteriorScene::RenderShadowMaps( Tr2RenderContext& renderContext )
 				}
 				else if( !( *it )->IsShadowEmpty( i ) )
 				{
-					// Give a chance for shadow update to shadow maps that require shadow resolution
-					// change (although with lower priority than dirty shadows).
-					static const float CHANGE_RESOLUTION_IMPORTANCE_FACTOR = 0.1f;
-
 					Tr2AtlasTexture* texture = ( *it )->GetShadowAtlasTexture( i );
 					unsigned width, height;
 					( *it )->GetRequiredShadowMapResolution( i, !m_useShadowLOD, width, height );
@@ -1835,6 +1825,10 @@ void Tr2InteriorScene::RenderShadowMaps( Tr2RenderContext& renderContext )
 					{
 						if( texture == NULL || width != texture->GetWidth() || height != texture->GetHeight() )
 						{
+							// Give a chance for shadow update to shadow maps that require shadow resolution
+							// change (although with lower priority than dirty shadows).
+							static const float CHANGE_RESOLUTION_IMPORTANCE_FACTOR = 0.1f;
+
 							unsigned frames = ( *it )->GetFramesSinceShadowUpdate( i );
 							( *it )->SetFramesSinceShadowUpdate( i, frames + 1 );
 							ITr2InteriorLight::LightSourceItem item;
@@ -2203,7 +2197,6 @@ bool Tr2InteriorScene::UpdateShadowMap(
 		}
 	}
 
-	bool oldDisplayDynamics;
 	CTriViewport viewport;
 
 	{
@@ -2231,7 +2224,7 @@ bool Tr2InteriorScene::UpdateShadowMap(
 		// Prepare for Umbra visibility query
 		m_cameraToWorldMatrix = item.lightSource->GetViewMatrix( item.shadowMapIndex );
 
-		oldDisplayDynamics = m_displayDynamics;
+		bool oldDisplayDynamics = m_displayDynamics;
 		m_displayDynamics = item.lightSource->GetShadowCasterTypes() & ITr2InteriorLight::ST_DYNAMICS_ONLY;
 		m_displayStatics = item.lightSource->GetShadowCasterTypes() & ITr2InteriorLight::ST_STATICS_ONLY;
 
@@ -4075,7 +4068,7 @@ void Tr2InteriorScene::DoInstanceVisible( const Tr2VisibilityEvent& event,
 								ConstructKey( m_currentObjectGroup, WODINTBATCHGROUP_BLEND ) );
 							attachment->GetBatches( m_activeTransparentBatchStore,
 								TRIBATCHTYPE_TRANSPARENT,
-								perObjectOpaque );
+								perObjectOpaqueAttachment );
 							// Update batch count to indicate the range of transparent batches
 							// gathered for this cell
 							m_transparencyStack.back().second =
@@ -4915,11 +4908,11 @@ void Tr2InteriorScene::UpdateLights( void )
 	// Visit each light
 	for( PITr2InteriorLightVector::iterator lit = m_lights.begin(); lit != m_lights.end(); ++lit )
 	{
-		// Are the cells fully loaded yet?
-		bool cellsReady = true;
 		// Check the dirty flag & update
 		if( ( *lit )->IsDirty() )
 		{
+			// Are the cells fully loaded yet?
+			bool cellsReady = true;
 			// Test intersection with each cell
 			for( Tr2InteriorCellVector::iterator cit = m_cells.begin(); cit != m_cells.end(); ++cit )
 			{
@@ -4957,10 +4950,10 @@ void Tr2InteriorScene::UpdateDynamics( void )
 
 	for( PITr2InteriorDynamicVector::iterator dit = m_dynamics.begin(); dit != m_dynamics.end(); ++dit )
 	{
-		bool cellsReady = true;
-		bool added = false;
 		if( ( *dit )->IsDirty() && ( *dit )->IsBoundingBoxReady() && ( *dit )->IsUmbraReady() )
 		{
+			bool cellsReady = true;
+			bool added = false;
 			// Test intersection with each cell
 			for( Tr2InteriorCellVector::iterator cit = m_cells.begin(); cit != m_cells.end(); ++cit )
 			{
@@ -5670,34 +5663,12 @@ void Tr2InteriorScene::SetEnvironmentCubeMapToEnlighten( Tr2RenderContext &rende
 		return;
 	}
 
-	// This ordering is taken from EnvironmentBox.cpp in the enlighten samples
-	D3DCUBEMAP_FACES faces[6] =
-	{
-		D3DCUBEMAP_FACE_POSITIVE_X,
-		D3DCUBEMAP_FACE_NEGATIVE_X,
-		D3DCUBEMAP_FACE_POSITIVE_Y,
-		D3DCUBEMAP_FACE_NEGATIVE_Y,
-		D3DCUBEMAP_FACE_POSITIVE_Z,
-		D3DCUBEMAP_FACE_NEGATIVE_Z
-	};
-
 	// 6 faces, 2x2 each
 	for( int f = 0; f < 6; ++f )
 	{
 		for( int p = 0; p < 4; ++p )
 		{
 			m_enlightenInputEnvironmentLightingCache[4*f+p] = Geo::VZero();
-			/*
-			// If you need to debug this, this is quite handy
-			if( faces[f] == m_visualizeCubemapDirection )
-			{
-				enlightenInputEnvironmentLighting[4*f+p] = Geo::VConstruct( 1.0f, 1.0f, 1.0f, 0.0f );
-			}
-			else
-			{
-				enlightenInputEnvironmentLighting[4*f+p] = Geo::VZero();
-			}
-			*/
 		}
 	}
 

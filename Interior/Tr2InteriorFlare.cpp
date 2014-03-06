@@ -102,6 +102,7 @@ struct Tr2InteriorFlare::FlarePerObjectVSData
 // --------------------------------------------------------------------------------------
 Tr2InteriorFlare::Tr2InteriorFlare( IRoot* lockobj )
 :	m_color( 1.f, 1.f, 1.f, 1.f ),
+	m_isVisible( true ),
 	m_umbraObject( NULL ),
 	m_umbraModel( NULL ),
 	m_isDirty( true ),

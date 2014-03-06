@@ -23,7 +23,6 @@ const Be::ClassInfo* EveSOFDataBooster::ExposeToBlue()
 		MAP_ATTRIBUTE( "textureResPath", m_textureResPath, "", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "trailColor", m_trailColor, "", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "trailSize", m_trailSize, "", Be::READWRITE | Be::PERSIST )
-		MAP_ATTRIBUTE( "soundName", m_soundName, "", Be::READWRITE | Be::PERSIST )
 
     EXPOSURE_END()
 }
@@ -149,7 +148,6 @@ const Be::ClassInfo* EveSOFDataHullBooster::ExposeToBlue()
 
 		MAP_ATTRIBUTE( "alwaysOn", m_alwaysOn, "", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "hasTrails", m_hasTrails, "", Be::READWRITE | Be::PERSIST )
-		MAP_ATTRIBUTE( "soundName", m_soundName, "", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "items", m_items, "", Be::READWRITE | Be::PERSIST )
     EXPOSURE_END()
 }
@@ -204,6 +202,8 @@ const Be::ClassInfo* EveSOFDataHull::ExposeToBlue()
         MAP_INTERFACE( EveSOFDataHull )
 
 		MAP_ATTRIBUTE( "name", m_name, "The hull name, eg cb2_t1. This functions as an ID.", Be::READWRITE | Be::PERSIST )
+
+		MAP_ATTRIBUTE( "description", m_description, "A description string. NOT used by the SOF, it's just for debugging purposes.", Be::READWRITE | Be::PERSIST )
 
 		MAP_ATTRIBUTE( "geometryResFilePath", m_geometryResFilePath, "The res file path to the gr2 file", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "boundingSphere", m_boundingSphere, "The actual size of the gemoetry", Be::READWRITE | Be::PERSIST )
@@ -266,6 +266,7 @@ const Be::ClassInfo* EveSOFDataFaction::ExposeToBlue()
         MAP_INTERFACE( EveSOFDataFaction )
 
 		MAP_ATTRIBUTE( "name", m_name, "The faction name, eg sarum. This functions as an ID.", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "description", m_description, "A description string. NOT used by the SOF, it's just for debugging purposes.", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "textureResPathInsert", m_textureResPathInsert, "All the textures we need to change for this faction.", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "hullAreas", m_hullAreas, "", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "spriteSets", m_spriteSets, "All the groups of sprite sets.", Be::READWRITE | Be::PERSIST )

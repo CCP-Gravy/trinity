@@ -281,7 +281,6 @@ void Tr2InteriorParticleObject::GetBatches( ITriRenderBatchAccumulator* batches,
 						 const Tr2PerObjectData* perObjectData )
 {
 	unsigned int depth = 0;
-	Tr2PerAreaSHLightingData* areaData = nullptr;
 	if( batchType == TRIBATCHTYPE_TRANSPARENT )
 	{
 		// Compute the depth
@@ -886,7 +885,7 @@ void Tr2InteriorParticleObject::AddToRootCell( Umbra::Cell* cell )
 		( *it )->setCell( NULL );
 		( *it )->release();
 		( *it ) = NULL;
-		m_umbraObjects.erase( it );
+		it = m_umbraObjects.erase( it );
 	}
 	if( m_umbraObjects.empty() )
 	{

@@ -28,6 +28,7 @@ ClCompile:
   WarningLevel: Level3
   TreatWarningAsError: true
   BufferSecurityCheck: false
+  FloatingPointModel: Fast
   AdditionalIncludeDirectories:
   - .
   - ..
@@ -48,7 +49,7 @@ ResourceCompile:
 BaseConfigurations:
   Windows:
     Imports:
-    - ../../../../../../sdk/Granny/2.9.12.0/granny_2.9.12.0.yaml
+    - ../../../../../../sdk/Granny/2.9.24.0/granny_2.9.24.0.yaml
     - ../../../../../../sdk/umbra/1.5.3/umbra_1.5.3.yaml
     - ../../../../../../sdk/Bink/1.9v/Bink_1.9v.yaml
     - ../../../../../../sdk/Enlighten/v2.08.1460/Enlighten_v2.08.1460.yaml
@@ -84,7 +85,7 @@ BaseConfigurations:
     Imports:
     - ../../../../../../sdk/zlib/1.2.3/zlib_1.2.3.yaml
     - ../TrinityAL/uses_TrinityALORBIS.yaml
-    - ../../../../../../sdk/Granny/2.9.18.0/granny_2.9.18.0.yaml
+    - ../../../../../../sdk/Granny/2.9.24.0/granny_2.9.24.0.yaml
     ClCompile:
       PreprocessorDefinitions:
       - EVALUATION_SDKS_ENABLED=0
@@ -417,6 +418,18 @@ Configurations:
     - ../../../../../../sdk/UmbraPvs/4740/UmbraPvs_4740.yaml
     General:
       TargetName: _trinity_gles2_internal
+
+  ReleaseGLES2_27|Win32,x64:
+    BaseConfigurations:
+    - Windows    
+    - ReleaseBase
+    - ReleaseRuntime
+    - GLES2
+    Imports:
+    - ../blue/uses_blue_27.yaml
+    - ../../../../../../sdk/UmbraPvs/4740/UmbraPvs_4740.yaml
+    General:
+      TargetName: _trinity_gles2_internal
         
   ReleaseGLES2_27|Linux64:
     BaseConfigurations:
@@ -466,7 +479,7 @@ Configurations:
     - ../../../../../../sdk/python/Python_2.7.yaml
     - ../../../../../../sdk/tbb/tbb40_233oss/tbb40_233oss.yaml
     - ../../../../../../sdk/freetype/2.4.6/freetype_2.4.6.yaml
-    - ../../../../../../sdk/Granny/2.9.12.0/granny_2.9.12.0.yaml
+    - ../../../../../../sdk/Granny/2.9.24.0/granny_2.9.24.0.yaml
     General:
       TargetName: _trinity_gles2_internal
     ClCompile:
@@ -485,7 +498,7 @@ Configurations:
     Imports:
     - ../blue/uses_blue_lua.yaml
     - ../lua/uses_lua.yaml
-    - ../../../../../../sdk/Granny/2.9.18.0/granny_2.9.18.0.yaml
+    - ../../../../../../sdk/Granny/2.9.24.0/granny_2.9.24.0.yaml
     General:
       TargetName: lib_trinity_gles2_debug
       AndroidTargetAPI: android-14

@@ -48,7 +48,7 @@ public:
 		float boosterIntensity;
 		float shipSpeed;
 		float maxBoosterSize;
-		float padding0;
+		float padding;
 
 		// trail data
 		Vector4 trailsControlPositions[EVE_MAX_CONTROL_POINT_COUNT];
@@ -59,7 +59,7 @@ public:
 		// trail data
 		float boosterIntensity;
 		float trailIntensity;
-		float padding1;
+		float shipWarp;
 		float padding2;
 	};
 
@@ -133,14 +133,16 @@ public:
 	struct InstanceVertex
 	{
 		Matrix transform;
+		Vector4 functionality;
 		float wavePhase;
 	};
 
 	// timing
 	void Update( float deltaT, Be::Time t, const Matrix* parentMatrix, ITriVectorFunctionPtr ballPosition, ITriQuaternionFunctionPtr ballRotation );
+	void UpdateTrails( float deltaT, Be::Time t );
 	// manage individual exhaust points
 	void Clear();
-	void Add( const Matrix* localMatrix );
+	void Add( const Matrix* localMatrix, const Vector4* functionality );
 	// set internal visual data
 	void SetData( float glowScale, const Color* glowColor, float symHaloScale, float haloScaleX, float haloScaleY, const Color* haloColor, bool alwaysOn );
 	void SetEffect( Tr2EffectPtr effect );
@@ -178,6 +180,7 @@ private:
 	Matrix m_parentTransform;
 	// parent ship data
 	float m_parentSpeed;
+	float m_parentWarp;
 	Quaternion m_parentRotation;
 
 	// bounding info (is setup dynamically)
@@ -202,6 +205,7 @@ private:
 	struct SingleBoosterData
 	{
 		Matrix transform;
+		Vector4 functionality;
 	};
 	std::vector<SingleBoosterData> m_singleBoosters;
 

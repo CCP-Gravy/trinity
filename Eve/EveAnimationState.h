@@ -48,6 +48,7 @@ private:
 	// Holds the id of a state that we've been requested to transition into or empty string
 	std::string m_transitionName;
 	bool m_transitionPending;
+	bool m_pendingCommands;
 
 	EveAnimationSequencePtr m_enterSequence;
 	EveAnimationSequencePtr m_mainSequence;
@@ -60,7 +61,10 @@ private:
 	float m_startTime;
 	float m_animationDuration;
 	float m_secondsRemaining;
+	float m_pendingCommandDelay;
 
+	void DoAnimationSequenceCurves( EveSpaceObject2Ptr owner, EveAnimationSequencePtr sequence );
+	void DoAnimationSequenceCommands( EveSpaceObject2Ptr owner, EveAnimationSequencePtr sequence );
 	void DoAnimationSequence( EveSpaceObject2Ptr owner, EveAnimationSequencePtr sequence );
 	void UpdateSequenceDuration( EveSpaceObject2Ptr owner, const EveAnimationSequencePtr sequence );
 	bool HasTransition( std::string stateName );
@@ -90,6 +94,7 @@ public:
 	~EveAnimationStateContainer() {}
 
 	PEveAnimationStateVector m_states;
+	BlueSharedString m_defaultAnimation;
 };
 TYPEDEF_BLUECLASS( EveAnimationStateContainer );
 #endif

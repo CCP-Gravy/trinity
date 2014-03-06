@@ -143,7 +143,9 @@ EveSpaceScene::EveSpaceScene( IRoot* lockobj ) :
 	m_reflectionMapTransformVar( "ReflectionMapTransform", Tr2Renderer::GetIdentityTransform() ),
 	m_suncVecVar( "SunVec", Vector3( 0.0f, 0.0f, 1.0f )),
 	m_shadowLightnessVar( "ShadowLightness", 0.0f ),
-	m_dynamicClipPlanes( true )
+	m_dynamicClipPlanes( true ),
+	m_nearClip( 0.0f ),
+	m_farClip( 0.0f )
 {
 	TriPoolAllocator* allocator = Tr2Renderer::GetPoolAllocator();
 	m_primaryBatches[TRIBATCHTYPE_OPAQUE] = CCP_NEW( "EveSpaceScene/m_batches" ) TriRenderBatchAccumulator<EffectKeyGenerator>( allocator );
@@ -246,8 +248,8 @@ void EveSpaceScene::Update( Be::Time time )
 
 	if( m_warpTunnel )
 	{
-		m_warpTunnel->UpdateWorldTransform( time );
-		m_warpTunnel->Update( m_updateContext );
+		m_warpTunnel->UpdateSyncronous( m_updateContext );
+		m_warpTunnel->UpdateAsyncronous( m_updateContext );
 	}
 
 	if( m_dustfieldConstaint )
@@ -257,7 +259,6 @@ void EveSpaceScene::Update( Be::Time time )
 
 	if( m_dustfield )
 	{
-		m_dustfield->UpdateWorldTransform( time );
 		m_dustfield->Update( m_updateContext );
 	}
 
@@ -281,13 +282,18 @@ void EveSpaceScene::Update( Be::Time time )
 		(*it)->Update( TimeAsDouble( time ) );
 	}
 
-	for( IEveSpaceObject2Vector::const_iterator it = m_objects.begin(); it != m_objects.end(); ++it )
 	{
-		(*it)->UpdateWorldTransform( time );
+		CCP_STATS_ZONE( "UpdateSyncronous" );
+
+		for( IEveSpaceObject2Vector::const_iterator it = m_objects.begin(); it != m_objects.end(); ++it )
+		{
+			(*it)->UpdateSyncronous( m_updateContext );
+		}
 	}
-	for( IEveSpaceObject2Vector::const_iterator it = m_objects.begin(); it != m_objects.end(); ++it )
 	{
-		(*it)->Update( m_updateContext );
+		CCP_STATS_ZONE( "UpdateAsyncronous" );
+
+		Tr2ParallelDo( m_objects.begin(), m_objects.end(), [&]( IEveSpaceObject2* obj ) { obj->UpdateAsyncronous( m_updateContext ); } );
 	}
 
 	// Update the sun direction from the ball
@@ -891,8 +897,6 @@ void EveSpaceScene::RenderObjectsReceivingShadows(	std::vector<ShadowReceiver>& 
 		return;
 	}
 
-	Tr2Effect* visualizerEffect = m_visualizerEffects[m_visualizeMethod];
-
 	std::unique_ptr<std::vector<ITr2Renderable*>[]> shadowRenderables;
 	std::unique_ptr<std::vector<IEveShadowCaster*>[]> debugCasters;
 	std::vector<IEveShadowCaster*> shadowCasters;
@@ -1039,8 +1043,8 @@ void EveSpaceScene::BeginRender( Tr2RenderContext& renderContext )
 	ApplyPerFrameData( renderContext );
 }
 
-
-static void UpdateViewDistanceInfo( IEveSpaceObject2Vector& objs, TriFrustum& frustum, ViewDistanceInfo& viewDistance )
+template<class T>
+static void UpdateViewDistanceInfo( T& objs, TriFrustum& frustum, ViewDistanceInfo& viewDistance )
 {
 	CCP_STATS_ZONE( __FUNCTION__ );
 	for( auto it = objs.begin(); it != objs.end(); it++ )
@@ -1144,7 +1148,8 @@ void EveSpaceScene::GatherBatches( Tr2RenderContext& renderContext )
 	
 	if( m_dynamicClipPlanes )
 	{
-		UpdateViewDistanceInfo( m_objects, frustum, viewDistance );
+		UpdateViewDistanceInfo<IEveSpaceObject2Vector>( m_objects, frustum, viewDistance );
+		UpdateViewDistanceInfo<PEvePlanetVector>( m_planets, frustum, viewDistance );
 		m_nearClip = viewDistance.m_near;
 		m_farClip = viewDistance.m_far;
 	}
@@ -2186,9 +2191,6 @@ void EveSpaceScene::UpdateStatefulParticles(
 		
 		const unsigned largePoolSizeX = Tr2Renderer::GetShaderModel() <= TR2SM_3_0_LO ? 256 : 512;
 		const unsigned largePoolSizeY = Tr2Renderer::GetShaderModel() <= TR2SM_3_0_LO ? 128 : 256;
-		const unsigned smallPoolSizeX = Tr2Renderer::GetShaderModel() <= TR2SM_3_0_LO ? 128 : 256;
-		const unsigned smallPoolSizeY = Tr2Renderer::GetShaderModel() <= TR2SM_3_0_LO ? 128 : 256;
-		const unsigned tinyPoolSize = 64;
 
 		USE_MAIN_THREAD_RENDER_CONTEXT();
 

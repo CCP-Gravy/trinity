@@ -43,7 +43,8 @@ EveMissileWarhead::EveMissileWarhead( IRoot* lockobj ) :
 	m_explosionDistance( 0.0f ),
 	m_maxExplosionDistance( 40.0f ),
 	m_explosionPosition( 0.f, 0.f, 0.f ),
-	m_bombFlightpath( false )
+	m_bombFlightpath( false ),
+	m_doSpread( true )
 {
 	D3DXMatrixIdentity( &m_currentOffsetTransform );
 	m_speedModifier = 1.04f - TriRand() * 0.08f;
@@ -285,7 +286,7 @@ EveMissileWarhead::StateChangeEvent EveMissileWarhead::UpdateState( float deltaT
 	case STATE_START_TRACKING:
 		// get target locator from target
 		m_targetLocator = target ? target->GetGoodDamageLocatorIndex( *GetWorldPosition() ) : -1;
-		if( estimatedTotalAliveTime >= 5.f )
+		if( estimatedTotalAliveTime >= 5.f && m_doSpread )
 		{
 			m_state = STATE_TRACKING_SPREAD;
 		}

@@ -47,6 +47,11 @@ void TriDevice::HandleRenderTick( Be::Time timestamp )
 
 	USE_MAIN_THREAD_RENDER_CONTEXT();
 
+	if( m_renderJobs )
+	{
+		m_renderJobs->RunUpdate( timestamp );
+	}
+
 	if( !isFirstFrame )
 	{
 		CR_RETURN( renderContext.Present() );

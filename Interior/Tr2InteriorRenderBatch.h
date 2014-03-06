@@ -192,8 +192,6 @@ struct Tr2IntKeyGenerator
 		const __int64 baseKey = entry.m_batch->GetUserData();
 		__int64 group = ( baseKey & mask ) >> 32;
 
-		unsigned int group32 = (unsigned int)group;
-
 		// Opaque batches are sort-by-effect
 		if( group == (unsigned int)WODINTBATCHGROUP_OPAQUE )
 		{

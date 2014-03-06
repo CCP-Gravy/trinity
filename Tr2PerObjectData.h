@@ -94,6 +94,11 @@ protected:
 class Tr2PerAreaSHLightingData : public Tr2PerObjectDataPSBuffer
 {
 public:
+	Tr2PerAreaSHLightingData()
+		:m_perObjectDataPtr( nullptr )
+	{
+	}
+
 	virtual void UpdateConstantBuffer( Tr2RenderContextEnum::ShaderType type, 
 									   Tr2ConstantBufferAL& buffer, 
 									   UpdateDestination updateDestination,
@@ -203,10 +208,12 @@ class Tr2PerObjectDataSkinned : public Tr2PerObjectDataPSBuffer
 {
 public:
 	Tr2PerObjectDataSkinned()
+		:m_jointCount( 0 ),
+		m_data( nullptr ),
+		m_worldMat( Tr2Renderer::GetIdentityTransform() ),
+		m_mirrorMatrix( Tr2Renderer::GetIdentityTransform() ),
+		m_worldPos( 0.0f, 0.0f, 0.0f, 0.0f )
 	{
-		m_worldMat = Tr2Renderer::GetIdentityTransform();
-		m_mirrorMatrix = Tr2Renderer::GetIdentityTransform();
-		m_worldPos = Vector4( 0.0f, 0.0f, 0.0f, 0.0f );
 	}
 
 	virtual void UpdateConstantBuffer( Tr2RenderContextEnum::ShaderType type, 

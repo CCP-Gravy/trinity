@@ -22,6 +22,7 @@ const Be::ClassInfo* EveMissileWarhead::ExposeToBlue()
 		MAP_ATTRIBUTE( "maxExplosionDistance", m_maxExplosionDistance, "Determine how far away from the target the warhead should explode.", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "id", m_id, "The warhead's acceleration after eject phase is complete.", Be::READWRITE )
 		MAP_ATTRIBUTE( "explosionPosition", m_explosionPosition, "Position in world space where the missile exploded", Be::READ )
+		MAP_ATTRIBUTE( "doSpread", m_doSpread, "The warhead should(possibly) switch to a new damage locator if appropriate mid flight.", Be::READWRITE )
 
 		MAP_METHOD_AND_WRAP(
 			"PrepareLaunch",

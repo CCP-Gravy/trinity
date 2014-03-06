@@ -231,7 +231,6 @@ void Tr2InstancedMesh::RebuildIndirectBuffers()
 	}
 	else
 	{
-		USE_MAIN_THREAD_RENDER_CONTEXT();
 		for( int type = 0; type < TRIBATCHTYPE_COUNT_OF_BATCH_TYPES; ++type )
 		{
 			Tr2MeshAreaVector* areas = GetAreas( TriBatchType( type ) );
@@ -311,12 +310,10 @@ Tr2GpuBufferAL* Tr2InstancedMesh::GetIndirectBuffer( const AreaKey& key )
 	const TriGeometryResAreaData& area = pMesh->m_areas[areaIx];
 
 	unsigned int primCount = area.m_primitiveCount;
-	unsigned int vertCount = area.m_vertexCount;
 	for( unsigned int i = 1; i < areaCount; ++i )
 	{
 		const TriGeometryResAreaData& curArea = pMesh->m_areas[areaIx + i];
 		primCount += curArea.m_primitiveCount;
-		vertCount += curArea.m_vertexCount;
 	}
 
 	uint32_t data[5];
@@ -450,7 +447,7 @@ void Tr2InstancedMesh::GetBatches( ITriRenderBatchAccumulator* batches,
 		if( batch )
 		{
 			batch->SetPerObjectData( data );
-			batch->SetMesh( (Tr2InstancedMesh*)this );
+			batch->SetMesh( const_cast<Tr2InstancedMesh*>( this ) );
 			batch->SetMeshParameters( area->GetIndex(), area->GetCount(), area->GetReversed() );
 			batch->SetShaderMaterial( area->GetMaterialInterface() );
 
@@ -659,12 +656,10 @@ void Tr2InstancedMesh::RenderAreas( unsigned int areaIx,
 		const TriGeometryResAreaData& area = pMesh->m_areas[areaIx];
 
 		unsigned int primCount = area.m_primitiveCount;
-		unsigned int vertCount = area.m_vertexCount;
 		for( unsigned int i = 1; i < areaCount; ++i )
 		{
 			const TriGeometryResAreaData& curArea = pMesh->m_areas[areaIx + i];
 			primCount += curArea.m_primitiveCount;
-			vertCount += curArea.m_vertexCount;
 		}
 
 		const unsigned instanceCount = m_instanceGeometryResource->GetInstanceBufferVertexCount( m_instanceMeshIndex );

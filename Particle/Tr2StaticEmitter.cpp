@@ -7,10 +7,11 @@
 #include "StdAfx.h"
 #include "Tr2StaticEmitter.h"
 #include "Tr2ParticleSystem.h"
-#include "Resources/TriGeometryRes.h"
+#include "Resources/TriGrannyRes.h"
 #include "Tr2Renderer.h"
 #include "Tr2EffectStateManager.h"
 #include "blue/include/IBlueResMan.h"
+#include "Tr2VertexDefinitionUtilities.h"
 
 
 // --------------------------------------------------------------------------------------
@@ -43,7 +44,7 @@ bool Tr2StaticEmitter::Initialize()
 	if( !m_geometryResourcePath.empty() )
 	{
 		BeResMan->GetResource( m_geometryResourcePath, 
-							   "", 
+							   "raw", 
 							   m_geometryResource );
 	}
 	if( m_particleSystem && m_isThreadSafe )
@@ -68,7 +69,7 @@ bool Tr2StaticEmitter::OnModified( Be::Var* value )
 	if( IsMatch( value, m_geometryResourcePath ) )
 	{
 		BeResMan->GetResource( m_geometryResourcePath, 
-							   "", 
+							   "raw", 
 							   m_geometryResource );
 	}
 	else if( IsMatch( value, m_particleSystem ) )
@@ -110,22 +111,23 @@ void Tr2StaticEmitter::DoSpawn()
 	{
 		m_hasSpawnedParticles = true;
 
-		if( m_meshIndex >= m_geometryResource->GetMeshCount() )
+		if( int( m_meshIndex ) >= m_geometryResource->GetMeshCount() )
 		{
 			CCP_LOGERR( "Invalid mesh index for Tr2StaticEmitter with geometry path %s", 
 						m_geometryResourcePath.c_str() );
 			return;
 		}
-		TriGeometryResMeshData* meshData = m_geometryResource->GetMeshData( m_meshIndex );
+		auto meshData = m_geometryResource->GetGrannyMesh( m_meshIndex );
+		auto vertexDefinition = m_geometryResource->GetGrannyVertexType( m_meshIndex );
 
-		Tr2VertexDefinition elements;
-
-		if( !Tr2EffectStateManager::GetVertexDeclarationElements( meshData->m_vertexDeclaration, elements ) )
+		if( !meshData || !meshData->PrimaryVertexData || !vertexDefinition )
 		{
-			CCP_LOGERR( "Could not get vertex declaration for Tr2StaticEmitter with geometry path %s", 
+			CCP_LOGERR( "Invalid granny file for Tr2StaticEmitter with geometry path %s", 
 						m_geometryResourcePath.c_str() );
 			return;
 		}
+
+		Tr2VertexDefinition elements = BuildFromGrannyVertexDecl( vertexDefinition );
 
 		// Validate geometry vertex declaration against particle system element declaration
 		const Tr2ParticleElementDataMap &particleElements = m_particleSystem->GetElementDeclaration();
@@ -186,9 +188,9 @@ void Tr2StaticEmitter::DoSpawn()
 		m_particleSystem->ClearParticles();
 
 		// Spawn particles
-		char* data;
-		CR_RETURN( meshData->m_vertexBuffer.Lock( data, Tr2RenderContextEnum::LOCK_READONLY, renderContext ) );
-		for( unsigned i = 0; i < meshData->m_vertexCount; ++i )
+		uint8_t* data = meshData->PrimaryVertexData->Vertices;
+		uint32_t stride = m_geometryResource->GetVertexSize( m_meshIndex );
+		for( int i = 0; i < meshData->PrimaryVertexData->VertexCount; ++i )
 		{
 			float* particle[Tr2ParticleElementData::COUNT];
 			if( m_particleSystem->InsertParticle( particle ) )
@@ -212,9 +214,8 @@ void Tr2StaticEmitter::DoSpawn()
 				}
 				m_particleSystem->DoneInsertingParticle();
 			}
-			data += meshData->m_bytesPerVertex;
+			data += stride;
 		}
-		meshData->m_vertexBuffer.Unlock( renderContext );
 	}
 }
 

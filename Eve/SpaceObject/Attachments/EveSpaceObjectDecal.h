@@ -7,9 +7,9 @@
 #include "ITr2Renderable.h"
 #include "Tr2PerObjectData.h"
 #include "TriRenderBatch.h"
-#include "../Tr2DeviceResource.h"
+#include "Tr2DeviceResource.h"
 
-#include "SpaceObject/EveShip2.h"
+#include "Eve/SpaceObject/EveShip2.h"
 
 BLUE_DECLARE( Tr2Effect );
 BLUE_DECLARE( Tr2Mesh );

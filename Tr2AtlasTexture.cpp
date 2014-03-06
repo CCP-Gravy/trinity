@@ -103,9 +103,6 @@ void Tr2AtlasTexture::CalcSubTextureWindow( Vector4& tw, float rectX, float rect
 		rectHeight = (float)m_height;
 	}
 	
-	float srcWidth = (float)m_textureWidth;
-	float srcHeight = (float)m_textureHeight;
-
 	tw.x = (float)(m_x + rectX) * m_textureWidthReciprocal;
 	tw.y = (float)(m_y + rectY) * m_textureHeightReciprocal;
 	tw.z = (float)rectWidth * m_textureWidthReciprocal;
@@ -168,14 +165,13 @@ BlueAsyncRes::LoadingResult Tr2AtlasTexture::DoLoad()
 		return LR_FAILED;
 	}
 
-	bool isOK = true;
 	m_imageHandler = CreateImageHandler( m_path );
 	m_imageHandler->SetStream( m_dataStream );
 	
 	// for backward compatibility, make a texture that's intended for atlassing always 32 bit.
 	m_imageHandler->SetDesiredFormat( PIXEL_FORMAT_B8G8R8A8_UNORM );
 
-	isOK = m_imageHandler->ReadHeader();
+	bool isOK = m_imageHandler->ReadHeader();
 	if( isOK )
 	{
 		isOK = m_imageHandler->IsSupported();

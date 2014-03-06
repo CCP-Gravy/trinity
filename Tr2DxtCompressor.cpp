@@ -288,8 +288,11 @@ void SelectYCoCgDiagonal( const uint8_t *colorBlock, uint8_t *minColor, uint8_t 
 
 	uint8_t c0 = minColor[1];
 	uint8_t c1 = maxColor[1];
-
-	c0 ^= c1 ^= mask &= c0 ^= c1;
+	
+	c0 ^= c1;
+	mask &= c0;
+	c1 ^= mask;
+	c0 ^= c1;
 
 	minColor[1] = c0;
 	maxColor[1] = c1;
@@ -896,7 +899,7 @@ struct Tr2DxtCompressSurfaceAsyncData
 
 static void Tr2DxtCompressSurfaceAsyncHelper( void* context )
 {
-	Tr2DxtCompressSurfaceAsyncData* data = (Tr2DxtCompressSurfaceAsyncData*)context;
+	Tr2DxtCompressSurfaceAsyncData* data = static_cast<Tr2DxtCompressSurfaceAsyncData*>( context );
 	data->succeeded = Tr2DxtCompressSurface(	data->eCompressFmt, 
 												data->inBuf, 
 												data->width, 
@@ -931,9 +934,6 @@ bool Tr2DxtCompressSurfaceAsync(	Tr2DxtCompressionFormat eCompressFmt,
 		// Create the background welder the first time we need to build
 		s_wodBackgroundCompressor = BeCallbackMan;
 	}
-
-	char test = *inBuf;
-	test = *outBuf;
 
 	Tr2DxtCompressSurfaceAsyncData* data = CCP_NEW( "Tr2DxtCompressSurfaceAsync/data" ) Tr2DxtCompressSurfaceAsyncData;
 	data->control = control;

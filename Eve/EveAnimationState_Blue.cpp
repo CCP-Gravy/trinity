@@ -55,5 +55,6 @@ const Be::ClassInfo* EveAnimationStateContainer::ExposeToBlue()
         MAP_INTERFACE( EveAnimationStateContainer )
 
 		MAP_ATTRIBUTE( "states", m_states, "", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "defaultAnimation", m_defaultAnimation, "", Be::READWRITE | Be::PERSIST )
     EXPOSURE_END()
 }

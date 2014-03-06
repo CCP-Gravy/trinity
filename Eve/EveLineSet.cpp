@@ -89,7 +89,7 @@ bool EveLineSet::OnPrepareResources()
 
 //////////////////////////////////////////////////////////////////////////////////////
 // IEveSpaceObject2
-void EveLineSet::Update( EveUpdateContext& updateContext )
+void EveLineSet::UpdateSyncronous( EveUpdateContext& updateContext )
 {
 	Quaternion rotation( 0.0f, 0.0f, 0.0f, 1.0f );
 	Vector3 translation( 0.0f, 0.0f, 0.0f );
@@ -106,8 +106,13 @@ void EveLineSet::Update( EveUpdateContext& updateContext )
 	D3DXMatrixTransformation( &m_worldTransform, 0, 0, &m_scaling, 0, &rotation, &translation );
 }
 
-void EveLineSet::UpdateWorldTransform( Be::Time time )
+void EveLineSet::UpdateAsyncronous( EveUpdateContext& updateContext )
 {
+}
+
+void EveLineSet::Update( EveUpdateContext& updateContext )
+{
+	UpdateSyncronous( updateContext );
 }
 
 void EveLineSet::RenderDebugInfo( Tr2RenderContext& renderContext )

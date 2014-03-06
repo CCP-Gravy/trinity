@@ -441,7 +441,6 @@ void Tr2InteriorEnlightenSystem::UpdateEnlightenDebugTextures()
 				{
 					unsigned short component = (x + y) % 2 == 0 ? dark : bright;
 					unsigned short *pixel = (unsigned short*)(row+x);
-					const int pixelMax = (1 << 16) - 1;
 					pixel[0] = component;
 					pixel[1] = component;
 					pixel[2] = component;
@@ -493,7 +492,6 @@ void Tr2InteriorEnlightenSystem::UpdateEnlightenDebugTextures()
 				float r[5] = { 1.f, 0.8f, 0.6f, 0.4f, 0.2f };
 				float g[7] = { 0.2f, 0.33f, 0.46f, 0.6f, 0.73f, 0.86f, 1.f };
 				float b[3] = { 0.6f, 1.0f, 0.2f };
-				unsigned short usMax = (1<<16) - 1;
 						
 				for( int y = 0; y < height; ++y )
 				{

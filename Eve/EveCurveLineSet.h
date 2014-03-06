@@ -28,14 +28,15 @@ public:
 
 	//////////////////////////////////////////////////////////////////////////////////////
 	// IEveSpaceObject2
-	void Update( EveUpdateContext& updateContext );
+	void UpdateSyncronous( EveUpdateContext& updateContext );
+	void UpdateAsyncronous( EveUpdateContext& updateContext );
 	void GetRenderables( const TriFrustum& frustum, std::vector<ITr2Renderable*>& renderables, const Matrix& parentTransform );
 	bool GetBoundingSphere( Vector4& sphere, BoundingSphereQuery query=EVE_BOUNDS_NORMAL ) const;
 	void UpdateViewDistanceInfo( const TriFrustum& frustum, ViewDistanceInfo& viewDistance ) const;
-	void UpdateWorldTransform( Be::Time time );
 
 	/////////////////////////////////////////////////////////////////////////////////////
 	// IEveTransform
+	void Update( EveUpdateContext& updateContext );
 	void UpdateViewDependentData( const Matrix& parentTransform );
 	void SetLowDetail( bool b ) {};
 	LodLevel GetLODLevel() const { return LOD_HIGH; }

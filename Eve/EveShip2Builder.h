@@ -39,7 +39,7 @@ protected:
 	void Weld( granny_uint8* referenceVB, int referenceCount, granny_uint8* vb, int count );
 	void InitializeGrannyFile();
 	bool AddMeshToGrannyFile( TriGrannyResPtr* grannies, int ix, Tr2Mesh* mesh, const Vector3& offset, Tr2Mesh* dstMesh );
-	void CalculateBoundingSphere();
+	void CalculateBoundingSphere( const Vector3* offsets );
 	void CalculateAudioBooster();
 	void FinalizeGrannyFile( const std::string& outputName );
 

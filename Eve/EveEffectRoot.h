@@ -33,13 +33,13 @@ public:
 
 	/////////////////////////////////////////////////////////////////////////////////////
 	// IEveSpaceObject2
-	void Update( EveUpdateContext& updateContext );
+	void UpdateSyncronous( EveUpdateContext& updateContext );
+	void UpdateAsyncronous( EveUpdateContext& updateContext );
 	void RenderDebugInfo( Tr2RenderContext& renderContext );
 	void GetRenderables( const TriFrustum& frustum, std::vector<ITr2Renderable*>& renderables, const Matrix& parentTransform );
 	bool GetBoundingSphere( Vector4& sphere, BoundingSphereQuery query=EVE_BOUNDS_NORMAL ) const;
 	void UpdateViewDistanceInfo( const TriFrustum& frustum, ViewDistanceInfo& viewDistance ) const;
 
-	void UpdateWorldTransform( Be::Time time );
 	// This version of the function should perform an update on the model / ball position
 	void GetModelCenterWorldPosition( Vector3 &position, Be::Time t );
 
@@ -55,6 +55,8 @@ public:
 	void Start();
 	void Stop();
 protected:
+	void UpdateWorldTransform( Be::Time time );
+
 	std::string m_name;
 
 	Vector3 m_scaling;

@@ -23,6 +23,7 @@ public:
 	~Tr2RenderJobs();
 	
 	void Run( Be::Time time );
+	void RunUpdate( Be::Time time );
 
 #ifdef _WIN32
 	void		SetThreadPoolSize( uint32_t	poolSize );
@@ -32,6 +33,7 @@ public:
 	PTriRenderJobVector m_scheduledRecurring;
 	PTriRenderJobVector m_scheduledOnce;
 	PTriRenderJobVector m_scheduledChained;
+	PTriRenderJobVector m_updateRecurring;
 
 private:
 	// Used to run the jobs:
@@ -46,7 +48,9 @@ private:
 	struct TRenderThread
 	{
 		TRenderThread()
-		: m_handle( 0 )
+		: m_handle( 0 ),
+		m_kickThreadEvent( 0 ),
+		m_listReadyEvent( 0 )
 		{}
 		Tr2RenderContextPtr		m_renderContext;		
 		Tr2RenderJobsPtr		m_owner;

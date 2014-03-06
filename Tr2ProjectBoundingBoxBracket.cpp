@@ -243,8 +243,6 @@ void Tr2ProjectBoundingBoxBracket::UpdateValue( double time )
 		y += 16;
 
 		g_debugRenderer->Printf( x, y, 0xffffffff, "(%5.2f, %5.2f)", m_projectedWidth, m_projectedHeight );
-		y += 16;
-
 	}
 }
 

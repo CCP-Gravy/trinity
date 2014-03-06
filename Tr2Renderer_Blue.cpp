@@ -228,7 +228,7 @@ MAP_FUNCTION_AND_WRAP( "UpdateMaterials", UpdateMaterials,
 			 "Updates all Tr2Materials with the parameters from the default material\n"
 			 );
 
-static void AddGlobalSituationFlags( const std::vector<std::string> flags )
+static void AddGlobalSituationFlags( const std::vector<std::string>& flags )
 {
 	for( auto it = flags.begin(); it != flags.end(); ++it )
 	{
@@ -244,7 +244,7 @@ MAP_FUNCTION_AND_WRAP
 	"Adds a list of situation strings to the global situation.\n"
 );
 
-static void RemoveGlobalSituationFlags( const std::vector<std::string> flags )
+static void RemoveGlobalSituationFlags( const std::vector<std::string>& flags )
 {
 	for( auto it = flags.begin(); it != flags.end(); ++it )
 	{

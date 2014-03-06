@@ -6,11 +6,11 @@
 #include "StdAfx.h"
 #include "EveSOF.h"
 #include "Eve/SpaceObject/EveShip2.h"
-#include "Eve/EveSpriteSet.h"
-#include "Eve/EveTrailsSet.h"
-#include "Eve/EveSpotlightSet.h"
-#include "Eve/EvePlaneSet.h"
-#include "Eve/EveBoosterSet2.h"
+#include "Eve/SpaceObject/Attachments/EveSpriteSet.h"
+#include "Eve/SpaceObject/Attachments/EveTrailsSet.h"
+#include "Eve/SpaceObject/Attachments/EveSpotlightSet.h"
+#include "Eve/SpaceObject/Attachments/EvePlaneSet.h"
+#include "Eve/SpaceObject/Attachments/EveBoosterSet2.h"
 #include "Tr2Mesh.h"
 #include "EffectParameter/TriTexture2DParameter.h"
 #include "EffectParameter/Tr2Vector4Parameter.h"
@@ -73,7 +73,7 @@ IRootPtr EveSOF::Load( const char* resFile, const char* hullName, const char* ra
 	EveShip2Ptr newShip;
 	if( p->QueryInterface( BlueInterfaceIID<EveShip2>(), (void**)&newShip ) )
 	{
-//		SetupBoosters( newShip, hullData, raceData );
+		SetupBoosters( newShip, hullData, raceData );
 	}
 
 	return p;
@@ -436,7 +436,7 @@ void EveSOF::SetupBoosters( EveShip2Ptr ship, const EveSOFDataMgr::HullData* hul
 	// add all the indiviual items
 	for( auto biit = hdata->items.begin(); biit != hdata->items.end(); ++biit )
 	{
-		set->Add( &biit->transform );
+		set->Add( &biit->transform, &biit->functionality );
 	}
 
 	// add it to ship

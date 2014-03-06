@@ -149,7 +149,6 @@ public:
 
 	// per-hull data of a booster
 	bool m_alwaysOn, m_hasTrails;
-	std::string m_soundName;
 	PEveSOFDataHullBoosterItemVector m_items;
 };
 TYPEDEF_BLUECLASS( EveSOFDataHullBooster );
@@ -200,6 +199,9 @@ public:
 
 	// hull name
 	std::string m_name;
+
+	// description
+	std::string m_description;
 
 	// geometry
 	std::string m_geometryResFilePath;
@@ -304,7 +306,6 @@ public:
 	Color m_color, m_glowColor, m_haloColor, m_trailColor;
 	std::string m_textureResPath;
 	Vector4 m_trailSize, m_scale;
-	std::string m_soundName;
 };
 TYPEDEF_BLUECLASS( EveSOFDataBooster );
 
@@ -316,6 +317,9 @@ public:
 	EXPOSE_TO_BLUE();
 	EveSOFDataFaction( IRoot* lockobj = NULL );
 	~EveSOFDataFaction() {}
+
+	// description
+	std::string m_description;
 
 	// hull name
 	std::string m_name;

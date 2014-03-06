@@ -1583,13 +1583,8 @@ bool TriGrannyRes::CreateEnlightenPackedGeometry( const std::string& filename,
 
 	// The conversion from our units (m) to theirs (cm)
 	const float enlightenUnitScale = 0.01f;
-	// The size of each Enlighten texel (width) in cm
-	const float enlightenOutputPixelSize = enlightenPixelSize / enlightenUnitScale;
 	// Always follows this formula
 	const float enlightenRadiosityPerPixelSurfaceArea = pow( enlightenPixelSize, 2.0f );
-
-	// 16 or 32 bit
-	bool isHalfPrecision = false;
 
 	CCP_LOG( "Creating new precompute input geometry with id: %i, %i",1,guid);
 	Enlighten::IPrecompInputGeometry* geom = Enlighten::IPrecompInputGeometry::Create( Geo::GeoGuid::Create( 1, guid ) );
@@ -1667,12 +1662,12 @@ bool TriGrannyRes::CreateEnlightenPackedGeometry( const std::string& filename,
 	{
 		granny_mesh* Mesh = fi->Meshes[meshIx];
 				
-		isHalfPrecision = ( Mesh->PrimaryVertexData->VertexType[0].Type == GrannyReal16Member );
-
 		if( !Mesh )
 		{
 			continue;
 		}
+
+		bool isHalfPrecision = ( Mesh->PrimaryVertexData->VertexType[0].Type == GrannyReal16Member );
 
 		const Geo::GeoPoint2* outputUVs = packedGeometry->GetOutputUvArray( meshIx );
 		void* originalVBufferContents = Mesh->PrimaryVertexData->Vertices;
@@ -1795,13 +1790,8 @@ bool TriGrannyRes::ProjectEnlightenGeometry( const std::string& filename,
 
 	// The conversion from our units (m) to theirs (cm)
 	const float enlightenUnitScale = 0.01f;
-	// The size of each Enlighten texel (width) in cm
-	const float enlightenOutputPixelSize = enlightenPixelSize / enlightenUnitScale;
 	// Always follows this formula
 	const float enlightenRadiosityPerPixelSurfaceArea = pow( enlightenPixelSize, 2.0f );
-
-	// 16 or 32 bit
-	bool isHalfPrecision = false;
 
 	CCP_LOG( "Creating new precompute input geometry with id: %i, %i",1,guid);
 	Enlighten::IPrecompInputGeometry* geom = Enlighten::IPrecompInputGeometry::Create( Geo::GeoGuid::Create( 1, guid ) );
@@ -1883,12 +1873,12 @@ bool TriGrannyRes::ProjectEnlightenGeometry( const std::string& filename,
 	{
 		granny_mesh* Mesh = fi->Meshes[meshIx];
 				
-		isHalfPrecision = ( Mesh->PrimaryVertexData->VertexType[0].Type == GrannyReal16Member );
-
 		if( !Mesh )
 		{
 			continue;
 		}
+
+		bool isHalfPrecision = ( Mesh->PrimaryVertexData->VertexType[0].Type == GrannyReal16Member );
 
 		const Geo::GeoPoint2* outputUVs = packedGeometry->GetOutputUvArray( meshIx + 1 );
 		void* originalVBufferContents = Mesh->PrimaryVertexData->Vertices;
@@ -2641,15 +2631,15 @@ GrannyMaterialWrapper::GrannyMaterialWrapper(granny_material * gmat, unsigned in
 	if (defs == 0)
 		return;
 
-	char * dataPtr = (char*)gmat->ExtendedData.Object;
+	uint8_t* dataPtr = static_cast<uint8_t*>( gmat->ExtendedData.Object );
 
 	while(defs->Type != GrannyEndMember)
 	{
 
 		if (defs->Type == GrannyReal32Member)
 		{
-			float floatVal = *((float*)dataPtr);
-			double v = (double)floatVal;
+			float floatVal = *reinterpret_cast<float*>( dataPtr );
+			double v = double( floatVal );
 			PyObject * pythonFloat = PyFloat_FromDouble(v);
 			// set into the dict.
 			PyDict_SetItemString(m_dictionary, defs->Name, pythonFloat);
@@ -2807,7 +2797,7 @@ Be::Result<std::string> TriGrannyRes::BakeBlendshapeFromScript( unsigned int mes
 		return Be::Result<std::string>( "Failed to lock vertex buffer" );
 	}
 
-	const bool ok = BakeBlendshape( meshIx, weights, pVertexData, meshData->m_vertexCount * meshData->m_bytesPerVertex );
+	BakeBlendshape( meshIx, weights, pVertexData, meshData->m_vertexCount * meshData->m_bytesPerVertex );
 	meshData->m_vertexBuffer.Unlock( renderContext );
 
 	return Be::Result<std::string>();

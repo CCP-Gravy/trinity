@@ -258,7 +258,6 @@ unsigned int Tr2FontMeasurer::AddText( const std::wstring& text )
 	FTC_CMapCache cmCache = g_fontManager->GetCmCache();
 	FTC_SBitCache sbitCache = g_fontManager->GetSbitCache();
 
-	int glyphIndex = 0;
 	int charactersAdded = 0;
 	const wchar_t* curChar = text.c_str();
 	while( *curChar )
@@ -269,7 +268,7 @@ unsigned int Tr2FontMeasurer::AddText( const std::wstring& text )
 		CharacterBitmap* characterBitmap = NULL;
 
 		// Look for the glyph index for current character in the current font
-		glyphIndex = FTC_CMapCache_Lookup( cmCache, (FTC_FaceID)m_currentFace, cmapIndex, *curChar );
+		int glyphIndex = FTC_CMapCache_Lookup( cmCache, (FTC_FaceID)m_currentFace, cmapIndex, *curChar );
 		if( glyphIndex )
 		{
 			// Current font has the character - construct the CharacterBitmap structure and get
@@ -1375,7 +1374,7 @@ struct RGBA {
 
 	void BlendOverAlpha( const RGBA& other )
 	{
-		if( !a || other.a == '\xff' )
+		if( !a || other.a == 0xff )
 		{
 			*this = other;
 		}

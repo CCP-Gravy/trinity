@@ -37,6 +37,16 @@ const Be::ClassInfo* Tr2RenderJobs::ExposeToBlue()
 			Be::READ | Be::PERSIST
 		)
 
+		MAP_ATTRIBUTE
+		( 
+			"updateRecurring",
+			m_updateRecurring,
+			"Update jobs are special jobs that are not supposed to do any rendering, but rather do CPU-intensive"
+			"\ncomputations. They run every frame and are scheduled right before device present to hide stalls"
+			"\nfor GPU-bount cases.",
+			Be::READ | Be::PERSIST
+		)
+
 #ifdef _WIN32
 		MAP_PROPERTY
 		(

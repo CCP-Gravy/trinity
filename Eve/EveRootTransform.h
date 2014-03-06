@@ -22,8 +22,8 @@ public:
 
 	/////////////////////////////////////////////////////////////////////////////////////
 	// IEveSpaceObject2
-	virtual void Update( EveUpdateContext& updateContext );
-	virtual void UpdateWorldTransform( Be::Time time );
+	virtual void UpdateSyncronous( EveUpdateContext& updateContext );
+	virtual void UpdateAsyncronous( EveUpdateContext& updateContext );
 
 	/////////////////////////////////////////////////////////////////////////////////////
 	// ITriTargetable
@@ -35,6 +35,7 @@ public:
 
 	/////////////////////////////////////////////////////////////////////////////////////
 	// Tr2Transform
+	virtual void Update( EveUpdateContext& updateContext );
 	virtual void UpdateViewDependentData( const Matrix& parentTransform );
 
 protected:

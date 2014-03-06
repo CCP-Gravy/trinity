@@ -17,8 +17,6 @@
 // --------------------------------------------------------------------------------------
 Tr2VertexDefinition::DataType ConvertGrannyTypeToDataType( const granny_data_type_definition& src )
 {
-	const unsigned width = std::max( src.ArrayWidth, 1 );
-
 	unsigned type = 0;
 
 	switch (src.Type)

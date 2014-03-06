@@ -85,7 +85,6 @@ private:
 
 	// has it's own vertex handle and buffer
 	unsigned int m_vertexDeclHandle;
-	unsigned int m_bytesPerVertex;
 	unsigned int m_vertexCount;
 	Tr2VertexBufferAL m_vertexBuffer;
 };

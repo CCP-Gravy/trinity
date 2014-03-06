@@ -25,7 +25,7 @@
 #ifndef TRIUTIL_H
 #define TRIUTIL_H
 
-#if (TRINITY_PLATFORM == TRINITY_DIRECTX9)
+#if (TRINITY_PLATFORM == TRINITY_DIRECTX9) && defined(_WIN32)
 	#if defined(_DEBUG) || defined(TRINITYDEV)
 		#define D3D_DEBUG_INFO
 		//#define taskletProfiling //profile?
@@ -34,14 +34,13 @@
 #endif
 
 
-#ifdef _WIN32
+#ifdef D3DPERF
 #include <d3dx9.h>
 
 //Helper class for d3d events
 class D3DPERF_Event
 {
 public:
-#ifdef D3DPERF
 	D3DPERF_Event(LPCWSTR name, D3DCOLOR col = 0) {D3DPERF_BeginEvent(col, name);}
 	D3DPERF_Event(D3DCOLOR col, const wchar_t *format, ...) {
 		va_list va;
@@ -50,10 +49,6 @@ public:
 		va_end(va);
 	}
 	~D3DPERF_Event() {D3DPERF_EndEvent();}
-#else
-	D3DPERF_Event(LPCWSTR name, D3DCOLOR col = 0) {}
-	D3DPERF_Event(D3DCOLOR col, const wchar_t *format, ...) {}
-#endif
 
 private:
 	static void BeginEvent(const wchar_t *format, va_list va, D3DCOLOR col = 0)
@@ -69,13 +64,12 @@ private:
 		D3DPERF_BeginEvent(col, buf);
 		if (buf != mybuf)
 			CCP_DELETE [] buf;
-	}	
+	}
 };
 
 class D3DPERF_Marker
 {
 public:
-#ifdef D3DPERF
 	D3DPERF_Marker(LPCWSTR name, D3DCOLOR col = 0) {D3DPERF_SetMarker(col, name);}
 	D3DPERF_Marker(D3DCOLOR col, const wchar_t *format, ...) {
 		va_list va;
@@ -83,11 +77,6 @@ public:
 		SetMarker(format, va, col);
 		va_end(va);
 	}
-#else
-	D3DPERF_Marker(LPCWSTR name, D3DCOLOR col = 0) {}
-	D3DPERF_Marker(D3DCOLOR col, const wchar_t *format, ...) {}
-#endif
-
 private:
 	static void SetMarker(const wchar_t *format, va_list va, D3DCOLOR col = 0)
 	{
@@ -151,6 +140,9 @@ public:
 	{
 		return *m_instance;
 	}
+private:
+	NeverEndingSingleton( const NeverEndingSingleton& ) /* = delete */;
+	NeverEndingSingleton& operator=( const NeverEndingSingleton& ) /* = delete */;
 };
 
 // -------------------------------------------------------------

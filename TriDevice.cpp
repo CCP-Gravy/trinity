@@ -204,8 +204,6 @@ bool TriDevice::CreateSimpleDevice(
 	unsigned int height,
 	DeviceScreenType type )
 {
-	USE_MAIN_THREAD_RENDER_CONTEXT();
-	
 	// Clean out old resources and the old device (if exists)
 	Invalidate( TRISTORAGE_ALL );
 
@@ -290,8 +288,6 @@ bool TriDevice::CreateFullScreenDevice(
 
 bool TriDevice::InitD3DDevice()
 {
-	USE_MAIN_THREAD_RENDER_CONTEXT();
-
 	// Get the default viewport
 	// fill out local structures
 	if( !DeviceExists()												|| 
@@ -336,8 +332,6 @@ bool TriDevice::ChangeDevice(
 		Tr2WindowHandle hWnd,
 		const Tr2PresentParametersAL* pp )
 {
-	USE_MAIN_THREAD_RENDER_CONTEXT();
-
 	bool resetOnly = true;
 	if( !DeviceExists()	||  hWnd != mHwnd || Tr2VideoAdapterInfo::AreAdaptersDifferent( adapter, mAdapter ) )
 	{

@@ -20,20 +20,12 @@ public:
 	EveMetaballItem(IRoot* lockobj = NULL);
 	~EveMetaballItem();
 
-	// access to this field
-	float GetNormalizedDistanceTo( const Vector3* samplePosition ) const;
-	float GetSmoothness( const Vector3* samplePosition ) const;
-
-	// add this to a bounding box
-	void AddToBoundingBox( Vector3& min, Vector3& max ) const;
+	Vector3 GetPosition(void) { return m_position; };
+	float GetRadius(void) { return m_radius; };
 	
 private:
-	// center
 	Vector3 m_position;
-	// radius
 	float m_radius;
-	
-	float m_strength;
 };
 
 TYPEDEF_BLUECLASS( EveMetaballItem );

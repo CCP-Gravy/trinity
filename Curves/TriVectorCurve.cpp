@@ -634,7 +634,7 @@ PyObject* TriVectorCurve::PyCheckProximity(PyObject* args)
 
 	size_t size;
 	Be::Time* values;
-	CheckProximityOfCurves(this, (TriVectorCurve*)(ITriVectorCurve*)(veevee), range, &size, &values, (stopAtFirst != 0));
+	CheckProximityOfCurves(this, static_cast<TriVectorCurve*>( veevee.p ), range, &size, &values, (stopAtFirst != 0));
 
 	PyObject* list = PyList_New(size);
 	for (size_t i = 0; i < size; i++)

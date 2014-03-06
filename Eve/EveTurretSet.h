@@ -120,6 +120,7 @@ private:
 public:
 	// set local position
 	void SetLocalTransform( unsigned int turretIndex, const Matrix* localMatrix );
+	void UpdateModelLOD();
 	// timing and worldspace positioning
 	void Update( float deltaT, Be::Time time, const Matrix* parentMatrix );
 	// rendering

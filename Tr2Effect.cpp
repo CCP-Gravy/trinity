@@ -208,7 +208,7 @@ void Tr2Effect::AddParameterColor( const char* name, const Color* value )
 	Tr2Vector4ParameterPtr param;
 	param.CreateInstance();
 	param->m_name = BlueSharedString( name );
-	param->m_value = *(const Vector4*)value;
+	param->m_value = *reinterpret_cast<const Vector4*>( value );
 	// add it to this effect's parameters
 	m_parameters.Append( param->GetRawRoot() );
 }
@@ -580,10 +580,10 @@ unsigned int Tr2Effect::GetParameterHash()
 {
 	CCP_STATS_ZONE( __FUNCTION__ );
 
-	static const char* materialType = "Tr2Effect";
-	
 	if( m_parameterHash == INVALID_PARAMETER_HASH )
 	{
+		static const char* materialType = "Tr2Effect";
+	
 		//	Hash based on the MaterialType
 		m_parameterHash = CcpHashFNV1( materialType, strlen( materialType ) );
 
@@ -1183,13 +1183,13 @@ void MapPassParameters(
 
 	Tr2EffectParamVector &pv = pp.m_stageInput[stage].m_shaderParameters;
 	ITriReroutableVector& reroutables = pp.m_reroutedParameters;
-	const char* perObjectName = stage == PIXEL_SHADER ? "PerObjectPS" : "PerObjectVS";
 	Tr2VariableStore& variableStore = owner.GetVariableStore();
 
 	unsigned int perObjectStart = 0xffffffff;
 
 #if( TRINITY_PLATFORM==TRINITY_DIRECTX9 )
 	// First find perObjectStart if the effect has it:
+	const char* perObjectName = stage == PIXEL_SHADER ? "PerObjectPS" : "PerObjectVS";
 	for( auto constantIx = constants.begin(); constantIx != constants.end(); ++constantIx )
 	{
 		if( strcmp( constantIx->name, perObjectName ) == 0 )

@@ -2,9 +2,9 @@
 
 #include "EveShip2Builder.h"
 #include "SpaceObject/EveShip2.h"
-#include "EveSpriteSet.h"
-#include "EveSpotlightSet.h"
-#include "EveSpaceObjectDecal.h"
+#include "SpaceObject/Attachments/EveSpriteSet.h"
+#include "SpaceObject/Attachments/EveSpotlightSet.h"
+#include "SpaceObject/Attachments/EveSpaceObjectDecal.h"
 #include "Tr2Mesh.h"
 #include "Tr2Effect.h"
 #include "Miniball3.h"
@@ -13,6 +13,7 @@
 #include "blue/include/IBlueCallbackMan.h"
 #include "blue/include/IBluePaths.h"
 #include "EveLocator2.h"
+#include "Utilities/BoundingSphere.h"
 
 IBlueCallbackManPtr s_backgroundWelder;
 CcpMutex s_writeGrannyFileMutex( "EveShip2Builder", "s_writeGrannyFileMutex" );
@@ -28,6 +29,10 @@ bool StartsWith( const std::string& string, const char* prefix )
 }
 
 EveShip2Builder::EveShip2Builder( IRoot* lockobj ) :
+	m_turretLocatorCount( 0 ),
+	m_boosterLocatorCount( 0 ),
+	m_areaOffset( 0 ),
+	m_vertexSize( 0 ),
 	m_weldThreshold( 0.03f ),
 	m_buildSucceeded( false ),
 	m_notifyBuildDoneId( 0 ),
@@ -137,10 +142,7 @@ void EveShip2Builder::CopyLocators( EveLocator2Vector& locators, const Vector3& 
 			}
 
 			std::string s = locatorName.substr( pos + 1 );
-			char which = s[s.size() - 1];
 			s.resize( s.size() - 1 );
-			
-			int n = atoi( s.c_str() );
 			
 			EveLocator2Ptr p;
 			p.CreateInstance();
@@ -452,9 +454,9 @@ bool EveShip2Builder::Build()
 		}
 	}
 
-	CalculateBoundingSphere();
+	CalculateBoundingSphere( offsets );
 
-	FinalizeGrannyFile( m_highDetailOutputName.c_str() );
+	FinalizeGrannyFile( m_highDetailOutputName );
 	mesh->SetMeshResPath( m_highDetailOutputName.c_str() );
 
 	CCP_LOG( "EveShip2Builder::Build took %g seconds", time.GetSeconds() );
@@ -730,86 +732,16 @@ void EveShip2Builder::CalculateAudioBooster()
 	}
 }
 
-void EveShip2Builder::CalculateBoundingSphere()
+void EveShip2Builder::CalculateBoundingSphere( const Vector3* offsets )
 {
 	CCP_STATS_ZONE( __FUNCTION__ );
+	BoundingSphereInitialize( m_boundingSphere );
 
-	int numVerts = m_grannyVertexData.VertexCount;
-	int vertSize = GrannyGetTotalObjectSize( m_grannyVertexData.VertexType );
-
-	bool is16BitFloat = false;
-	bool is16BitIndex = false;
-	int indexCount = 0;
-	if( m_grannyVertexData.VertexType->Type == GrannyReal16Member )
+	for( int i = 0; i < MODULE_MAX_COUNT; ++i )
 	{
-		is16BitFloat = true;
+		Vector4 moduleBoundingSphere( m_module[i]->GetBoundingSphereCenter() + offsets[i], m_module[i]->GetBoundingSphereRadius() );
+		BoundingSphereUpdate( moduleBoundingSphere, m_boundingSphere );
 	}
-
-	if( m_grannyTopology.Index16Count > 0 )
-	{
-		is16BitIndex = true;
-		indexCount = m_grannyTopology.Index16Count;
-	}
-	else
-	{
-		indexCount = m_grannyTopology.IndexCount;
-	}
-
-	typedef float* const* PointIterator; 
-	typedef const float* CoordIterator;
-	typedef Miniball::Miniball <Miniball::CoordAccessor<PointIterator, CoordIterator> > MB;
-	float** samplePoints = new float*[indexCount];
-	uint8_t* pVertices = m_grannyVertexData.Vertices;
-	for ( int j = 0; j < indexCount/3; ++j )
-	{	
-		for ( int k = 0; k < 3; k++ )
-		{
-			int index = 0;
-			if ( is16BitIndex )
-			{
-				short s = m_grannyTopology.Indices16[(j*3)+k];
-				index = (int)s;
-			}
-			else
-			{
-				index = m_grannyTopology.Indices[(j*3)+k];
-			}
-
-			float* point = new float[3];
-			
-			if( is16BitFloat )
-			{
-				Vector3 p;
-
-				D3DXFloat16To32Array( (float*)&p, (const D3DXFLOAT16*)(pVertices+(index*vertSize)), 3 );
-
-				point[0] = p.x;
-				point[1] = p.y;
-				point[2] = p.z;
-			}
-			else
-			{
-				Vector3* p = (Vector3*)(pVertices+(index*vertSize));
-				point[0] = p->x;
-				point[1] = p->y;
-				point[2] = p->z;
-			}
-			samplePoints[j*3+k]=point;
-		}
-	}
-	MB mb( 3, samplePoints, samplePoints+indexCount );
-	const float* center = mb.center();
-
-	m_boundingSphere.x = center[0];
-	m_boundingSphere.y = center[1];
-	m_boundingSphere.z = center[2];
-	m_boundingSphere.w = sqrt( mb.squared_radius() );
-
-	for( int i=0; i< indexCount; ++i )
-	{
-		delete[] samplePoints[i];
-	}
-	delete[] samplePoints;
 
 	m_ship->m_boundingSphereCenter = Vector3( m_boundingSphere.x, m_boundingSphere.y, m_boundingSphere.z );
 	m_ship->m_boundingSphereRadius = m_boundingSphere.w;
@@ -933,7 +865,7 @@ void EveShip2Builder::StaticBuildAsync( void* context )
 {
 	CCP_STATS_ZONE( __FUNCTION__ );
 
-	EveShip2Builder* pThis = (EveShip2Builder*)context;
+	EveShip2Builder* pThis = static_cast<EveShip2Builder*>( context );
 	pThis->m_buildSucceeded = pThis->Build();
 	pThis->m_buildQueueID = 0;
 	BeResMan->AddToQueue( BRMQ_MAIN, StaticNotifyBuildDone, context, 0, &pThis->m_notifyBuildDoneId );
@@ -957,7 +889,7 @@ void EveShip2Builder::StaticNotifyBuildDone( void* context )
 {
 	CCP_STATS_ZONE( __FUNCTION__ );
 
-	EveShip2Builder* pThis = (EveShip2Builder*)context;
+	EveShip2Builder* pThis = static_cast<EveShip2Builder*>( context );
 
 	if( pThis->m_doneCallbackToPython )
 	{

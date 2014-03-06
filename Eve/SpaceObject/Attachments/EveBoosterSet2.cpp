@@ -62,6 +62,7 @@ EveBoosterSet2::EveBoosterSet2( IRoot* lockobj ) :
 	m_boosterLOD( 0.f ),
 	m_trailsLOD( 0.f ),
 	m_parentSpeed( 0.f ),
+	m_parentWarp( 0.f ),
 	m_parentRotation( 0.f, 0.f, 0.f, 1.f ),
 	m_vertexDeclHandle( Tr2EffectStateManager::UNINITIALIZED_DECLARATION ),
 	m_maxVel( 250.f ),
@@ -217,8 +218,7 @@ float EveBoosterSet2::CalculateIntensity( ITriVectorFunctionPtr ball, Be::Time t
 // Description:
 //   Does a lot of calculations for the boosters and trails based on the
 //   movement of the parent (aka the ship). Querying some parameters
-//   from the provided balls and then calling the function that calculates
-//   all the spline data.
+//   from the provided balls.
 // Arguments:
 //   deltaT - time since last frame
 //   t - global time
@@ -263,7 +263,18 @@ void EveBoosterSet2::Update( float deltaT, Be::Time t, const Matrix* parentMatri
 
 	// update the intensity, which is based on ship's movement
 	m_overallIntensity = CalculateIntensity( ballPosition, t );
+}
 
+// --------------------------------------------------------------------------------
+// Description:
+//   Does a lot of calculations for trails based on the movement of the parent (aka 
+//   the ship). Calling the function that calculates all the spline data.
+// Arguments:
+//   deltaT - time since last frame
+//   t - global time
+// --------------------------------------------------------------------------------
+void EveBoosterSet2::UpdateTrails( float deltaT, Be::Time t )
+{
 	// do we have trails?
 	if( m_trails )
 	{
@@ -341,11 +352,12 @@ void EveBoosterSet2::Clear()
 // SeeAlso:
 //   EveSpriteSet
 // --------------------------------------------------------------------------------
-void EveBoosterSet2::Add( const Matrix* localMatrix )
+void EveBoosterSet2::Add( const Matrix* localMatrix, const Vector4* functionality )
 {
 	// keep it in our list of boosters
 	SingleBoosterData sbd;
 	sbd.transform = *localMatrix;
+	sbd.functionality = *functionality;
 	m_singleBoosters.push_back( sbd );
 
 	// grab pos/dir/scale from the local transform matrix
@@ -459,7 +471,8 @@ bool EveBoosterSet2::OnPrepareResources()
 		vd.Add( vd.FLOAT32_4, vd.TEXCOORD, 2, 1, 1 );
 		vd.Add( vd.FLOAT32_4, vd.TEXCOORD, 3, 1, 1 );
 		vd.Add( vd.FLOAT32_4, vd.TEXCOORD, 4, 1, 1 );
-		vd.Add( vd.FLOAT32_1, vd.TEXCOORD, 5, 1, 1 );
+		vd.Add( vd.FLOAT32_4, vd.TEXCOORD, 5, 1, 1 );
+		vd.Add( vd.FLOAT32_1, vd.TEXCOORD, 6, 1, 1 );
 	}
 
 	// create vertex-declarartion
@@ -518,6 +531,7 @@ void EveBoosterSet2::RebuildInstanceData( Tr2RenderContext& /*renderContext*/ )
 	{
 		vertices[i].transform = m_singleBoosters[i].transform;
 		vertices[i].wavePhase = (float)rand() / (float)RAND_MAX;
+		vertices[i].functionality = m_singleBoosters[i].functionality;
 	}
 	USE_MAIN_THREAD_RENDER_CONTEXT();
 	CR_RETURN(	m_instanceBuffer.Create(	
@@ -684,6 +698,7 @@ Tr2PerObjectData* EveBoosterSet2::GetPerObjectData( ITriRenderBatchAccumulator* 
 	// ps data
 	perObjectData->m_psData.boosterIntensity = m_overallIntensity;
 	perObjectData->m_psData.trailIntensity = m_trailIntensity;
+	perObjectData->m_psData.shipWarp = m_parentWarp;
 
 	for( unsigned int i = 0; i < EVE_MAX_CONTROL_POINT_COUNT; ++i )
 	{

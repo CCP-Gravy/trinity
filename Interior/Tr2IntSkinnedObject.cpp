@@ -847,7 +847,7 @@ bool Tr2IntSkinnedObject::TestCellIntersectionAndAdd( Tr2InteriorCell* cell )
 				( *it )->setCell( NULL );
 				( *it )->release();
 				( *it ) = NULL;
-				m_umbraObjects.erase( it );
+				it = m_umbraObjects.erase( it );
 			}
 			else
 			{
@@ -915,7 +915,7 @@ void Tr2IntSkinnedObject::AddToRootCell( Umbra::Cell* cell )
 		( *it )->setCell( NULL );
 		( *it )->release();
 		( *it ) = NULL;
-		m_umbraObjects.erase( it );
+		it = m_umbraObjects.erase( it );
 	}
 	if( m_umbraObjects.empty() )
 	{

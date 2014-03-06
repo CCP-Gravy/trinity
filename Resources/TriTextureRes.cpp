@@ -397,15 +397,13 @@ BlueAsyncRes::LoadingResult TriTextureRes::DoLoad()
 		m_type = TEX_TYPE_2D;
 	}
 
-	bool isOK = true;
-
 	m_imageHandler.reset( CreateImageHandler( m_path ) );
 	CCP_ASSERT( m_imageHandler != nullptr );
 
 	m_imageHandler->SetMipLevelSkipCount( ComputeMipSkipCount() );
 	m_imageHandler->SetMipLevelMaxCount( m_mipLevelMaxCount );
 	m_imageHandler->SetStream( m_dataStream );
-	isOK = m_imageHandler->ReadHeader();
+	bool isOK = m_imageHandler->ReadHeader();
 	if(isOK)
 	{
 		isOK = m_imageHandler->IsSupported();

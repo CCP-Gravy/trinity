@@ -67,15 +67,16 @@ public:
 
 	//////////////////////////////////////////////////////////////////////////////////////
 	// IEveSpaceObject2
-	virtual void Update( EveUpdateContext& updateContext );
+	virtual void UpdateSyncronous( EveUpdateContext& updateContext );
+	virtual void UpdateAsyncronous( EveUpdateContext& updateContext );
 	virtual void RenderDebugInfo( Tr2RenderContext& renderContext );
 	virtual void GetRenderables( const TriFrustum& frustum, std::vector<ITr2Renderable*>& renderables, const Matrix& parentTransform );
 	virtual bool GetBoundingSphere( Vector4& sphere, BoundingSphereQuery query=EVE_BOUNDS_NORMAL ) const;
 	virtual void UpdateViewDistanceInfo( const TriFrustum& frustum, ViewDistanceInfo& viewDistance ) const;
-	virtual void UpdateWorldTransform( Be::Time time );
 
 	/////////////////////////////////////////////////////////////////////////////////////
 	// IEveTransform
+	virtual void Update( EveUpdateContext& updateContext );
 	virtual void UpdateViewDependentData( const Matrix& parentTransform );
 	virtual void SetLowDetail( bool b ) {};
 	LodLevel GetLODLevel() const { return LOD_HIGH; }

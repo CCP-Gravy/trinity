@@ -596,7 +596,7 @@ void Tr2InteriorCell::RebuildCachedData( BlueAsyncRes* p )
 				CCP_LOGERR( "Tr2InteriorCell::RebuildCachedData. Incorrect number of probe volumes in the file\n" );	
 				break;
 			}
-			if( resX == 0 || resY == 0 || resY == 0)
+			if( resX == 0 || resY == 0 || resZ == 0)
 			{
 				break;
 			}
@@ -610,7 +610,7 @@ void Tr2InteriorCell::RebuildCachedData( BlueAsyncRes* p )
 			Matrix transform;
 			if( m_shProbeResource->GetAdditionalProbeSet( m_shProbeResource->GetAdditionalProbeSetCount() - 1, set, resX, resY, resZ, transform ) )
 			{
-				if( resX == 0 || resY == 0 || resY == 0)
+				if( resX == 0 || resY == 0 || resZ == 0)
 				{
 #if defined(ENLIGHTEN_PRECOMPUTE_ENABLED)
 					m_portalSocketSamples.m_precomputedProbeSet = NULL;

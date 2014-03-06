@@ -90,9 +90,9 @@ bool EveMissile::GetBoundingSphere( Vector4& sphere, BoundingSphereQuery query )
 // Arguments:
 //   time - current game time
 // --------------------------------------------------------------------------------
-void EveMissile::Update( EveUpdateContext& updateContext )
+void EveMissile::UpdateSyncronous( EveUpdateContext& updateContext )
 {
-	EveSpaceObject2::Update( updateContext );
+	EveSpaceObject2::UpdateSyncronous( updateContext );
 	Be::Time time = updateContext.GetTime();
 	float deltaT = updateContext.GetDeltaT();
 

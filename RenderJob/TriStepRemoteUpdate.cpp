@@ -165,7 +165,6 @@ TriStepResult TriStepRemoteUpdate::Execute( Be::Time time, Tr2RenderContext& ren
 		if( !OpenSharedMemoryAndEvents())
 		{
 			CCP_LOGERR("There is no shared memory to read from");
-			RS_FAILED;
 		}		
 	}
 

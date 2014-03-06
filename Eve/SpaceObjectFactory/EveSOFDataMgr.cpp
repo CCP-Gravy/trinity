@@ -179,7 +179,6 @@ bool EveSOFDataMgr::LoadHullData( EveSOFDataPtr srcData )
 			HullBoosterData hbd;
 			hbd.alwaysOn = boosterData->m_alwaysOn;
 			hbd.hasTrails = boosterData->m_hasTrails;
-			hbd.soundName = boosterData->m_soundName;
 
 			// booster items
 			for( auto biit = boosterData->m_items.begin(); biit != boosterData->m_items.end(); ++biit )
@@ -400,7 +399,6 @@ bool EveSOFDataMgr::LoadRaceData( EveSOFDataPtr srcData )
 		rd.boosterData.symHaloScale = raceData->m_booster->m_symHaloScale;
 		rd.boosterData.trailColor = raceData->m_booster->m_trailColor;
 		rd.boosterData.trailSize = raceData->m_booster->m_trailSize;
-		rd.boosterData.soundName = raceData->m_booster->m_soundName;
 
 		m_raceData[(*it)->m_name] = rd;
 	}

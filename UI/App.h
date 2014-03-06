@@ -194,8 +194,6 @@ public:
     int IsKeyPressed( uint32_t vKeyCode );
     static bool GetKeyName( uint32_t vKeyCode, char* buffer, size_t bufferSize );
     bool CallEventHandler( uint32_t messageID, uintptr_t wParam, uintptr_t lParam, long& lResult );
-	const Be::Clsid* mClsid;
-
 };
 
 TYPEDEF_BLUECLASS(App);

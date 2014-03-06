@@ -80,21 +80,19 @@ void EveMobile::OnListModified( long event, ssize_t key, ssize_t key2, IRoot* va
 
 // --------------------------------------------------------------------------------
 // Description:
-//   Override base ::Update() function, so we can update the turrets and their
-//   positions (if they are attached to animated bones!)
+//   Override base ::UpdateSyncronous() function, so we can update the turrets and 
+//   their positions (if they are attached to animated bones!)
 // --------------------------------------------------------------------------------
-void EveMobile::Update( EveUpdateContext& updateContext )
+void EveMobile::UpdateSyncronous( EveUpdateContext& updateContext )
 {
-	EveSpaceObject2::Update( updateContext );
+	EveSpaceObject2::UpdateSyncronous( updateContext );
+	for( auto it = m_turretSets.begin(); it != m_turretSets.end(); ++it )
+	{
+		(*it)->UpdateModelLOD();
+	}
+
 	Be::Time time = updateContext.GetTime();
 	float deltaT = updateContext.GetDeltaT();
-
-	// prepare shader data:
-	if( m_activationStrengthCurve && m_playActivationCurve )
-	{
-		m_activationDelta += deltaT;
-		m_spaceObjectData.y = m_activationStrengthCurve->Update( m_activationDelta );
-	}
 
 	// turret update
 	unsigned int locatorInfoIdx = 0;
@@ -125,6 +123,24 @@ void EveMobile::Update( EveUpdateContext& updateContext )
 
 		// call standard update function
 		(*it)->Update( deltaT, time, &m_worldTransform );
+	}
+}
+
+// --------------------------------------------------------------------------------
+// Description:
+//   Override base ::UpdateAsyncronous() function, so we can update the turrets and 
+//   their positions (if they are attached to animated bones!)
+// --------------------------------------------------------------------------------
+void EveMobile::UpdateAsyncronous( EveUpdateContext& updateContext )
+{
+	EveSpaceObject2::UpdateAsyncronous( updateContext );
+
+	// prepare shader data:
+	if( m_activationStrengthCurve && m_playActivationCurve )
+	{
+		float deltaT = updateContext.GetDeltaT();
+		m_activationDelta += deltaT;
+		m_spaceObjectData.y = m_activationStrengthCurve->Update( m_activationDelta );
 	}
 }
 
@@ -327,7 +343,6 @@ void EveMobile::RebuildTurretPositions()
 		bool turretInName = false;
 		
 		unsigned int locatorNumber = 0;
-		unsigned int totalNumber = 0;
 
 		// Check whether this is a standard turret locator or a special case
 		size_t found = name.find( "turret" );
@@ -338,6 +353,7 @@ void EveMobile::RebuildTurretPositions()
 
 		if( !turretInName )
 		{
+			unsigned int totalNumber = 0;
 			// Check whether we have a locator with the name
 			if( !GetTurretLocatorCountingInfo( name.c_str(), locatorNumber, totalNumber ) )
 			{

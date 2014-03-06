@@ -99,9 +99,29 @@ static void TGNotificationCallback( TG_NOTIFY_TYPE type, DWORD state, int data, 
 #endif
 
 App::App()
+	:mWindowTitle( L"CCP 3D Application" ),
+	mHwnd( 0 ),
+	mCreationLeft( DEFAULT_WINDOW_POSITION ),
+	mCreationTop( DEFAULT_WINDOW_POSITION ),
+	mCreationWidth( 0 ),
+    mCreationHeight( 0 ),
+	mRefreshRate( Tr2RenderContextEnum::PRESENT_INTERVAL_ONE ),
+	mWindowed( true ),
+	mFullscreen( false ),
+	mHideTitle( false ),
+	mActive( false ),
+    mReady( false ),
+	mSendResizeEvent( false ),
+	mIsResizing( false ),
+	mMinimumHeight( 100 ),
+	mMinimumWidth( 100 ),
+	mIsTransgaming( IsTransgaming() ),
+    mFixedWindow( false ),
+	mIsMaximized( false ),
+	mIsHidden( false ),
+	mSendToggleEvent( false )
 #if BLUE_WITH_PYTHON
-	:
-	m_eventHandler( NULL ),
+	, m_eventHandler( NULL ),
 	m_sessionChangeHandler( NULL )
 #endif
 {
@@ -143,33 +163,6 @@ App::App()
 #endif
     
 	g_app = this;
-
-	//published members
-	mWindowTitle = L"CCP 3D Application";
-
-	// private members
-	mHwnd = NULL;
-
-	mCreationLeft = DEFAULT_WINDOW_POSITION;
-	mCreationTop = DEFAULT_WINDOW_POSITION;
-	mCreationWidth   = 0;
-    mCreationHeight  = 0;
-	mRefreshRate = Tr2RenderContextEnum::PRESENT_INTERVAL_ONE;
-	mWindowed = true;
-	mFullscreen = false;
-	mHideTitle = false;
-
-	mActive = false;
-    mReady = false;
-	mSendResizeEvent = false;
-	mIsResizing = false;
-	mMinimumHeight = 100;
-	mMinimumWidth = 100;
-	mIsTransgaming = IsTransgaming();
-    mFixedWindow = false;
-	mIsMaximized = false;
-	mIsHidden = false;
-	mSendToggleEvent = false;
 }
 
 App::~App()
@@ -433,14 +426,13 @@ void App::Quit()
 //--------------------------------------------------------------------
 void App::MoveWindow( int x, int y, Be::Optional<int> width, Be::Optional<int> height )
 {
+#if !defined( __ORBIS__ ) && !defined( __ANDROID__ )
 	int w, h;
 #ifdef _WIN32
 	RECT rc;
 	::GetWindowRect(mHwnd, &rc);
 	w = rc.right - rc.left;
 	h = rc.bottom - rc.top;
-#elif defined( __ORBIS__ )
-#elif defined( __ANDROID__ )
 #else
     glfwGetWindowSize( reinterpret_cast<GLFWwindow*>( mHwnd ), &w, &h );
 #endif
@@ -455,11 +447,10 @@ void App::MoveWindow( int x, int y, Be::Optional<int> width, Be::Optional<int> h
 
 #ifdef _WIN32
 	::MoveWindow(mHwnd, x, y, w, h, TRUE);
-#elif defined( __ORBIS__ )
-#elif defined( __ANDROID__ )
 #else
     glfwSetWindowPos( reinterpret_cast<GLFWwindow*>( mHwnd ), x, y );
     glfwSetWindowSize( reinterpret_cast<GLFWwindow*>( mHwnd ), w, h );
+#endif
 #endif
 }
 

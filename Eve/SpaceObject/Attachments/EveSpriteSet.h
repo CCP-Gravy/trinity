@@ -69,7 +69,6 @@ private:
 
 	// Member variables for runtime state
 	unsigned int m_vertexDeclHandle;
-	unsigned int m_bytesPerVertex;
 	unsigned int m_vertexCount;
 	Tr2VertexBufferAL m_vertexBuffer;
 

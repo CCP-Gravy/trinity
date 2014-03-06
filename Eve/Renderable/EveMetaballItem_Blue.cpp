@@ -15,7 +15,6 @@ const Be::ClassInfo* EveMetaballItem::ExposeToBlue()
 
 		MAP_ATTRIBUTE( "position", m_position, "Center position", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "radius", m_radius, "Radius", Be::READWRITE | Be::PERSIST )
-		MAP_ATTRIBUTE( "strength", m_strength, "debug", Be::READWRITE | Be::PERSIST )
 
     EXPOSURE_END()
 }

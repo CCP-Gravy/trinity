@@ -142,7 +142,7 @@ void Tr2SkinnedModel::GetBatches( ITriRenderBatchAccumulator* batches,
 	}
 	*pm = m;
 
-	Tr2PerObjectDataSkinned* skinnedData = ( Tr2PerObjectDataSkinned* )data;
+	auto skinnedData = static_cast<const Tr2PerObjectDataSkinned*>( data );
 
 	for( PTr2MeshVector::iterator meshIt = m_meshes.begin(); meshIt != m_meshes.end(); ++meshIt )
 	{
@@ -157,7 +157,7 @@ void Tr2SkinnedModel::GetBatches( ITriRenderBatchAccumulator* batches,
 			Tr2MeshAreaVector* areas = mesh->GetAreas( batchType );
 			if( areas )
 			{
-				GetBatchesForArea( areas, mesh, batches, pm, skinnedData );
+				GetBatchesForArea( areas, mesh, batches, pm, const_cast<Tr2PerObjectDataSkinned*>( skinnedData ) );
 			}
 		}
 	}

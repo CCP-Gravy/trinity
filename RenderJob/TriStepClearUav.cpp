@@ -30,8 +30,6 @@ TriStepClearUav::TriStepClearUav( IRoot* lockobj )
 // --------------------------------------------------------------------------------------
 TriStepResult TriStepClearUav::Execute( Be::Time time, Tr2RenderContext& renderContext )
 {
-	unsigned int flags = 0;
-
 	if( m_buffer )
 	{
 		Tr2GpuBufferAL* buffer = m_buffer->GetGpuBuffer( 0 );

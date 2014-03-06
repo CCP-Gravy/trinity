@@ -69,7 +69,7 @@ void BoundingSphereTransform( const Matrix& tf, Vector4& sphere )
 	float scaleX = D3DXVec3Length( &tf.GetX() );
 	float scaleY = D3DXVec3Length( &tf.GetY() );
 	float scaleZ = D3DXVec3Length( &tf.GetZ() );
-	float scale = std::max( scaleX, std::max( scaleY, scaleY) );
+	float scale = std::max( scaleX, std::max( scaleY, scaleZ ) );
 	sphere.w *= scale;
 }
 

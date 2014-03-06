@@ -123,10 +123,11 @@ namespace
 }
 
 Tr2JpgHandler::Tr2JpgHandler( const wchar_t* sourceName )
-: Tr2ImageHandler( sourceName )
-, m_impl( new Impl )
-, m_rgbData( "Tr2JpgHandler/m_rgbData" )
-, m_compressedData( "Tr2JpgHandler/m_compressedData" )
+:	Tr2ImageHandler( sourceName ),
+	m_impl( new Impl ),
+	m_rgbData( "Tr2JpgHandler/m_rgbData" ),
+	m_compressedData( "Tr2JpgHandler/m_compressedData" ),
+	m_channels( 0 )
 {
 	if( setjmp( m_clientData.m_jmpBuf ) )
 	{
@@ -276,7 +277,7 @@ bool Tr2JpgHandler::ReadImage()
 			return false;
 		}
 	}
-	bool inputComplete = jpeg_input_complete( &m_impl->m_decode );
+	jpeg_input_complete( &m_impl->m_decode );
 
 	if( !jpeg_finish_decompress( &m_impl->m_decode ) )
 	{
@@ -337,14 +338,14 @@ namespace {
 	
 	void blue_stream_init_destination( j_compress_ptr cinfo )
 	{
-		TSaveData& sd = *(TSaveData*)cinfo->client_data;
+		TSaveData& sd = *static_cast<TSaveData*>( cinfo->client_data );
 		cinfo->dest->next_output_byte = &sd.buffer[0];
 		cinfo->dest->free_in_buffer   = sd.buffer.size();
 	}
 
 	boolean blue_stream_empty_output_buffer( j_compress_ptr cinfo )
 	{ 
-		TSaveData& sd = *(TSaveData*)cinfo->client_data;
+		TSaveData& sd = *static_cast<TSaveData*>( cinfo->client_data );
 		sd.output->Write( &sd.buffer[0], sd.buffer.size() );
 		cinfo->dest->next_output_byte = &sd.buffer[0];
 		cinfo->dest->free_in_buffer   = sd.buffer.size();
@@ -353,7 +354,7 @@ namespace {
 
 	void blue_stream_term_destination( j_compress_ptr cinfo )
 	{ 
-		TSaveData& sd = *(TSaveData*)cinfo->client_data;
+		TSaveData& sd = *static_cast<TSaveData*>( cinfo->client_data );
 		sd.output->Write( &sd.buffer[0], sd.buffer.size() - cinfo->dest->free_in_buffer );
 		cinfo->dest->free_in_buffer = 0;
 	}	

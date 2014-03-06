@@ -38,7 +38,6 @@ public:
 	struct HullBoosterData
 	{
 		bool alwaysOn, hasTrails;
-		std::string soundName;
 		std::vector<HullBoosterItemData> items;
 	};
 
@@ -138,7 +137,6 @@ public:
 		Color color, glowColor, haloColor, trailColor;
 		Vector4 scale, trailSize;
 		std::string textureResPath;
-		std::string soundName;
 	};
 
 	struct RaceData

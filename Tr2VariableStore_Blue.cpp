@@ -133,7 +133,6 @@ static PyObject* PyRegisterVariable( PyObject* self, PyObject* args )
 		return NULL;
 	}
 
-	const unsigned valueArgPosition = 1;
 	TriVariable* variable = NULL;
 
 	float valFloat;

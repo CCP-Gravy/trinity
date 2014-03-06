@@ -22,6 +22,7 @@ struct PlaneVertex
 	Vector4 layer2Transform;
 	Vector4 layer1Scroll;
 	Vector4 layer2Scroll;
+	Vector4 scaling;
 	uint8_t index;
 	uint8_t boneIndex;
 
@@ -40,7 +41,6 @@ EvePlaneSet::EvePlaneSet( IRoot* lockobj ) :
 	PARENTLOCK( m_planes ),
 	m_display( true ),
 	m_hideOnLowQuality( false ),
-	m_bytesPerVertex( 0 ),
 	m_vertexCount( 0 ),
 	m_vertexDeclHandle( Tr2EffectStateManager::UNINITIALIZED_DECLARATION )
 {
@@ -117,7 +117,8 @@ bool EvePlaneSet::OnPrepareResources()
 		vd.Add( vd.FLOAT32_4, vd.TEXCOORD, 4 );
 		vd.Add( vd.FLOAT32_4, vd.TEXCOORD, 5 );
 		vd.Add( vd.FLOAT32_4, vd.TEXCOORD, 6 );
-		vd.Add( vd.UBYTE_4, vd.TEXCOORD, 7 );
+		vd.Add( vd.FLOAT32_4, vd.TEXCOORD, 7 );
+		vd.Add( vd.UBYTE_4, vd.TEXCOORD, 8 );
 	}
 	m_vertexDeclHandle = Tr2EffectStateManager::GetVertexDeclarationHandle( s_spriteVertexDecl );
 	if( m_vertexDeclHandle == Tr2EffectStateManager::UNINITIALIZED_DECLARATION )
@@ -127,7 +128,6 @@ bool EvePlaneSet::OnPrepareResources()
 
 	// prepare buffers
 	m_vertexCount = (unsigned int)m_planes.GetSize() * 4;
-	m_bytesPerVertex = sizeof( PlaneVertex );
 	std::vector<PlaneVertex> verts( m_vertexCount );
 
 	// fill it
@@ -136,7 +136,7 @@ bool EvePlaneSet::OnPrepareResources()
 	{
 		// build transformation matrix out of the individual item data
 		Matrix itemTransform;
-		D3DXMatrixTransformation( &itemTransform, NULL, NULL, &m_planes[i]->m_scaling, NULL, &m_planes[i]->m_rotation, &m_planes[i]->m_position );
+		D3DXMatrixTransformation( &itemTransform, NULL, NULL, NULL, NULL, &m_planes[i]->m_rotation, &m_planes[i]->m_position );
 		for( unsigned int j = 0; j < 4; ++j )
 		{
 			PlaneVertex& vertex = verts[i * 4 + j];
@@ -144,6 +144,7 @@ bool EvePlaneSet::OnPrepareResources()
 			vertex.transform1 = Vector4( itemTransform._11, itemTransform._21, itemTransform._31, itemTransform._41 );
 			vertex.transform2 = Vector4( itemTransform._12, itemTransform._22, itemTransform._32, itemTransform._42 );
 			vertex.transform3 = Vector4( itemTransform._13, itemTransform._23, itemTransform._33, itemTransform._43 );
+			vertex.scaling = Vector4( m_planes[i]->m_scaling, 0.f );
 			vertex.color = Vector4( m_planes[i]->m_color.r, m_planes[i]->m_color.g, m_planes[i]->m_color.b, m_planes[i]->m_color.a );
 			vertex.layer1Transform = m_planes[i]->m_layer1Transform;
 			vertex.layer2Transform = m_planes[i]->m_layer2Transform;
@@ -157,7 +158,7 @@ bool EvePlaneSet::OnPrepareResources()
 	}
 
 	USE_MAIN_THREAD_RENDER_CONTEXT();
-	CR_RETURN_VAL( m_vertexBuffer.Create( m_vertexCount * m_bytesPerVertex, USAGE_IMMUTABLE, &verts[0], renderContext ), false );
+	CR_RETURN_VAL( m_vertexBuffer.Create( m_vertexCount * sizeof( PlaneVertex ), USAGE_IMMUTABLE, &verts[0], renderContext ), false );
 
 	return true;
 }
@@ -169,7 +170,7 @@ bool EvePlaneSet::OnPrepareResources()
 void EvePlaneSet::SubmitGeometry( Tr2RenderContext& renderContext )
 {
 	renderContext.m_esm.ApplyVertexDeclaration( m_vertexDeclHandle );
-	renderContext.m_esm.ApplyStreamSource( 0, m_vertexBuffer, 0, m_bytesPerVertex );
+	renderContext.m_esm.ApplyStreamSource( 0, m_vertexBuffer, 0, sizeof( PlaneVertex ) );
 	auto ib = Tr2Renderer::GetQuadListIndexBuffer( m_vertexCount / 4 );
 	if( !ib )
 	{

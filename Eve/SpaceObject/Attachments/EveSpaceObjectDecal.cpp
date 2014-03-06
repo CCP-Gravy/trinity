@@ -610,7 +610,6 @@ void EveDecalPerObjectData::SetPerObjectDataToDevice( Tr2ConstantBufferAL** buff
 	// add up constant count, see EveDecalPerObjectData
 
 	auto& vsBuffer = *buffers[Tr2RenderContextEnum::VERTEX_SHADER];
-	auto& psBuffer = *buffers[Tr2RenderContextEnum::PIXEL_SHADER ];
 
 	FillAndSetConstants( vsBuffer, &m_worldMatrix, 5 * 64, VERTEX_SHADER, Tr2Renderer::GetPerObjectVSStartRegister(), renderContext );
 }

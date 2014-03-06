@@ -114,6 +114,7 @@ private:
 	Quaternion m_startOrientation;
 	// dynamic start data valid?
 	bool m_startDataValid;
+	bool m_doSpread;
 
 	// dynamic end data
 	Vector3 m_endOffset;

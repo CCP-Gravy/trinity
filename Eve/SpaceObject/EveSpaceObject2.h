@@ -58,10 +58,6 @@ BLUE_DECLARE( Tr2BindingVector3 );
 BLUE_DECLARE( EveAnimationStateSequencer );
 
 struct granny_skeleton;
-struct granny_model_instance;
-struct granny_local_pose;
-struct granny_world_pose;
-struct granny_mesh_binding;
 
 class TriFrustum;
 class EveSpaceObjectDecalCache;
@@ -151,13 +147,13 @@ public:
 
 	//////////////////////////////////////////////////////////////////////////////////////
 	// IEveSpaceObject2
-	virtual void Update( EveUpdateContext& updateContext );	
+	virtual void UpdateSyncronous( EveUpdateContext& updateContext );
+	virtual void UpdateAsyncronous( EveUpdateContext& updateContext );
 
 	// Update the transformed damage locator positions
 	void UpdateDamageLocatorPositions();
 	void UpdateImpactDirections();
 
-	void UpdateWorldTransform( Be::Time time );
 	void UnloadLodIfNeeded( Be::Time time );
 	virtual void RenderDebugInfo( Tr2RenderContext& renderContext );
 	virtual void GetRenderables( const TriFrustum& frustum, std::vector<ITr2Renderable*>& renderables, const Matrix& parentTransform );
@@ -225,10 +221,10 @@ public:
 	Be::Result<std::string> GetLocalBoundingBoxFromScript( std::pair<Vector3, Vector3>& result );
 
 	// access curve sets
-	void UpdateCurveSet( const std::string name, Be::Time time );
-	void PlayCurveSet( const std::string name );
-	void StopCurveSet( const std::string name );
-	float GetCurveSetDuration( const std::string name ) const;
+	void UpdateCurveSet( const std::string& name, Be::Time time );
+	void PlayCurveSet( const std::string& name );
+	void StopCurveSet( const std::string& name );
+	float GetCurveSetDuration( const std::string& name ) const;
 
 	// access spritesets & co
 	void AddSpriteSet( EveSpriteSetPtr newSpriteSet );
@@ -252,6 +248,9 @@ protected:
 	unsigned GetDamageLocatorCount() const;
 	Vector3 GetDamageLocator( unsigned index ) const;
 	Vector3 GetTransformedDamageLocator( unsigned index ) const;
+
+	CcpMutex& GetObjectMutex();
+	void UpdateWorldTransform( Be::Time time );
 protected:
 	friend class EveShip2Builder;
 
@@ -273,8 +272,8 @@ protected:
 
 	/////////////////////////////////////////////////////////////////////////////////////
 	// per-object data
-	Tr2PersistentPerObjectData<EveSpaceObject2, Tr2RenderContextEnum::VERTEX_SHADER> m_perObjectDataVs;
-	Tr2PersistentPerObjectData<EveSpaceObject2, Tr2RenderContextEnum::PIXEL_SHADER> m_perObjectDataPs;
+	Tr2PersistentPerObjectData<EveSpaceObject2> m_perObjectDataVs;
+	Tr2PersistentPerObjectData<EveSpaceObject2> m_perObjectDataPs;
 	EveSpaceSceneLightMgrPtr m_lightManager;
 	unsigned m_psPointLightCount;
 	Vector4 m_spaceObjectData;

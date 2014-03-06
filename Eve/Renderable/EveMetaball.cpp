@@ -343,7 +343,14 @@ bool EveMetaball::Initialize()
 // --------------------------------------------------------------------------------
 // Description:
 // --------------------------------------------------------------------------------
-void EveMetaball::Update( EveUpdateContext& updateContext )
+void EveMetaball::UpdateSyncronous( EveUpdateContext& updateContext )
+{
+}
+
+// --------------------------------------------------------------------------------
+// Description:
+// --------------------------------------------------------------------------------
+void EveMetaball::UpdateAsyncronous( EveUpdateContext& updateContext )
 {
 }
 
@@ -366,7 +373,7 @@ void EveMetaball::GetRenderables( const TriFrustum& frustum, std::vector<ITr2Ren
 		return;
 	}
 
-	// use parent as word
+	// use parent as world
 	m_worldTransform = parentTransform;
 
 	Vector4 boundingSphere = m_boundingSphere;
@@ -399,13 +406,6 @@ bool EveMetaball::GetBoundingSphere( Vector4& sphere, BoundingSphereQuery query 
 // Description:
 // --------------------------------------------------------------------------------
 void EveMetaball::UpdateViewDistanceInfo( const TriFrustum& frustum, ViewDistanceInfo& viewDistance ) const
-{
-}
-
-// --------------------------------------------------------------------------------
-// Description:
-// --------------------------------------------------------------------------------
-void EveMetaball::UpdateWorldTransform( Be::Time time )
 {
 }
 
@@ -573,6 +573,16 @@ void EveMetaball::RenderDebugInfo( Tr2RenderContext& renderContext )
 {
 }
 
+
+// --------------------------------------------------------------------------------
+// Description:
+// --------------------------------------------------------------------------------
+void EveMetaball::AddToBoundingBox( EveMetaballItemPtr item )
+{
+	Vector4 sphere = Vector4( item->GetPosition(), item->GetRadius() );
+	BoundingBoxUpdate( m_minBounds, m_maxBounds, sphere );
+}
+
 // --------------------------------------------------------------------------------
 // Description:
 // --------------------------------------------------------------------------------
@@ -586,10 +596,9 @@ void EveMetaball::UpdateBuffers()
 
 	// calc total size of max box around the whole metaball
 	BoundingBoxInitialize( m_minBounds, m_maxBounds );
-	for( EveMetaballItemVector::const_iterator it = m_sourceItems.begin(); it != m_sourceItems.end(); ++it )
+	for( auto it = m_sourceItems.begin(); it != m_sourceItems.end(); ++it )
 	{
-		EveMetaballItemPtr item = (*it);
-		item->AddToBoundingBox( m_minBounds, m_maxBounds );
+		AddToBoundingBox( *it );
 	}
 
 	Vector3 totalSize = m_maxBounds - m_minBounds;
@@ -716,6 +725,7 @@ unsigned int EveMetaball::GetBoxIntersectionMask( float* sampleDataList, const V
 	return mask;
 }
 
+
 // --------------------------------------------------------------------------------
 // Description:
 // --------------------------------------------------------------------------------
@@ -726,16 +736,13 @@ float EveMetaball::SamplePointInsideVolume( const Vector3* samplePosition ) cons
 	for( EveMetaballItemVector::const_iterator it = m_sourceItems.begin(); it != m_sourceItems.end(); ++it )
 	{
 		EveMetaballItemPtr item = (*it);
-		float d = item->GetNormalizedDistanceTo( samplePosition );
+		Vector3 centerPos = *samplePosition - item->GetPosition();
+		float d = D3DXVec3Length( &centerPos ) / item->GetRadius();
 		minDistance = min( minDistance, d );
-//		threshold += item->GetSmoothness( samplePosition );
 	}
 
 	return minDistance - threshold;
 }
-
-
-
 
 
 

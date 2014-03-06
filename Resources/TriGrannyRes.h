@@ -55,6 +55,8 @@ public:
     granny_file* GetGrannyFile() const { return m_grannyFile; }
 	granny_skeleton* GetGrannySkeleton( int skeletonIx ) const;
 
+	const granny_mesh* GetGrannyMesh( int meshIx ) const;
+
 	// access the main vertices
 	granny_data_type_definition* GetGrannyVertexType( int meshIx ) const;
 	int GetVertexSize( int meshIx ) const;
@@ -143,8 +145,6 @@ protected:
     virtual LoadingResult DoLoad();
     virtual bool DoPrepare();
     virtual void DoCloseStream();
-
-	const granny_mesh* GetGrannyMesh( int meshIx ) const;
 
 	void CollectGrannyMaterials();
 

@@ -10,10 +10,7 @@
 #include "ITr2Renderable.h"
 #include "ITr2GeometryProvider.h"
 #include "Eve/IEveSpaceObject2.h"
-
-// forwards
-BLUE_DECLARE( EveMetaballItem );
-BLUE_DECLARE_VECTOR( EveMetaballItem );
+#include "EveMetaballItem.h"
 
 // --------------------------------------------------------------------------------
 // Description:
@@ -34,11 +31,11 @@ public:
 	
 	//////////////////////////////////////////////////////////////////////////////////////
 	// IEveSpaceObject2
-	void Update( EveUpdateContext& updateContext );
+	void UpdateSyncronous( EveUpdateContext& updateContext );
+	void UpdateAsyncronous( EveUpdateContext& updateContext );
 	void GetRenderables( const TriFrustum& frustum, std::vector<ITr2Renderable*>& renderables, const Matrix& parentTransform );
 	bool GetBoundingSphere( Vector4& sphere, BoundingSphereQuery query=EVE_BOUNDS_NORMAL ) const;
 	void UpdateViewDistanceInfo( const TriFrustum& frustum, ViewDistanceInfo& viewDistance ) const;
-	void UpdateWorldTransform( Be::Time time );
 	void RenderDebugInfo( Tr2RenderContext& renderContext );
 	void GetModelCenterWorldPosition( Vector3 &position, Be::Time t ) {}
 	void GetCurrentModelCenterWorldPosition( Vector3 &position ) {}
@@ -129,6 +126,9 @@ private:
 
 	// the source data
 	PEveMetaballItemVector m_sourceItems;
+
+	// Update bounds
+	void AddToBoundingBox( EveMetaballItemPtr item );
 };
 
 TYPEDEF_BLUECLASS( EveMetaball );

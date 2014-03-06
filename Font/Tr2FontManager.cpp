@@ -352,7 +352,7 @@ FT_Face Tr2FontManager::LoadFromDisk( FTC_FaceID id )
 	// opened ResFiles vector
 	Be::Clsid resFileClsid( "blue", "ResFile" );
 	IResFilePtr fp( resFileClsid );
-	bool result = s_fpVector.Insert( -1, fp );
+	s_fpVector.Insert( -1, fp );
 	// Open the file
 	// TODO: Add error handling to close and remove
 	// object from the opened ResFile vector

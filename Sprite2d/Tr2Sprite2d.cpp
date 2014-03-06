@@ -14,7 +14,8 @@ Tr2Sprite2d::Tr2Sprite2d( IRoot* lockobj ) :
 	m_useSizeFromTexture( false ),
 	m_firstVertex( 0 ),
 	m_vertexCount( 0 ),
-	m_saturation( 1.0f )
+	m_saturation( 1.0f ),
+	m_effectOpacity( 1.0f )
 {
 }
 

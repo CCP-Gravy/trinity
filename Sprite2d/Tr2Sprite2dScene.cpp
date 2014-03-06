@@ -66,6 +66,7 @@ Tr2Sprite2dScene::Tr2Sprite2dScene( IRoot* lockobj ) :
 	m_spriteEffect( TR2_SFX_FILL ),
 	m_blendMode( TR2_SBM_NONE ),
 	m_numTexturesUsed( 0 ),
+	m_isAntiAliased( false ),
 	m_translation( 0.0f, 0.0f, 0.0f ),
 	m_rotation( 0.0f, 0.0f, 0.0f, 1.0f ),
 	m_scaling( 1.0f, 1.0f, 1.0f ),
@@ -103,12 +104,13 @@ Tr2Sprite2dScene::Tr2Sprite2dScene( IRoot* lockobj ) :
 	m_drawCallsRendered( 0 ),
 	m_maxDrawCallsToRender( 0xffffffff ),
 	m_captureDisplayList( nullptr ),
+	m_preCaptureVertexData( nullptr ),
+	m_preCaptureIndexData( nullptr ),
 	m_captureVertexDataSize( 0 ),
 	m_captureVertexDataCapacity( 0 ),
-	m_captureVertexData( nullptr ),
 	m_captureIndexDataSize( 0 ),
 	m_captureIndexDataCapacity( 0 ),
-	m_captureIndexData( nullptr ),
+	m_captureStartIndex( 0 ),
 	m_viewportSizeVar( "UIViewportSize", Vector4( 0.0f, 0.0f, 0.0f, 0.0f ) ),
 	m_dotVectorVar( "g_DotVector", Vector4( 0.0f, 0.0f, 0.0f, 1.0f ) ),
 	m_maxSpriteCount( 1024 ),
@@ -156,22 +158,17 @@ Tr2Sprite2dScene::Tr2Sprite2dScene( IRoot* lockobj ) :
 
 	m_captureVertexDataCapacity = 1024;
 	unsigned int vbSize = m_captureVertexDataCapacity * sizeof( Tr2Sprite2dD3DVertex );
-	m_captureVertexData = static_cast<Tr2Sprite2dD3DVertex*>( CCP_ALIGNED_MALLOC( "Tr2Sprite2dScene/m_captureVertexData", vbSize, VB_ALIGNMENT ) );
+	m_captureVertexData = CcpAlignedMallocBuffer( "Tr2Sprite2dScene/m_captureVertexData", vbSize, VB_ALIGNMENT );
 
 	m_captureIndexDataCapacity = m_captureVertexDataCapacity + m_captureVertexDataCapacity / 2;
 	unsigned int ibSize = m_captureIndexDataCapacity * sizeof( unsigned int );
-	m_captureIndexData = static_cast<unsigned int*>( CCP_ALIGNED_MALLOC( "Tr2Sprite2dScene/m_captureIndexData", ibSize, IB_ALIGNMENT ) );
+	m_captureIndexData = CcpAlignedMallocBuffer( "Tr2Sprite2dScene/m_captureIndexData", ibSize, IB_ALIGNMENT );
 }
 
 Tr2Sprite2dScene::~Tr2Sprite2dScene()
 {
-	m_captureIndexDataCapacity = 0;
-	CCP_ALIGNED_FREE( m_captureIndexData );
-	m_captureIndexData = nullptr;
-
-	m_captureVertexDataCapacity = 0;
-	CCP_ALIGNED_FREE( m_captureVertexData );
-	m_captureVertexData = nullptr;
+	m_captureIndexData.clear();
+	m_captureVertexData.clear();
 
 	CCP_ASSERT( m_transformStack->empty() );
 	CCP_DELETE( m_transformStack );
@@ -873,18 +870,6 @@ bool Tr2Sprite2dScene::PrepareTriangleVerts( Tr2Sprite2dD3DVertex* destVerts, Tr
 	//
 
 	//
-	// Gather data for texture windows, transformation
-	//
-	float repeat[2];
-
-	for( int twIx = 0; twIx < 2; ++twIx )
-	{
-		TextureSetting& texSettings = m_textureSettings[twIx];
-
-		repeat[twIx] = float(texSettings.repeatMode);
-	}
-
-	//
 	// Process the vertices into the vertex buffer
 	//
 
@@ -967,7 +952,7 @@ void Tr2Sprite2dScene::RenderTriangleVerts( Tr2VertexBufferAL& verticesSrc, unsi
 {
 	CCP_ASSERT( !m_captureDisplayList );
 
-	bool effectOK = SelectEffect();
+	SelectEffect();
 
 	IssueDrawCall();
 
@@ -1728,11 +1713,11 @@ bool Tr2Sprite2dScene::StartCapture( ITr2SpriteObject* owner )
 
 	CCP_ASSERT( m_currentVertexData );
 	m_preCaptureVertexData = m_currentVertexData;
-	m_currentVertexData = m_captureVertexData;
+	m_currentVertexData = reinterpret_cast<Tr2Sprite2dD3DVertex*>(m_captureVertexData.get());
 
 	CCP_ASSERT( m_currentIndexData );
 	m_preCaptureIndexData = m_currentIndexData;
-	m_currentIndexData = m_captureIndexData;
+	m_currentIndexData = reinterpret_cast<unsigned int*>(m_captureIndexData.get());
 
 	m_captureStartIndex = 0;
 
@@ -1776,22 +1761,17 @@ Tr2Sprite2dDisplayList* Tr2Sprite2dScene::EndCapture( Tr2Sprite2dDisplayList* pr
 		if( previousDisplayList && previousDisplayList->vertexBuffer.IsValid() && 
 			previousDisplayList->vertexBuffer.GetTotalSizeInBytes() >= vbSize && previousDisplayList->vertexBuffer.GetTotalSizeInBytes() / 2 <= vbSize )
 		{
-			Tr2Sprite2dD3DVertex* bufferData = nullptr;
-			if( SUCCEEDED( previousDisplayList->vertexBuffer.Lock( bufferData, LOCK_WRITEONLY, renderContext ) ) && bufferData )
-			{
-				memcpy( bufferData, m_captureVertexData, vbSize );
-				if( SUCCEEDED( previousDisplayList->vertexBuffer.Unlock( renderContext ) ) )
+			if( SUCCEEDED( previousDisplayList->vertexBuffer.UpdateBuffer( 0, vbSize, m_captureVertexData.get(), renderContext ) ) )
 				{
 					m_captureDisplayList->vertexBuffer = std::move( previousDisplayList->vertexBuffer );
 					reusedVb = true;
 				}
-			}
 
 		}
 		if( !reusedVb )
 		{
 			vbSize = std::min( m_captureVertexDataCapacity, m_captureVertexDataSize + m_captureVertexDataSize / 4 ) * sizeof( Tr2Sprite2dD3DVertex );
-			hr = m_captureDisplayList->vertexBuffer.Create( vbSize, bufferUsage, m_captureVertexData, renderContext );
+			hr = m_captureDisplayList->vertexBuffer.Create( vbSize, bufferUsage, m_captureVertexData.get(), renderContext );
 			if( FAILED( hr ) )
 			{
 				CCP_LOGERR( "%s failed (%d) to create vertex buffer for %d vertices (%d KiB)", __FUNCTION__, hr, m_captureVertexDataSize, vbSize / 1024 );
@@ -1811,23 +1791,18 @@ Tr2Sprite2dDisplayList* Tr2Sprite2dScene::EndCapture( Tr2Sprite2dDisplayList* pr
 		if( previousDisplayList && previousDisplayList->indexBuffer.IsValid() && 
 			previousDisplayList->indexBuffer.GetTotalSizeInBytes() >= ibSize && previousDisplayList->indexBuffer.GetTotalSizeInBytes() / 2 <= ibSize )
 		{
-			unsigned int* bufferData = nullptr;
-			if( SUCCEEDED( previousDisplayList->indexBuffer.Lock( bufferData, LOCK_WRITEONLY, renderContext ) ) && bufferData )
-			{
-				memcpy( bufferData, m_captureIndexData, ibSize );
-				if( SUCCEEDED( previousDisplayList->indexBuffer.Unlock( renderContext ) ) )
+			if( SUCCEEDED( previousDisplayList->indexBuffer.UpdateBuffer( 0, ibSize, m_captureIndexData.get(), renderContext ) ) )
 				{
 					m_captureDisplayList->indexBuffer = std::move( previousDisplayList->indexBuffer );
 					reusedIb = true;
 				}
-			}
 
 		}
 		if( !reusedIb )
 		{
 			m_captureIndexDataSize = std::min( m_captureIndexDataCapacity, m_captureIndexDataSize + m_captureIndexDataSize / 4 );
 			ibSize = m_captureIndexDataSize * sizeof( unsigned int );
-			hr = m_captureDisplayList->indexBuffer.Create( m_captureIndexDataSize, bufferUsage, IB_32BIT, m_captureIndexData, renderContext );
+			hr = m_captureDisplayList->indexBuffer.Create( m_captureIndexDataSize, bufferUsage, IB_32BIT, m_captureIndexData.get(), renderContext );
 
 			if( FAILED( hr ) )
 			{
@@ -2234,19 +2209,8 @@ void Tr2Sprite2dScene::GrowCaptureVertexBuffer( unsigned int vertexCount )
 		m_captureVertexDataCapacity = m_captureVertexDataSize + vertexCount;
 	}
 
-	unsigned int vbSize = m_captureVertexDataCapacity * sizeof( Tr2Sprite2dD3DVertex );
-	void* newCaptureVertexData = CCP_ALIGNED_MALLOC( 
-		"Tr2Sprite2dScene/m_captureVertexData", 
-		vbSize,
-		VB_ALIGNMENT );
-
-	if( newCaptureVertexData )
-	{
-		memcpy( newCaptureVertexData, m_captureVertexData, m_captureVertexDataSize * sizeof( Tr2Sprite2dD3DVertex ) );
-	}
-
-	CCP_ALIGNED_FREE( m_captureVertexData );
-	m_captureVertexData = static_cast<Tr2Sprite2dD3DVertex*>( newCaptureVertexData );
+	size_t vbSize = m_captureVertexDataCapacity * sizeof( Tr2Sprite2dD3DVertex );
+	m_captureVertexData.resize( "Tr2Sprite2dScene/m_captureVertexData", vbSize );
 	
 	CCP_ASSERT( m_captureVertexData );
 }
@@ -2263,19 +2227,8 @@ void Tr2Sprite2dScene::GrowCaptureIndexBuffer( unsigned short indexCount )
 		m_captureIndexDataCapacity = m_captureIndexDataSize + indexCount;
 	}
 
-	unsigned int ibSize = m_captureIndexDataCapacity * sizeof( unsigned int );
-	void* newCaptureIndexData = CCP_ALIGNED_MALLOC( 
-		"Tr2Sprite2dScene/m_captureIndexData", 
-		ibSize,
-		IB_ALIGNMENT );
-
-	if( newCaptureIndexData )
-	{
-		memcpy( newCaptureIndexData, m_captureIndexData, m_captureIndexDataSize * sizeof( unsigned int ) );
-	}
-
-	CCP_ALIGNED_FREE( m_captureIndexData );
-	m_captureIndexData = static_cast<unsigned int*>( newCaptureIndexData );
+	size_t ibSize = m_captureIndexDataCapacity * sizeof( unsigned int );
+	m_captureIndexData.resize( "Tr2Sprite2dScene/m_captureIndexData", ibSize );
 
 	CCP_ASSERT( m_captureIndexData );
 }
@@ -2310,7 +2263,7 @@ bool Tr2Sprite2dScene::EnsureBufferSpace( unsigned int vertexCount, unsigned sho
 				return false;
 			}
 
-			m_currentVertexData = m_captureVertexData + m_captureVertexDataSize;
+			m_currentVertexData = reinterpret_cast<Tr2Sprite2dD3DVertex*>(m_captureVertexData.get()) + m_captureVertexDataSize;
 		}
 
 		// Index count is estimated, allow the index buffer to grow as needed.
@@ -2323,7 +2276,7 @@ bool Tr2Sprite2dScene::EnsureBufferSpace( unsigned int vertexCount, unsigned sho
 				return false;
 			}
 
-			m_currentIndexData = m_captureIndexData + m_captureIndexDataSize;
+			m_currentIndexData = reinterpret_cast<unsigned int*>(m_captureIndexData.get()) + m_captureIndexDataSize;
 		}
 
 		vertexOffset = m_captureVertexDataSize;

@@ -12,13 +12,13 @@
 
 #include "Eve/EveTransform.h"
 #include "EveSpaceObject2.h"
-#include "Eve/EveSpaceObjectDecal.h"
+#include "Attachments/EveSpaceObjectDecal.h"
 #include "Eve/EveSpaceScene.h"
 #include "Eve/EveLocator2.h"
 #include "Eve/EveMeshOverlayEffect.h"
-#include "Eve/EveSpriteSet.h"
-#include "Eve/EveSpotlightSet.h"
-#include "Eve/EvePlaneSet.h"
+#include "Attachments/EveSpriteSet.h"
+#include "Attachments/EveSpotlightSet.h"
+#include "Attachments/EvePlaneSet.h"
 #include "Tr2GPUParticleEmitter.h"
 #include "Tr2Mesh.h"
 #include "Tr2GrannyAnimation.h"
@@ -205,20 +205,17 @@ bool EveSpaceObject2::Initialize()
 	return true;
 }
 
-void EveSpaceObject2::Update( EveUpdateContext& updateContext )
+void EveSpaceObject2::UpdateSyncronous( EveUpdateContext& updateContext )
 {
+	Be::Time time = updateContext.GetTime();
+
+	UpdateWorldTransform( time );
+
 	if( !m_update )
 	{
 		return;
 	}
-	
-	m_perObjectDataVs.InvalidateBufferData();
-	m_perObjectDataPs.InvalidateBufferData();
-
-	// prepare shader data: shader needs to know size of this object for some surface-scaling issues
-	m_spaceObjectData.w = GetBoundingSphereRadius();
 		
-	Be::Time time = updateContext.GetTime();
 	if( m_allowLodSelection )
 	{
 		UnloadLodIfNeeded( time );
@@ -227,20 +224,6 @@ void EveSpaceObject2::Update( EveUpdateContext& updateContext )
 	// Reset this so we do a transformed damage locator update if needed
 	m_damageLocatorsUpdatedThisFrame = false;
 	m_impactDirectionsUpdatedThisFrame = false;
-
-	if( m_animationSequencer )
-	{
-		m_animationSequencer->Update( time );
-	}
-	//
-	// Animation
-	//
-	if( m_animationUpdater )
-	{
-		Matrix m;
-		D3DXMatrixIdentity( &m );
-		m_animationUpdater->PrePhysicsAnimation( 0, m );
-	}
 
 	// Particle Systems
 	// Get the reference position
@@ -266,28 +249,15 @@ void EveSpaceObject2::Update( EveUpdateContext& updateContext )
 		m_positionDelta->m_value = Vector3( 0.f, 0.f, 0.f );
 	}
 	m_previousPosition = referencePosition;
-
-	Matrix transformWithoutTranslation = m_worldTransform;
-	transformWithoutTranslation._41 -= m_worldPosition.x;
-	transformWithoutTranslation._42 -= m_worldPosition.y;
-	transformWithoutTranslation._43 -= m_worldPosition.z;
-
-	// Get this object's world position
-	Vector3d worldPositionDouble( m_worldPosition );
-	if( m_ballPosition )
-	{
-		m_ballPosition->InterpolatedPosition( &worldPositionDouble, time );
-	}
-
-	if( m_boundingSphereRadius > 0.0f )
-	{
-		D3DXVec3TransformCoord( (Vector3*)&m_boundingSphereWorld, &m_boundingSphereCenter, &m_worldTransform );
-		m_boundingSphereWorld.w = m_modelScale * m_boundingSphereRadius;
-	}
-		
+	
 	//update GPU emitters (these only need an egoball-relative position)
 	if( !m_particleEmittersGPU.empty() ) 
 	{
+		Matrix transformWithoutTranslation = m_worldTransform;
+		transformWithoutTranslation._41 -= m_worldPosition.x;
+		transformWithoutTranslation._42 -= m_worldPosition.y;
+		transformWithoutTranslation._43 -= m_worldPosition.z;
+
 		Tr2GPUParticlePoolManager* manager = updateContext.GetParticlePoolManager();
 		if( manager != NULL )
 		{
@@ -302,6 +272,48 @@ void EveSpaceObject2::Update( EveUpdateContext& updateContext )
 				(*it)->UpdateTransform( relativePosition, relativeVelocity, manager->GetLastEgoTranslation(), transformWithoutTranslation );
 			}
 		}
+	}
+
+	//
+	// Animation
+	//
+	if( m_animationSequencer )
+	{
+		m_animationSequencer->Update( time );
+	}
+	if( m_animationUpdater )
+	{
+		Matrix m;
+		D3DXMatrixIdentity( &m );
+		m_animationUpdater->PrePhysicsAnimation( 0, m );
+	}
+
+	TriObserverLocalVector::iterator observersEnd = m_observers.end();
+	for( TriObserverLocalVector::iterator it = m_observers.begin(); it != observersEnd; ++it )
+	{
+		(*it)->Update( m_worldTransform );
+	}
+}
+
+void EveSpaceObject2::UpdateAsyncronous( EveUpdateContext& updateContext )
+{
+	if( !m_update )
+	{
+		return;
+	}
+
+	Be::Time time = updateContext.GetTime();
+
+	m_perObjectDataVs.InvalidateBufferData();
+	m_perObjectDataPs.InvalidateBufferData();
+
+	// prepare shader data: shader needs to know size of this object for some surface-scaling issues
+	m_spaceObjectData.w = GetBoundingSphereRadius();
+
+	if( m_boundingSphereRadius > 0.0f )
+	{
+		D3DXVec3TransformCoord( (Vector3*)&m_boundingSphereWorld, &m_boundingSphereCenter, &m_worldTransform );
+		m_boundingSphereWorld.w = m_modelScale * m_boundingSphereRadius;
 	}
 
 	if( !m_curveSets.empty() || !m_overlayEffects.empty() )
@@ -321,12 +333,6 @@ void EveSpaceObject2::Update( EveUpdateContext& updateContext )
 				(*it)->Update( time );
 			}
 		}
-	}
-
-	TriObserverLocalVector::iterator observersEnd = m_observers.end();
-	for( TriObserverLocalVector::iterator it = m_observers.begin(); it != observersEnd; ++it )
-	{
-		(*it)->Update( m_worldTransform );
 	}
 
 	for( IEveTransformVector::const_iterator it = m_children.begin(); it != m_children.end(); ++it )
@@ -1287,9 +1293,12 @@ int EveSpaceObject2::GetClosestDamageLocatorIndex( const Vector3* position )
 	XMVECTOR closestLength = XMVectorSet( max, max, max, 0.0 );
 	int closestIndex = -1;
 
-	if( !m_damageLocatorsUpdatedThisFrame )
 	{
-		UpdateDamageLocatorPositions();
+		CcpAutoMutex lock( GetObjectMutex() );
+		if( !m_damageLocatorsUpdatedThisFrame )
+		{
+			UpdateDamageLocatorPositions();
+		}
 	}
 
 	for( unsigned int i = 0; i < m_allocatedDamageLocatorCount ; ++i )
@@ -1371,13 +1380,16 @@ int EveSpaceObject2::GetGoodDamageLocatorIndex( const Vector3& position )
 		bestDirectionFit = 1.0f;
 	}
 
-	if( !m_damageLocatorsUpdatedThisFrame )
 	{
-		UpdateDamageLocatorPositions();
-	}
-	if( !m_impactDirectionsUpdatedThisFrame )
-	{
-		UpdateImpactDirections();
+		CcpAutoMutex lock( GetObjectMutex() );
+		if( !m_damageLocatorsUpdatedThisFrame )
+		{
+			UpdateDamageLocatorPositions();
+		}
+		if( !m_impactDirectionsUpdatedThisFrame )
+		{
+			UpdateImpactDirections();
+		}
 	}
 
 	Vector3 v;
@@ -1432,9 +1444,12 @@ bool EveSpaceObject2::GetDamageLocatorPosition( Vector3* out, int index )
 		return false;
 	}
 
-	if( !m_damageLocatorsUpdatedThisFrame )
 	{
-		UpdateDamageLocatorPositions();
+		CcpAutoMutex lock( GetObjectMutex() );
+		if( !m_damageLocatorsUpdatedThisFrame )
+		{
+			UpdateDamageLocatorPositions();
+		}
 	}
 
 	*out = m_transformedDamageLocators[ index ];
@@ -1975,7 +1990,7 @@ Be::Result<std::string> EveSpaceObject2::GetLocalBoundingBoxFromScript( std::pai
 // Description:
 //   Update the curve set with the appropriate name
 // --------------------------------------------------------------------------------
-void EveSpaceObject2::UpdateCurveSet( const std::string name, Be::Time time )
+void EveSpaceObject2::UpdateCurveSet( const std::string& name, Be::Time time )
 {
 	for( auto it = m_curveSets.begin(); it != m_curveSets.end(); it++ )
 	{
@@ -1990,7 +2005,7 @@ void EveSpaceObject2::UpdateCurveSet( const std::string name, Be::Time time )
 // Description:
 //   Play the curve set with the appropriate name
 // --------------------------------------------------------------------------------
-void EveSpaceObject2::PlayCurveSet( const std::string name )
+void EveSpaceObject2::PlayCurveSet( const std::string& name )
 {
 	for( auto it = m_curveSets.begin(); it != m_curveSets.end(); it++ )
 	{
@@ -2005,7 +2020,7 @@ void EveSpaceObject2::PlayCurveSet( const std::string name )
 // Description:
 //   Stop the curve set with the appropriate name
 // --------------------------------------------------------------------------------
-void EveSpaceObject2::StopCurveSet( const std::string name )
+void EveSpaceObject2::StopCurveSet( const std::string& name )
 {
 	for( auto it = m_curveSets.begin(); it != m_curveSets.end(); it++ )
 	{
@@ -2020,7 +2035,7 @@ void EveSpaceObject2::StopCurveSet( const std::string name )
 // Description:
 //   Get the duration of the curve set with the appropriate name
 // --------------------------------------------------------------------------------
-float EveSpaceObject2::GetCurveSetDuration( const std::string name ) const
+float EveSpaceObject2::GetCurveSetDuration( const std::string& name ) const
 {
 	for( auto it = m_curveSets.begin(); it != m_curveSets.end(); it++ )
 	{
@@ -2030,4 +2045,24 @@ float EveSpaceObject2::GetCurveSetDuration( const std::string name ) const
 		}
 	}
 	return 0.f;
+}
+
+// --------------------------------------------------------------------------------
+// Description:
+//   Get a mutex for this object that can be used during UpdateAsyncronous call.
+// --------------------------------------------------------------------------------
+CcpMutex& EveSpaceObject2::GetObjectMutex()
+{
+	static const size_t MUTEX_COUNT = 256;
+	static CcpMutex* mutexes[MUTEX_COUNT] = { nullptr, };
+	static char mutexNames[MUTEX_COUNT][64];
+	if( !mutexes[0] )
+	{
+		for( size_t i = 0; i < MUTEX_COUNT; ++i )
+		{
+			sprintf_s( mutexNames[i], "GetObjectMutex_%" CCP_SIZET_FORMAT, i );
+			mutexes[i] = CCP_NEW( "EveSpaceObject2::GetObjectMutex" ) CcpMutex( "EveSpaceObject2", mutexNames[i], 64 );
+		}
+	}
+	return *mutexes[reinterpret_cast<size_t>( this ) & ( MUTEX_COUNT - 1 )];
 }

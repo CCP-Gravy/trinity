@@ -17,7 +17,6 @@ extern bool isWinNT;
 
 LRESULT App::WndProc(HWND hwnd, UINT msg, WPARAM w, LPARAM l)
 {
-	static int count = 0;
 #if BLUE_WITH_PYTHON
 	Ccp::PyGilEnsure gilWrapper;
 #endif

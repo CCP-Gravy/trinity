@@ -45,7 +45,6 @@ public:
 
 	//////////////////////////////////////////////////////////////////////////
 	// ITr2SpriteObject
-	unsigned int GetVertexCount();
 	void GatherSprites( Tr2Sprite2dScene* renderer );
 
 	ITr2SpriteObject* PickPoint( float x, float y, Tr2Sprite2dScene* renderer );
@@ -72,6 +71,7 @@ private:
 		const Color& toColor, 
 		float capAngleTo);
 	float ClampAngle(float angle);
+	unsigned int GetEstimatedVertexCount();
 
 private:
 	std::wstring m_name;
@@ -88,10 +88,8 @@ private:
 	float m_end;
 	bool m_isLoop;
 
-	Tr2Sprite2dD3DVertex* m_renderVertices;
-	unsigned int m_renderVertexCapacity;
-	unsigned int m_renderVertexCount;
-	TrackableStdVector<unsigned short> m_renderIndices;
+	TrackableStdVector<uint16_t> m_renderIndices;
+	TrackableStdVector<Tr2Sprite2dD3DVertex> m_renderVertices;
 };
 
 TYPEDEF_BLUECLASS( Tr2Sprite2dLineTrace );

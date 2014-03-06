@@ -14,7 +14,8 @@ Tr2Sprite2dTextObject::Tr2Sprite2dTextObject( IRoot* lockobj /*= nullptr */ ) :
 	m_textWidth( 0.0f ),
 	m_textHeight( 0.0f ),
 	m_pickRadius( 0.0f ),
-	m_hasAuxiliaryTooltip( false )
+	m_hasAuxiliaryTooltip( false ),
+	m_useSizeFromTexture( false )
 {
 
 }

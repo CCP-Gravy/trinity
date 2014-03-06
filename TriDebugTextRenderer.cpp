@@ -15,7 +15,8 @@ TriDebugTextRenderer::TriDebugTextRenderer() :
 #ifdef _WIN32
     , m_bitmapData( nullptr ),
 	m_bitmapWidth( 0 ),
-	m_bitmapHeight( 0 )
+	m_bitmapHeight( 0 ),
+	m_bitmap( nullptr )
 #endif
 {
 #ifdef _WIN32
@@ -257,7 +258,7 @@ void TriDebugTextRenderer::DrawText( TriDebugFont font, const char* string, cons
 	int rowWidth = 0;
 	for( const char* ch = string; *ch; ++ch )
 	{
-		if( *ch < 128 )
+		if( *ch > 0 )
 		{
 			if( *ch == '\n' )
 			{
@@ -305,7 +306,7 @@ void TriDebugTextRenderer::DrawText( TriDebugFont font, const char* string, cons
 	int pixelWidths = int( s_charPixelsArraySizes[font] / s_charHeight[font] );
 	for( const char* ch = string; *ch; ++ch )
 	{
-		if( *ch < 128 )
+		if( *ch > 0 )
 		{
 			if( *ch == '\n' )
 			{

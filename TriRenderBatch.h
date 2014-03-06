@@ -313,7 +313,9 @@ class TriClippingBatch : public TriRenderBatch
 {
 public:
 	// Constructor
-	TriClippingBatch() : TriRenderBatch() 
+	TriClippingBatch() 
+		:m_isCullModeInverted( false ),
+		m_useClipPlane( false )
 	{
 		m_objectData = NULL;
 	}

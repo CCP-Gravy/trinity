@@ -33,6 +33,7 @@ static unsigned short s_frameIndices[] = {
 static const Color WHITE( 1.0f, 1.0f, 1.0f, 1.0f );
 
 Tr2Sprite2dFrame::Tr2Sprite2dFrame( IRoot* lockobj ) : 
+	m_cornerSize( 0 ),
 	m_offset( 0 ),
 	m_cachedWidth( 0.0f ), 
 	m_cachedHeight( 0.0f ), 
@@ -56,7 +57,7 @@ void Tr2Sprite2dFrame::GatherSprites( Tr2Sprite2dScene* renderer )
 		return;
 	}
 
-	if( (m_spriteEffect != TR2_SFX_FILL) && !m_texture )
+	if( (m_spriteEffect == TR2_SFX_FILL) || !m_texture )
 	{
 		return;
 	}
@@ -66,57 +67,39 @@ void Tr2Sprite2dFrame::GatherSprites( Tr2Sprite2dScene* renderer )
 		renderer->SetSpriteEffect( m_spriteEffect );
 		renderer->SetTileMode( 0 );
 
-		float srcLeft = 0.0f;
-		float srcTop = 0.0f;
-		float srcWidth = 0.0f;
-		float srcHeight = 0.0f;
-
-		unsigned int textureWidth = 0;
-		unsigned int textureHeight = 0;
-
-		if( m_spriteEffect != TR2_SFX_FILL )
+		if( !m_texture->IsGood() )
 		{
-			if( !m_texture->IsGood() )
-			{
-				return;
-			}
-
-			m_texture->Apply( renderer, 0 );
-
-			srcLeft = m_texture->GetSrcX();
-			srcTop = m_texture->GetSrcY();
-			srcWidth = m_texture->GetSrcWidth();
-			srcHeight = m_texture->GetSrcHeight();
-
-			textureWidth = m_texture->GetWidth();
-			textureHeight = m_texture->GetHeight();
-
-			if( srcWidth == 0.0f )
-			{
-				srcWidth = (float)textureWidth;
-			}
-			if( srcHeight == 0.0f )
-			{
-				srcHeight = (float)textureHeight;
-			}
-
-			if( srcWidth < m_cornerSize*2 )
-			{
-				return;
-			}
-
-			if( srcHeight < m_cornerSize*2 )
-			{
-				return;
-			}
+			return;
 		}
 
+		m_texture->Apply( renderer, 0 );
 
-		float srcRight = srcLeft + srcWidth;
-		float srcBottom = srcTop + srcHeight;
+		float srcWidth = m_texture->GetSrcWidth();
+		float srcHeight = m_texture->GetSrcHeight();
+
+		unsigned textureWidth = m_texture->GetWidth();
+		unsigned textureHeight = m_texture->GetHeight();
+
+		if( srcWidth == 0.0f )
+		{
+			srcWidth = (float)textureWidth;
+		}
+		if( srcHeight == 0.0f )
+		{
+			srcHeight = (float)textureHeight;
+		}
+
+		if( srcWidth < m_cornerSize*2 )
+		{
+			return;
+		}
+
+		if( srcHeight < m_cornerSize*2 )
+		{
+			return;
+		}
 
 		float cs = (float)m_cornerSize;
-		float cs2 = 2.0f*(float)m_cornerSize;
 
 		float texHorizontalCs = cs / srcWidth;
 		float texVerticalCs = cs / srcHeight;

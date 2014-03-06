@@ -98,13 +98,8 @@ Quaternion* TriRotationCurve::GetValueAt(
 			*in = mValue;
 			return in;
 		}
-		else if (mExtrapolation == TRIEXT_CONSTANT)
+		else
 		{
-			*in = mKeys[0]->mValue;
-			return in;
-		}
-		else 
-		{// (mExtrapolation == TRIEXT_CYCLE)
 			*in = mKeys[0]->mValue;
 			return in;
 		}

@@ -92,8 +92,6 @@ void ITr2PickableScene::PickObject( Tr2RenderContext& renderContext, int x, int 
 
 	if( !pickableObjects.empty() )
 	{
-        float dist = std::numeric_limits<float>::max();
-
 		if( count == 0 )
 		{
 			return;

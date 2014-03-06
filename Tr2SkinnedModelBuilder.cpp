@@ -46,7 +46,7 @@ struct Tr2SkinnedModelBuilder_OutputData
 	
 	unsigned int m_targetMaterial[TRIBATCHTYPE_COUNT_OF_BATCH_TYPES];
 	
-	std::vector<unsigned char> m_targetVertices;
+	std::vector<uint8_t> m_targetVertices;
 
 	
 	int m_vertexSize;
@@ -95,6 +95,12 @@ struct Tr2SkinnedModelBuilder_OutputData
 		memset( &m_grannyTopology, 0, sizeof( granny_tri_topology ) );
 		memset( &m_grannySingleGroup, 0, sizeof( granny_tri_material_group ) );
 		m_vertexSize = 0;
+
+		m_meshes[0] = nullptr;
+		m_topologies[0] = nullptr;
+		m_vertexDatas[0] = nullptr;
+		m_skeletons[0] = nullptr;
+		m_models[0] = nullptr;
 
 		//CCP_LOG( "Output struct ctor, 0x%x", this );
 	}
@@ -215,12 +221,20 @@ Tr2SkinnedModelBuilder::Tr2SkinnedModelBuilder( IRoot* lockobj ) :
 	m_collapseTransparentAreas( false ),
 	m_notifyBuildDoneId( 0 ),
 	m_outputData( NULL ),
+	m_uvCoords0ByteOffset( 0 ),
+	m_uvCoords1ByteOffset( 0 ),
+	m_boneIndexOffset( 0 ),
+	m_areaOffset( 0 ),
 	m_effectPath( "res:/Graphics/Effect/Managed/Interior/Avatar/AvatarBRDFCombined.fx" )
 {
 	if( !s_wodBackgroundWelder )
 	{
 		// Create the background welder the first time we need to build
 		s_wodBackgroundWelder = BeCallbackMan;
+	}
+	for( auto it = std::begin( m_batchEnabled ); it != std::end( m_batchEnabled ); ++it )
+	{
+		*it = false;
 	}
 }
 
@@ -614,7 +628,7 @@ bool Tr2SkinnedModelBuilder::Build()
 	// collect all bones used by all source meshes
 	CollectAllBones();
 
-	if( !m_outputData->m_boneMapping.size() )
+	if( m_outputData->m_boneMapping.empty() )
 	{
 		if( !m_createGPUMesh || !m_enableSubsetBuilding )
 		{
@@ -722,8 +736,8 @@ void Tr2SkinnedModelBuilder::Weld( const granny_uint8* referenceVB, int referenc
 {
 	CCP_STATS_ZONE( __FUNCTION__ );
 
-	Vector3* referencePositions = (Vector3*)CCP_MALLOC( "Weld/referencePositions", referenceCount * sizeof( Vector3 ) );
-	Vector3* positions = (Vector3*)CCP_MALLOC( "Weld/referencePositions", count * sizeof( Vector3 ) );
+	Vector3* referencePositions = static_cast<Vector3*>( CCP_MALLOC( "Weld/referencePositions", referenceCount * sizeof( Vector3 ) ) );
+	Vector3* positions = static_cast<Vector3*>( CCP_MALLOC( "Weld/referencePositions", count * sizeof( Vector3 ) ) );
 
 	GrannyConvertVertexLayouts( referenceCount, m_outputData->m_grannyVertexData.VertexType, referenceVB, GrannyP3VertexType, referencePositions );
 	GrannyConvertVertexLayouts( count, m_outputData->m_grannyVertexData.VertexType, vb, GrannyP3VertexType, positions );
@@ -1070,10 +1084,11 @@ void Tr2SkinnedModelBuilder::CollectIndicesPerArea( const granny_mesh* mesh, con
 {
 	CCP_STATS_ZONE( __FUNCTION__ );
 
-	// 16 vs 32 bit indices
-	bool is16Bit = ( mesh->PrimaryTopology->Index16Count > 0 );
 	if( srcAreas )
 	{
+		// 16 vs 32 bit indices
+		bool is16Bit = ( mesh->PrimaryTopology->Index16Count > 0 );
+
 		// all areas
 		for( Tr2MeshAreaVector::const_iterator it = srcAreas->begin(); it != srcAreas->end(); ++it )
 		{
@@ -1153,8 +1168,6 @@ void Tr2SkinnedModelBuilder::CollectMaterialsPerArea( const granny_mesh* mesh, c
 {
 	CCP_STATS_ZONE( __FUNCTION__ );
 
-	// 16 vs 32 bit indices
-	bool is16Bit = ( mesh->PrimaryTopology->Index16Count > 0 );
 	if( srcAreas )
 	{
 		// all areas
@@ -1194,7 +1207,7 @@ void Tr2SkinnedModelBuilder::ReMapUVs( uint8_t* uv, granny_member_type type, con
 		// full float
 		while( count-- )
 		{
-			Vector2& uvVec2 = *(Vector2*)uv;
+			Vector2& uvVec2 = *reinterpret_cast<Vector2*>( uv );
 			uvVec2.x = uvVec2.x * scale.x + offset.x;
 			uvVec2.y = uvVec2.y * scale.y + offset.y;
 			uv += stride;
@@ -1229,10 +1242,10 @@ void Tr2SkinnedModelBuilder::AddMaterialIndex()
 	// expand verts by putting on float between them
 	for( int v = m_outputData->m_numOfVertices - 1; v >= 0; --v )
 	{
-		const unsigned char * const src = &m_outputData->m_targetVertices[v * m_outputData->m_vertexSize];
-		unsigned char * const dst = &m_outputData->m_targetVertices[v * newVertexSize];
+		const uint8_t* const src = &m_outputData->m_targetVertices[v * m_outputData->m_vertexSize];
+		uint8_t* const dst = &m_outputData->m_targetVertices[v * newVertexSize];
 		memcpy( dst, src, m_outputData->m_vertexSize );
-		float* f = (float*)(dst + m_outputData->m_vertexSize);
+		float* f = reinterpret_cast<float*>( dst + m_outputData->m_vertexSize );
 		f[0] = 0;
 		f[1] = 0;
 	}
@@ -1635,7 +1648,7 @@ void Tr2SkinnedModelBuilder::StaticBuildAsync( void* context )
 {
 	CCP_STATS_ZONE( __FUNCTION__ );
 
-	Tr2SkinnedModelBuilder* pThis = (Tr2SkinnedModelBuilder*)context;
+	Tr2SkinnedModelBuilder* pThis = static_cast<Tr2SkinnedModelBuilder*>( context );
 	pThis->m_buildSucceeded = pThis->Build();
 	BeResMan->AddToQueue( BRMQ_MAIN, StaticNotifyBuildDone, context, 0, &pThis->m_notifyBuildDoneId );
 }
@@ -1653,10 +1666,10 @@ void Tr2SkinnedModelBuilder::BuildAsync( const BlueScriptCallback& doneCallback 
 // ------------------------------------------------------------------------------------------------------
 void Tr2SkinnedModelBuilder::StaticNotifyBuildDone( void* context )
 {
-	Tr2SkinnedModelBuilder* pThis = (Tr2SkinnedModelBuilder*)context;
+	Tr2SkinnedModelBuilder* pThis = static_cast<Tr2SkinnedModelBuilder*>( context );
 
 	if( pThis->m_doneCallbackToPython )
-		{
+	{
 		pThis->m_doneCallbackToPython.CallVoid( pThis->m_buildSucceeded );
 	}
 

@@ -263,7 +263,7 @@ private:
 		{}
 	//private:
 		SpawnData() : seed(0), behaviour(0), startPos(s_zero), endPos(s_zero), startVel(s_zero), endVel(s_zero), 
-			emitterTransform(s_identity), posScale(0), velScale(0), inheritVel(0) {}
+			emitterTransform(s_identity), posScale(0), velScale(0), inheritVel(0), posTexture( nullptr ), velTexture( nullptr ) {}
 	};
 	struct SpawnQuad {
 		unsigned x, y, w, h;

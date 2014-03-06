@@ -85,7 +85,6 @@ bool Tr2ApexRes::DoPrepare()
 	NxParameterized::Serializer::SerializeType serType = g_Tr2Apex->GetApexSDK()->getSerializeType(*fb);
 	NxParameterized::Serializer* serializer = g_Tr2Apex->GetApexSDK()->createSerializer( serType ); // create a binary deserializer
 
-	physx::apex::NxApexAsset* asset = NULL;
 	NxParameterized::Serializer::DeserializedData deserializedData;
 
 	NxParameterized::Serializer::ErrorType serError = serializer->deserialize(*fb, deserializedData );
@@ -106,7 +105,7 @@ bool Tr2ApexRes::DoPrepare()
 			{
 				CCP_LOGWARN( "'%s' contains multiple assets - only using the first one", m_apexName.c_str() );
 			}
-			asset = g_Tr2Apex->GetApexSDK()->createAsset( data, m_apexName.c_str() );
+			physx::apex::NxApexAsset* asset = g_Tr2Apex->GetApexSDK()->createAsset( data, m_apexName.c_str() );
 			if( !asset )
 			{
 				CCP_LOGERR( "'%s' is not a valid apex asset", m_apexName.c_str() );

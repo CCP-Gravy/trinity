@@ -10,6 +10,7 @@
     <Filter Include="Source Files\Eve\Renderable"/>
     <Filter Include="Source Files\Eve\SpaceObject"/>
     <Filter Include="Source Files\Eve\SpaceObjectFactory"/>
+    <Filter Include="Source Files\Eve\SpaceObject\Attachments"/>
     <Filter Include="Source Files\Font"/>
     <Filter Include="Source Files\ImageIO"/>
     <Filter Include="Source Files\Include"/>
@@ -677,9 +678,6 @@
     <ClInclude Include="Eve\EveAnimationState.h">
       <Filter>Source Files\Eve</Filter>
     </ClInclude>
-    <ClInclude Include="Eve\EveBoosterSet2.h">
-      <Filter>Source Files\Eve</Filter>
-    </ClInclude>
     <ClInclude Include="Eve\EveCamera.h">
       <Filter>Source Files\Eve</Filter>
     </ClInclude>
@@ -722,12 +720,6 @@
     <ClInclude Include="Eve\EveParticleSpringAttractor.h">
       <Filter>Source Files\Eve</Filter>
     </ClInclude>
-    <ClInclude Include="Eve\EvePlaneSet.h">
-      <Filter>Source Files\Eve</Filter>
-    </ClInclude>
-    <ClInclude Include="Eve\EvePlaneSetItem.h">
-      <Filter>Source Files\Eve</Filter>
-    </ClInclude>
     <ClInclude Include="Eve\EvePlanet.h">
       <Filter>Source Files\Eve</Filter>
     </ClInclude>
@@ -746,9 +738,6 @@
     <ClInclude Include="Eve\EveSO2ModelCenterPos.h">
       <Filter>Source Files\Eve</Filter>
     </ClInclude>
-    <ClInclude Include="Eve\EveSpaceObjectDecal.h">
-      <Filter>Source Files\Eve</Filter>
-    </ClInclude>
     <ClInclude Include="Eve\EveSpaceScene.h">
       <Filter>Source Files\Eve</Filter>
     </ClInclude>
@@ -761,25 +750,10 @@
     <ClInclude Include="Eve\EveSpherePinIndexTree.h">
       <Filter>Source Files\Eve</Filter>
     </ClInclude>
-    <ClInclude Include="Eve\EveSpotlightSet.h">
-      <Filter>Source Files\Eve</Filter>
-    </ClInclude>
-    <ClInclude Include="Eve\EveSpotlightSetItem.h">
-      <Filter>Source Files\Eve</Filter>
-    </ClInclude>
-    <ClInclude Include="Eve\EveSpriteSet.h">
-      <Filter>Source Files\Eve</Filter>
-    </ClInclude>
-    <ClInclude Include="Eve\EveSpriteSetItem.h">
-      <Filter>Source Files\Eve</Filter>
-    </ClInclude>
     <ClInclude Include="Eve\EveStarfield.h">
       <Filter>Source Files\Eve</Filter>
     </ClInclude>
     <ClInclude Include="Eve\EveStretch.h">
-      <Filter>Source Files\Eve</Filter>
-    </ClInclude>
-    <ClInclude Include="Eve\EveTrailsSet.h">
       <Filter>Source Files\Eve</Filter>
     </ClInclude>
     <ClInclude Include="Eve\EveTransform.h">
@@ -835,6 +809,33 @@
     </ClInclude>
     <ClInclude Include="Eve\SpaceObject\EveStation2.h">
       <Filter>Source Files\Eve\SpaceObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Eve\SpaceObject\Attachments\EveBoosterSet2.h">
+      <Filter>Source Files\Eve\SpaceObject\Attachments</Filter>
+    </ClInclude>
+    <ClInclude Include="Eve\SpaceObject\Attachments\EvePlaneSet.h">
+      <Filter>Source Files\Eve\SpaceObject\Attachments</Filter>
+    </ClInclude>
+    <ClInclude Include="Eve\SpaceObject\Attachments\EvePlaneSetItem.h">
+      <Filter>Source Files\Eve\SpaceObject\Attachments</Filter>
+    </ClInclude>
+    <ClInclude Include="Eve\SpaceObject\Attachments\EveSpaceObjectDecal.h">
+      <Filter>Source Files\Eve\SpaceObject\Attachments</Filter>
+    </ClInclude>
+    <ClInclude Include="Eve\SpaceObject\Attachments\EveSpotlightSet.h">
+      <Filter>Source Files\Eve\SpaceObject\Attachments</Filter>
+    </ClInclude>
+    <ClInclude Include="Eve\SpaceObject\Attachments\EveSpotlightSetItem.h">
+      <Filter>Source Files\Eve\SpaceObject\Attachments</Filter>
+    </ClInclude>
+    <ClInclude Include="Eve\SpaceObject\Attachments\EveSpriteSet.h">
+      <Filter>Source Files\Eve\SpaceObject\Attachments</Filter>
+    </ClInclude>
+    <ClInclude Include="Eve\SpaceObject\Attachments\EveSpriteSetItem.h">
+      <Filter>Source Files\Eve\SpaceObject\Attachments</Filter>
+    </ClInclude>
+    <ClInclude Include="Eve\SpaceObject\Attachments\EveTrailsSet.h">
+      <Filter>Source Files\Eve\SpaceObject\Attachments</Filter>
     </ClInclude>
     <ClInclude Include="Eve\SpaceObjectFactory\EveSOF.h">
       <Filter>Source Files\Eve\SpaceObjectFactory</Filter>
@@ -2546,12 +2547,6 @@
     <ClCompile Include="Eve\EveAnimationState_Blue.cpp">
       <Filter>Source Files\Eve</Filter>
     </ClCompile>
-    <ClCompile Include="Eve\EveBoosterSet2.cpp">
-      <Filter>Source Files\Eve</Filter>
-    </ClCompile>
-    <ClCompile Include="Eve\EveBoosterSet2_Blue.cpp">
-      <Filter>Source Files\Eve</Filter>
-    </ClCompile>
     <ClCompile Include="Eve\EveCamera.cpp">
       <Filter>Source Files\Eve</Filter>
     </ClCompile>
@@ -2627,18 +2622,6 @@
     <ClCompile Include="Eve\EveParticleSpringAttractor_Blue.cpp">
       <Filter>Source Files\Eve</Filter>
     </ClCompile>
-    <ClCompile Include="Eve\EvePlaneSet.cpp">
-      <Filter>Source Files\Eve</Filter>
-    </ClCompile>
-    <ClCompile Include="Eve\EvePlaneSetItem.cpp">
-      <Filter>Source Files\Eve</Filter>
-    </ClCompile>
-    <ClCompile Include="Eve\EvePlaneSetItem_Blue.cpp">
-      <Filter>Source Files\Eve</Filter>
-    </ClCompile>
-    <ClCompile Include="Eve\EvePlaneSet_Blue.cpp">
-      <Filter>Source Files\Eve</Filter>
-    </ClCompile>
     <ClCompile Include="Eve\EvePlanet.cpp">
       <Filter>Source Files\Eve</Filter>
     </ClCompile>
@@ -2675,12 +2658,6 @@
     <ClCompile Include="Eve\EveSO2ModelCenterPos_Blue.cpp">
       <Filter>Source Files\Eve</Filter>
     </ClCompile>
-    <ClCompile Include="Eve\EveSpaceObjectDecal.cpp">
-      <Filter>Source Files\Eve</Filter>
-    </ClCompile>
-    <ClCompile Include="Eve\EveSpaceObjectDecal_Blue.cpp">
-      <Filter>Source Files\Eve</Filter>
-    </ClCompile>
     <ClCompile Include="Eve\EveSpaceScene.cpp">
       <Filter>Source Files\Eve</Filter>
     </ClCompile>
@@ -2702,30 +2679,6 @@
     <ClCompile Include="Eve\EveSpherePin_Blue.cpp">
       <Filter>Source Files\Eve</Filter>
     </ClCompile>
-    <ClCompile Include="Eve\EveSpotlightSet.cpp">
-      <Filter>Source Files\Eve</Filter>
-    </ClCompile>
-    <ClCompile Include="Eve\EveSpotlightSetItem.cpp">
-      <Filter>Source Files\Eve</Filter>
-    </ClCompile>
-    <ClCompile Include="Eve\EveSpotlightSetItem_Blue.cpp">
-      <Filter>Source Files\Eve</Filter>
-    </ClCompile>
-    <ClCompile Include="Eve\EveSpotlightSet_Blue.cpp">
-      <Filter>Source Files\Eve</Filter>
-    </ClCompile>
-    <ClCompile Include="Eve\EveSpriteSet.cpp">
-      <Filter>Source Files\Eve</Filter>
-    </ClCompile>
-    <ClCompile Include="Eve\EveSpriteSetItem.cpp">
-      <Filter>Source Files\Eve</Filter>
-    </ClCompile>
-    <ClCompile Include="Eve\EveSpriteSetItem_Blue.cpp">
-      <Filter>Source Files\Eve</Filter>
-    </ClCompile>
-    <ClCompile Include="Eve\EveSpriteSet_Blue.cpp">
-      <Filter>Source Files\Eve</Filter>
-    </ClCompile>
     <ClCompile Include="Eve\EveStarfield.cpp">
       <Filter>Source Files\Eve</Filter>
     </ClCompile>
@@ -2736,12 +2689,6 @@
       <Filter>Source Files\Eve</Filter>
     </ClCompile>
     <ClCompile Include="Eve\EveStretch_Blue.cpp">
-      <Filter>Source Files\Eve</Filter>
-    </ClCompile>
-    <ClCompile Include="Eve\EveTrailsSet.cpp">
-      <Filter>Source Files\Eve</Filter>
-    </ClCompile>
-    <ClCompile Include="Eve\EveTrailsSet_Blue.cpp">
       <Filter>Source Files\Eve</Filter>
     </ClCompile>
     <ClCompile Include="Eve\EveTransform.cpp">
@@ -2821,6 +2768,60 @@
     </ClCompile>
     <ClCompile Include="Eve\SpaceObject\EveStation2_Blue.cpp">
       <Filter>Source Files\Eve\SpaceObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Eve\SpaceObject\Attachments\EveBoosterSet2.cpp">
+      <Filter>Source Files\Eve\SpaceObject\Attachments</Filter>
+    </ClCompile>
+    <ClCompile Include="Eve\SpaceObject\Attachments\EveBoosterSet2_Blue.cpp">
+      <Filter>Source Files\Eve\SpaceObject\Attachments</Filter>
+    </ClCompile>
+    <ClCompile Include="Eve\SpaceObject\Attachments\EvePlaneSet.cpp">
+      <Filter>Source Files\Eve\SpaceObject\Attachments</Filter>
+    </ClCompile>
+    <ClCompile Include="Eve\SpaceObject\Attachments\EvePlaneSetItem.cpp">
+      <Filter>Source Files\Eve\SpaceObject\Attachments</Filter>
+    </ClCompile>
+    <ClCompile Include="Eve\SpaceObject\Attachments\EvePlaneSetItem_Blue.cpp">
+      <Filter>Source Files\Eve\SpaceObject\Attachments</Filter>
+    </ClCompile>
+    <ClCompile Include="Eve\SpaceObject\Attachments\EvePlaneSet_Blue.cpp">
+      <Filter>Source Files\Eve\SpaceObject\Attachments</Filter>
+    </ClCompile>
+    <ClCompile Include="Eve\SpaceObject\Attachments\EveSpaceObjectDecal.cpp">
+      <Filter>Source Files\Eve\SpaceObject\Attachments</Filter>
+    </ClCompile>
+    <ClCompile Include="Eve\SpaceObject\Attachments\EveSpaceObjectDecal_Blue.cpp">
+      <Filter>Source Files\Eve\SpaceObject\Attachments</Filter>
+    </ClCompile>
+    <ClCompile Include="Eve\SpaceObject\Attachments\EveSpotlightSet.cpp">
+      <Filter>Source Files\Eve\SpaceObject\Attachments</Filter>
+    </ClCompile>
+    <ClCompile Include="Eve\SpaceObject\Attachments\EveSpotlightSetItem.cpp">
+      <Filter>Source Files\Eve\SpaceObject\Attachments</Filter>
+    </ClCompile>
+    <ClCompile Include="Eve\SpaceObject\Attachments\EveSpotlightSetItem_Blue.cpp">
+      <Filter>Source Files\Eve\SpaceObject\Attachments</Filter>
+    </ClCompile>
+    <ClCompile Include="Eve\SpaceObject\Attachments\EveSpotlightSet_Blue.cpp">
+      <Filter>Source Files\Eve\SpaceObject\Attachments</Filter>
+    </ClCompile>
+    <ClCompile Include="Eve\SpaceObject\Attachments\EveSpriteSet.cpp">
+      <Filter>Source Files\Eve\SpaceObject\Attachments</Filter>
+    </ClCompile>
+    <ClCompile Include="Eve\SpaceObject\Attachments\EveSpriteSetItem.cpp">
+      <Filter>Source Files\Eve\SpaceObject\Attachments</Filter>
+    </ClCompile>
+    <ClCompile Include="Eve\SpaceObject\Attachments\EveSpriteSetItem_Blue.cpp">
+      <Filter>Source Files\Eve\SpaceObject\Attachments</Filter>
+    </ClCompile>
+    <ClCompile Include="Eve\SpaceObject\Attachments\EveSpriteSet_Blue.cpp">
+      <Filter>Source Files\Eve\SpaceObject\Attachments</Filter>
+    </ClCompile>
+    <ClCompile Include="Eve\SpaceObject\Attachments\EveTrailsSet.cpp">
+      <Filter>Source Files\Eve\SpaceObject\Attachments</Filter>
+    </ClCompile>
+    <ClCompile Include="Eve\SpaceObject\Attachments\EveTrailsSet_Blue.cpp">
+      <Filter>Source Files\Eve\SpaceObject\Attachments</Filter>
     </ClCompile>
     <ClCompile Include="Eve\SpaceObjectFactory\EveSOF.cpp">
       <Filter>Source Files\Eve\SpaceObjectFactory</Filter>

@@ -49,7 +49,9 @@ const unsigned PALETTE_SIZE = 768;
 //   Tr2TgaHandler constructor
 // --------------------------------------------------------------------------------------
 Tr2TgaHandler::Tr2TgaHandler( const wchar_t* sourceName )
-	:Tr2ImageHandler( sourceName )
+	:Tr2ImageHandler( sourceName ),
+	m_fileSize( 0 ),
+	m_imageSize( 0 )
 {
 }
 

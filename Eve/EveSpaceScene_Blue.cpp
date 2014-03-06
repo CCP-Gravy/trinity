@@ -623,9 +623,6 @@ static PyObject* PyPickParticle( PyObject* self, PyObject* args )
 		return PyInt_FromLong( -1 );
 	}
 
-	// calulate world-scale-factor, if we need it
-	float worldScale = 1.f;
-
 	float fx, fy;
 	Vector3 startWorld;
 	Vector3 dirWorld;

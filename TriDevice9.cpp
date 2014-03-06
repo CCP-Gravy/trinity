@@ -169,6 +169,11 @@ void TriDevice::HandleRenderTick( Be::Time timestamp )
 	{
 		return;
 	}
+
+	if( m_renderJobs )
+	{
+		m_renderJobs->RunUpdate( timestamp );
+	}
 	
 	// Present the backbuffer from the last renderering to the front buffer.
 	// it is more efficient to do it like this (revers order), because there is some

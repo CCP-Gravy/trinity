@@ -7,6 +7,7 @@
 #include "StdAfx.h"
 #include "Tr2VideoAdapters.h"
 #include "TriSettingsRegistrar.h"
+#include "TrinityAL/Tr2DriverUtilities.h"
 
 #ifdef _WIN32
 std::vector<HANDLE> g_D3DCreatedHeaps;
@@ -317,7 +318,7 @@ std::string Tr2VideoAdapter::GetDeviceIdentifierString() const
 		return ( const char* )str;
 	}
 #else
-    char buffer[49];
+    char buffer[128];
     sprintf(
             buffer,
             "%08x-%04x-%04x-%02xhh%02xhh-%02xhh%02xhh%02xhh%02xhh%02xhh%02xhh",
@@ -336,3 +337,26 @@ std::string Tr2VideoAdapter::GetDeviceIdentifierString() const
 #endif
 	return "";
 }
+
+// --------------------------------------------------------------------------------------
+// Description:
+//   Get driver information for the display adapter.
+// Arguments:
+//   info - (out) Tr2VideoDriver object with video driver properties
+// Return Value:
+//   ALResult code of operation
+// --------------------------------------------------------------------------------------
+ALResult Tr2VideoAdapter::GetDriverInfo( Tr2VideoDriver** info )
+{
+	*info = nullptr;
+	
+	Tr2VideoDriverInfo driverInfo;
+	CR_RETURN_HR( Tr2DriverUtilities::GetDriverVersion( m_info.deviceID, driverInfo ) );
+
+	Tr2VideoDriverPtr result;
+	result.CreateInstance();
+	result->m_info = driverInfo;
+	*info = result.Detach();
+	return S_OK;
+}
+

@@ -200,7 +200,6 @@ bool Tr2InteriorLightmapGenerator::BakeLighting( std::vector<BakeContents>& cont
 				unsigned width = lightmap8bpp->GetMipWidth( i );
 				unsigned height = lightmap8bpp->GetMipHeight( i );
 
-				ptrdiff_t count = 0;
 				bool cancel = false;
 				Tr2DxtCompressSurface( 
 					TR2DXT_COMPRESS_SQUISH_DXT5, 

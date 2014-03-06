@@ -340,8 +340,7 @@ Tr2MayaAnimationEngine::~Tr2MayaAnimationEngine( )
 // Refactored and optimized version of the maya evaluation logic and setup.
 float Tr2MayaAnimationEngine::evaluateBezier(const Tr2MayaAnimBezierSegment *segment, float time, float nextSegmentTime) const
 {
-	float t, s, poly[4], roots[5];
-	int numRoots;
+	float t, s;
 
 	s = (time - segment->m_time) / (nextSegmentTime - segment->m_time);
 
@@ -351,12 +350,13 @@ float Tr2MayaAnimationEngine::evaluateBezier(const Tr2MayaAnimBezierSegment *seg
 	}
 	else 
 	{
+		float poly[4], roots[5];
 		poly[3] = segment->m_fCoeff[3];
 		poly[2] = segment->m_fCoeff[2];
 		poly[1] = segment->m_fCoeff[1];
 		poly[0] = segment->m_fCoeff[0] - s;
 
-		numRoots = polyZeroes (poly, 3, 0.0, 1, 1.0, 1, roots);
+		int numRoots = polyZeroes (poly, 3, 0.0, 1, 1.0, 1, roots);
 		if (numRoots == 1) 
 		{
 			t = roots[0];
@@ -438,10 +438,8 @@ float Tr2MayaAnimationEngine::evaluateInfinities(const Tr2MayaAnimCurve *animCur
 
 float Tr2MayaAnimationEngine::evaluateInfinityLinearPre( const Tr2MayaAnimCurve *animCurve, void* firstSegment, size_t segmentSize, float time )
 {
-	float value = 0.0;
-	float firstTime;
-	firstTime = ((Tr2MayaAnimSegment*)firstSegment)->m_time;
-	value = ((Tr2MayaAnimSegment*)firstSegment)->m_value;	
+	float firstTime = static_cast<Tr2MayaAnimSegment*>( firstSegment )->m_time;
+	float value = static_cast<Tr2MayaAnimSegment*>( firstSegment )->m_value;	
 
 	value -= ((firstTime - time) * animCurve->m_inTangent);					
 
@@ -450,8 +448,7 @@ float Tr2MayaAnimationEngine::evaluateInfinityLinearPre( const Tr2MayaAnimCurve 
 
 float Tr2MayaAnimationEngine::evaluateInfinityLinearPost( const Tr2MayaAnimCurve *animCurve, float time )
 {
-	float value = 0.0;
-	value = animCurve->m_endValue;
+	float value = animCurve->m_endValue;
 	value += ((time - animCurve->m_endTime) * animCurve->m_outTangent);					
 	return value;
 }
@@ -462,7 +459,7 @@ void Tr2MayaAnimationEngine::evaluateInfinityCycleSetup( const Tr2MayaAnimCurve 
 {
 	float timeRange;
 	double numCycles;
-	*firstTime = ((Tr2MayaAnimSegment*)firstSegment)->m_time;
+	*firstTime = static_cast<Tr2MayaAnimSegment*>( firstSegment )->m_time;
 	*lastTime = animCurve->m_endTime;
 	timeRange = *lastTime - *firstTime;
 
@@ -504,8 +501,8 @@ void Tr2MayaAnimationEngine::evaluateInfinityCycleRelativeSetup( const Tr2MayaAn
 	float *remainder, float* valueRange, double *numCycles ) const
 {
 	float timeRange;
-	*firstTime = ((Tr2MayaAnimSegment*)firstSegment)->m_time;
-	*valueRange = animCurve->m_endValue - ((Tr2MayaAnimSegment*)firstSegment)->m_value;
+	*firstTime = static_cast<Tr2MayaAnimSegment*>( firstSegment )->m_time;
+	*valueRange = animCurve->m_endValue - static_cast<Tr2MayaAnimSegment*>( firstSegment )->m_value;
 	*lastTime = animCurve->m_endTime;
 	timeRange = *lastTime - *firstTime;
 
@@ -556,7 +553,7 @@ void Tr2MayaAnimationEngine::evaluateInfinityOscillateSetup( const Tr2MayaAnimCu
 {
 	float timeRange;
 	/* find the number of cycles of the base animation curve */
-	*firstTime = ((Tr2MayaAnimSegment*)firstSegment)->m_time;
+	*firstTime = static_cast<Tr2MayaAnimSegment*>( firstSegment )->m_time;
 	*lastTime = animCurve->m_endTime;
 	timeRange = *lastTime - *firstTime;
 
@@ -580,7 +577,7 @@ float Tr2MayaAnimationEngine::evaluateInfinityOscillatePre( const Tr2MayaAnimCur
 
 	evaluateInfinityOscillateSetup( animCurve, firstSegment, segmentSize, time, &firstTime, &lastTime, &factoredTime, &remainder, &numCycles );
 	
-	if ((remainder = (float)modf (numCycles / 2.0f, &notUsed)) != 0.0f) 
+	if ( modf( numCycles / 2.0, &notUsed ) != 0 ) 
 	{
 		factoredTime = firstTime + factoredTime;
 	}
@@ -600,7 +597,7 @@ float Tr2MayaAnimationEngine::evaluateInfinityOscillatePost( const Tr2MayaAnimCu
 
 	evaluateInfinityOscillateSetup( animCurve, firstSegment, segmentSize, time, &firstTime, &lastTime, &factoredTime, &remainder, &numCycles );
 
-	if ((remainder = (float)modf (numCycles / 2.0f, &notUsed)) != 0.0f) 
+	if ( modf( numCycles / 2.0f, &notUsed ) != 0 ) 
 	{
 		factoredTime = lastTime - factoredTime;
 	}
@@ -614,25 +611,22 @@ float Tr2MayaAnimationEngine::evaluateInfinityOscillatePost( const Tr2MayaAnimCu
 
 bool Tr2MayaAnimationEngine::find(const Tr2MayaAnimCurve *animCurve, float time, void* firstSegment, size_t segmentSize, int *index) const
 {
-	int len, mid, low, high;
-
 	/* use a binary search to find the key */
 	*index = 0;
-	len = animCurve->m_numSegments + 1;
-	void* segment = NULL;	
-	float stime = 0.0f;
+	int len = animCurve->m_numSegments + 1;
 
 	if (len > 0) 
 	{
-		low = 0;
-		high = len - 1;
+		int low = 0;
+		int high = len - 1;
 		do 
 		{
-			mid = (low + high) >> 1;	
+			float stime;
+			int mid = (low + high) >> 1;	
 			if( mid < ( len - 1 ) )
 			{
-				segment = (char*)firstSegment + (segmentSize*mid);
-				stime = ((Tr2MayaAnimSegment*)segment)->m_time;
+				void* segment = (char*)firstSegment + (segmentSize*mid);
+				stime = static_cast<Tr2MayaAnimSegment*>( segment )->m_time;
 			}
 			else
 			{
@@ -717,11 +711,11 @@ float Tr2MayaAnimationEngine::evaluate( int curveIndex, float time )
 	}
 
 	/* check if the time falls into the pre-infinity */
-	if (time < ((Tr2MayaAnimSegment*)firstSegment)->m_time) 
+	if( time < static_cast<Tr2MayaAnimSegment*>( firstSegment )->m_time ) 
 	{
 		if (animCurve->m_preInfinity == INFINITY_CONSTANT) 
 		{
-			return ((Tr2MayaAnimSegment*)firstSegment)->m_value;
+			return static_cast<Tr2MayaAnimSegment*>( firstSegment )->m_value;
 		}
 		return evaluateInfinities(animCurve, firstSegment, segmentSize, time, true);
 	}
@@ -741,20 +735,18 @@ float Tr2MayaAnimationEngine::evaluate( int curveIndex, float time )
 
 float Tr2MayaAnimationEngine::evaluateImp( const Tr2MayaAnimCurve *animCurve, float time, void* firstSegment, size_t segmentSize )
 {
-
 	bool withinInterval = false;
 	Tr2MayaAnimSegment* nextSegment = NULL;
 	Tr2MayaAnimSegment* lastSegment = NULL;
 	int index;
-	float value = 0.0;	
 
 	/* check to see if the time falls within the last segment we evaluated */
 	if (m_evalCache[m_currentCurveIndex] >= 0) 
 	{
-		lastSegment = (Tr2MayaAnimSegment*)((char*)firstSegment + (segmentSize*(m_evalCache[m_currentCurveIndex])));
+		lastSegment = reinterpret_cast<Tr2MayaAnimSegment*>( static_cast<char*>( firstSegment ) + ( segmentSize * m_evalCache[m_currentCurveIndex] ) );
 		if ((m_evalCache[m_currentCurveIndex] < (animCurve->m_numSegments - 1)) && (time > lastSegment->m_time)) 
 		{			
-			nextSegment = (Tr2MayaAnimSegment*)((char*)firstSegment + (segmentSize*(m_evalCache[m_currentCurveIndex] + 1)));
+			nextSegment = reinterpret_cast<Tr2MayaAnimSegment*>( static_cast<char*>( firstSegment ) + ( segmentSize * ( m_evalCache[m_currentCurveIndex] + 1 ) ) );
 			if (time == nextSegment->m_time) 
 			{
 				m_evalCache[m_currentCurveIndex]++;
@@ -772,7 +764,7 @@ float Tr2MayaAnimationEngine::evaluateImp( const Tr2MayaAnimCurve *animCurve, fl
 		}
 		else if ((m_evalCache[m_currentCurveIndex] > 0) && (time < lastSegment->m_time)) 
 		{			
-			Tr2MayaAnimSegment* prevSegment = (Tr2MayaAnimSegment*)((char*)firstSegment + (segmentSize*(m_evalCache[m_currentCurveIndex] - 1)));
+			Tr2MayaAnimSegment* prevSegment = reinterpret_cast<Tr2MayaAnimSegment*>( static_cast<char*>( firstSegment ) + ( segmentSize * ( m_evalCache[m_currentCurveIndex] - 1 ) ) );
 			if (time > prevSegment->m_time) 
 			{
 				index = m_evalCache[m_currentCurveIndex];
@@ -804,7 +796,7 @@ float Tr2MayaAnimationEngine::evaluateImp( const Tr2MayaAnimCurve *animCurve, fl
 			else
 			{				
 				m_evalCache[m_currentCurveIndex] = index;
-				return ((Tr2MayaAnimSegment*)((char*)firstSegment + (segmentSize*index)))->m_value;	
+				return reinterpret_cast<Tr2MayaAnimSegment*>( static_cast<char*>( firstSegment ) + segmentSize * index )->m_value;	
 			}		
 		}
 		else if( index == (animCurve->m_numSegments+1) )  
@@ -818,16 +810,16 @@ float Tr2MayaAnimationEngine::evaluateImp( const Tr2MayaAnimCurve *animCurve, fl
 	if( m_evalCache[m_currentCurveIndex] != (index - 1) ) 
 	{
 		m_evalCache[m_currentCurveIndex] = index - 1;
-		lastSegment = (Tr2MayaAnimSegment*)((char*)firstSegment + (segmentSize*(m_evalCache[m_currentCurveIndex])));
+		lastSegment = reinterpret_cast<Tr2MayaAnimSegment*>( static_cast<char*>( firstSegment ) + segmentSize * m_evalCache[m_currentCurveIndex] );
 		if(nextSegment == NULL)
 		{
-			nextSegment = (Tr2MayaAnimSegment*)((char*)firstSegment + (segmentSize*index));
+			nextSegment = reinterpret_cast<Tr2MayaAnimSegment*>( static_cast<char*>( firstSegment ) + segmentSize * index );
 		}
 	}
 
 	if( animCurve->m_isWeighted )
 	{
-		Tr2MayaAnimBezierSegment* bSegment = (Tr2MayaAnimBezierSegment*)lastSegment;
+		Tr2MayaAnimBezierSegment* bSegment = static_cast<Tr2MayaAnimBezierSegment*>( lastSegment );
 		/* finally we can evaluate the segment */
 		if(bSegment->m_isStep) 
 		{
@@ -853,7 +845,7 @@ float Tr2MayaAnimationEngine::evaluateImp( const Tr2MayaAnimCurve *animCurve, fl
 	}
 	else
 	{
-		Tr2MayaAnimHermiteSegment* hSegment = (Tr2MayaAnimHermiteSegment*)lastSegment;
+		Tr2MayaAnimHermiteSegment* hSegment = static_cast<Tr2MayaAnimHermiteSegment*>( lastSegment );
 		/* finally we can evaluate the segment */
 		if(hSegment->m_isStep) 
 		{

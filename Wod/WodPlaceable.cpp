@@ -134,7 +134,7 @@ void WodPlaceable::SetPlaceableResPath( const std::string& val )
 {
     m_placeableResPath = val;
 	IRootPtr p;
-	p.Attach( BeResMan->GetObject( m_placeableResPath.c_str() ) );
+	p.Attach( BeResMan->LoadObject( m_placeableResPath.c_str() ) );
 	m_placeableRes = nullptr;
 	BlueQIPtrAssign( (IRoot**)&m_placeableRes, p, BlueInterfaceIID<WodPlaceableRes>() );
 
@@ -285,7 +285,7 @@ bool WodPlaceable::OnModified( Be::Var* value )
 bool WodPlaceable::Initialize()
 {
 	IRootPtr p;
-	p.Attach( BeResMan->GetObject( m_placeableResPath.c_str() ) );
+	p.Attach( BeResMan->LoadObject( m_placeableResPath.c_str() ) );
 	BlueQIPtrAssign( (IRoot**)&m_placeableRes, p, BlueInterfaceIID<WodPlaceableRes>() );
 
 	UpdateLightOverrides();

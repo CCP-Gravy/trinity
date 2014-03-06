@@ -106,9 +106,6 @@ float WodLightSource::CalculateIntensityInBoundingBox( const Matrix& lightWorldT
 
 	const float closestPointIntensity = CalculateIntensityAtPoint( lightWorldTransform, nearestPoint );
 
-	float directionIntersectionIntensity = 0.0f;
-
-
 	return closestPointIntensity;
 }
 

@@ -403,7 +403,6 @@ protected:
 	PerFramePSData m_perFramePS;
 	PerFrameVSData m_perFrameVS;
 
-	int m_objectsRendered;
 	EveVisualizeMethod m_visualizeMethod;
 	bool m_isWireframe;
 

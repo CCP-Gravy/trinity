@@ -53,30 +53,19 @@ void Tr2Sprite2dStretch::GatherSprites( Tr2Sprite2dScene* renderer )
 		renderer->SetSpriteEffect( m_spriteEffect );
 		renderer->SetTileMode( 0 );
 
-		float srcLeft = m_texture->GetSrcX();
-		float srcTop = m_texture->GetSrcY();
 		float srcWidth = m_texture->GetSrcWidth();
-		float srcHeight = m_texture->GetSrcHeight();
 
 		unsigned int textureWidth = m_texture->GetWidth();
-		unsigned int textureHeight = m_texture->GetHeight();
 
 		if( srcWidth == 0.0f )
 		{
 			srcWidth = (float)textureWidth;
-		}
-		if( srcHeight == 0.0f )
-		{
-			srcHeight = (float)textureHeight;
 		}
 
 		if( srcWidth < m_leftEdgeSize + m_rightEdgeSize )
 		{
 			return;
 		}
-
-		float srcRight = srcLeft + srcWidth;
-		float srcBottom = srcTop + srcHeight;
 
 		float leftEdgeSize = (float)m_leftEdgeSize;
 		float rightEdgeSize = (float)m_rightEdgeSize;

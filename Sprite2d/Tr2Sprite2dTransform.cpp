@@ -9,7 +9,9 @@ Tr2Sprite2dTransform::Tr2Sprite2dTransform( IRoot* lockobj ) :
 	m_rotation( 0.0f ),
 	m_scalingCenter( 0.0f, 0.0f ),
 	m_scalingRotation( 0.0f ),
-	m_scale( 1.0f, 1.0f )
+	m_scale( 1.0f, 1.0f ),
+	m_depthMin( 0.0f ),
+	m_depthMax( 0.0f )
 {
 }
 

@@ -183,7 +183,7 @@ void Tr2ScalarExprKey::SetExpression( mu::Parser& parser, std::string& expressio
 		// Generate the bytecode
 		parser.Eval();
 	}
-	catch (mu::Parser::exception_type e)
+	catch( const mu::Parser::exception_type& e )
 	{
 		if ( expression.size() )
 		{

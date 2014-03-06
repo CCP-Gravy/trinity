@@ -10,22 +10,20 @@
 #include "Tr2Sprite2dScene.h"
 
 Tr2Sprite2dLineTraceVertex::Tr2Sprite2dLineTraceVertex( IRoot* lockobj /*= NULL */ ) :
-	m_position( 0.0f, 0.0f ),
+m_position( 0.0f, 0.0f ),
 	m_color( 1.0f, 1.0f, 1.0f, 1.0f )
 {
 }
 
 Tr2Sprite2dLineTrace::Tr2Sprite2dLineTrace( IRoot* lockobj /*= NULL */ ) :
-	PARENTLOCK( m_vertices ),
+PARENTLOCK( m_vertices ),
 	m_lineWidth( 1.0f ),
 	m_length( 0.0f ),
 	m_start( 0.0f ),
 	m_end( 1.0f ),
 	m_isLoop( false ),
-	m_renderVertices( nullptr ),
-	m_renderVertexCapacity( 0 ),
-	m_renderVertexCount( 0 ),
 	m_renderIndices( "Tr2Sprite2dLineTrace/m_renderIndices" ),
+	m_renderVertices( "Tr2Sprite2dLineTrace/m_renderVertices" ),
 	m_textureWidth( 1.0f),
 	m_textureOffset( 0.0f ),
 	m_textureOffsetAccum( 0.0f )
@@ -44,7 +42,7 @@ void Tr2Sprite2dLineTrace::GatherSprites( Tr2Sprite2dScene* renderer )
 
 	if( !m_display || m_vertices.empty() || (m_end <= m_start) || (m_spriteEffect == TR2_SFX_NONE) )
 	{
-		if( m_renderVertices )
+		if( !m_renderVertices.empty() )
 		{
 			ClearVertices();
 		}
@@ -67,14 +65,9 @@ void Tr2Sprite2dLineTrace::GatherSprites( Tr2Sprite2dScene* renderer )
 
 		renderer->PushTranslation( m_translation );
 
-		m_renderVertexCapacity = GetVertexCount();
-		m_renderVertices = (Tr2Sprite2dD3DVertex*)CCP_MALLOC( 
-			"Tr2Sprite2dLineTrace/m_renderVertices", 
-			m_renderVertexCapacity * sizeof( Tr2Sprite2dD3DVertex ) );
-		m_renderVertexCount = 0;
+		m_renderVertices.reserve( GetEstimatedVertexCount() );
 
 		m_length = CalcLength();
-		float relativeLength = 0.0f;
 		float lastRelativeLength = 0.0f;
 		float length = 0.0f;
 
@@ -102,7 +95,7 @@ void Tr2Sprite2dLineTrace::GatherSprites( Tr2Sprite2dScene* renderer )
 			Vector2 d = toPos - fromPos;
 			float curLength = D3DXVec2Length( &d );
 			length += curLength;
-			relativeLength = length / m_length;
+			float relativeLength = length / m_length;
 
 			Vector2 adjustedFromPos;
 			Color adjustedFromColor;
@@ -190,7 +183,7 @@ void Tr2Sprite2dLineTrace::GatherSprites( Tr2Sprite2dScene* renderer )
 	}
 
 	SetValidatedTextures( renderer );
-	renderer->RenderTriangleVerts( m_renderVertices, m_renderVertexCount, &m_renderIndices[0], (unsigned short)m_renderIndices.size() );
+	renderer->RenderTriangleVerts( &m_renderVertices[0], (unsigned int)m_renderVertices.size(), &m_renderIndices[0], (uint16_t)m_renderIndices.size() );
 }
 
 ITr2SpriteObject* Tr2Sprite2dLineTrace::PickPoint( float x, float y, Tr2Sprite2dScene* renderer )
@@ -228,11 +221,12 @@ float Tr2Sprite2dLineTrace::CalcLength()
 	return length;
 }
 
-unsigned int Tr2Sprite2dLineTrace::GetVertexCount()
+unsigned int Tr2Sprite2dLineTrace::GetEstimatedVertexCount()
 {
 	unsigned int vertsNeeded = (unsigned int)m_vertices.size() * 4 + 2;
 
-	// Add verts for line joints
+	// Add verts for line joints. Actual number of vertices used varies
+	// depending on line thickness and joint angle.
 	unsigned int w = (unsigned int)m_lineWidth;
 	vertsNeeded += (unsigned int)m_vertices.size() * w;
 
@@ -248,12 +242,6 @@ void Tr2Sprite2dLineTrace::AddSegment(
 	const Color& toColor, 
 	float capAngleTo )
 {
-	CCP_ASSERT( m_renderVertexCount + 4 <= m_renderVertexCapacity );
-	if( m_renderVertexCount + 4 > m_renderVertexCapacity )
-	{
-		return;
-	}
-
 	Vector2 d = to - from;
 	float segmentLength = D3DXVec2Length( &d );
 	D3DXVec2Normalize( &d, &d );
@@ -379,21 +367,23 @@ void Tr2Sprite2dLineTrace::AddSegment(
 		v3.texCoord[1] = Vector2( texOffset2, 0.0f );
 	}
 
+	uint16_t oldSize = (uint16_t)m_renderVertices.size();
+	m_renderVertices.resize( oldSize + 4 );
+
 	renderer->PrepareTriangleVerts( 
-		m_renderVertices + m_renderVertexCount, 
+		&m_renderVertices[oldSize], 
 		verts, 
 		sizeof( Tr2Sprite2dVertexBase ), 
 		4 );
 
-	m_renderIndices.push_back( 0 + m_renderVertexCount );
-	m_renderIndices.push_back( 1 + m_renderVertexCount );
-	m_renderIndices.push_back( 3 + m_renderVertexCount );
-	m_renderIndices.push_back( 3 + m_renderVertexCount );
-	m_renderIndices.push_back( 1 + m_renderVertexCount );
-	m_renderIndices.push_back( 2 + m_renderVertexCount );
+	m_renderIndices.push_back( 0 + oldSize );
+	m_renderIndices.push_back( 1 + oldSize );
+	m_renderIndices.push_back( 3 + oldSize );
+	m_renderIndices.push_back( 3 + oldSize );
+	m_renderIndices.push_back( 1 + oldSize );
+	m_renderIndices.push_back( 2 + oldSize );
 
-	m_renderVertexCount += 4;
-	unsigned int fanVertexBase = m_renderVertexCount;
+	auto fanVertexBase = m_renderVertices.size();
 
 	// Construct joint
 	if( capAngleTo == 0.0f )
@@ -402,25 +392,25 @@ void Tr2Sprite2dLineTrace::AddSegment(
 		return;
 	}
 
-	unsigned short fanBase;
+	uint16_t fanBase;
 	Vector2 fanBaseTranslation;
 	float sign = 1.0f;
 	if( capAngleTo < 0.0f )
 	{
-		fanBase = 2 + m_renderVertexCount - 4;
+		fanBase = 2 + (uint16_t)m_renderVertices.size() - 4;
 		fanBaseTranslation = v2.position;
 		sign = -1.0f;
 	}
 	else if( capAngleTo > 0.0f )
 	{
-		fanBase = 3 + m_renderVertexCount - 4;
+		fanBase = 3 + (uint16_t)m_renderVertices.size() - 4;
 		fanBaseTranslation = v3.position;
 	}
 
 	float startAngle = atan2( normal.y, normal.x );
 	float endAngle = startAngle + capAngleTo;
 	float angleDiff = endAngle - startAngle;
-	
+
 	float arcLength = angleDiff * m_lineWidth;
 	unsigned int numSteps = (unsigned int)arcLength / 4;
 	if( numSteps < 1 )
@@ -430,7 +420,6 @@ void Tr2Sprite2dLineTrace::AddSegment(
 	float stepSize = angleDiff / (float)numSteps;
 	++numSteps;
 
-	// This needs to be synced up with GetVertexCount
 	unsigned int w = (unsigned int)m_lineWidth;
 
 	if( numSteps > w )
@@ -439,16 +428,17 @@ void Tr2Sprite2dLineTrace::AddSegment(
 		stepSize = angleDiff / (float)(numSteps - 1);
 	}
 
-	Tr2Sprite2dVertexBase* fanVerts = (Tr2Sprite2dVertexBase*)CCP_MALLOC( 
+	Tr2Sprite2dVertexBase* fanVerts = static_cast<Tr2Sprite2dVertexBase*>( CCP_MALLOC( 
 		"Tr2Sprite2dLineTrace/fanVerts", 
-		numSteps * sizeof( Tr2Sprite2dVertexBase ) );
-	
+		numSteps * sizeof( Tr2Sprite2dVertexBase ) ) );
+
 	Tr2Sprite2dVertexBase* currentVertex = fanVerts;
 	float a = startAngle;
 	float jointWidth = halfWidth * 2.0f;
+	uint16_t vertexCount = (uint16_t)m_renderVertices.size();
 	for( unsigned int i = 0; i < numSteps; ++i )
 	{
-		
+
 		Tr2Sprite2dVertexBase& v = *currentVertex++;
 		v.position.x = sign * cos( a ) * jointWidth + fanBaseTranslation.x;
 		v.position.y = sign * sin( a ) * jointWidth + fanBaseTranslation.y;
@@ -482,19 +472,19 @@ void Tr2Sprite2dLineTrace::AddSegment(
 
 		if( i > 0 )
 		{
-			m_renderIndices.push_back( -1 + m_renderVertexCount );
-			m_renderIndices.push_back(  0 + m_renderVertexCount );
+			m_renderIndices.push_back( -1 + vertexCount );
+			m_renderIndices.push_back(  0 + vertexCount );
 			m_renderIndices.push_back( fanBase );
 		}
 
-		m_renderVertexCount += 1;
 		a += stepSize;
-
-		CCP_ASSERT( m_renderVertexCount <= m_renderVertexCapacity );
+		++vertexCount;
 	}
 
+	oldSize = (uint16_t)m_renderVertices.size();
+	m_renderVertices.resize( vertexCount );
 	renderer->PrepareTriangleVerts( 
-		m_renderVertices + fanVertexBase, 
+		&m_renderVertices[fanVertexBase], 
 		fanVerts, 
 		sizeof( Tr2Sprite2dVertexBase ), 
 		numSteps );
@@ -517,10 +507,8 @@ float Tr2Sprite2dLineTrace::ClampAngle(float angle)
 
 void Tr2Sprite2dLineTrace::ClearVertices()
 {
-	CCP_FREE( m_renderVertices );
-	m_renderVertices = nullptr;
-	m_renderVertexCapacity = 0;
-	m_renderVertexCount = 0;
+	m_renderVertices.clear();
+	m_renderVertices.shrink_to_fit();
 	m_renderIndices.clear();
 	m_renderIndices.shrink_to_fit();
 	m_textureOffsetAccum = 0.0f;
@@ -529,11 +517,11 @@ void Tr2Sprite2dLineTrace::ClearVertices()
 void Tr2Sprite2dLineTrace::OnListModified( long event, /* BLUELISTEVENT values */ ssize_t key, ssize_t key2, IRoot* value, const IList* theList )
 {
 	switch( event )
-	{
-		case BELIST_INSERTED:
-		case BELIST_REMOVED:
-		case BELIST_UNLOADSTART:
-			SetDirty();
-			break;
+	{ 
+	case BELIST_INSERTED:
+	case BELIST_REMOVED:
+	case BELIST_UNLOADSTART:
+		SetDirty();
+		break;
 	}
 }

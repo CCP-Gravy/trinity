@@ -16,6 +16,8 @@ EveAnimationState::EveAnimationState( IRoot* lockobj ) :
 	m_currentSequence( EVE_ANISTAGE_INVALID ),
 	m_transitionName( "" ),
 	m_transitionPending( false ),
+	m_pendingCommands( false ),
+	m_pendingCommandDelay( 0.f ),
 	m_animationDuration( 0.f ),
 	m_startTime( 0.f )
 {
@@ -188,6 +190,9 @@ EveAnimationSequencePtr EveAnimationState::GetAnimationSequence( EveAnimationSta
 	case EVE_ANISTAGE_EXIT:
 		sequence = m_exitSequence;
 		break;
+	case EVE_ANISTAGE_TRANSITION:
+		sequence = GetTransition( m_transitionName );
+		break;
 	default:
 		break;
 	};
@@ -266,29 +271,32 @@ inline void ExecuteActivationCurveCommand( EveSpaceObject2Ptr owner, EveAnimatio
 
 // --------------------------------------------------------------------------------
 // Description:
-//   Play animations and curves in the animation sequence
+//   Play curves in the animation sequence
 // --------------------------------------------------------------------------------
-void EveAnimationState::DoAnimationSequence( EveSpaceObject2Ptr owner, EveAnimationSequencePtr sequence )
+void EveAnimationState::DoAnimationSequenceCurves( EveSpaceObject2Ptr owner, EveAnimationSequencePtr sequence )
 {
 	if( !sequence )
 	{
 		return;
 	}
 
-	// granny animation
-	if( sequence->m_animation )
-	{
-		EveAnimationPtr anim = sequence->m_animation;
-		owner->PlayAnimation( anim->m_name.c_str(), false, anim->m_loops, anim->m_delay, anim->m_speed );
-	}
-	
-	// curve sets
 	for( auto it = sequence->m_curves.cbegin(); it != sequence->m_curves.cend(); it++ )
 	{
 		owner->PlayCurveSet( (*it)->m_name );
 	}
+}
 
-	// commands
+// --------------------------------------------------------------------------------
+// Description:
+//   Play commands in the animation sequence
+// --------------------------------------------------------------------------------
+void EveAnimationState::DoAnimationSequenceCommands( EveSpaceObject2Ptr owner, EveAnimationSequencePtr sequence )
+{
+	if( !sequence )
+	{
+		return;
+	}
+	
 	for( auto it = sequence->m_commands.cbegin(); it != sequence->m_commands.cend(); it++ )
 	{
 		EveAnimationCommandPtr cmd = *it;
@@ -334,19 +342,45 @@ void EveAnimationState::DoAnimationSequence( EveSpaceObject2Ptr owner, EveAnimat
 
 // --------------------------------------------------------------------------------
 // Description:
+//   Play animations, commands and curves in the animation sequence
+// --------------------------------------------------------------------------------
+void EveAnimationState::DoAnimationSequence( EveSpaceObject2Ptr owner, EveAnimationSequencePtr sequence )
+{
+	if( !sequence )
+	{
+		return;
+	}
+
+	m_pendingCommands = false;
+	m_pendingCommandDelay = owner->GetAnimationController()->GetAnimationChainCompleteTime() - Tr2Renderer::GetAnimationTime();
+	if( m_pendingCommandDelay > 0.f )
+	{
+		m_pendingCommands = true;
+	}
+	
+	// granny animation
+	if( sequence->m_animation )
+	{
+		EveAnimationPtr anim = sequence->m_animation;
+		owner->PlayAnimation( anim->m_name.c_str(), false, anim->m_loops, anim->m_delay, anim->m_speed );
+	}
+
+	if( m_pendingCommands )
+	{
+		return;
+	}
+
+	DoAnimationSequenceCurves( owner, sequence );
+	DoAnimationSequenceCommands( owner, sequence );
+}
+
+// --------------------------------------------------------------------------------
+// Description:
 //   Start the sequence specified, update end time etc.
 // --------------------------------------------------------------------------------
 void EveAnimationState::PlaySequence( EveSpaceObject2Ptr owner, EveAnimationStage type )
 {
-	EveAnimationSequencePtr sequence;
-	if( type == EVE_ANISTAGE_TRANSITION )
-	{
-		sequence = GetTransition( m_transitionName );
-	}
-	else
-	{
-		sequence = GetAnimationSequence( type );
-	}
+	EveAnimationSequencePtr sequence = GetAnimationSequence( type );
 	DoAnimationSequence( owner, sequence );
 	UpdateSequenceDuration( owner, sequence );
 	m_currentSequence = type;
@@ -387,6 +421,12 @@ void EveAnimationState::Update( Be::Time time, EveSpaceObject2Ptr owner )
 	float animationDelta = Tr2Renderer::GetAnimationTimeElapsed( m_startTime );
 	m_secondsRemaining = m_animationDuration - animationDelta;
 
+	if( m_pendingCommands && ( m_pendingCommandDelay - animationDelta ) <= 0 )
+	{
+		DoAnimationSequenceCurves( owner, GetAnimationSequence( m_currentSequence ) );
+		DoAnimationSequenceCommands( owner, GetAnimationSequence( m_currentSequence ) );
+		m_pendingCommands = false;
+	}
 	if( animationDelta < m_animationDuration )
 	{
 		return;

@@ -280,9 +280,6 @@ private:
 	// Umbra mirrors
 	std::vector<Tr2InteriorMirror*> m_mirrors;
 
-	// Should we draw ourself in a mirror?
-	bool m_drawInMirror;
-
 	// Number of lights affecting this object
 	int m_visibleLightCount;
 

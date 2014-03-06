@@ -44,8 +44,6 @@ void EveSprite2dBracketRenderer::GatherSprites( Tr2Sprite2dScene* renderer )
 
 	Tr2Sprite2dD3DVertex* vertices;
 
-	HRESULT hr;
-
 	if( m_bracketCountInBuffers != m_brackets.size() )
 	{
 		{
@@ -114,7 +112,7 @@ void EveSprite2dBracketRenderer::GatherSprites( Tr2Sprite2dScene* renderer )
 	}
 	else
 	{
-		hr = m_vertexBuffer.Lock( vertices, LOCK_WRITEONLY, renderContext );
+		auto hr = m_vertexBuffer.Lock( vertices, LOCK_WRITEONLY, renderContext );
 		if( FAILED( hr ) )
 		{
 			CCP_LOGERR( "%s failed to lock vertex buffer", __FUNCTION__ );

@@ -992,8 +992,6 @@ bool Tr2HostBitmap::Compress( unsigned compressionFormat, unsigned qualityLevel,
 	// TODO: Enable for PS4
 	return false;
 #else
-	USE_MAIN_THREAD_RENDER_CONTEXT();
-
 	if( !output || !IsValid() || GetType() != TEX_TYPE_2D || compressionFormat >= TR2DXT_COMPRESS_COUNT )
 	{
 		return false;

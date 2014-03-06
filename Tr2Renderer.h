@@ -82,6 +82,15 @@ public:
 		return GetPerObjectVSStartRegister();
 	}
 
+	static unsigned int GetPerObjectStartRegister( Tr2RenderContextEnum::ShaderType shaderType )
+	{
+		if( shaderType == Tr2RenderContextEnum::PIXEL_SHADER )
+		{
+			return GetPerObjectPSStartRegister();
+		}
+		return GetPerObjectVSStartRegister();
+	}
+
 
 	static bool IsRightHanded();
 

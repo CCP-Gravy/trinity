@@ -524,19 +524,9 @@ bool EveTurretSet::UpdateLOD()
 
 // --------------------------------------------------------------------------------
 // Description:
-//   First thing to do is to keep the world-matrices of all turrets up to date,
-//   cause most likely the ship has moved. Then sample the granny animation
-//   for each single turret of this set, cause they are animated independently.
-//   Just before collapsing the skeleton matrices, sneek in a bone modification
-//   for the auto tracking.
-//   Also smoothly do some fading between states and tracking positions.
-// SeeAlso:
-//   SingleTurretData, ModifySystemBoneTransform
-// Arguments:
-//   time - time delta since last frame
-//   parentMatrix - transform of parent object (usually a ship)
+//   Updates LODs for turrets.
 // --------------------------------------------------------------------------------
-void EveTurretSet::Update( float deltaT, Be::Time time, const Matrix* parentMatrix )
+void EveTurretSet::UpdateModelLOD()
 {
 	if( !m_singleTurrets.size() )
 	{
@@ -563,6 +553,28 @@ void EveTurretSet::Update( float deltaT, Be::Time time, const Matrix* parentMatr
 				break;
 			}
 		}
+	}
+}
+
+// --------------------------------------------------------------------------------
+// Description:
+//   First thing to do is to keep the world-matrices of all turrets up to date,
+//   cause most likely the ship has moved. Then sample the granny animation
+//   for each single turret of this set, cause they are animated independently.
+//   Just before collapsing the skeleton matrices, sneek in a bone modification
+//   for the auto tracking.
+//   Also smoothly do some fading between states and tracking positions.
+// SeeAlso:
+//   SingleTurretData, ModifySystemBoneTransform
+// Arguments:
+//   time - time delta since last frame
+//   parentMatrix - transform of parent object (usually a ship)
+// --------------------------------------------------------------------------------
+void EveTurretSet::Update( float deltaT, Be::Time time, const Matrix* parentMatrix )
+{
+	if( !m_singleTurrets.size() )
+	{
+		return;
 	}
 
 	// update single turret list
@@ -1992,7 +2004,7 @@ void EveTurretSet::ForceIdleAnimation()
 	{
 		for( unsigned int i = 0; i < m_singleTurrets.size(); ++i )
 		{
-			PlayAnimation( i, "", idleAnimName.c_str(), 0.f );
+			PlayAnimation( i, "", idleAnimName, 0.f );
 		}
 	}
 }
@@ -2124,7 +2136,7 @@ void EveTurretSet::ResetMissQueue()
 {
 	m_lastShotAccuracy = ACCURACY_INDETERMINATE;
 	m_trackMissPoint = false;
-	while( m_missQueue.size() > 0 ) 
+	while( !m_missQueue.empty() ) 
 	{
 		m_missQueue.pop();
 	}

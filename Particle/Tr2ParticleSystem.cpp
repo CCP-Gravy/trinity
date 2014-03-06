@@ -1119,7 +1119,6 @@ void Tr2ParticleSystem::UpdateElementDeclaration()
 	DestroyBuffers();
 	m_declaration = Tr2EffectStateManager::UNINITIALIZED_DECLARATION;
 	m_elementMap.clear();
-	const bool subtractFromTotal = m_buffers[0] != nullptr;
 	for( unsigned i = 0; i < Tr2ParticleElementDeclarationName::CUSTOM; ++i )
 	{
 		m_semanticElements[i].m_offset = -1;

@@ -41,12 +41,17 @@ EveCurveLineSet::~EveCurveLineSet()
 }
 
 // ------------------------------------------------------------------------------------------------------
-void EveCurveLineSet::Update( EveUpdateContext& updateContext )
+void EveCurveLineSet::UpdateSyncronous( EveUpdateContext& updateContext )
 {
 }
 
 // ------------------------------------------------------------------------------------------------------
-void EveCurveLineSet::UpdateWorldTransform( Be::Time time )
+void EveCurveLineSet::UpdateAsyncronous( EveUpdateContext& updateContext )
+{
+}
+
+// ------------------------------------------------------------------------------------------------------
+void EveCurveLineSet::Update( EveUpdateContext& updateContext )
 {
 }
 

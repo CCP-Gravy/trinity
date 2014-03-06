@@ -160,8 +160,7 @@ void Tr2ScalingTool::ResetPrimitiveColors()
 void Tr2ScalingTool::GenLineSets()
 {
 	Matrix translationMat;
-	Vector3* c_tris = NULL;
-	Vector3* p_tris = NULL;
+	Vector3* c_tris;
 	int numVectors = 0;
 
 	Tr2EffectPtr mSolidEffect;

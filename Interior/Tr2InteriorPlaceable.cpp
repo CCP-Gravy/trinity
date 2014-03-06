@@ -442,7 +442,7 @@ bool Tr2InteriorPlaceable::TestCellIntersectionAndAdd( Tr2InteriorCell* cell )
 				( *it )->setCell( NULL );
 				( *it )->release();
 				( *it ) = NULL;
-				m_umbraObjects.erase( it );
+				it = m_umbraObjects.erase( it );
 			}
 			else
 			{
@@ -626,7 +626,7 @@ void Tr2InteriorPlaceable::AddToRootCell( Umbra::Cell* cell )
 		( *it )->setCell( NULL );
 		( *it )->release();
 		( *it ) = NULL;
-		m_umbraObjects.erase( it );
+		it = m_umbraObjects.erase( it );
 	}
 	if( m_umbraObjects.empty() )
 	{
@@ -1203,8 +1203,6 @@ void Tr2InteriorPlaceable::EnableMirrors( Umbra::Cell* cell )
 			if( !mesh->GetAreaBoundingBox( ( *it )->GetIndex(), minBounds, maxBounds ) )
 				continue;
 
-			m_drawInMirror = false;
-
 			Tr2InteriorMirror* mirror = CCP_NEW("Tr2InteriorMirror" ) Tr2InteriorMirror();
 
 			if( !mirror )
@@ -1437,23 +1435,14 @@ const ITr2RenderableVector* Tr2InteriorPlaceable::GetAttachedRenderables()
 
 // --------------------------------------------------------------------------------------
 // Description:
-//   Loads a copy or an instance of a placeableRes from the res path depending on if 
-//   the placeable is  a shared or unique instance.
+//   Loads a copy of a placeableRes from the res path.
 // --------------------------------------------------------------------------------------
 void Tr2InteriorPlaceable::LoadPlaceableRes()
 {
 	m_placeableRes.Unlock();
 
 	IRootPtr p;
-	if( m_isUniqueInstance )
-	{
-		p.Attach( BeResMan->LoadObject(  m_placeableResPath.c_str() ) );
-	}
-	else
-	{
-		// Shared Copy
-		p.Attach( BeResMan->GetObject( m_placeableResPath.c_str(), "int" ) );
-	}
+	p.Attach( BeResMan->LoadObject( m_placeableResPath.c_str() ) );
 
 	BlueQIPtrAssign( ( IRoot** )&m_placeableRes, p, BlueInterfaceIID<WodPlaceableRes>() );
 }

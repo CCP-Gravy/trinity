@@ -255,7 +255,6 @@ float EvePlanet::EstimatePixelDiameterDist( float scaledDistance, float tanFOV )
 
 void EvePlanet::PrepareForWarp(float minDist, const Vector3& dest)
 {
-	Vector3* center = (Vector3*)&m_worldTransform._41;
 	m_warpMode = true;
 
 	float distEstimatedMinSize = EstimatePixelDiameterDist( minDist / SCALE, 1.f / Tr2Renderer::GetProjectionTransform()._11 );
@@ -303,7 +302,11 @@ void EvePlanet::UpdateViewDistanceInfo( const TriFrustum& frustum, ViewDistanceI
 
 	if( m_zOnlyModel )
 	{
-		m_zOnlyModel->UpdateViewDistanceInfo( frustum, viewDistance );
+		Vector4 boundingSphere;
+		if( m_zOnlyModel->GetBoundingSphere( boundingSphere, EVE_BOUNDS_WITH_CHILDREN ) )
+		{
+			viewDistance.UpdateClipPlanesIfInFront( boundingSphere, frustum );
+		}
 	}
 }
 

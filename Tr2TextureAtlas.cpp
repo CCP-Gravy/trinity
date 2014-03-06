@@ -1137,8 +1137,6 @@ bool Tr2TextureAtlas::CopyTextureIntoAtlas( Tr2AtlasTexture* tex )
 
 ALResult Tr2TextureAtlas::CreateTexture( unsigned int width, unsigned int height, AtlasTextureType type, Tr2AtlasTexture** result )
 {
-	USE_MAIN_THREAD_RENDER_CONTEXT();
-
 	Tr2AtlasTexturePtr tex;
 	tex.CreateInstance();
 	tex->m_textureAtlas = this;

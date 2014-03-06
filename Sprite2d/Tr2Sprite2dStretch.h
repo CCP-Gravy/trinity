@@ -56,13 +56,6 @@ private:
 
 	Tr2StretchScaleBehavior m_dpiScaleBehavior;
 
-	// Cached values for width, height and corner size. If these are
-	// the same as current width, height and corner size the vertices
-	// are up to date and are not updated when rendering.
-	float m_cachedWidth;
-	float m_cachedHeight;
-	unsigned int m_cachedCornerSize;
-
 	// The texture object, loaded from the resource pointed to with m_resPath
 	Tr2Sprite2dTexturePtr m_texture;
 
