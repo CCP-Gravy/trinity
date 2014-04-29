@@ -2205,6 +2205,7 @@
     <ClInclude Include="Eve\SpaceObject\Attachments\EveSpriteSet.h"/>
     <ClInclude Include="Eve\SpaceObject\Attachments\EveSpriteSetItem.h"/>
     <ClInclude Include="Eve\SpaceObject\Attachments\EveTrailsSet.h"/>
+    <ClInclude Include="Eve\SpaceObject\Utils\EveCustomMask.h"/>
     <ClInclude Include="Eve\SpaceObjectFactory\EveSOF.h"/>
     <ClInclude Include="Eve\SpaceObjectFactory\EveSOFData.h"/>
     <ClInclude Include="Eve\SpaceObjectFactory\EveSOFDataMgr.h"/>
@@ -2831,6 +2832,8 @@
     <ClCompile Include="Eve\SpaceObject\Attachments\EveSpriteSet_Blue.cpp"/>
     <ClCompile Include="Eve\SpaceObject\Attachments\EveTrailsSet.cpp"/>
     <ClCompile Include="Eve\SpaceObject\Attachments\EveTrailsSet_Blue.cpp"/>
+    <ClCompile Include="Eve\SpaceObject\Utils\EveCustomMask.cpp"/>
+    <ClCompile Include="Eve\SpaceObject\Utils\EveCustomMask_Blue.cpp"/>
     <ClCompile Include="Eve\SpaceObjectFactory\EveSOF.cpp"/>
     <ClCompile Include="Eve\SpaceObjectFactory\EveSOFData.cpp"/>
     <ClCompile Include="Eve\SpaceObjectFactory\EveSOFDataMgr.cpp"/>

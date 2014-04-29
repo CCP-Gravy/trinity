@@ -11,6 +11,7 @@
     <Filter Include="Source Files\Eve\SpaceObject"/>
     <Filter Include="Source Files\Eve\SpaceObjectFactory"/>
     <Filter Include="Source Files\Eve\SpaceObject\Attachments"/>
+    <Filter Include="Source Files\Eve\SpaceObject\Utils"/>
     <Filter Include="Source Files\Font"/>
     <Filter Include="Source Files\Include"/>
     <Filter Include="Source Files\Interior"/>
@@ -811,6 +812,9 @@
     </ClInclude>
     <ClInclude Include="Eve\SpaceObject\Attachments\EveTrailsSet.h">
       <Filter>Source Files\Eve\SpaceObject\Attachments</Filter>
+    </ClInclude>
+    <ClInclude Include="Eve\SpaceObject\Utils\EveCustomMask.h">
+      <Filter>Source Files\Eve\SpaceObject\Utils</Filter>
     </ClInclude>
     <ClInclude Include="Eve\SpaceObjectFactory\EveSOF.h">
       <Filter>Source Files\Eve\SpaceObjectFactory</Filter>
@@ -2677,6 +2681,12 @@
     </ClCompile>
     <ClCompile Include="Eve\SpaceObject\Attachments\EveTrailsSet_Blue.cpp">
       <Filter>Source Files\Eve\SpaceObject\Attachments</Filter>
+    </ClCompile>
+    <ClCompile Include="Eve\SpaceObject\Utils\EveCustomMask.cpp">
+      <Filter>Source Files\Eve\SpaceObject\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Eve\SpaceObject\Utils\EveCustomMask_Blue.cpp">
+      <Filter>Source Files\Eve\SpaceObject\Utils</Filter>
     </ClCompile>
     <ClCompile Include="Eve\SpaceObjectFactory\EveSOF.cpp">
       <Filter>Source Files\Eve\SpaceObjectFactory</Filter>
