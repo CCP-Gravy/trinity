@@ -91,12 +91,7 @@ private:
 	struct Vertex
 	{
 		Vector3 position;
-		Vector4 weights;
-		int indices[4];
-		Vector2 tex;
 		Vector3 normal;
-		Vector3 tangent;
-		Vector3 bitangent;
 	};
 
 	// metaball triangle
@@ -138,6 +133,7 @@ private:
 	// shaders
 	ITr2ShaderMaterialPtr m_distortionEffect;
 	ITr2ShaderMaterialPtr m_additiveEffect;
+	ITr2ShaderMaterialPtr m_transparentEffect;
 
 	// resulting transform
 	Matrix m_worldTransform;

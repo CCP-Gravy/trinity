@@ -280,7 +280,7 @@ void EveMetaball::SubmitGeometry( Tr2RenderContext& renderContext )
 	}
 
 	renderContext.m_esm.ApplyVertexDeclaration( m_vertexDeclHandle );
-	renderContext.m_esm.ApplyStreamSource( 0, m_vertexBuffer, 0, sizeof( Vertex ) );
+	renderContext.m_esm.ApplyStreamSource( 0, m_vertexBuffer, 0, sizeof( EveMetaball::Vertex ) );
 //	renderContext.m_esm.ApplyIndexBuffer( m_indexBuffer );
 	renderContext.SetTopology( TOP_TRIANGLES );
 //	renderContext.DrawIndexedPrimitive( 8, 0, m_triangleCount );
@@ -315,6 +315,17 @@ void EveMetaball::GetBatches( ITriRenderBatchAccumulator* batches, TriBatchType 
 		{
 			batch->SetPerObjectData( perObjectData );
 			batch->SetShaderMaterial( m_additiveEffect );
+			batch->SetGeometryProvider( this );
+			batches->Commit( batch );
+		}
+	}
+	if( batchType == TRIBATCHTYPE_TRANSPARENT && m_transparentEffect )
+	{
+		TriForwardingBatch* batch = batches->Allocate<TriForwardingBatch>();
+		if( batch )
+		{
+			batch->SetPerObjectData( perObjectData );
+			batch->SetShaderMaterial( m_transparentEffect );
 			batch->SetGeometryProvider( this );
 			batches->Commit( batch );
 		}
@@ -376,9 +387,7 @@ uint32_t EveMetaball::GetPerObjectDataSize( Tr2RenderContextEnum::ShaderType sha
 	}
 	else
 	{
-		return
-			64 +				// m_vsWorldMatrix
-			16;				// m_vsSpaceObjectData
+		return 64 + 16;	// m_vsWorldMatrix + m_vsSpaceObjectData
 	}
 }
 
@@ -423,12 +432,7 @@ bool EveMetaball::OnPrepareResources()
 			Tr2VertexDefinition& tvd = s_metaBallDataVertexDecl;
 
 			tvd.Add( tvd.FLOAT32_3, tvd.POSITION );
-			tvd.Add( tvd.FLOAT32_4, tvd.BLENDWEIGHTS );
-			tvd.Add( tvd.UBYTE_4, tvd.BLENDINDICES );
-			tvd.Add( tvd.FLOAT32_2, tvd.TEXCOORD );
 			tvd.Add( tvd.FLOAT32_3, tvd.NORMAL );
-			tvd.Add( tvd.FLOAT32_3, tvd.TANGENT );
-			tvd.Add( tvd.FLOAT32_3, tvd.BITANGENT );
 		}
 
 		m_vertexDeclHandle = Tr2EffectStateManager::GetVertexDeclarationHandle( s_metaBallDataVertexDecl );
@@ -548,8 +552,8 @@ void EveMetaball::UpdateBuffers()
 	}
 
 	// create vertex buffer
-	CR_RETURN( m_vertexBuffer.Create( 3 * m_triangleCount * sizeof( Vertex ), USAGE_CPU_WRITE, nullptr, renderContext ) );
-	Vertex* vertexBuffer;
+	CR_RETURN( m_vertexBuffer.Create( 3 * m_triangleCount * sizeof( EveMetaball::Vertex ), USAGE_CPU_WRITE, nullptr, renderContext ) );
+	EveMetaball::Vertex* vertexBuffer;
 	CR_RETURN( m_vertexBuffer.Lock( vertexBuffer, LOCK_WRITEONLY, renderContext ) );
 	for( unsigned int i = 0; i < m_triangles.size(); ++i )
 	{
