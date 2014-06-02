@@ -50,7 +50,7 @@ BaseConfigurations:
     Imports:
     - ../../../../../../sdk/Granny/2.9.24.0/granny_2.9.24.0.yaml
     - ../../../../../../sdk/umbra/1.5.3/umbra_1.5.3.yaml
-    - ../../../../../../sdk/Bink/1.9v/Bink_1.9v.yaml
+    - ../../../../../../sdk/Bink/2.4e/Bink_2.4e.yaml
     - ../../../../../../sdk/Enlighten/v2.08.1460/Enlighten_v2.08.1460.yaml
     - ../../../../../../sdk/nvidia/nvapi/R331/nvapi_R331.yaml
     - ../../../../../../sdk/nvidia/CUDA/3.0/CUDA_3.0.yaml

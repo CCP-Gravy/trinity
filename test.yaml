@@ -9,7 +9,7 @@ Imports:
 - ../../../../../../sdk/UmbraPvs/4740/UmbraPvs_4740.yaml
 - ../../../../../../sdk/libpng/1.4.0/libpng_1.4.0.yaml
 - ../../../../../../sdk/libJPG/jpeg-8c/jpeg-8c.yaml
-- ../../../../../../sdk/Bink/1.9v/Bink_1.9v.yaml
+- ../../../../../../sdk/Bink/2.4e/Bink_2.4e.yaml
 - ../../../../../../sdk/Enlighten/v2.08.1460/Enlighten_v2.08.1460.yaml
 - ../../../../../../sdk/Miniball/Miniball.yaml
 - ../../../../../../sdk/squish/1.10/squish_1.10.yaml
