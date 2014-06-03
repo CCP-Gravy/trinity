@@ -172,6 +172,9 @@ namespace
 	Tr2IndexBufferAL  s_quadListIndexBuffer;
 	unsigned int s_quadListSize = 0;
 
+	Tr2TextureAL s_fallbackTextures[2][3];
+	bool s_debugFallbackTexture = false;
+
 	unsigned long s_currentRenderContextCounter = 0;
 
 	std::list<Matrix> s_projectionStack;
@@ -360,6 +363,42 @@ namespace
 			renderContext.m_d3dDevice9->SetTransform( D3DTS_PROJECTION, &s_projectionTransform );
 		}
 #endif
+	}
+
+	void CreateFallbackTexturesWithColor( uint32_t color, Tr2TextureAL* outputTextures, Tr2PrimaryRenderContext& renderContext )
+	{
+		Tr2SubresourceData initialData[CUBEMAP_FACE_COUNT];
+		for( int i = 0; i < CUBEMAP_FACE_COUNT; ++i )
+		{
+			initialData[i].m_height = 1;
+			initialData[i].m_sysMemPitch = 4;
+			initialData[i].m_sysMemSlicePitch = 4;
+			initialData[i].m_sysMem = &color;
+		}
+		outputTextures[0].Create2D( 1, 1, 1, PIXEL_FORMAT_B8G8R8A8_UNORM, USAGE_IMMUTABLE, initialData, renderContext );
+		outputTextures[1].CreateVolume( 1, 1, 1, 1, PIXEL_FORMAT_B8G8R8A8_UNORM, USAGE_IMMUTABLE, initialData, renderContext );
+		outputTextures[2].CreateCube( 1, 1, 1, PIXEL_FORMAT_B8G8R8A8_UNORM, USAGE_IMMUTABLE, initialData, renderContext );
+	}
+
+	void DestroyFallbackTextures( Tr2TextureAL* fallbackTextures )
+	{
+		fallbackTextures[0].Destroy();
+		fallbackTextures[1].Destroy();
+		fallbackTextures[2].Destroy();
+	}
+
+	void CreateFallbackTextures( Tr2PrimaryRenderContext& renderContext )
+	{
+		if( s_debugFallbackTexture )
+		{
+			CreateFallbackTexturesWithColor( 0xffff00ff, s_fallbackTextures[0], renderContext );
+			CreateFallbackTexturesWithColor( 0x8800ff00, s_fallbackTextures[1], renderContext );
+		}
+		else
+		{
+			CreateFallbackTexturesWithColor( 0, s_fallbackTextures[0], renderContext );
+			DestroyFallbackTextures( s_fallbackTextures[1] );
+		}
 	}
 
 #if INTERIORS_ENABLED
@@ -1756,6 +1795,8 @@ void Tr2Renderer::PrepareDeviceResources()
 
 	// just call the Get* function, it will do the alloc...
 	GetQuadListIndexBuffer( 1 );
+
+	CreateFallbackTextures( renderContext );
 }
 
 void Tr2Renderer::ReleaseDeviceResources( TriStorage s )
@@ -1766,6 +1807,8 @@ void Tr2Renderer::ReleaseDeviceResources( TriStorage s )
 		s_quadListIndexBuffer.Destroy();
 		s_quadListSize = 0;
 	}
+	DestroyFallbackTextures( s_fallbackTextures[0] );
+	DestroyFallbackTextures( s_fallbackTextures[1] );
 }
 
 void Tr2Renderer::DrawLine( const Vector3& from, const Vector3& to, uint32_t color /*= 0xffffffff */ )
@@ -2006,4 +2049,49 @@ void Tr2Renderer::SetIsDeviceResetting( bool resetInProgress )
 bool Tr2Renderer::IsDeviceResetting()
 {
 	return s_isDeviceResetting;
+}
+
+void Tr2Renderer::EnableFallbackTextureDebugging()
+{
+	if( !s_debugFallbackTexture )
+	{
+		s_debugFallbackTexture = true;
+		USE_MAIN_THREAD_RENDER_CONTEXT();
+		CreateFallbackTextures( renderContext );
+	}
+}
+
+void Tr2Renderer::DisableFallbackTextureDebugging()
+{
+	if( s_debugFallbackTexture )
+	{
+		s_debugFallbackTexture = false;
+		USE_MAIN_THREAD_RENDER_CONTEXT();
+		CreateFallbackTextures( renderContext );
+	}
+}
+
+void Tr2Renderer::ApplyFallbackTexture( Tr2RenderContextEnum::ShaderType stage, uint32_t registerIndex, Tr2EffectResource::Type textureType, const char* debugContext, Tr2RenderContext &renderContext )
+{
+	uint32_t textureSet = 0;
+	if( s_debugFallbackTexture )
+	{
+		CCP_LOGWARN( "Using fallback texture for %s", debugContext );
+		textureSet = ( uint32_t( GetAnimationTime() * 20 ) % 2 ) * 3;
+	}
+	switch( textureType )
+	{
+	case Tr2EffectResource::TEXTURE_1D:
+	case Tr2EffectResource::TEXTURE_2D:
+		renderContext.SetTexture( stage, registerIndex, s_fallbackTextures[textureSet][0] );
+		break;
+	case Tr2EffectResource::TEXTURE_3D:
+		renderContext.SetTexture( stage, registerIndex, s_fallbackTextures[textureSet][1] );
+		break;
+	case Tr2EffectResource::TEXTURE_CUBE:
+		renderContext.SetTexture( stage, registerIndex, s_fallbackTextures[textureSet][2] );
+		break;
+	default:
+		return;
+	}
 }

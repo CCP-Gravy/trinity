@@ -2,6 +2,7 @@
 #include "TriTexture2DParameter.h"
 #include "Resources/TriTextureRes.h"
 #include "ITr2ShaderState.h"
+#include "Tr2Renderer.h"
 
 TriTexture2DParameter::TriTexture2DParameter(IRoot* lockobj):
 	m_isUsedByEffect( false ),
@@ -15,7 +16,8 @@ TriTexture2DParameter::TriTexture2DParameter(IRoot* lockobj):
 	m_overrideMipmapLodBias( 0.f ),
 	m_overrideMaxMipLevel( 0 ),
 	m_overrideMaxAnisotropy( 4 ),
-	m_overrideSrgb( false )
+	m_overrideSrgb( false ),
+	m_resourceType( Tr2EffectResource::TEXTURE_TYPELESS )
 {
 }
 
@@ -177,7 +179,7 @@ void TriTexture2DParameter::CopyValueToEffect(	Tr2RenderContextEnum::ShaderType 
 		}
 		else
 		{
-			renderContext.m_esm.ApplyTexture( inputType, ix, nullTX );
+			Tr2Renderer::ApplyFallbackTexture( inputType, ix, m_resourceType, m_name.c_str(), renderContext );
 		}
 	}
 
@@ -272,11 +274,17 @@ void TriTexture2DParameter::RebuildEffectHandles( ITr2ShaderState* effectRes )
 {
 	m_cachedEffect = effectRes;
 
-	if ( m_name.empty() || !effectRes || !effectRes->GetResource( m_name.c_str() ) )
+	m_isUsedByEffect = false;
+	if ( m_name.empty() || !effectRes )
 	{
-		m_isUsedByEffect = false;
 		return;
 	}
 
+	auto resource = effectRes->GetResource( m_name.c_str() );
+	if( !resource )
+	{
+		return;
+	}
+	m_resourceType = resource->type;
 	m_isUsedByEffect = true;
 }

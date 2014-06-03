@@ -5,6 +5,7 @@
 
 #include "TriDebugTextRenderer.h"
 #include "Tr2Blitter.h"
+#include "Tr2EffectDescription.h"
 
 BLUE_DECLARE( Tr2Effect );
 
@@ -293,7 +294,9 @@ public:
 	// Will cause certain python calls to raise exceptions
 	static void SetIsDeviceResetting( bool resetInProgress );
 
-
+	static void EnableFallbackTextureDebugging();
+	static void DisableFallbackTextureDebugging();
+	static void ApplyFallbackTexture( Tr2RenderContextEnum::ShaderType stage, uint32_t registerIndex, Tr2EffectResource::Type textureType, const char* debugContext, Tr2RenderContext &renderContext );
 private:
 
 	static void SetResourceCreationAllowed( bool isAllowed );

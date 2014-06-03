@@ -294,3 +294,25 @@ MAP_FUNCTION
 	"Rebuilds all shader materials\n"
 );
 #endif
+
+static void EnableFallbackTextureDebugging()
+{
+	Tr2Renderer::EnableFallbackTextureDebugging();
+}
+
+MAP_FUNCTION_AND_WRAP(
+	"EnableFallbackTextureDebugging",
+	EnableFallbackTextureDebugging,
+	"Enable debugging of fallback textures used by effect texture parameters when the original\n"
+	"texture is missing. When debugging is enabled the texture is set to an ugly blinking mess and a\n"
+	"warning is generated whenever the fallback texture is used." );
+
+static void DisableFallbackTextureDebugging()
+{
+	Tr2Renderer::DisableFallbackTextureDebugging();
+}
+
+MAP_FUNCTION_AND_WRAP(
+	"DisableFallbackTextureDebugging",
+	DisableFallbackTextureDebugging,
+	"Disables debugging of a fallback texture previously enabled by trinity.EnableFallbackTextureDebugging." );

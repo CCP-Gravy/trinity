@@ -28,6 +28,7 @@
 #define _TriTexture2DParameter_H_
 
 #include "include/ITriEffectParameter.h"
+#include "Tr2EffectDescription.h"
 
 BLUE_DECLARE_INTERFACE( ITr2ShaderState );
 BLUE_DECLARE( TriTextureRes );
@@ -122,6 +123,7 @@ private:
 	std::string m_resourcePath;
 
 	TriTextureResPtr m_resource;
+	Tr2EffectResource::Type m_resourceType;
 
 	bool m_isUsedByEffect;
 };
