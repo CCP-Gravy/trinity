@@ -386,6 +386,22 @@ bool Tr2Effect::PopulateParameters()
 							m_resources.Insert( -1, p );
 						};
 
+	auto hasParameter = [&]( const char* name ) -> bool
+	{
+		if( GetParameterByName( name ) )
+		{
+			return true;
+		}
+		for( auto it = m_constParameters.begin(); it != m_constParameters.end(); ++it )
+		{
+			if( strcmp( it->name.c_str(), name ) == 0 )
+			{
+				return true;
+			}
+		}
+		return false;
+	};
+
 	for( unsigned passIx = 0; passIx < m_effectResource->GetPassCount(); ++passIx )
 	{
 		const Tr2Pass& pass = m_effectResource->GetPass( passIx );
@@ -400,7 +416,7 @@ bool Tr2Effect::PopulateParameters()
 					continue;
 				}
 
-				if( GetParameterByName( constant->name.c_str() ) )
+				if( hasParameter( constant->name.c_str() ) )
 				{
 					continue;
 				}
@@ -415,7 +431,7 @@ bool Tr2Effect::PopulateParameters()
 					continue;
 				}
 
-				if( GetParameterByName( sampler->second.name ) )
+				if( hasParameter( sampler->second.name ) )
 				{
 					continue;
 				}
@@ -430,7 +446,7 @@ bool Tr2Effect::PopulateParameters()
 					continue;
 				}
 
-				if( GetParameterByName( uav->second.name ) )
+				if( hasParameter( uav->second.name ) )
 				{
 					continue;
 				}
@@ -494,6 +510,27 @@ bool Tr2Effect::PruneParameters()
 		else
 		{
 			++y;
+		}
+	}
+
+	// Prune const parameters
+	size_t it = 0;
+	while( it < m_constParameters.size() )
+	{
+		const char* pName = m_constParameters[it].name.c_str();
+		bool removeParameter = !GetBool( m_effectResource, pName, "SasUiVisible" );
+		const Tr2EffectConstant *constant = m_effectResource->GetConstant( pName );
+		if( constant == nullptr && !removeParameter )
+		{
+			removeParameter = true;
+		}
+		if (removeParameter)
+		{
+			m_constParameters.Remove( it );
+		}
+		else
+		{
+			++it;
 		}
 	}
 
