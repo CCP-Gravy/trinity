@@ -765,3 +765,15 @@ size_t TriValueBinding::DetermineCopyFunc( const Be::VarEntry* srcEntry, const B
 	}
 	return dataSize;
 }
+
+void TriValueBinding::SetSource( const std::string& sourceAttribute, IRootPtr sourceObject )
+{
+	m_sourceAttribute = sourceAttribute;
+	m_sourceObject = sourceObject;
+}
+
+void TriValueBinding::SetDestination( const std::string& destinationAttribute, IRootPtr destinationObject )
+{
+	m_destinationAttribute = destinationAttribute;
+	m_destinationObject = destinationObject;
+}
