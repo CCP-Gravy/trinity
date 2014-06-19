@@ -129,7 +129,10 @@ EveSOFDataHullSpotlightSet::EveSOFDataHullSpotlightSet( IRoot* lockobj ) :
 EveSOFDataHullSpotlightSetItem::EveSOFDataHullSpotlightSetItem( IRoot* lockobj ) :
 	m_boneIndex( 0 ), m_groupIndex( -1 ),
 	m_boosterGainInfluence( false ),
-	m_spriteScale( 1.f, 1.f, 1.f )
+	m_spriteScale( 1.f, 1.f, 1.f ),
+	m_coneIntensity( 0.f ),
+	m_flareIntensity( 0.f ),
+	m_spriteIntensity( 0.f )
 {
 	D3DXMatrixIdentity( &m_transform );
 }
