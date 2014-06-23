@@ -181,19 +181,19 @@ void EveSOF::SetupMesh( EveShip2Ptr ship, const EveSOFDataMgr::HullData* hullDat
 
 	// setup mesh areas
 	Tr2MeshAreaVector* opaqueMeshAreaVector = mesh->GetAreas( TRIBATCHTYPE_OPAQUE );
-	FillMeshAreaVector( &hullData->opaqueAreas, &factionData->opaqueAreaParameters, factionData, opaqueMeshAreaVector );
+	FillMeshAreaVector( &hullData->opaqueAreas, &factionData->opaqueAreaParameters, factionData, opaqueMeshAreaVector, hullData );
 	
 	Tr2MeshAreaVector* transparentMeshAreaVector = mesh->GetAreas( TRIBATCHTYPE_TRANSPARENT );
-	FillMeshAreaVector( &hullData->transparentAreas, &factionData->transparentAreaParameters, factionData, transparentMeshAreaVector );
+	FillMeshAreaVector( &hullData->transparentAreas, &factionData->transparentAreaParameters, factionData, transparentMeshAreaVector, hullData );
 	
 	Tr2MeshAreaVector* additiveMeshAreaVector = mesh->GetAreas( TRIBATCHTYPE_ADDITIVE );
-	FillMeshAreaVector( &hullData->additiveAreas, nullptr, factionData, additiveMeshAreaVector );
+	FillMeshAreaVector( &hullData->additiveAreas, nullptr, factionData, additiveMeshAreaVector, hullData );
 	
 	Tr2MeshAreaVector* depthMeshAreaVector = mesh->GetAreas( TRIBATCHTYPE_DEPTH );
-	FillMeshAreaVector( &hullData->depthAreas, nullptr, factionData, depthMeshAreaVector );
+	FillMeshAreaVector( &hullData->depthAreas, nullptr, factionData, depthMeshAreaVector, hullData );
 	
 	Tr2MeshAreaVector* distortionMeshAreaVector = mesh->GetAreas( TRIBATCHTYPE_DISTORTION );
-	FillMeshAreaVector( &hullData->distortionAreas, nullptr, factionData, distortionMeshAreaVector );
+	FillMeshAreaVector( &hullData->distortionAreas, nullptr, factionData, distortionMeshAreaVector, hullData );
 
 	// create lod levels
 	ship->SetHighDetailMesh( mesh );
@@ -205,7 +205,7 @@ void EveSOF::SetupMesh( EveShip2Ptr ship, const EveSOFDataMgr::HullData* hullDat
 // Description:
 //   Fill up mesh area vector given the hull and faction area data provided.
 // --------------------------------------------------------------------------------
-void EveSOF::FillMeshAreaVector( const std::vector<EveSOFDataMgr::HullAreas>* hullAreas, const FactionAreaMap* factionAreas, const EveSOFDataMgr::FactionData* factionData, Tr2MeshAreaVector* meshAreaVector ) const
+void EveSOF::FillMeshAreaVector( const std::vector<EveSOFDataMgr::HullAreas>* hullAreas, const FactionAreaMap* factionAreas, const EveSOFDataMgr::FactionData* factionData, Tr2MeshAreaVector* meshAreaVector, const EveSOFDataMgr::HullData* hullData ) const
 {
 	for( auto area = hullAreas->begin(); area != hullAreas->end(); ++area )
 	{
@@ -213,7 +213,21 @@ void EveSOF::FillMeshAreaVector( const std::vector<EveSOFDataMgr::HullAreas>* hu
 		Tr2EffectPtr newShader;
 		newShader.CreateInstance();
 		newShader->StartUpdate();
-		newShader->SetEffectPathName( area->shaderPath.c_str() );
+		if( hullData->isSkinned )
+		{
+			std::string skinnedName = area->shaderPath;
+			std::string insertString = "skinned_";
+			size_t pos = skinnedName.find_last_of( '/' );
+			if ( pos != std::string::npos )
+			{
+				skinnedName.insert( pos + 1, insertString );
+			}
+			newShader->SetEffectPathName( skinnedName.c_str() );
+		}
+		else
+		{
+			newShader->SetEffectPathName( area->shaderPath.c_str() );
+		}
 
 		const std::map<std::string, Vector4>* factionShaderParams = nullptr;
 		if( factionAreas )
