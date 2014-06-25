@@ -867,6 +867,7 @@ void EveSOF::SetupDecals( EveShip2Ptr ship, const EveSOFDataMgr::HullData* hullD
 		decal->SetPosition( hdit->position );
 		decal->SetRotation( hdit->rotation );
 		decal->SetScaling( hdit->scaling );
+		decal->SetBoneIndex( hdit->boneIndex );
 		// the decal effect
 		Tr2EffectPtr shader;
 		shader.CreateInstance();

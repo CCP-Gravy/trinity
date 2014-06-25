@@ -425,6 +425,7 @@ void EveSOFDataMgr::GenerateHullData( HullData& hd, EveSOFDataHullPtr srcData ) 
 		hdd.rotation = hullDecal->m_rotation;
 		hdd.scaling = hullDecal->m_scaling;
 		hdd.groupIndex = hullDecal->m_groupIndex;
+		hdd.boneIndex = hullDecal->m_boneIndex;
 		hdd.shaderPath = hullDecal->m_shaderPath;
 		for( auto hdtit = hullDecal->m_textures.begin(); hdtit != hullDecal->m_textures.end(); ++hdtit )
 		{

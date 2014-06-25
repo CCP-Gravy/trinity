@@ -419,6 +419,24 @@ void EveSpaceObjectDecal::SetScaling( const Vector3& sc )
 	m_scaling = sc;
 }
 
+// --------------------------------------------------------------------------------------
+// Description:
+//   Returns the boneindex of this decal
+// --------------------------------------------------------------------------------------
+int EveSpaceObjectDecal::GetBoneIndex() const
+{
+	return m_parentBoneIndex;
+}
+
+// --------------------------------------------------------------------------------------
+// Description:
+//  Sets the boneindex of this decal
+// --------------------------------------------------------------------------------------
+void EveSpaceObjectDecal::SetBoneIndex( int idx )
+{
+	m_parentBoneIndex = idx;
+}
+
 // ------------------------------------------------------------------------------------------------------
 void EveSpaceObjectDecal::CreateDecalIndexBuffer( TriGeometryResPtr geomRes )
 {

@@ -127,6 +127,8 @@ public:
 	void SetRotation( const Quaternion& rot );
 	const Vector3& GetScaling() const;
 	void SetScaling( const Vector3& sc );
+	int GetBoneIndex() const;
+	void SetBoneIndex( int idx );
 
 	// edit helper
 	void RenderDebugInfo( const Matrix* worldMatrix ) const;

@@ -119,6 +119,7 @@ public:
 		Quaternion rotation;
 		Vector3 scaling;
 		int groupIndex;
+		int boneIndex;
 		std::string shaderPath;
 		std::map<std::string, TextureData> textures;
 		std::map<std::string, Vector4> parameters;

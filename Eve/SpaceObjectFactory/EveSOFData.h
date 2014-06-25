@@ -295,7 +295,7 @@ public:
 	Vector3 m_position, m_scaling;
 	Quaternion m_rotation;
 	std::string m_shaderPath;
-	int m_groupIndex;
+	int m_groupIndex, m_boneIndex;
 	PEveSOFDataTextureVector m_textures;
 	PEveSOFDataParameterVector m_parameters;
 };
