@@ -4,6 +4,7 @@
 
 #include "ITr2AnimationUpdater.h"
 #include "GrannyBoneOffset.h"
+#include "Tr2GrannyAnimationLayer.h"
 
 BLUE_DECLARE( TriGrannyRes );
 BLUE_DECLARE( TriGeometryRes );
@@ -26,11 +27,19 @@ public:
 
 	const std::string& GetModel() const;
 	void SetModel( const std::string& val);
+	granny_model* GetGrannyModel() const;
+	
+	bool IsInitialized() const;
 
 	bool	PlayAnimation( const char* animName, bool replace, int loopCount, float delay, float speed, bool clearWhenDone=true );
+	bool	PlayLayerAnimationByName( const char* layer, const char* animName, bool replace, int loopCount, float delay, float speed, bool clearWhenDone );
 	void	EndAnimation();
 	void	ClearAnimations();
 	float	GetAnimationChainCompleteTime();
+
+	void AddAnimationLayer( const char* layerName );
+	void AddAnimationLayerBone( const char* layerName, const char* boneName );
+	void RemoveAnimationLayerBone( const char* layerName, const char* boneName );
 
 	void PlayAnimationOnce( const char* animName );
 	void PlayAnimationEx( const char* animName, int loopCount, float delay, float speed );
@@ -56,51 +65,43 @@ public:
 	void	ReleaseCachedData( BlueAsyncRes* p );
 	void	RebuildCachedData( BlueAsyncRes* p );
 
-	bool	FindBoneByName( const char* name, unsigned int& ix );
+	bool	FindBoneByName( const char* name, unsigned int& ix ) const;
+	granny_animation* FindAnimationByName( const char* name ) const;
 
 	void	Cleanup();
+	
+	granny_skeleton *m_skeleton;
+	granny_world_pose *m_worldPose;
+	granny_mesh_binding *m_meshBinding;
 
-protected:
+private:
 	std::string			m_name;
 	std::string			m_resPath;
 	std::string			m_model;
 	TriGrannyResPtr		m_grannyRes;
 	TriGeometryResPtr	m_geometryRes;
 
-	PGrannyBoneOffset	m_boneOffset;
+	PGrannyBoneOffset m_boneOffset;
+	granny_local_pose *m_localPose;
+	granny_local_pose *m_compositePose;
+	std::map<std::string, Tr2GrannyAnimationLayer> m_animationLayers;
+	Tr2GrannyAnimationLayer m_baseLayer;
 
-	struct AnimationRequest
-	{
-		std::string m_animationName;
-		bool m_replace;
-		int m_loopCount;
-		float m_start;
-		float m_speed;
-	};
-	typedef TrackableStdList<AnimationRequest> AnimationRequestList;
-	AnimationRequestList m_animationQueue;
-
-public:
-	granny_skeleton			*m_skeleton;
-	granny_model_instance	*m_modelInstance;
-	granny_local_pose		*m_localPose;
-	granny_world_pose		*m_worldPose;
-	granny_mesh_binding		*m_meshBinding;
-
-protected:
 	typedef TrackableStdVector<std::string> BoneList_t;
 	BoneList_t m_boneList;
 
 	// bone matrix list in mesh-order
 	granny_matrix_3x4* m_meshBoneMatrixList;
 	int m_meshBoneCount;
+	int m_modelIndex;
 
 	bool m_debugRenderSkeleton;
 	bool m_debugRenderJointNames;
 
 	bool	m_useMeshBinding;
 
-	granny_file_info* GetFileInfo();
+	granny_file_info* GetFileInfo() const;
+	Tr2GrannyAnimationLayer* GetAnimationLayer( const char* name );
 };
 
 TYPEDEF_BLUECLASS( Tr2GrannyAnimation );

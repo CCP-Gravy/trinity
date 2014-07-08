@@ -41,7 +41,7 @@ void EveAnimationState::UpdateSequenceDuration( EveSpaceObject2Ptr owner, const 
 	m_startTime = currentAnimationTime;
 	m_animationDuration = 0;
 	auto ac = owner->GetAnimationController();
-	if( ac && ac->m_modelInstance )
+	if( ac && ac->IsInitialized() )
 	{
 		m_animationDuration = ac->GetAnimationChainCompleteTime() - currentAnimationTime;
 	}

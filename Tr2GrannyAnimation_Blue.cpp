@@ -80,6 +80,35 @@ const Be::ClassInfo* Tr2GrannyAnimation::ExposeToBlue()
 			"ClearAnimations()\n\n"
 			"Abruptly ends all animations."
 		)
+		
+		MAP_METHOD_AND_WRAP
+		(
+			"PlayLayerAnimation",
+			PlayLayerAnimationByName,
+			"PlayLayerAnimation( layerName, animationName, replace, loops, delay, speed, clearWhenFinished )\n\n"
+			"Plays the given animation on the layer specified.\n"
+		)
+		MAP_METHOD_AND_WRAP
+		(
+			"AddAnimationLayer",
+			AddAnimationLayer,
+			"AddAnimationLayer( layerName )\n\n"
+			"Creates a new animation layer for this granny animation.\n"
+		)
+		MAP_METHOD_AND_WRAP
+		(
+			"AddAnimationLayerBone",
+			AddAnimationLayerBone,
+			"AddAnimationLayerBone( layerName, boneName )\n\n"
+			"Add the specified bone to this animation layer.\n"
+		)
+		MAP_METHOD_AND_WRAP
+		(
+			"RemoveAnimationLayerBone",
+			RemoveAnimationLayerBone,
+			"RemoveAnimationLayerBone( layerName, boneName )\n\n"
+			"Remove the specified bone to from the animation layer.\n"
+		)
 
 		MAP_ATTRIBUTE( "boneOffset", m_boneOffset, "Per-bone post animation offsets.", Be::READWRITE )
 

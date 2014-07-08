@@ -1,0 +1,255 @@
+#include "StdAfx.h"
+#include "Tr2GrannyAnimationLayer.h"
+#include "Resources/TriGrannyRes.h"
+#include "Tr2GrannyAnimation.h"
+#include "Tr2Renderer.h"
+
+
+Tr2GrannyAnimationLayer::Tr2GrannyAnimationLayer() :
+	m_modelInstance( nullptr ),
+	m_trackMask( nullptr ),
+	m_defaultBoneWeight( 0.f ),
+	m_boneCount( 0 )
+{
+}
+
+Tr2GrannyAnimationLayer::Tr2GrannyAnimationLayer( float defaultBoneWeight ) :
+	m_modelInstance( nullptr ),
+	m_trackMask( nullptr ),
+	m_defaultBoneWeight( defaultBoneWeight ),
+	m_boneCount( 0 )
+{
+}
+
+void Tr2GrannyAnimationLayer::InitializeAnimationLayer( const Tr2GrannyAnimation* grannyAnimation )
+{
+	granny_model* model = grannyAnimation->GetGrannyModel();
+	if( !model )
+	{
+		return;
+	}
+
+	m_modelInstance = GrannyInstantiateModel( model );
+	granny_skeleton* skeleton = GrannyGetSourceSkeleton( m_modelInstance );
+	m_boneCount = skeleton->BoneCount;
+	m_trackMask = GrannyNewTrackMask( m_defaultBoneWeight, skeleton->BoneCount );
+
+	for( auto it = m_bones.begin(); it != m_bones.end(); it++ )
+	{
+		unsigned int boneIndex;
+		if( grannyAnimation->FindBoneByName( it->c_str(), boneIndex ) )
+		{
+			GrannySetTrackMaskBoneWeight( m_trackMask, boneIndex, m_defaultBoneWeight );
+		}
+	}
+}
+
+void Tr2GrannyAnimationLayer::ConsumeAnimationQueue( const Tr2GrannyAnimation* animationController )
+{
+	// PlayAnimation will clear the animation queue if the replace flag is set.
+	// We really should be searching backwards through the queue here to find the
+	// last entry with replace set, then go forward from there. In reality we
+	// rarely have more than one entry here, and this approach is much simpler:
+	// Make a copy of the queue, iterate through that and be done with it...
+	std::vector<AnimationRequest> queueSnapshot = m_animationQueue;
+	for( auto it = queueSnapshot.cbegin(); it != queueSnapshot.cend(); ++it )
+	{
+		PlayAnimation( animationController, it->m_animationName.c_str(), it->m_replace, it->m_loopCount, it->m_start, it->m_speed, it->m_clearWhenDone );
+	}
+	m_animationQueue.clear();
+}
+
+void Tr2GrannyAnimationLayer::QueueAnimation( const char* animName, bool replace, int loopCount, float delay, float speed, bool clearWhenDone )
+{
+	AnimationRequest ar;
+	ar.m_animationName = animName;
+	ar.m_replace = replace;
+	ar.m_clearWhenDone = clearWhenDone;
+	ar.m_loopCount = loopCount;
+	ar.m_start = delay;
+	ar.m_speed = speed;
+
+	m_animationQueue.push_back( ar );
+}
+
+bool Tr2GrannyAnimationLayer::PlayAnimation( const Tr2GrannyAnimation* grannyAnimation, const char* animName, bool replace, int loopCount, float delay, float speed, bool clearWhenDone )
+{
+	if( !m_modelInstance )
+	{
+		return false;
+	}
+
+	const granny_animation* animation = grannyAnimation->FindAnimationByName( animName );
+	if( !animation )
+	{
+		return false;
+	}
+
+	if( replace )
+	{
+		ClearAnimations();
+	}
+
+	float startTime = Tr2Renderer::GetAnimationTime();
+	if( !replace )
+	{
+		delay += GetAnimationRemainingTime();
+	}
+	startTime += delay;
+
+	granny_control* control = GrannyPlayControlledAnimation( startTime, animation, m_modelInstance );    
+	GrannyEaseControlIn( control, 0.0f, false );
+	GrannySetControlLoopCount( control, loopCount );
+	GrannySetControlSpeed( control, speed );
+
+	if( loopCount > 0 && clearWhenDone )
+	{
+		GrannyCompleteControlAt( control, Tr2Renderer::GetAnimationTime() + GrannyGetControlDurationLeft( control ) + delay );
+	}
+
+	GrannySetControlClock( control, Tr2Renderer::GetAnimationTime() );
+
+	return true;
+}
+
+void Tr2GrannyAnimationLayer::EndAnimation()
+{
+	if( !m_modelInstance )
+	{
+		m_animationQueue.clear();
+		return;
+	}
+
+	for(	granny_model_control_binding *binding = GrannyModelControlsBegin( m_modelInstance ); 
+			binding != GrannyModelControlsEnd( m_modelInstance ); 
+			binding = GrannyModelControlsNext( binding ) )
+	{
+		granny_control *control = GrannyGetControlFromBinding( binding );
+		// Force control to stop at the end of its current loop iteration
+		int newLoopCount;
+		newLoopCount = max(0, GrannyGetControlLoopIndex( control )) + 1;
+		GrannySetControlLoopCount( control, newLoopCount );
+	}
+	GrannyFreeCompletedModelControls( m_modelInstance );
+}
+
+void Tr2GrannyAnimationLayer::ClearAnimations()
+{	
+	m_animationQueue.clear();
+
+	if( !m_modelInstance )
+	{
+		return;
+	}
+
+	for( granny_model_control_binding *binding = GrannyModelControlsBegin( m_modelInstance ); binding != GrannyModelControlsEnd( m_modelInstance ); )
+	{
+		granny_control *control = GrannyGetControlFromBinding( binding );
+		binding = GrannyModelControlsNext( binding );
+		GrannyFreeControl( control );
+	}
+}
+
+void Tr2GrannyAnimationLayer::SampleAnimation( float animationTime, granny_local_pose* resultPose )
+{
+	GrannySetModelClock( m_modelInstance, animationTime );
+	GrannyFreeCompletedModelControls( m_modelInstance );
+	GrannySampleModelAnimations( m_modelInstance, 0, m_boneCount, resultPose );
+}
+
+void Tr2GrannyAnimationLayer::SampleAnimation( float animationTime, granny_local_pose* compositePose, granny_local_pose* resultPose )
+{
+	GrannySetModelClock( m_modelInstance, animationTime );
+	GrannyFreeCompletedModelControls( m_modelInstance );
+	GrannySampleModelAnimations( m_modelInstance, 0, m_boneCount, compositePose );
+	GrannyModulationCompositeLocalPose( resultPose, 0, 1, m_trackMask, compositePose );
+}
+
+float Tr2GrannyAnimationLayer::GetAnimationChainCompleteTime()
+{
+	float startTime = Tr2Renderer::GetAnimationTime();
+	return startTime + GetAnimationRemainingTime();
+}
+
+float Tr2GrannyAnimationLayer::GetAnimationRemainingTime()
+{
+	if( !m_modelInstance )
+	{
+		return 0.f;
+	}
+
+	float maxRemaining = 0.0f;
+	for(	granny_model_control_binding *binding = GrannyModelControlsBegin( m_modelInstance ); 
+			binding != GrannyModelControlsEnd( m_modelInstance ); 
+			binding = GrannyModelControlsNext( binding ) )
+	{
+		granny_control *control = GrannyGetControlFromBinding( binding );
+
+		// Force control to stop at the end of its current loop iteration
+		int loopCount = max(0, GrannyGetControlLoopIndex( control ));
+		int newLoopCount = loopCount + 1;
+		int loopsTotal = GrannyGetControlLoopCount( control );
+		
+		GrannySetControlLoopCount( control, newLoopCount );
+		float remaining = GrannyGetControlDurationLeft( control );
+		GrannySetControlLoopCount( control, loopsTotal );
+		if( remaining > maxRemaining )
+		{
+			maxRemaining = remaining;
+		}
+	}
+
+	return maxRemaining;
+}
+
+void Tr2GrannyAnimationLayer::Cleanup()
+{
+	if( m_modelInstance )
+	{
+		ClearAnimations();
+		GrannyFreeModelInstance( m_modelInstance );
+		m_modelInstance = nullptr;
+	}
+
+	if( m_trackMask )
+	{
+		GrannyFreeTrackMask( m_trackMask );
+		m_trackMask = nullptr;
+	}
+}
+
+void Tr2GrannyAnimationLayer::AddBone( const Tr2GrannyAnimation* grannyAnimation, const char* name )
+{
+	m_bones.push_back( name );
+
+	if( !m_trackMask )
+	{
+		return;
+	}
+	
+	unsigned int boneIndex = 0;
+	if( !grannyAnimation->FindBoneByName( name, boneIndex ) )
+	{
+		return;
+	}
+
+	GrannySetTrackMaskBoneWeight( m_trackMask, boneIndex, 1.0 );
+}
+
+void Tr2GrannyAnimationLayer::RemoveBone( const Tr2GrannyAnimation* grannyAnimation, const char* name )
+{
+	m_bones.erase( std::remove(m_bones.begin(), m_bones.end(), name), m_bones.end() );
+
+	if( !m_trackMask )
+	{
+		return;
+	}
+	
+	unsigned int boneIndex = 0;
+	if( !grannyAnimation->FindBoneByName( name, boneIndex ) )
+	{
+		return;
+	}
+
+	GrannySetTrackMaskBoneWeight( m_trackMask, boneIndex, 0.0 );
+}

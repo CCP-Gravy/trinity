@@ -131,7 +131,7 @@ EveSpaceObject2::~EveSpaceObject2()
 		CCP_ALIGNED_FREE( m_transformedDamageLocators );
 	}
 
-	if( m_transformedDamageLocators )
+	if( m_transformedImpactDirections )
 	{
 		CCP_ALIGNED_FREE( m_transformedImpactDirections );
 	}
@@ -922,7 +922,7 @@ uint32_t EveSpaceObject2::GetPerObjectDataSize( Tr2RenderContextEnum::ShaderType
 	else
 	{
 		int boneCount = 0;
-		if( m_animationUpdater && m_animationUpdater->m_modelInstance )
+		if( m_animationUpdater && m_animationUpdater->IsInitialized() )
 		{
 			boneCount = m_animationUpdater->GetMeshBoneCount();
 		}
@@ -1078,7 +1078,7 @@ void EveSpaceObject2::GetRenderables( const TriFrustum& frustum, std::vector<ITr
 					// assign this space-object's cache to the decal
 					(*it)->SetCache( m_decalCache );
 					// tell the decal of animation, IF we have any
-					if( m_animationUpdater && m_animationUpdater->GetMeshBoneCount() )
+					if( m_animationUpdater && m_animationUpdater->GetMeshBoneCount() && m_animationUpdater->IsInitialized() )
 					{
 						(*it)->SetBoneMatrix( m_animationUpdater->GetMeshBoneMatrixList(), m_animationUpdater->GetMeshBoneCount() );
 					}
@@ -1198,7 +1198,7 @@ void EveSpaceObject2::RebuildCachedData( BlueAsyncRes* p )
 {
 	// If we already have a model we don't want to go through here
 	// as it would nuke all current animations.
-	if( !m_animationUpdater || m_animationUpdater->m_modelInstance )
+	if( !m_animationUpdater || m_animationUpdater->IsInitialized() )
 	{
 		return;
 	}
@@ -1206,7 +1206,8 @@ void EveSpaceObject2::RebuildCachedData( BlueAsyncRes* p )
 	m_animationUpdater->SetUseMeshBinding( true );	
 	m_animationUpdater->SetSharedGeometryRes( m_geometryResFromMesh );
 	m_animationUpdater->RebuildCachedData( p );
-	if( m_animationUpdater->m_modelInstance )
+
+	if( m_animationUpdater->IsInitialized() )
 	{
 		Matrix m;
 		D3DXMatrixIdentity( &m );
@@ -2177,4 +2178,3 @@ CcpMutex& EveSpaceObject2::GetObjectMutex()
 	}
 	return *mutexes[reinterpret_cast<size_t>( this ) & ( MUTEX_COUNT - 1 )];
 }
-
