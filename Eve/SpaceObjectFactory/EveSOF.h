@@ -35,6 +35,8 @@ public:
 
 	// build a spaceship and return a EveShip2 object
 	IRootPtr Build( const char* hullName, const char* factionName, const char* raceName );
+	// build a spaceship from a dns string and return a EveShip2 object
+	IRootPtr BuildFromDNA( const char* dna );
 
 	// maintain the old style loading (with a bit of the new way...)
 	IRootPtr Load( const char* resFile, const char* hullName, const char* raceName );

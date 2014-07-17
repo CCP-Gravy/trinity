@@ -103,7 +103,40 @@ IRootPtr EveSOF::Load( const char* resFile, const char* hullName, const char* ra
 
 // --------------------------------------------------------------------------------
 // Description:
-//   This is where it is all going to happen
+//   Build a ship from a dna string
+// --------------------------------------------------------------------------------
+IRootPtr EveSOF::BuildFromDNA( const char* dna )
+{
+	// split up dna string in all subparts
+	std::vector<std::string> dnaParts;
+	std::string originalDna( dna );
+	for( size_t i = 0; i < originalDna.size(); ++i )
+	{
+		size_t next = originalDna.find( '.', i );
+		if( next == std::string::npos )
+		{
+			next = originalDna.size();
+		}
+
+		dnaParts.push_back( originalDna.substr( i, next - i ) );
+
+		i = next;
+	}
+
+	// need three
+	if(dnaParts.size() != 3)
+	{
+		return nullptr;
+	}
+
+	// pass it on to build function
+	return Build( dnaParts[0].c_str(), dnaParts[1].c_str(), dnaParts[2].c_str() );
+}
+
+// --------------------------------------------------------------------------------
+// Description:
+//   This is where it is all going to happen: building a ship with the three
+//   main infos
 // --------------------------------------------------------------------------------
 IRootPtr EveSOF::Build( const char* hullName, const char* factionName, const char* raceName )
 {
