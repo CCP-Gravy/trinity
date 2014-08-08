@@ -117,8 +117,16 @@ void EveSOFDNA::Setup( const char* dnaString, EveSOFDataMgrPtr dataMgr )
 		std::vector<std::string> commandList;
 		StringSplit( commandList, cmdAndArgs[1].c_str(), ';' );
 
-		// put into map
-		m_commands[cmdAndArgs[0]] = commandList;
+		// put into map, but check if it already exists! So no overwriting
+		auto finder = m_commands.find( cmdAndArgs[0] );
+		if( finder == m_commands.end() )
+		{
+			m_commands[cmdAndArgs[0]] = commandList;
+		}
+		else
+		{
+			finder->second.insert( finder->second.end(), commandList.begin(), commandList.end() );
+		}
 	}
 }
 
@@ -389,24 +397,28 @@ const Vector4* EveSOFDNA::GetFactionMeshAreaParameters( TriBatchType type, const
 	std::vector<std::string> meshCommandArgs;
 	if( GetDnaCommandArgs( CMD_MESH, meshCommandArgs ) )
 	{
-		// is this the correct area? hull or exhaust etc.
-		if( meshCommandArgs[0] == std::string( areaDesignation ) )
+		// variable list of args: always 3 for CMD_MESH
+		for( size_t a = 0; a < meshCommandArgs.size(); a += 3 )
 		{
-			// identify mask, submask
-			if( StringStartsWithI( parameterName, meshCommandArgs[1].c_str() ) )
+			// is this the correct area? hull or exhaust etc.
+			if( meshCommandArgs[ a + 0 ] == std::string( areaDesignation ) )
 			{
-				// get the material from the lib
-				const EveSOFDataMgr::MaterialData* materialData = m_dataMgr->GetMaterialData( meshCommandArgs[2].c_str() );
-				if( materialData ) 
+				// identify mask, submask
+				if( StringStartsWithI( parameterName, meshCommandArgs[ a + 1 ].c_str() ) )
 				{
-					// construct parameter name
-					std::string lookup = std::string( parameterName );
-					StringRemove( lookup, "SubMask" );
-					StringRemove( lookup, "Mask" );
-					auto parameterIt = materialData->parameters.find( lookup.c_str() );
-					if( parameterIt != materialData->parameters.end() )
+					// get the material from the lib
+					const EveSOFDataMgr::MaterialData* materialData = m_dataMgr->GetMaterialData( meshCommandArgs[ a + 2 ].c_str() );
+					if( materialData ) 
 					{
-						return &parameterIt->second;
+						// construct parameter name
+						std::string lookup = std::string( parameterName );
+						StringRemove( lookup, "SubMask" );
+						StringRemove( lookup, "Mask" );
+						auto parameterIt = materialData->parameters.find( lookup.c_str() );
+						if( parameterIt != materialData->parameters.end() )
+						{
+							return &parameterIt->second;
+						}
 					}
 				}
 			}
