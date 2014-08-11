@@ -45,6 +45,23 @@ TYPEDEF_BLUECLASS( EveSOFDataTexture );
 BLUE_DECLARE_VECTOR( EveSOFDataTexture );
 
 
+BLUE_CLASS( EveSOFDataTransform ) :
+	public IRoot
+{
+public:
+	EXPOSE_TO_BLUE();
+	EveSOFDataTransform( IRoot* lockobj = NULL );
+	~EveSOFDataTransform() {}
+
+	// data
+	Vector3 m_position;
+	Quaternion m_rotation;
+};
+TYPEDEF_BLUECLASS( EveSOFDataTransform );
+BLUE_DECLARE_VECTOR( EveSOFDataTransform );
+
+
+
 // --------------------------------------------------------------------------------
 // All data storage classes for per-hull data
 // --------------------------------------------------------------------------------
@@ -348,6 +365,7 @@ public:
 
 	// locators
 	PEveSOFDataHullLocatorVector m_locatorTurrets;
+	PEveSOFDataTransformVector m_damageLocators;
 
 	// children
 	PEveSOFDataHullChildVector m_children;

@@ -242,7 +242,6 @@ const Be::ClassInfo* EveSOFDataHullArea::ExposeToBlue()
 }
 
 
-
 BLUE_DEFINE( EveSOFDataHullLocator );
 const Be::ClassInfo* EveSOFDataHullLocator::ExposeToBlue()
 {
@@ -251,6 +250,18 @@ const Be::ClassInfo* EveSOFDataHullLocator::ExposeToBlue()
 
 		MAP_ATTRIBUTE( "name", m_name, "", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "transform", m_transform, "", Be::READWRITE | Be::PERSIST )
+    EXPOSURE_END()
+}
+
+
+BLUE_DEFINE( EveSOFDataTransform );
+const Be::ClassInfo* EveSOFDataTransform::ExposeToBlue()
+{
+    EXPOSURE_BEGIN( EveSOFDataTransform, "" )
+        MAP_INTERFACE( EveSOFDataTransform )
+
+		MAP_ATTRIBUTE( "position", m_position, "", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "rotation", m_rotation, "", Be::READWRITE | Be::PERSIST )
     EXPOSURE_END()
 }
 
@@ -330,6 +341,7 @@ const Be::ClassInfo* EveSOFDataHull::ExposeToBlue()
 		MAP_ATTRIBUTE( "animations", m_animations, "List of animations", Be::READWRITE | Be::PERSIST )
 
 		MAP_ATTRIBUTE( "locatorTurrets", m_locatorTurrets, "Turret locators", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "damageLocators", m_damageLocators, "Damage locators", Be::READWRITE | Be::PERSIST )
 
 		MAP_ATTRIBUTE( "modelRotationCurvePath", m_modelRotationCurvePath, "Model rotation curve path", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "modelTranslationCurvePath", m_modelTranslationCurvePath, "Model translation curve path", Be::READWRITE | Be::PERSIST )

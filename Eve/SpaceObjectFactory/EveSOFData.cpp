@@ -81,6 +81,7 @@ EveSOFDataHull::EveSOFDataHull( IRoot* lockobj ) :
 	PARENTLOCK( m_depthAreas ),
 	PARENTLOCK( m_distortionAreas ),
 	PARENTLOCK( m_locatorTurrets ),
+	PARENTLOCK( m_damageLocators ),
 	PARENTLOCK( m_children ),
 	PARENTLOCK( m_animations ),
 	m_boundingSphere( 0.f, 0.f, 0.f, 0.f ),
@@ -120,6 +121,13 @@ EveSOFDataHullDecal::EveSOFDataHullDecal( IRoot* lockobj ) :
 EveSOFDataHullLocator::EveSOFDataHullLocator( IRoot* lockobj )
 {
 	D3DXMatrixIdentity( &m_transform );
+}
+
+
+EveSOFDataTransform::EveSOFDataTransform( IRoot* lockobj ) :
+	m_position( 0.f, 0.f, 0.f ),
+	m_rotation( 0.f, 0.f, 0.f, 1.f )
+{
 }
 
 
