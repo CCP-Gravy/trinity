@@ -142,7 +142,14 @@ void Tr2SpriteObjectBase::SetAssociatedObject( PyObject* obj )
 		Py_DECREF( m_associatedObject );
 	}
 
-	m_associatedObject = PyWeakref_NewRef( obj, nullptr );
+	if( obj != Py_None )
+	{
+		m_associatedObject = PyWeakref_NewRef( obj, nullptr );
+	}
+	else
+	{
+		m_associatedObject = nullptr;
+	}
 }
 #endif
 
