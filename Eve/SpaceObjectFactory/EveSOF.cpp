@@ -193,12 +193,19 @@ void EveSOF::SetupMesh( EveShip2Ptr ship, const EveSOFDNAPtr dna ) const
 		ship->SetShadowEffect( m_shadowEffect );
 	}
 
-	// setup mesh areas
-	FillMeshAreaVector( mesh, mesh->GetAreas( TRIBATCHTYPE_OPAQUE ), TRIBATCHTYPE_OPAQUE, dna );
-	FillMeshAreaVector( mesh, mesh->GetAreas( TRIBATCHTYPE_TRANSPARENT ), TRIBATCHTYPE_TRANSPARENT, dna );
-	FillMeshAreaVector( mesh, mesh->GetAreas( TRIBATCHTYPE_ADDITIVE ), TRIBATCHTYPE_ADDITIVE, dna );
-	FillMeshAreaVector( mesh, mesh->GetAreas( TRIBATCHTYPE_DEPTH ), TRIBATCHTYPE_DEPTH, dna );
-	FillMeshAreaVector( mesh, mesh->GetAreas( TRIBATCHTYPE_DISTORTION ), TRIBATCHTYPE_DISTORTION, dna );
+	// setup mesh areas, try sharing as many Tr2LodResources as possible
+	std::map<std::string, Tr2LodResourcePtr> lodResPerTexture;
+	FillMeshAreaVector( lodResPerTexture, mesh->GetAreas( TRIBATCHTYPE_OPAQUE ), TRIBATCHTYPE_OPAQUE, dna );
+	FillMeshAreaVector( lodResPerTexture, mesh->GetAreas( TRIBATCHTYPE_TRANSPARENT ), TRIBATCHTYPE_TRANSPARENT, dna );
+	FillMeshAreaVector( lodResPerTexture, mesh->GetAreas( TRIBATCHTYPE_ADDITIVE ), TRIBATCHTYPE_ADDITIVE, dna );
+	FillMeshAreaVector( lodResPerTexture, mesh->GetAreas( TRIBATCHTYPE_DEPTH ), TRIBATCHTYPE_DEPTH, dna );
+	FillMeshAreaVector( lodResPerTexture, mesh->GetAreas( TRIBATCHTYPE_DISTORTION ), TRIBATCHTYPE_DISTORTION, dna );
+
+	// register all used lodresource objects with the new mesh
+	for( auto it = lodResPerTexture.begin(); it != lodResPerTexture.end(); ++it )
+	{
+		mesh->AddLodResource( it->second );
+	}
 
 	// preselect a lod
 	mesh->SelectLod( TR2_LOD_HIGH );
@@ -211,7 +218,7 @@ void EveSOF::SetupMesh( EveShip2Ptr ship, const EveSOFDNAPtr dna ) const
 // Description:
 //   Fill up mesh area vector given the hull and faction area data provided.
 // --------------------------------------------------------------------------------
-void EveSOF::FillMeshAreaVector( Tr2MeshPtr mesh, Tr2MeshAreaVector* meshAreaVector, TriBatchType areaType, const EveSOFDNAPtr dna ) const
+void EveSOF::FillMeshAreaVector( std::map<std::string, Tr2LodResourcePtr>& lodResCollector, Tr2MeshAreaVector* meshAreaVector, TriBatchType areaType, const EveSOFDNAPtr dna ) const
 {
 	const std::vector<EveSOFDataMgr::HullAreas>* hullAreas = dna->GetHullMeshAreas( areaType );
 	for( auto area = hullAreas->begin(); area != hullAreas->end(); ++area )
@@ -261,15 +268,25 @@ void EveSOF::FillMeshAreaVector( Tr2MeshPtr mesh, Tr2MeshAreaVector* meshAreaVec
 			std::string mediumResPath, lowResPath;
 			if( GenerateLodResourcePaths( mediumResPath, lowResPath, highResPath.c_str(), it->first.c_str() ) )
 			{
-				// alloc and init the resource loder
-				Tr2LodResourcePtr lodResource;
-				lodResource.CreateInstance();
-				lodResource->SetResourcePath( TR2_LOD_LOW, lowResPath.c_str() );
-				lodResource->SetResourcePath( TR2_LOD_MEDIUM, mediumResPath.c_str() );
-				lodResource->SetResourcePath( TR2_LOD_HIGH, highResPath.c_str() );
-				newShader->AddResourceTexture2DLod( it->first.c_str(), lodResource );
-				// also add it to the mesh for updating
-				mesh->AddLodResource( lodResource );
+				// now we need a lod resource object, maybe we already have one?
+				auto finder = lodResCollector.find( highResPath );
+				if( finder != lodResCollector.end() )
+				{
+					// yeah, we have one: use it!
+					newShader->AddResourceTexture2DLod( it->first.c_str(), finder->second );
+				}
+				else
+				{
+					// not found, so we have to make a new one
+					Tr2LodResourcePtr lodResource;
+					lodResource.CreateInstance();
+					lodResource->SetResourcePath( TR2_LOD_LOW, lowResPath.c_str() );
+					lodResource->SetResourcePath( TR2_LOD_MEDIUM, mediumResPath.c_str() );
+					lodResource->SetResourcePath( TR2_LOD_HIGH, highResPath.c_str() );
+					newShader->AddResourceTexture2DLod( it->first.c_str(), lodResource );
+					// also add it to the mesh for updating
+					lodResCollector[ highResPath ] = lodResource;
+				}
 			}
 			else
 			{
