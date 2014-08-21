@@ -118,7 +118,7 @@ void EveAnimationStateSequencer::GoToState( const std::string& name )
 // --------------------------------------------------------------------------------
 bool EveAnimationStateSequencer::CheckCompletionAndChangeStates()
 {
-	int pendingCount = m_pendingStates.GetSize();
+	ssize_t pendingCount = m_pendingStates.GetSize();
 	if( m_currentState->GetProgress() != EVE_ANIM_DONE || !pendingCount )
 	{
 		return false;
