@@ -2,7 +2,7 @@
 #ifndef Tr2GrannyAnimation_h
 #define Tr2GrannyAnimation_h
 
-#include "ITr2AnimationUpdater.h"
+#include "Include/ITr2AnimationUpdater.h"
 #include "GrannyBoneOffset.h"
 #include "Tr2GrannyAnimationLayer.h"
 

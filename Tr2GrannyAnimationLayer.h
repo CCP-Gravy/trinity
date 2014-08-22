@@ -3,7 +3,7 @@
 #define Tr2GrannyAnimationLayer_h
 
 #include "granny.h"
-#include "ITr2AnimationUpdater.h"
+#include "Include/ITr2AnimationUpdater.h"
 #include "GrannyBoneOffset.h"
 #include "blue/include/BlueAsyncRes.h"
 

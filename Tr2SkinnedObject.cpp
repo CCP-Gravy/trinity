@@ -9,7 +9,7 @@
 #include "Utilities/Obb.h"
 #include "Curves/TriCurveSet.h"
 #include "TriLineSet.h"
-#include "ITr2AnimationUpdater.h"
+#include "Include/ITr2AnimationUpdater.h"
 #include "ITr2WorldTransformUpdater.h"
 
 #if APEX_ENABLED
