@@ -193,7 +193,7 @@ void EveAnimationState::EndAnimation( EveSpaceObject2Ptr owner )
 	float animationDuration = 0;
 	if( ac && ac->IsInitialized() )
 	{
-		m_animationDuration = ac->GetAnimationChainCompleteTime() - currentAnimationTime;
+		animationDuration = ac->GetAnimationChainCompleteTime() - currentAnimationTime;
 	}
 
 	m_animationDuration = max( m_animationDuration, animationDuration );
