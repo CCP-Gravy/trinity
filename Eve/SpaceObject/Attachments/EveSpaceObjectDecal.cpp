@@ -128,6 +128,8 @@ bool EveSpaceObjectDecal::OnPrepareResources()
 // ------------------------------------------------------------------------------------------------------
 void EveSpaceObjectDecal::GetRenderables( TriGeometryResPtr geomRes, const TriFrustum& frustum, std::vector<ITr2Renderable*>& renderables, const ParentData* parentData )
 {
+	CCP_STATS_ZONE( __FUNCTION__ );
+
 	if( !geomRes || !m_decalEffect )
 	{
 		return;
@@ -449,6 +451,8 @@ void EveSpaceObjectDecal::SetBoneIndex( int idx )
 // ------------------------------------------------------------------------------------------------------
 void EveSpaceObjectDecal::CreateDecalIndexBuffer( TriGeometryResPtr geomRes )
 {
+	CCP_STATS_ZONE( __FUNCTION__ );
+
 	USE_MAIN_THREAD_RENDER_CONTEXT();
 
 	BeTimer timer;

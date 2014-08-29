@@ -975,6 +975,8 @@ void EveSpaceObject2::UpdatePerObjectBuffer( Tr2RenderContextEnum::ShaderType sh
 
 void EveSpaceObject2::GetRenderables( const TriFrustum& frustum, std::vector<ITr2Renderable*>& renderables, const Matrix& parentTransform )
 {
+	CCP_STATS_ZONE( __FUNCTION__ );
+
 	m_isVisible = false;
 	m_isMeshVisible = false;
 
