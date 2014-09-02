@@ -1533,6 +1533,61 @@ bool TriGeometryRes::GetIntersectionPoints( const Vector3* pos, const Vector3*di
 	return result;
 }
 
+std::pair<float, Vector3> TriGeometryRes::GetClosestVertex( const Vector3& pos )
+{
+	CCP_STATS_ZONE( __FUNCTION__ );
+
+	USE_MAIN_THREAD_RENDER_CONTEXT();
+
+	float minDist = FLT_MAX;
+	float maxDist = FLT_MIN;
+	std::pair<float, Vector3> result = std::make_pair( -1.f, Vector3( 0.f, 0.f, 0.f ) );
+	float currentDist = FLT_MAX;
+	Vector3 currentPos = Vector3( 0.f, 0.f, 0.f );
+	for ( size_t i = 0; i < m_meshes.size(); ++i )
+	{
+		if( m_meshes[i] == NULL )
+		{
+			continue;
+		}
+
+		uint8_t* pVertices;
+		int vertSize = m_meshes[i]->m_bytesPerVertex;
+		if (FAILED(m_meshes[i]->m_vertexBuffer.Lock(0, 0, (void**)&pVertices, LOCK_READONLY, renderContext )))
+		{
+			return result;
+		}
+		ON_BLOCK_EXIT( [&]{ m_meshes[i]->m_vertexBuffer.Unlock( renderContext ); } );
+		
+		Tr2VertexDefinition decl;
+		if ( !Tr2EffectStateManager::GetVertexDeclarationElements( m_meshes[i]->m_vertexDeclaration, decl ) )
+		{
+			return result;
+		}
+		const Tr2VertexDefinition::Item* const position = decl.Find( decl.POSITION );
+		if( !position )
+		{
+			return result;
+		}
+
+		for ( unsigned int j = 0; j < m_meshes[i]->m_vertexCount; ++j )
+		{
+			Vector3 vtx;
+			ConvertDataToVector3( position->m_dataType, pVertices + j * vertSize, &vtx );
+			Vector3 vec = vtx - pos;
+			float d = D3DXVec3LengthSq( &vec );
+			if( d < currentDist )
+			{
+				currentDist = d;
+				currentPos = vtx;
+			}
+		}
+	}
+
+	result = std::make_pair( sqrtf( currentDist ), currentPos );
+	return result;
+}
+
 unsigned int TriGeometryRes::GetSkeletonCount() const
 {
 	return (unsigned int)m_skeletons.size();

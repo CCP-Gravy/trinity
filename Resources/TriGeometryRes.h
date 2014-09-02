@@ -228,6 +228,8 @@ public:
 
 	std::pair<bool, std::pair<Vector3, Vector3>> GetIntersectionPointAndNormalFromScript( const Vector3& pos, const Vector3& dir );
 
+	std::pair<float, Vector3> GetClosestVertex( const Vector3& pos );
+
 	bool GetBoundingBox( unsigned int meshIx, Vector3& min, Vector3& max ) const;
 	Be::Result<std::string> GetBoundingBoxFromScript( unsigned int meshIx, std::pair<Vector3, Vector3>& bounds ) const;
 	bool GetAreaBoundingBox( unsigned int meshIx, unsigned int areaIx, Vector3& min, Vector3& max ) const;
