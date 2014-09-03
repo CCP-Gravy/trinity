@@ -78,13 +78,8 @@ public:
 	std::string PermuteIndexToString( const int permuteIndex ) const;
 
 private:
-	enum LoadingOption
-	{
-		SYNCRONOUS,
-		ASYNCRONOUS,
-	};
 	// Loads the .fx file
-	void LoadFXFile( LoadingOption );
+	void LoadFXFile();
 
 	// Creates an array of #defines for the D3DX effect compiler
 	Tr2EffectDefine* CreateDefinesFromSituation( const Tr2ShaderSituation& situation, 

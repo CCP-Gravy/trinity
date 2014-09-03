@@ -71,7 +71,7 @@ bool Tr2HighLevelShader::OnModified( Be::Var *val )
 	// when shader path changes, then re-build myself. ( is this a good idea to implement? )
 	if( IsMatch( val, m_shaderFilePath ) )
 	{
-		LoadFXFile( SYNCRONOUS );
+		LoadFXFile();
 		m_shaderStorage.clear();
 	}
 
@@ -116,7 +116,7 @@ void Tr2HighLevelShader::UnregisterShader(Tr2ShaderMaterial * material)
 
 bool Tr2HighLevelShader::Initialize()
 {
-	LoadFXFile( ASYNCRONOUS );
+	LoadFXFile();
 
 	m_nameHash = CcpHashFNV1( m_name.c_str(), m_name.length() );
 
@@ -254,11 +254,8 @@ const Tr2ShaderParameterDescriptionVector&
 // --------------------------------------------------------------------------------------
 // Description:
 //   Loads sources code from the .fx file for this high-level shader.
-// Arguments:
-//   loadingOption - control on how to load the file, syncronously or asyncronously (with
-//     tasklet yielding)
 // --------------------------------------------------------------------------------------
-void Tr2HighLevelShader::LoadFXFile( LoadingOption loadingOption )
+void Tr2HighLevelShader::LoadFXFile()
 {
 	delete[] m_stringTable;
 	m_stringTable = nullptr;
@@ -290,17 +287,8 @@ void Tr2HighLevelShader::LoadFXFile( LoadingOption loadingOption )
 	std::wstring cacheFilePath = (const wchar_t*)CA2W( ( s_cacheRoot + cacheFileName ).c_str() );
 
 	m_compiledFile.Unlock();
-	bool result;
-	if( loadingOption == ASYNCRONOUS )
-	{
-		result = Be::IsSuccess( BePaths->GetFileContentsWithYield( cacheFilePath.c_str(), &m_compiledFile ) );
-	}
-	else
-	{
-		result = BePaths->GetStreamFromPathW( cacheFilePath.c_str(), &m_compiledFile );
-	}
 
-	if( result )
+	if( BePaths->GetStreamFromPathW( cacheFilePath.c_str(), &m_compiledFile ) )
 	{
 		uint32_t version;
 		if( m_compiledFile->Read( &version, sizeof( version ) ) != sizeof( version ) )
@@ -487,7 +475,7 @@ Tr2EffectDefine* Tr2HighLevelShader::CreateDefinesFromSituation(
 void Tr2HighLevelShader::RebuildLowLevelShadersAfterCodeChange()
 {
 	// Gets the new .fx file from disk.
-	LoadFXFile( SYNCRONOUS );
+	LoadFXFile();
 
 	ShaderStorageType::iterator walker( m_shaderStorage.begin() ),
 		endOfShaders( m_shaderStorage.end() );
