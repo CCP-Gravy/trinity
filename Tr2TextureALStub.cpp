@@ -114,23 +114,22 @@ ALResult Tr2TextureAL::LoadInitialData( Tr2SubresourceData* initialData )
 {
 	if( initialData )
 	{
-		int offset = 0;
-		unsigned levelsToCopy;
+		unsigned int levelsToCopy = GetTrueMipCount();
 		if( m_type == TEX_TYPE_CUBE )
 		{
-			levelsToCopy = GetTrueMipCount() * 6;
-		}
-		else
-		{
-			levelsToCopy = GetTrueMipCount();
+			levelsToCopy *= 6;
 		}
 		
-		for( unsigned i = 0; i<levelsToCopy; ++i)
+		uint8_t* destination = m_data.get();
+		unsigned int offset = 0;
+		for( unsigned int level = 0; level < levelsToCopy; ++level )
 		{
-			memcpy(m_data.get(), (char*)initialData[i].m_sysMem + offset, initialData->m_sysMemSlicePitch);
-			offset += initialData->m_sysMemSlicePitch;
+			auto size = initialData[level].m_sysMemSlicePitch;
+			memcpy( destination, (char*)initialData[level].m_sysMem, size );
+			destination += size;
 		}
 	}
+
 	return S_OK;
 }
 
@@ -339,6 +338,11 @@ ALResult Tr2TextureAL::Lock( Tr2RenderContextEnum::CubemapFace face,
 		{
 			return E_FAIL;
 		}
+
+		m_lockedRect[0] = ltrb[0];
+		m_lockedRect[1] = ltrb[1];
+		m_lockedRect[2] = ltrb[2];
+		m_lockedRect[3] = ltrb[3];
 	}
 
 	m_lockedFace = face;

@@ -77,12 +77,12 @@ ALResult Tr2VideoAdapterInfo::GetAdapterDisplayMode( unsigned adapterIndex,
 													 Tr2DisplayModeInfo& mode )
 {
 	mode.format = PIXEL_FORMAT_B8G8R8A8_UNORM;
-	mode.height = 1;
+	mode.width = 800;
+	mode.height = 600;
 	mode.refreshRateDenominator = 1;
 	mode.refreshRateNumerator = 1;
 	mode.scaling = DISPLAY_SCALING_UNSPECIFIED;
 	mode.scanlineOrdering = SCANLINE_ORDER_UNSPECIFIED;
-	mode.width = 1;
 	return S_OK;
 }
 

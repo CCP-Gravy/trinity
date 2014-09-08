@@ -19,7 +19,7 @@ public:
 	Tr2ALMemoryType GetMemoryClass() const { return AL_MEMORY_MANAGED; }
 
 	static const uint32_t SAMPLER_STATE_MIN = 1;
-	static const uint32_t SAMPLER_STATE_COUNT = 13;
+	static const uint32_t SAMPLER_STATE_COUNT = 11;
 
 	uint32_t m_states[SAMPLER_STATE_COUNT];
 private:

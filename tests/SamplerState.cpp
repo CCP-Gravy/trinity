@@ -21,8 +21,7 @@ TEST_F( WithValidRenderContext, CanCreateSamplerState )
 		CMP_ALWAYS,
 		borderColor,
 		0.1f,
-		3.2f,
-		false );
+		3.2f );
 
 	ASSERT_HRESULT_SUCCEEDED( ss.Create( *renderContext, desc ) );
 	EXPECT_TRUE( ss.IsValid() );
@@ -45,8 +44,7 @@ TEST_F( WithValidRenderContext, SamplerStateEqualsItself )
 		CMP_ALWAYS,
 		borderColor,
 		0.1f,
-		3.2f,
-		false );
+		3.2f );
 
 	ASSERT_HRESULT_SUCCEEDED( ss.Create( *renderContext, desc ) );
 	EXPECT_TRUE( ss == ss );
@@ -68,8 +66,7 @@ TEST_F( WithValidRenderContext, DifferentSamplerStatesAreNotEqual )
 		CMP_ALWAYS,
 		borderColor,
 		0.1f,
-		3.2f,
-		false );
+		3.2f );
 	Tr2SamplerStateAL ss1;
 	ASSERT_HRESULT_SUCCEEDED( ss1.Create( *renderContext, desc1 ) );
 
@@ -86,8 +83,7 @@ TEST_F( WithValidRenderContext, DifferentSamplerStatesAreNotEqual )
 		CMP_ALWAYS,
 		borderColor,
 		0.1f,
-		3.2f,
-		false );
+		3.2f );
 	Tr2SamplerStateAL ss2;
 	ASSERT_HRESULT_SUCCEEDED( ss2.Create( *renderContext, desc2 ) );
 
@@ -111,8 +107,7 @@ TEST_F( WithValidRenderContext, SamplerStateHasMemoryClass )
 		CMP_ALWAYS,
 		borderColor,
 		0.1f,
-		3.2f,
-		false );
+		3.2f );
 	ASSERT_HRESULT_SUCCEEDED( ss.Create( *renderContext, desc ) );
 
 	auto memoryClass = ss.GetMemoryClass();

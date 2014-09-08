@@ -149,8 +149,7 @@ ALResult Tr2RenderTargetAL::Create(
 				CMP_ALWAYS,
 				borderColor,
 				0,
-				1,
-				false ), m_backingStore.m_currentSampler );
+				1 ), m_backingStore.m_currentSampler );
 		Tr2SamplerStateAL::Apply( GL_TEXTURE_2D, mipLevelCount != 1, m_backingStore.m_currentSampler );
 		static_cast<Tr2BitmapDimensions&>(*this) = static_cast<Tr2BitmapDimensions&>( m_backingStore );
 	}

@@ -25,8 +25,6 @@ Tr2SamplerStateAL::Tr2SamplerStateAL()
 	m_states[D3DSAMP_MIPMAPLODBIAS] = 0;
 	m_states[D3DSAMP_MAXMIPLEVEL] = 0;
 	m_states[D3DSAMP_MAXANISOTROPY] = 4;
-	m_states[D3DSAMP_SRGBTEXTURE] = 0;
-	m_states[D3DSAMP_ELEMENTINDEX] = 0;
 }
 
 ALResult Tr2SamplerStateAL::Create( 
@@ -49,7 +47,6 @@ ALResult Tr2SamplerStateAL::Create(
 		( uint32_t( std::min( std::max( description.m_borderColor[0] * 255.f, 0.f ), 255.f ) ) << 16 ) |
 		( uint32_t( std::min( std::max( description.m_borderColor[1] * 255.f, 0.f ), 255.f ) ) << 8 ) |
 		uint32_t( std::min( std::max( description.m_borderColor[2] * 255.f, 0.f ), 255.f ) );
-	m_states[D3DSAMP_SRGBTEXTURE] = description.m_isSRGBTexture ? 1 : 0;
 	m_isValid = true;
 	ChangeObjectId();
 	return S_OK;

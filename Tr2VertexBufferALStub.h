@@ -56,7 +56,7 @@ public:
 			   Tr2RenderContextEnum::LockType lockType,
 			   Tr2RenderContextAL& renderContext )
 	{
-		return S_OK;
+		return Lock( 0, 0, reinterpret_cast<void**>( &data ), lockType, renderContext );
 	}
 
 	uint32_t GetTotalSizeInBytes() const

@@ -445,8 +445,7 @@ TEST_F( Rendering, CanSampleTexture )
 			Tr2RenderContextEnum::CMP_ALWAYS,
 			border,
 			0.0f,
-			0.0f,
-			false ) ) );
+			0.0f ) ) );
 
 	uint32_t g = 127;
 
@@ -584,8 +583,7 @@ TEST_F( Rendering, CanSampleMipMappedTexture )
 				Tr2RenderContextEnum::CMP_ALWAYS,
 				border,
 				float( g & 0xff ) / 255.0f * 2.0f,
-				2.0f,
-				false ) ) );
+				2.0f ) ) );
 
 
 		ASSERT_HRESULT_SUCCEEDED( renderContext->BeginScene() );
@@ -875,8 +873,7 @@ TEST_F( Rendering, CanClearRenderTarget )
 			Tr2RenderContextEnum::CMP_ALWAYS,
 			border,
 			0.0f,
-			0.0f,
-			false ) ) );
+			0.0f ) ) );
 
 	Tr2RenderTargetAL rt;
 	ASSERT_HRESULT_SUCCEEDED( rt.Create( 128, 64, 1, Tr2RenderContextEnum::PIXEL_FORMAT_B8G8R8A8_UNORM, 1, 0, *renderContext ) );
@@ -1011,8 +1008,7 @@ TEST_F( Rendering, CanRenderToRenderTarget )
 			Tr2RenderContextEnum::CMP_ALWAYS,
 			border,
 			0.0f,
-			0.0f,
-			false ) ) );
+			0.0f ) ) );
 
 	Tr2RenderTargetAL rt;
 	ASSERT_HRESULT_SUCCEEDED( rt.Create( 128, 64, 1, Tr2RenderContextEnum::PIXEL_FORMAT_B8G8R8A8_UNORM, 1, 0, *renderContext ) );
@@ -1158,8 +1154,7 @@ TEST_F( Rendering, CanRenderToMsaaRenderTarget )
 			Tr2RenderContextEnum::CMP_ALWAYS,
 			border,
 			0.0f,
-			0.0f,
-			false ) ) );
+			0.0f ) ) );
 
 	Tr2RenderTargetAL rt;
 	ASSERT_HRESULT_SUCCEEDED( rt.Create( 128, 64, 1, Tr2RenderContextEnum::PIXEL_FORMAT_B8G8R8A8_UNORM, 4, 0, *renderContext ) );
@@ -2018,8 +2013,7 @@ TEST_F( Rendering, CanPerformAlphaTestGreaterEqual )
 			Tr2RenderContextEnum::CMP_ALWAYS,
 			border,
 			0.0f,
-			0.0f,
-			false ) ) );
+			0.0f ) ) );
 
 	uint32_t g = 127;
 
@@ -2149,8 +2143,7 @@ TEST_F( Rendering, CanPerformAlphaTestLessEqual )
 			Tr2RenderContextEnum::CMP_ALWAYS,
 			border,
 			0.0f,
-			0.0f,
-			false ) ) );
+			0.0f ) ) );
 
 	uint32_t g = 127;
 
@@ -2280,8 +2273,7 @@ TEST_F( Rendering, CanPerformAlphaTestEqual )
 			Tr2RenderContextEnum::CMP_ALWAYS,
 			border,
 			0.0f,
-			0.0f,
-			false ) ) );
+			0.0f ) ) );
 
 	uint32_t g = 127;
 
@@ -2421,8 +2413,7 @@ TEST_F( Rendering, CanPerformAlphaBlend )
 			Tr2RenderContextEnum::CMP_ALWAYS,
 			border,
 			0.0f,
-			0.0f,
-			false ) ) );
+			0.0f ) ) );
 
 	uint32_t g = 127;
 
@@ -2563,8 +2554,7 @@ TEST_F( Rendering, CanGenerateRenderTargetMips )
 		Tr2RenderContextEnum::CMP_ALWAYS,
 		border,
 		0.0f,
-		0.0f,
-		false );
+		0.0f );
 	for( uint32_t i = 0; i < 8; ++i )
 	{
 		ASSERT_HRESULT_SUCCEEDED( samplers[i].Create( *renderContext, samplerDesc ) );
@@ -2718,8 +2708,7 @@ TEST_F( Rendering, CanCopyRenderTargetRegion )
 			Tr2RenderContextEnum::CMP_ALWAYS,
 			border,
 			0.0f,
-			0.0f,
-			false ) ) );
+			0.0f ) ) );
 
 	Tr2RenderTargetAL rt;
 	ASSERT_HRESULT_SUCCEEDED( rt.Create( 128, 64, 1, Tr2RenderContextEnum::PIXEL_FORMAT_B8G8R8A8_UNORM, 1, 0, *renderContext ) );
@@ -2873,8 +2862,7 @@ TEST_F( Rendering, CanSampleBc1Texture )
 			Tr2RenderContextEnum::CMP_ALWAYS,
 			border,
 			0.0f,
-			0.0f,
-			false ) ) );
+			0.0f ) ) );
 
 	uint32_t g = 127;
 
@@ -3084,8 +3072,7 @@ TEST_F( Rendering, CanSampleBc2Texture )
 			Tr2RenderContextEnum::CMP_ALWAYS,
 			border,
 			0.0f,
-			0.0f,
-			false ) ) );
+			0.0f ) ) );
 
 	uint32_t g = 127;
 
@@ -3207,8 +3194,7 @@ TEST_F( Rendering, CanSampleBc3Texture )
 			Tr2RenderContextEnum::CMP_ALWAYS,
 			border,
 			0.0f,
-			0.0f,
-			false ) ) );
+			0.0f ) ) );
 
 	uint32_t g = 127;
 
@@ -3424,8 +3410,7 @@ TEST_F( Rendering, CanLockTextureTwice )
 			Tr2RenderContextEnum::CMP_ALWAYS,
 			border,
 			0.0f,
-			0.0f,
-			false ) ) );
+			0.0f ) ) );
 
 	uint32_t g = 127;
 
@@ -3561,8 +3546,7 @@ TEST_F( Rendering, CanSampleSrgbTexture )
 			Tr2RenderContextEnum::CMP_ALWAYS,
 			border,
 			0.0f,
-			0.0f,
-			true ) ) );
+			0.0f ) ) );
 
 	uint32_t g = 127; 
 
@@ -3681,8 +3665,7 @@ TEST_F( Rendering, CanOutputToSrgbTarget )
 			Tr2RenderContextEnum::CMP_ALWAYS,
 			border,
 			0.0f,
-			0.0f,
-			true ) ) );
+			0.0f ) ) );
 
 	uint32_t g = 127; 
 

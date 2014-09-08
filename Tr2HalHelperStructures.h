@@ -107,8 +107,7 @@ struct Tr2SamplerDescription
 		Tr2RenderContextEnum::CompareFunc comparisonFunc,
 		const float* borderColor,
 		float minLOD,
-		float maxLOD,
-		bool isSRGBTexture )
+		float maxLOD )
 	:	m_minFilter( minFilter ),
 		m_magFilter( magFilter ),
 		m_mipFilter( mipFilter ),
@@ -120,8 +119,7 @@ struct Tr2SamplerDescription
 		m_maxAnisotropy( maxAnisotropy ),
 		m_comparisonFunc( comparisonFunc ),		
 		m_minLOD( minLOD ),
-		m_maxLOD( maxLOD ),
-		m_isSRGBTexture( isSRGBTexture )
+		m_maxLOD( maxLOD )
 	{
 		m_borderColor[0] = borderColor[0];
 		m_borderColor[1] = borderColor[1];
@@ -146,8 +144,7 @@ struct Tr2SamplerDescription
 			m_borderColor[2] == other.m_borderColor[2] &&
 			m_borderColor[3] == other.m_borderColor[3] &&
 			m_minLOD == other.m_minLOD &&
-			m_maxLOD == other.m_maxLOD &&
-			m_isSRGBTexture == other.m_isSRGBTexture;
+			m_maxLOD == other.m_maxLOD;
 	}
 
 	Tr2RenderContextEnum::TextureFilter m_minFilter;
@@ -163,7 +160,6 @@ struct Tr2SamplerDescription
 	float m_borderColor[4];
 	float m_minLOD;
 	float m_maxLOD;
-	bool m_isSRGBTexture;
 };
 
 // -------------------------------------------------------------

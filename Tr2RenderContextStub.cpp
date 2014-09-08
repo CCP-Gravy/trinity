@@ -239,6 +239,9 @@ ALResult Tr2RenderContextAL::SetPresentParameters( unsigned adapter, const Tr2Pr
 		1,
 		0,
 		*this ) );
+
+	SetRenderTarget( m_defaultBackBuffer );
+
 	return S_OK;
 }
 

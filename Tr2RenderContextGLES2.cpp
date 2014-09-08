@@ -220,8 +220,7 @@ struct Tr2RenderContextAL::Blitter
 			CMP_ALWAYS, 
 			border, 
 			0, 
-			std::numeric_limits<float>::max(), 
-			false );
+			std::numeric_limits<float>::max() );
 		CR_RETURN_HR( m_sampler.Create( renderContext, desc ) );
 
 		float vb[] = {

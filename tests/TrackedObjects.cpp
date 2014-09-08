@@ -73,8 +73,7 @@ ALResult CreateSampleObject( Tr2SamplerStateAL& ss, Tr2PrimaryRenderContextAL& r
 								CMP_ALWAYS,
 								borderColor,
 								0.1f,
-								3.2f,
-								false );
+								3.2f );
 	return ss.Create( renderContext, desc );
 }
 

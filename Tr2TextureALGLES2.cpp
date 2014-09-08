@@ -535,8 +535,7 @@ ALResult Tr2TextureAL::CreateDepthTexture( uint32_t width,
 													CMP_ALWAYS,
 													borderColor,
 													0,
-													1,
-													false ), m_currentSampler );
+													1 ), m_currentSampler );
 	Tr2SamplerStateAL::Apply( GL_TEXTURE_2D, false, m_currentSampler );
 	return S_OK;
 }
