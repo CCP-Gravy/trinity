@@ -448,15 +448,41 @@ ALResult Tr2TextureAL::CreateVolume( uint32_t width,
 	CR_RETURN_HR( renderContext.m_d3dDevice9->CreateVolumeTexture( width, height, depth, trueMipLevelCount, usage9, m_format9, m_pool9, &tex, 0 ) )
 	;
 
+	bool needsStagingTexture = false;
+	if ( initialData && m_pool9 == D3DPOOL_DEFAULT && ( usage9 & D3DUSAGE_DYNAMIC ) == 0 )
+	{
+		needsStagingTexture = true;
+	}
+
+	CComPtr<IDirect3DVolumeTexture9> stagingTexture;
+
+	if ( needsStagingTexture )
+	{
+		CR_RETURN_HR( renderContext.m_d3dDevice9->CreateVolumeTexture( 
+			width,
+			height,
+			depth,
+			trueMipLevelCount,
+			0,
+			m_format9,
+			D3DPOOL_SYSTEMMEM,
+			&stagingTexture,
+			nullptr ) );
+	}
+	else
+	{
+		stagingTexture = tex;
+	}
+
 	for ( uint32_t i = 0; i != trueMipLevelCount; ++i )
 	{
 		D3DLOCKED_BOX l =
 		{
 			0
 		};
-		CR_RETURN_HR( tex->LockBox( i, &l, 0, 0 ) );
+		CR_RETURN_HR( stagingTexture->LockBox( i, &l, 0, 0 ) );
 		ON_BLOCK_EXIT( [&]{
-						tex->UnlockBox( i );
+						stagingTexture->UnlockBox( i );
 					   } );
 
 		if ( !l.pBits )
@@ -467,6 +493,11 @@ ALResult Tr2TextureAL::CreateVolume( uint32_t width,
 		const uint32_t mipDepth = std::max( depth >> i, 1u );
 
 		memcpy( l.pBits, initialData[i].m_sysMem, initialData[i].m_sysMemSlicePitch * mipDepth );
+	}
+	if ( needsStagingTexture )
+	{
+		tex->AddDirtyBox( nullptr );
+		renderContext.m_d3dDevice9->UpdateTexture( stagingTexture, tex );
 	}
 
 	tex->PreLoad();
