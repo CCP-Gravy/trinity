@@ -549,6 +549,8 @@ ALResult Tr2PrimaryRenderContextAL::Present()
 	if( m_swapChain )
 	{
 		m_swapChain->Present( m_vsyncInterval, 0 );
+	} else {
+		m_context->Flush();
 	}
 
 	CComQIPtr<ID3D11InfoQueue> queue( m_d3dDevice11 );
