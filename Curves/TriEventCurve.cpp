@@ -2,6 +2,7 @@
 #include "TriEventCurve.h"
 #include "TriDevice.h"
 
+#if BLUE_WITH_PYTHON
 namespace
 {
 	void EventKeyCallback( void* context )
@@ -22,6 +23,7 @@ namespace
 		key->Unlock();
 	}
 }
+#endif
 
 TriEventCurve::TriEventCurve( IRoot* lockobj ) :
 	PARENTLOCK( m_keys ),
