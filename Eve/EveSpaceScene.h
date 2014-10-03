@@ -203,8 +203,9 @@ protected:
 		Matrix EnvMapRotationMat;
 
 		SunData Sun;
-		Color AmbientColor;
-		Color FogColor; 
+		Vector3 AmbientColor;
+		float NebulaIntensity;
+		Vector4 FogColor; 
 
 		Vector2 CameraRange;
 		Vector2 ViewportOffset;
@@ -400,7 +401,7 @@ protected:
 
 	Color m_ambientColor;
 	Color m_fogColor;
-
+	float m_nebulaIntensity;
 	float m_fogStart; // Depth at which fogging starts
 	float m_fogEnd; // Depth at which fog does not get stronger
 	float m_fogMax; // Maximum strength of fog, range [0,1], at m_fogEnd distance.

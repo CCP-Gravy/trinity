@@ -152,7 +152,8 @@ EveSpaceScene::EveSpaceScene( IRoot* lockobj ) :
 	m_nearClip( 0.0f ),
 	m_farClip( 0.0f ),
 	m_fogType( 0.f ),
-	m_fogBlur( 0.f )
+	m_fogBlur( 0.f ),
+	m_nebulaIntensity( 1.f )
 {
 	TriPoolAllocator* allocator = Tr2Renderer::GetPoolAllocator();
 	m_primaryBatches[TRIBATCHTYPE_OPAQUE] = CCP_NEW( "EveSpaceScene/m_batches" ) TriRenderBatchAccumulator<EffectKeyGenerator>( allocator );
@@ -1756,8 +1757,9 @@ void EveSpaceScene::PopulatePerFramePSData( PerFramePSData &data )
 	// make sure whatever direction we get in here, it is normalized! And inverted: Shaders work with direction to light...
 	D3DXVec3Normalize( &data.Sun.DirWorld, &data.Sun.DirWorld );
 	data.Sun.DirWorld = -data.Sun.DirWorld;
-	data.AmbientColor = m_ambientColor;
-	data.FogColor = m_fogColor;
+	data.AmbientColor = Vector3( m_ambientColor.r, m_ambientColor.g, m_ambientColor.b );
+	data.NebulaIntensity = m_nebulaIntensity;
+	data.FogColor = Vector4( m_fogColor.r, m_fogColor.g, m_fogColor.b, 0.f );
 
 	// ps data of fog
 	data.FogFactors.x = m_fogType;
