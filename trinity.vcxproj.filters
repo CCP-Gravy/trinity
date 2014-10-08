@@ -14,6 +14,7 @@
     <Filter Include="Source Files\Eve\SpaceObject\Attachments"/>
     <Filter Include="Source Files\Eve\SpaceObject\Utils"/>
     <Filter Include="Source Files\Font"/>
+    <Filter Include="Source Files\Include"/>
     <Filter Include="Source Files\Interior"/>
     <Filter Include="Source Files\Particle"/>
     <Filter Include="Source Files\RenderJob"/>
@@ -22,7 +23,6 @@
     <Filter Include="Source Files\UI"/>
     <Filter Include="Source Files\Utilities"/>
     <Filter Include="Source Files\Wod"/>
-    <Filter Include="Source Files\include"/>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ALResultBlue.h">
@@ -841,143 +841,143 @@
     <ClInclude Include="Font\Tr2SBit.h">
       <Filter>Source Files\Font</Filter>
     </ClInclude>
-    <ClInclude Include="include\IEveBallpark.h">
-      <Filter>Source Files\include</Filter>
+    <ClInclude Include="Include\IEveBallpark.h">
+      <Filter>Source Files\Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\IEveReferencePoint.h">
-      <Filter>Source Files\include</Filter>
+    <ClInclude Include="Include\IEveReferencePoint.h">
+      <Filter>Source Files\Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\IPhysXSdk.h">
-      <Filter>Source Files\include</Filter>
+    <ClInclude Include="Include\IPhysXSdk.h">
+      <Filter>Source Files\Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\ITr2AnimationUpdater.h">
-      <Filter>Source Files\include</Filter>
+    <ClInclude Include="Include\ITr2AnimationUpdater.h">
+      <Filter>Source Files\Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\ITr2BoundingBox.h">
-      <Filter>Source Files\include</Filter>
+    <ClInclude Include="Include\ITr2BoundingBox.h">
+      <Filter>Source Files\Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\ITr2CapturedBuffer.h">
-      <Filter>Source Files\include</Filter>
+    <ClInclude Include="Include\ITr2CapturedBuffer.h">
+      <Filter>Source Files\Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\ITr2DebugRenderer.h">
-      <Filter>Source Files\include</Filter>
+    <ClInclude Include="Include\ITr2DebugRenderer.h">
+      <Filter>Source Files\Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\ITr2GpuBuffer.h">
-      <Filter>Source Files\include</Filter>
+    <ClInclude Include="Include\ITr2GpuBuffer.h">
+      <Filter>Source Files\Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\ITr2InstanceData.h">
-      <Filter>Source Files\include</Filter>
+    <ClInclude Include="Include\ITr2InstanceData.h">
+      <Filter>Source Files\Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\ITr2Interior.h">
-      <Filter>Source Files\include</Filter>
+    <ClInclude Include="Include\ITr2Interior.h">
+      <Filter>Source Files\Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\ITr2MultiPassScene.h">
-      <Filter>Source Files\include</Filter>
+    <ClInclude Include="Include\ITr2MultiPassScene.h">
+      <Filter>Source Files\Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\ITr2RenderTargetGrabber.h">
-      <Filter>Source Files\include</Filter>
+    <ClInclude Include="Include\ITr2RenderTargetGrabber.h">
+      <Filter>Source Files\Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\ITr2Scene.h">
-      <Filter>Source Files\include</Filter>
+    <ClInclude Include="Include\ITr2Scene.h">
+      <Filter>Source Files\Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\ITr2Updateable.h">
-      <Filter>Source Files\include</Filter>
+    <ClInclude Include="Include\ITr2Updateable.h">
+      <Filter>Source Files\Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\ITr2ValueBinding.h">
-      <Filter>Source Files\include</Filter>
+    <ClInclude Include="Include\ITr2ValueBinding.h">
+      <Filter>Source Files\Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\ITriColor.h">
-      <Filter>Source Files\include</Filter>
+    <ClInclude Include="Include\ITriColor.h">
+      <Filter>Source Files\Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\ITriColorCurve.h">
-      <Filter>Source Files\include</Filter>
+    <ClInclude Include="Include\ITriColorCurve.h">
+      <Filter>Source Files\Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\ITriConstants.h">
-      <Filter>Source Files\include</Filter>
+    <ClInclude Include="Include\ITriConstants.h">
+      <Filter>Source Files\Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\ITriCurveLength.h">
-      <Filter>Source Files\include</Filter>
+    <ClInclude Include="Include\ITriCurveLength.h">
+      <Filter>Source Files\Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\ITriDevice.h">
-      <Filter>Source Files\include</Filter>
+    <ClInclude Include="Include\ITriDevice.h">
+      <Filter>Source Files\Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\ITriDuration.h">
-      <Filter>Source Files\include</Filter>
+    <ClInclude Include="Include\ITriDuration.h">
+      <Filter>Source Files\Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\ITriEffectParameter.h">
-      <Filter>Source Files\include</Filter>
+    <ClInclude Include="Include\ITriEffectParameter.h">
+      <Filter>Source Files\Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\ITriFunction.h">
-      <Filter>Source Files\include</Filter>
+    <ClInclude Include="Include\ITriFunction.h">
+      <Filter>Source Files\Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\ITriIME.h">
-      <Filter>Source Files\include</Filter>
+    <ClInclude Include="Include\ITriIME.h">
+      <Filter>Source Files\Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\ITriMatrix.h">
-      <Filter>Source Files\include</Filter>
+    <ClInclude Include="Include\ITriMatrix.h">
+      <Filter>Source Files\Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\ITriObserverLocal.h">
-      <Filter>Source Files\include</Filter>
+    <ClInclude Include="Include\ITriObserverLocal.h">
+      <Filter>Source Files\Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\ITriPoint.h">
-      <Filter>Source Files\include</Filter>
+    <ClInclude Include="Include\ITriPoint.h">
+      <Filter>Source Files\Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\ITriQuaternion.h">
-      <Filter>Source Files\include</Filter>
+    <ClInclude Include="Include\ITriQuaternion.h">
+      <Filter>Source Files\Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\ITriRect.h">
-      <Filter>Source Files\include</Filter>
+    <ClInclude Include="Include\ITriRect.h">
+      <Filter>Source Files\Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\ITriRenderObject.h">
-      <Filter>Source Files\include</Filter>
+    <ClInclude Include="Include\ITriRenderObject.h">
+      <Filter>Source Files\Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\ITriRotationCurve.h">
-      <Filter>Source Files\include</Filter>
+    <ClInclude Include="Include\ITriRotationCurve.h">
+      <Filter>Source Files\Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\ITriScalarCurve.h">
-      <Filter>Source Files\include</Filter>
+    <ClInclude Include="Include\ITriScalarCurve.h">
+      <Filter>Source Files\Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\ITriTargetable.h">
-      <Filter>Source Files\include</Filter>
+    <ClInclude Include="Include\ITriTargetable.h">
+      <Filter>Source Files\Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\ITriTextureRes.h">
-      <Filter>Source Files\include</Filter>
+    <ClInclude Include="Include\ITriTextureRes.h">
+      <Filter>Source Files\Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\ITriTransform.h">
-      <Filter>Source Files\include</Filter>
+    <ClInclude Include="Include\ITriTransform.h">
+      <Filter>Source Files\Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\ITriVector.h">
-      <Filter>Source Files\include</Filter>
+    <ClInclude Include="Include\ITriVector.h">
+      <Filter>Source Files\Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\ITriVectorCurve.h">
-      <Filter>Source Files\include</Filter>
+    <ClInclude Include="Include\ITriVectorCurve.h">
+      <Filter>Source Files\Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\Point.h">
-      <Filter>Source Files\include</Filter>
+    <ClInclude Include="Include\Point.h">
+      <Filter>Source Files\Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\Rect.h">
-      <Filter>Source Files\include</Filter>
+    <ClInclude Include="Include\Rect.h">
+      <Filter>Source Files\Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\Tr2Curve.h">
-      <Filter>Source Files\include</Filter>
+    <ClInclude Include="Include\Tr2Curve.h">
+      <Filter>Source Files\Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\Tr2WindowHandle.h">
-      <Filter>Source Files\include</Filter>
+    <ClInclude Include="Include\Tr2WindowHandle.h">
+      <Filter>Source Files\Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\TriColor.h">
-      <Filter>Source Files\include</Filter>
+    <ClInclude Include="Include\TriColor.h">
+      <Filter>Source Files\Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\TriMath.h">
-      <Filter>Source Files\include</Filter>
+    <ClInclude Include="Include\TriMath.h">
+      <Filter>Source Files\Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\TriMatrix.h">
-      <Filter>Source Files\include</Filter>
+    <ClInclude Include="Include\TriMatrix.h">
+      <Filter>Source Files\Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\TriQuaternion.h">
-      <Filter>Source Files\include</Filter>
+    <ClInclude Include="Include\TriQuaternion.h">
+      <Filter>Source Files\Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\TriVector.h">
-      <Filter>Source Files\include</Filter>
+    <ClInclude Include="Include\TriVector.h">
+      <Filter>Source Files\Include</Filter>
     </ClInclude>
     <ClInclude Include="Interior\Tr2InteriorBoundingBox.h">
       <Filter>Source Files\Interior</Filter>
