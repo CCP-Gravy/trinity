@@ -871,9 +871,14 @@ void EveSOF::SetupDecals( EveShip2Ptr ship, const EveSOFDNAPtr dna ) const
 		{
 			shaderPath = dna->GetDecalShaderLocationResPath() + std::string("/") + dna->GetShaderPrefix( false ) + fdd->shader;
 		}
-		else
+		else if( !hdit->shader.empty() )
 		{
 			shaderPath = dna->GetDecalShaderLocationResPath() + std::string("/") + dna->GetShaderPrefix( false ) + hdit->shader;
+		}
+		else
+		{
+			// we couldn't construct a valid shader path. So no decal!
+			continue;
 		}
 		shader->SetEffectPathName( shaderPath.c_str() );
 
