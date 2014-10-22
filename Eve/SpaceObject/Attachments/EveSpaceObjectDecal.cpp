@@ -107,7 +107,7 @@ bool EveSpaceObjectDecal::OnModified( Be::Var* value )
 		// update the decal matrix
 		UpdateDecalMatrix();
 		// and rebuild the index buffer, cause decal volume has changed size and might hit new triangles
-		if( !m_indices.empty() )
+		if( m_indices.empty() )
 		{
 			m_rebuildIndexBuffer = true;
 		}
