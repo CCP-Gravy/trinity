@@ -126,6 +126,17 @@ namespace Tr2RenderContextEnum
 	// Combination of BufferUsageFlags
 	typedef int BufferUsage;
 
+	enum GpuBufferUsageFlags
+	{
+		// Buffer with append/consume GPU access
+		GPU_BUFFER_APPEND			= 1 << 0,
+		// Add a counter to the buffer
+		GPU_BUFFER_COUNTER			= 1 << 1,
+	};
+
+	// Combination of GpuBufferUsageFlags
+	typedef int GpuBufferUsage;
+
 	bool ValidateUsage( BufferUsage );
 
 	// Topology

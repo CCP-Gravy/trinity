@@ -493,6 +493,9 @@ ALResult Tr2PrimaryRenderContextAL::CreateBackBuffers( const Tr2PresentParameter
 	m_context->OMSetRenderTargets(	1, 
 									&m_defaultBackBuffer->m_RTV.p, 
 									m_defaultDepthStencil.m_depthStencilView );
+	m_renderStateEmulation.m_fragmentOpSettings.m_renderTargetSize[0] = viewport.Width ? 1.f / viewport.Width : 0.f;
+	m_renderStateEmulation.m_fragmentOpSettings.m_renderTargetSize[1] = viewport.Height ? -1.f / viewport.Height : 0.f;
+	m_dirtyFlag = 0xffffffff;
 
 	return S_OK;
 }

@@ -71,7 +71,8 @@ public:
 	ALResult SetUav(
 		Tr2RenderContextEnum::ShaderType inputType, 
 		uint32_t slot, 
-		const Tr2GpuBufferAL& buffer ) throw()
+		const Tr2GpuBufferAL& buffer,
+		uint32_t initialCount = -1 ) throw()
 	{ 
 		return E_FAIL; 
 	}

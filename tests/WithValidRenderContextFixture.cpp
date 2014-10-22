@@ -29,7 +29,7 @@ void WithValidRenderContext::SetUpTestCase()
 	presentParameters.mode.height = 480;
 #endif
 	presentParameters.backBufferCount = 1;
-	presentParameters.msaaType = 1;
+	presentParameters.msaaType = 0;
 	presentParameters.msaaQuality = 0;
 	presentParameters.swapEffect = Tr2RenderContextEnum::SWAP_EFFECT_DISCARD;
 	presentParameters.depthStencilFormat = Tr2RenderContextEnum::DSFMT_D24S8;

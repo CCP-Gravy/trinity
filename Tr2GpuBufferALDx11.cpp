@@ -11,6 +11,7 @@ Tr2GpuBufferAL::Tr2GpuBufferAL()
 	: m_numElements( 0 )
 	, m_elementSize( 0 )
 	, m_format( PIXEL_FORMAT_UNKNOWN )
+	, m_gpuBufferUsage( 0 )
 {}
 
 ALResult Tr2GpuBufferAL::Create(	
@@ -39,14 +40,16 @@ ALResult Tr2GpuBufferAL::CreateEx(
 	m_elementSize = 0;
 	m_format = format;
 	m_lengthInBytes = GetTotalSizeInBytes();
+	m_gpuBufferUsage = 0;
 
-	return CreateImpl( usage, initialData, flags, renderContext );
+	return CreateImpl( usage, 0, initialData, flags, renderContext );
 }
 	
 ALResult Tr2GpuBufferAL::CreateStructured(	
 	uint32_t numberOfElements, 
 	uint32_t elementSize, 
 	Tr2RenderContextEnum::BufferUsage usage,
+	Tr2RenderContextEnum::GpuBufferUsage gpuBufferUsage,
 	const void* initialData, 
 	Tr2PrimaryRenderContextAL & renderContext )
 {
@@ -58,12 +61,14 @@ ALResult Tr2GpuBufferAL::CreateStructured(
 	m_elementSize = elementSize;
 	m_format = PIXEL_FORMAT_UNKNOWN;
 	m_lengthInBytes = GetTotalSizeInBytes();
+	m_gpuBufferUsage = gpuBufferUsage;
 
-	return CreateImpl( usage, initialData, 0, renderContext );
+	return CreateImpl( usage, gpuBufferUsage, initialData, 0, renderContext );
 }
 	
 ALResult Tr2GpuBufferAL::CreateImpl( 
 	Tr2RenderContextEnum::BufferUsage usage,
+	Tr2RenderContextEnum::GpuBufferUsage gpuBufferUsage,
 	const void* initialData, 
 	uint32_t flags,
 	Tr2PrimaryRenderContextAL &renderContext )
@@ -86,6 +91,11 @@ ALResult Tr2GpuBufferAL::CreateImpl(
 	}
 
 	const bool writable = ( usage & USAGE_CPU_WRITE ) != 0;
+
+	if( writable && gpuBufferUsage )
+	{
+		return E_INVALIDARG;
+	}
 	
 	D3D11_BUFFER_DESC desc;
 	memset( &desc, 0, sizeof( desc ) );
@@ -145,6 +155,14 @@ ALResult Tr2GpuBufferAL::CreateImpl(
 		descUAV.Buffer.FirstElement = 0;
 		descUAV.Buffer.NumElements  = m_numElements;
 		descUAV.Buffer.Flags = 0;
+		if( gpuBufferUsage & GPU_BUFFER_APPEND )
+		{
+			descUAV.Buffer.Flags |= D3D11_BUFFER_UAV_FLAG_APPEND;
+		}
+		if( gpuBufferUsage & GPU_BUFFER_COUNTER )
+		{
+			descUAV.Buffer.Flags |= D3D11_BUFFER_UAV_FLAG_COUNTER;
+		}
 		CR_RETURN_HR( renderContext.m_d3dDevice11->CreateUnorderedAccessView( m_buffer, &descUAV, &m_uav ) );
 	}
 
@@ -163,6 +181,7 @@ void Tr2GpuBufferAL::Destroy()
 	m_elementSize = 0;
 	m_lengthInBytes = 0;
 	m_format = PIXEL_FORMAT_UNKNOWN;
+	m_gpuBufferUsage = 0;
 }
 
 // Make a new SRV around an existing buffer, eg to bind a buffer that's R32_UINT with a view
@@ -185,6 +204,7 @@ ALResult Tr2GpuBufferAL::CreateAlias(
 	m_buffer			= other.m_buffer;
 	m_usage				= other.m_usage;
 	m_lengthInBytes		= other.m_lengthInBytes;
+	m_gpuBufferUsage = 0;
 
 	m_numElements		= 
 		( other.m_numElements * GetBytesPerPixel( other.GetFormat() ) + GetBytesPerPixel( format ) - 1 )
@@ -222,6 +242,7 @@ ALResult Tr2GpuBufferAL::CreateVbView(
 	m_lengthInBytes		= vb.GetTotalSizeInBytes();
 	m_elementSize		= 4;
 	m_numElements		= m_lengthInBytes / 4;
+	m_gpuBufferUsage = 0;
 	
 	D3D11_SHADER_RESOURCE_VIEW_DESC descSRV;
 	memset( &descSRV, 0, sizeof( descSRV ) );
@@ -251,6 +272,7 @@ Tr2GpuBufferAL& Tr2GpuBufferAL::operator=( Tr2GpuBufferAL&& other )
 	m_format		= other.m_format;
 	Tr2BufferImplAL::operator=( std::move( other ) );
 	m_uav = std::move( other.m_uav );
+	m_gpuBufferUsage = m_gpuBufferUsage;
 	return *this;
 }
 

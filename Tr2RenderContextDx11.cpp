@@ -625,6 +625,11 @@ void Tr2RenderContextAL::Destroy()
 		m_pixelShaderUavs[i] = nullptr;
 	}
 
+	for( size_t i = 0; i < sizeof( m_pixelShaderUavInitialCounts ) / sizeof( m_pixelShaderUavInitialCounts[0] ); ++i )
+	{
+		m_pixelShaderUavInitialCounts[i] = -1;
+	}
+
 	m_secondaryDevice11 = nullptr;
 
 	m_secondaryDefaultBackBuffer = nullptr;	
@@ -1017,6 +1022,10 @@ ALResult Tr2RenderContextAL::SetConstants(
 			if( memcmp( cb.mirror.get(), constantData, constantDataSize ) == 0 )
 			{
 				CCP_STATS_INC( cbCacheHit );
+				if( &buffer != &nullCB )
+				{
+					buffer.m_frameUse = buffer.FRAME_USE_NOT_USED_YET;	// it's been set, so user has the choice again between using Lock or the mirror buffer.
+				}
 				return S_OK;
 			}
 		}
@@ -1211,7 +1220,7 @@ ALResult Tr2RenderContextAL::SetRtDsToDevice( uint32_t changedSlot )
 							m_psUavsDirtyBegin, 
 							m_psUavsDirtyEnd - m_psUavsDirtyBegin,
 							reinterpret_cast<ID3D11UnorderedAccessView**>( m_pixelShaderUavs + m_psUavsDirtyBegin ), 
-							nullptr );
+							m_pixelShaderUavInitialCounts + m_psUavsDirtyBegin );
 			m_psUavsDirtyBegin = sizeof( m_pixelShaderUavs ) / sizeof( m_pixelShaderUavs[0] );
 			m_psUavsDirtyEnd = 0;
 		}
@@ -1876,7 +1885,7 @@ bool Tr2RenderContextAL::ApplyShadowRenderStates()
 			m_psUavsDirtyBegin, 
 			m_psUavsDirtyEnd - m_psUavsDirtyBegin,
 			reinterpret_cast<ID3D11UnorderedAccessView**>( m_pixelShaderUavs + m_psUavsDirtyBegin ), 
-			nullptr );
+			m_pixelShaderUavInitialCounts + m_psUavsDirtyBegin );
 		m_psUavsDirtyBegin = sizeof( m_pixelShaderUavs ) / sizeof( m_pixelShaderUavs[0] );
 		m_psUavsDirtyEnd = 0;
 	}
@@ -2051,7 +2060,8 @@ ALResult  Tr2RenderContextAL::SetShaderBuffer(
 ALResult Tr2RenderContextAL::SetUav(	
 	Tr2RenderContextEnum::ShaderType inputType, 
 	uint32_t slot, 
-	const Tr2GpuBufferAL& buffer )
+	const Tr2GpuBufferAL& buffer,
+	uint32_t initialCount )
 {
 	ID3D11UnorderedAccessView* view;
 
@@ -2088,9 +2098,10 @@ ALResult Tr2RenderContextAL::SetUav(
 		{
 			m_psUavsDirtyEnd = slot + 1;
 		}
+		m_pixelShaderUavInitialCounts[slot] = initialCount;
 		break;
 	case COMPUTE_SHADER:
-		m_context->CSSetUnorderedAccessViews( slot, 1, &view, nullptr );
+		m_context->CSSetUnorderedAccessViews( slot, 1, &view, &initialCount );
 		break;
 	default:
 		return E_INVALIDARG;
@@ -2147,6 +2158,7 @@ ALResult Tr2RenderContextAL::SetUav(
 		{
 			m_psUavsDirtyEnd = slot + 1;
 		}
+		m_pixelShaderUavInitialCounts[slot] = -1;
 		break;
 	case COMPUTE_SHADER:
 		m_context->CSSetUnorderedAccessViews( slot, 1, &view, nullptr );

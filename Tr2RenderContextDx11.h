@@ -61,7 +61,8 @@ public:
 	ALResult SetUav(
 		Tr2RenderContextEnum::ShaderType inputType, 
 		uint32_t slot, 
-		const Tr2GpuBufferAL& buffer ) throw();
+		const Tr2GpuBufferAL& buffer,
+		uint32_t initialCount = -1 ) throw();
 
 	ALResult SetUav(
 		Tr2RenderContextEnum::ShaderType inputType, 
@@ -203,6 +204,8 @@ private:
 
 	// UAVs for pixel shader (need to be set all at once)
 	CComPtr<ID3D11UnorderedAccessView> m_pixelShaderUavs[16];
+	uint32_t m_pixelShaderUavInitialCounts[16];
+
 	// Indexes of dirty pixel shader UAVs
 	uint32_t m_psUavsDirtyBegin;
 	uint32_t m_psUavsDirtyEnd;

@@ -41,6 +41,7 @@ public:
 		uint32_t numberOfElements, 
 		uint32_t elementSize, 
 		Tr2RenderContextEnum::BufferUsage usage,
+		Tr2RenderContextEnum::GpuBufferUsage gpuBufferUsage,
 		const void* initialData, 
 		Tr2RenderContextAL & renderContext )
 	{ 
@@ -90,6 +91,10 @@ public:
 	unsigned GetTotalSizeInBytes() const	{ return 0; }
 	Tr2RenderContextEnum::PixelFormat GetFormat() const 
 	{ return Tr2RenderContextEnum::PIXEL_FORMAT_UNKNOWN; }
+	Tr2RenderContextEnum::GpuBufferUsage GetGpuBufferUsage() const
+	{
+		return 0;
+	}
 
 	Tr2ALMemoryType GetMemoryClass() const { return AL_MEMORY_MANAGED; }
 

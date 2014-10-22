@@ -43,6 +43,7 @@ public:
 		uint32_t numberOfElements, 
 		uint32_t elementSize, 
 		Tr2RenderContextEnum::BufferUsage usage,
+		Tr2RenderContextEnum::GpuBufferUsage gpuBufferUsage,
 		const void* initialData, 
 		Tr2PrimaryRenderContextAL & renderContext );
 
@@ -98,6 +99,10 @@ public:
 	{ 
 		return m_format; 
 	}
+	Tr2RenderContextEnum::GpuBufferUsage GetGpuBufferUsage() const
+	{
+		return m_gpuBufferUsage;
+	}
 
 	bool operator==( const Tr2GpuBufferAL& other ) const
 	{ 
@@ -119,6 +124,7 @@ public:
 private:
 	ALResult CreateImpl( 
 		Tr2RenderContextEnum::BufferUsage usage,
+		Tr2RenderContextEnum::GpuBufferUsage gpuBufferUsage,
 		const void* initialData, 
 		uint32_t flags,
 		Tr2PrimaryRenderContextAL & renderContext );
@@ -128,6 +134,7 @@ private:
 	uint32_t m_numElements;
 	uint32_t m_elementSize;
 	Tr2RenderContextEnum::PixelFormat	m_format;
+	Tr2RenderContextEnum::GpuBufferUsage m_gpuBufferUsage;
 	Tr2GpuBufferAL( const Tr2GpuBufferAL& ) /* = delete */;
 	Tr2GpuBufferAL& operator=( const Tr2GpuBufferAL& ) /* = delete */;
 };

@@ -45,14 +45,34 @@ TEST_F( WithValidRenderContext, CanCreateStructuredGpuBuffer )
 	if( renderContext->GetCaps().SupportsGpuBuffer() )
 	{
 		Tr2GpuBufferAL vb;
-		ASSERT_HRESULT_SUCCEEDED( vb.CreateStructured( 128, 32, 0, nullptr, *renderContext ) );
+		ASSERT_HRESULT_SUCCEEDED( vb.CreateStructured( 128, 32, 0, 0, nullptr, *renderContext ) );
 		EXPECT_TRUE( vb.IsValid() );
 	}
 	else
 	{
 		Tr2GpuBufferAL vb;
-		ASSERT_HRESULT_FAILED( vb.CreateStructured( 128, 32, 0, nullptr, *renderContext ) );
+		ASSERT_HRESULT_FAILED( vb.CreateStructured( 128, 32, 0, 0, nullptr, *renderContext ) );
 		EXPECT_FALSE( vb.IsValid() );
+	}
+}
+
+TEST_F( WithValidRenderContext, CanCreateAppendConsumeStructuredGpuBuffer )
+{
+	if( renderContext->GetCaps().SupportsGpuBuffer() )
+	{
+		Tr2GpuBufferAL vb;
+		ASSERT_HRESULT_SUCCEEDED( vb.CreateStructured( 128, 32, 0, Tr2RenderContextEnum::GPU_BUFFER_APPEND, nullptr, *renderContext ) );
+		EXPECT_TRUE( vb.IsValid() );
+	}
+}
+
+TEST_F( WithValidRenderContext, CanCreateStructuredGpuBufferWithCounter )
+{
+	if( renderContext->GetCaps().SupportsGpuBuffer() )
+	{
+		Tr2GpuBufferAL vb;
+		ASSERT_HRESULT_SUCCEEDED( vb.CreateStructured( 128, 32, 0, Tr2RenderContextEnum::GPU_BUFFER_COUNTER, nullptr, *renderContext ) );
+		EXPECT_TRUE( vb.IsValid() );
 	}
 }
 
@@ -106,7 +126,7 @@ TEST_F( WithValidRenderContext, StructuredGpuBufferReportsUnknownFormat )
 	if( renderContext->GetCaps().SupportsGpuBuffer() )
 	{
 		Tr2GpuBufferAL vb;
-		ASSERT_HRESULT_SUCCEEDED( vb.CreateStructured( 128, 32, 0, nullptr, *renderContext ) );
+		ASSERT_HRESULT_SUCCEEDED( vb.CreateStructured( 128, 32, 0, 0, nullptr, *renderContext ) );
 		EXPECT_TRUE( vb.IsValid() );
 		EXPECT_EQ( Tr2RenderContextEnum::PIXEL_FORMAT_UNKNOWN, vb.GetFormat() );
 	}
