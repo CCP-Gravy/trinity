@@ -81,7 +81,7 @@ void EveDistanceField::Update( const EveUpdateContext& updateContext )
 	
 	float distanceNow = MAX_DISTANCE;
 
-	int count = m_objects.size();
+	auto count = m_objects.size();
 	if( count )
 	{
 		distanceNow = MAX_DISTANCE * MAX_DISTANCE;
