@@ -471,7 +471,7 @@ const Vector4* EveSOFDNA::GetFactionMeshAreaParameters( TriBatchType type, const
 	std::vector<std::string> meshCommandArgs;
 	if( GetDnaCommandArgs( CMD_MESH, meshCommandArgs ) )
 	{
-		size_t argIdx = -1;
+		size_t argIdx = (size_t)-1;
 		std::string materialDataParameterName = std::string( parameterName.c_str() );
 		// identify material mask, submask
 		for( size_t i = 0; i < 3; ++i )
@@ -485,7 +485,7 @@ const Vector4* EveSOFDNA::GetFactionMeshAreaParameters( TriBatchType type, const
 			}
 		}
 
-		if( ( argIdx > -1 ) && ( argIdx < meshCommandArgs.size() ) )
+		if( ( argIdx != (size_t)-1 ) && ( argIdx < meshCommandArgs.size() ) )
 		{
 			// get the material from the lib
 			const EveSOFDataMgr::MaterialData* materialData = m_dataMgr->GetMaterialData( meshCommandArgs[ argIdx ].c_str() );
