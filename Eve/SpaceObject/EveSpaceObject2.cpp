@@ -1219,6 +1219,11 @@ void EveSpaceObject2::RebuildCachedData( BlueAsyncRes* p )
 		m_animationUpdater->PrePhysicsAnimation( 0, m );
 	}
 
+	if( m_animationUpdater->IsInitialized() && m_animationSequencer )
+	{
+		m_animationSequencer->SetOwner( this );
+	}
+
 	if( m_boundingSphereRadius < 0.0f )
 	{
 		CCP_LOGWARN( "Bounding sphere not set for '%s' - calculating from '%s'", m_name.c_str(), m_geometryResFromMesh->GetPath() );
@@ -1242,7 +1247,7 @@ void EveSpaceObject2::RebuildCachedData( BlueAsyncRes* p )
 
 bool EveSpaceObject2::OnModified( Be::Var* val )
 {
-	if( IsMatch( val, m_animationSequencer ) && m_animationSequencer )
+	if( IsMatch( val, m_animationSequencer ) && m_animationSequencer && m_animationUpdater->IsInitialized() )
 	{
 		m_animationSequencer->SetOwner( this );
 	}

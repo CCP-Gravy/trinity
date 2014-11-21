@@ -44,6 +44,10 @@ void EveAnimationStateSequencer::SetOwner( EveSpaceObject2Ptr owner )
 	{
 		return;
 	}
+	if( m_currentState )
+	{
+		m_currentState->Start( this, EVE_ANIM_START_INIT );
+	}
 	if( !m_extraAnimation.empty() && !m_extraAnimationTrackMask.empty() )
 	{
 		auto ac = m_owner->GetAnimationController();
@@ -61,14 +65,15 @@ void EveAnimationStateSequencer::SetOwner( EveSpaceObject2Ptr owner )
 // --------------------------------------------------------------------------------
 void EveAnimationStateSequencer::GoToState( const std::string& name )
 {
-	if( !m_owner )
+	EveAnimationStatePtr state = GetAnimationState( name );
+	if( !state )
 	{
 		return;
 	}
 
-	EveAnimationStatePtr state = GetAnimationState( name );
-	if( !state )
+	if( !m_owner )
 	{
+		m_currentState = state;
 		return;
 	}
 
