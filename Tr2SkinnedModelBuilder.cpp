@@ -4,7 +4,6 @@
 #include "Tr2SkinnedModelBuilderBlend.h"
 #include "Resources/TriGrannyRes.h"
 #include "Resources/TriGeometryRes.h"
-#include "EffectParameter/TriVector4Parameter.h"
 #include "EffectParameter/Tr2Vector4Parameter.h"
 #include "EffectParameter/Tr2FloatParameter.h"
 #include "EffectParameter/TriFloatArrayParameter.h"
@@ -1441,11 +1440,7 @@ void Tr2SkinnedModelBuilder::AppendToEffectArrayParam( TriFloatArrayParameter* a
 	ITriEffectParameter* srcParameter = srcEffect->GetParameterByName( paramName );
 	if( srcParameter )
 	{
-		if( TriVector4Parameter* src = dynamic_cast<TriVector4Parameter*>( srcParameter ) )
-		{
-			parameterValue = src->m_value;
-		}
-		else if( Tr2Vector4Parameter* src = dynamic_cast<Tr2Vector4Parameter*>( srcParameter ) )
+		if( Tr2Vector4Parameter* src = dynamic_cast<Tr2Vector4Parameter*>( srcParameter ) )
 		{
 			parameterValue = src->m_value;
 		}
