@@ -358,6 +358,9 @@ const Be::ClassInfo* EveCamera::ExposeToBlue()
 			Be::READ | Be::PERSIST
 		)
 
+		// Handler for doing error reporting/raising
+		MAP_ATTRIBUTE( "errorHandler", m_errorListener, "A listener that gets called if look at target is invalid", Be::READWRITE );
+
 		MAP_METHOD_AND_WRAP( 
 			"SetRotationOnOrbit", 
 			SetRotationOnOrbit, 

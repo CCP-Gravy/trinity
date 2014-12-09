@@ -75,7 +75,8 @@ EveCamera::EveCamera(IRoot* lockobj) :
 	m_useExtraParentTranslation( false ),
 
 	PARENTLOCK( m_zoomCurve ),
-	m_update(true)
+	m_update( true ),
+	m_failedLastFrame( false )
 {
 
 	m_zoomCurve.AddKey( 0.0f,   defFOV, 0.0f,-11.0f, TRIINT_HERMITE );
@@ -215,6 +216,7 @@ void EveCamera::Update( Be::Time t )
 {	
 	if(!m_update)
 		return;
+	bool failed = false;
 
 	// 'dT' is the time span since this function was last called
 	float dT = float(TimeAsDouble(BeOS->GetInfo()->mRealTime - m_time));
@@ -238,9 +240,13 @@ void EveCamera::Update( Be::Time t )
 	}
 	if ( !IsFinite( m_translationFromParent ) )
 	{
-		CCP_LOGERR( "EveCamera: m_translationFromParent not finite(%f, %f, %f). Setting to safe value.", 
-			m_translationFromParent.x, m_translationFromParent.y, m_translationFromParent.z );
+		if( !m_failedLastFrame )
+		{
+			CCP_LOGERR( "EveCamera: m_translationFromParent not finite(%f, %f, %f). Setting to safe value.", 
+				m_translationFromParent.x, m_translationFromParent.y, m_translationFromParent.z );
+		}
 		m_translationFromParent = Vector3(0, 0, 1);
+		failed = true;
 	}
 
 	if(m_zoomCurve.mLength > 0.0f)
@@ -416,26 +422,38 @@ void EveCamera::Update( Be::Time t )
 
 	if( !IsFinite( realUpDir ) || !D3DXVec3LengthSq( &realUpDir ) )
 	{
-		CCP_LOGERR( "EveCamera: Invalid up direction (%f, %f, %f), rotation (%f, %f, %f, %f)", 
-			realUpDir.x, realUpDir.y, realUpDir.z,
-			m_rotationAroundParent.x, m_rotationAroundParent.y, m_rotationAroundParent.z, m_rotationAroundParent.w);
+		if( !m_failedLastFrame )
+		{
+			CCP_LOGERR( "EveCamera: Invalid up direction (%f, %f, %f), rotation (%f, %f, %f, %f)", 
+				realUpDir.x, realUpDir.y, realUpDir.z,
+				m_rotationAroundParent.x, m_rotationAroundParent.y, m_rotationAroundParent.z, m_rotationAroundParent.w);
+		}
 		realUpDir = Vector3( 0, 1, 0 );
+		failed = true;
 	}
 
 	Vector3 lookAtLength;
 	if( !D3DXVec3Length( D3DXVec3Subtract( &lookAtLength, &vecCamPos, &vecCamIntr ) ) )
 	{
-		CCP_LOGERR( "EveCamera: Camera position and camera interest identical(%f, %f, %f).",
-			vecCamPos.x, vecCamPos.y, vecCamPos.z );
+		if( !m_failedLastFrame )
+		{
+			CCP_LOGERR( "EveCamera: Camera position and camera interest identical(%f, %f, %f).",
+				vecCamPos.x, vecCamPos.y, vecCamPos.z );
+		}
 		vecCamPos += m_translationFromParent;
+		failed = true;
 	}
 	if( !IsFinite( vecCamIntr ) || !IsFinite( vecCamPos ) )
 	{
-		CCP_LOGERR( "EveCamera: Camera interest(%f, %f, %f) and/or position(%f, %f, %f) invalid.",
-			vecCamIntr.x, vecCamIntr.y, vecCamIntr.z,
-			vecCamPos.x, vecCamPos.y, vecCamPos.z);
+		if( !m_failedLastFrame )
+		{
+			CCP_LOGERR( "EveCamera: Camera interest(%f, %f, %f) and/or position(%f, %f, %f) invalid.",
+				vecCamIntr.x, vecCamIntr.y, vecCamIntr.z,
+				vecCamPos.x, vecCamPos.y, vecCamPos.z);
+		}
 		vecCamIntr = Vector3(0, 0, 0);
 		vecCamPos = m_translationFromParent;
+		failed = true;
 	}
 	
 	Matrix viewTransform, viewTransformInt;
@@ -461,7 +479,11 @@ void EveCamera::Update( Be::Time t )
 	}
 	else
 	{
-		CCP_LOGERR( "EveCamera: Invalid results after applying rotation of interest. Ignoring interest." );
+		if( !m_failedLastFrame )
+		{
+			CCP_LOGERR( "EveCamera: Invalid results after applying rotation of interest. Ignoring interest." );
+		}
+		failed = true;
 
 		m_viewVec = Vector3( viewTransform._13, viewTransform._23, viewTransform._33 );
 		m_upVec = Vector3( viewTransform._12, viewTransform._22, viewTransform._32 );
@@ -474,6 +496,11 @@ void EveCamera::Update( Be::Time t )
 	{
 		m_audio2Listener->UpdatePlacement( m_viewVec, m_upVec, m_pos );
 	}
+	if( m_errorListener && failed && !m_failedLastFrame )
+	{
+		m_errorListener->HandleEvent( nullptr );
+	}
+	m_failedLastFrame = failed;
 }
 
 

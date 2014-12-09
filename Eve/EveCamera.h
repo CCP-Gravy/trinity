@@ -155,6 +155,9 @@ private:
 	Be::Time m_time;
 	void CapPitchAndYaw();
 
+	// Listener intended for providing error details if camera gets invalid values
+	IBlueEventListenerPtr m_errorListener;
+	bool m_failedLastFrame;
 };
 TYPEDEF_BLUECLASS(EveCamera);
 
