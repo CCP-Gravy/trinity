@@ -110,7 +110,8 @@ void EveDistanceField::Update( const EveUpdateContext& updateContext )
 		distanceNow = sqrt( distanceNow );
 	}
 
-	float delta = ( updateContext.GetDeltaT() ) / ( ( distanceNow > m_distance ) ? m_timeAdjustmentSecondsOut : m_timeAdjustmentSecondsIn );
+	float frac = ( ( distanceNow > m_distance ) ? m_timeAdjustmentSecondsOut : m_timeAdjustmentSecondsIn );
+	float delta = ( updateContext.GetDeltaT() ) / ( frac ? frac : 1.f );
 	if( delta > 1 )
 	{
 		delta = 1;
