@@ -185,54 +185,67 @@ void Tr2CurveLineSet::WriteLineVerticesToBuffer( const Vector3& pos1, const Colo
 	// direction position hint for the vertexshader
 	Vector3 dirOffset = pos2 - pos1;
 
+	uint32_t col1Swizzled = SwizzleColor( col1 );
+	uint32_t col2Swizzled = SwizzleColor( col2 );
+	uint32_t multiColorSwizzled = SwizzleColor( lineData->multiColor );
+	uint32_t overlayColorSwizzled = SwizzleColor( lineData->overlayColor );
+
+	Vector3 animationData( lineData->animationSpeed, lineData->animationScale, (float)lineID );
+
 	// tri0 - v0
-	buffer[0].position = pos1;
-	buffer[0].lineDir = Vector4( dirOffset, -1.f * m_lineWidthFactor * lineData->width );
-	buffer[0].beginEnd = Vector4( 0.f, length1, lineData->multiColorBorder, length2 - length1 );
-	buffer[0].color = SwizzleColor( col1 );
-	buffer[0].overrideColor = SwizzleColor( lineData->multiColor );
-	buffer[0].overlayColor = SwizzleColor( lineData->overlayColor );
-	buffer[0].animationData = Vector3( lineData->animationSpeed, lineData->animationScale, (float)lineID );
+	LineVertex& v0 = buffer[0];
+	v0.position = pos1;
+	v0.lineDir = Vector4( dirOffset, -1.f * m_lineWidthFactor * lineData->width );
+	v0.beginEnd = Vector4( 0.f, length1, lineData->multiColorBorder, length2 - length1 );
+	v0.color = col1Swizzled;
+	v0.overrideColor = multiColorSwizzled;
+	v0.overlayColor = overlayColorSwizzled;
+	v0.animationData = animationData;
 	// tri0 - v1
-	buffer[1].position = pos1;
-	buffer[1].lineDir = Vector4( dirOffset, m_lineWidthFactor * lineData->width );
-	buffer[1].beginEnd = Vector4( 0.f, length1, lineData->multiColorBorder, length2 - length1 );
-	buffer[1].color = SwizzleColor( col1 );
-	buffer[1].overrideColor = SwizzleColor( lineData->multiColor );
-	buffer[1].overlayColor = SwizzleColor( lineData->overlayColor );
-	buffer[1].animationData = Vector3( lineData->animationSpeed, lineData->animationScale, (float)lineID );
+	LineVertex& v1 = buffer[1];
+	v1.position = pos1;
+	v1.lineDir = Vector4( dirOffset, m_lineWidthFactor * lineData->width );
+	v1.beginEnd = Vector4( 0.f, length1, lineData->multiColorBorder, length2 - length1 );
+	v1.color = col1Swizzled;
+	v1.overrideColor = multiColorSwizzled;
+	v1.overlayColor = overlayColorSwizzled;
+	v1.animationData = animationData;
 	// tri0 - v2
-	buffer[2].position = pos2;
-	buffer[2].lineDir = Vector4( -1.f * dirOffset, -1.f * m_lineWidthFactor * lineData->width );
-	buffer[2].beginEnd = Vector4( 1.f, length2, lineData->multiColorBorder, length2 - length1 );
-	buffer[2].color = SwizzleColor( col2 );
-	buffer[2].overrideColor = SwizzleColor( lineData->multiColor );
-	buffer[2].overlayColor = SwizzleColor( lineData->overlayColor );
-	buffer[2].animationData = Vector3( lineData->animationSpeed, lineData->animationScale, (float)lineID );
+	LineVertex& v2 = buffer[2];
+	v2.position = pos2;
+	v2.lineDir = Vector4( -1.f * dirOffset, -1.f * m_lineWidthFactor * lineData->width );
+	v2.beginEnd = Vector4( 1.f, length2, lineData->multiColorBorder, length2 - length1 );
+	v2.color = col2Swizzled;
+	v2.overrideColor = multiColorSwizzled;
+	v2.overlayColor = overlayColorSwizzled;
+	v2.animationData = animationData;
 	// tri1 - v0
-	buffer[3].position = pos1;
-	buffer[3].lineDir = Vector4( dirOffset, m_lineWidthFactor * lineData->width );
-	buffer[3].beginEnd = Vector4( 0.f, length1, lineData->multiColorBorder, length2 - length1 );
-	buffer[3].color = SwizzleColor( col1 );
-	buffer[3].overrideColor = SwizzleColor( lineData->multiColor );
-	buffer[3].overlayColor = SwizzleColor( lineData->overlayColor );
-	buffer[3].animationData = Vector3( lineData->animationSpeed, lineData->animationScale, (float)lineID );
+	LineVertex& v3 = buffer[3];
+	v3.position = pos1;
+	v3.lineDir = Vector4( dirOffset, m_lineWidthFactor * lineData->width );
+	v3.beginEnd = Vector4( 0.f, length1, lineData->multiColorBorder, length2 - length1 );
+	v3.color = col1Swizzled;
+	v3.overrideColor = multiColorSwizzled;
+	v3.overlayColor = overlayColorSwizzled;
+	v3.animationData = animationData;
 	// tri2 - v1
-	buffer[4].position = pos2;
-	buffer[4].lineDir = Vector4( -1.f * dirOffset, m_lineWidthFactor * lineData->width );
-	buffer[4].beginEnd = Vector4( 1.f, length2, lineData->multiColorBorder, length2 - length1 );
-	buffer[4].color = SwizzleColor( col2 );
-	buffer[4].overrideColor = SwizzleColor( lineData->multiColor );
-	buffer[4].overlayColor = SwizzleColor( lineData->overlayColor );
-	buffer[4].animationData = Vector3( lineData->animationSpeed, lineData->animationScale, (float)lineID );
+	LineVertex& v4 = buffer[4];
+	v4.position = pos2;
+	v4.lineDir = Vector4( -1.f * dirOffset, m_lineWidthFactor * lineData->width );
+	v4.beginEnd = Vector4( 1.f, length2, lineData->multiColorBorder, length2 - length1 );
+	v4.color = col2Swizzled;
+	v4.overrideColor = multiColorSwizzled;
+	v4.overlayColor = overlayColorSwizzled;
+	v4.animationData = animationData;
 	// tri2 - v2
-	buffer[5].position = pos2;
-	buffer[5].lineDir = Vector4( -1.f * dirOffset, -1.f * m_lineWidthFactor * lineData->width );
-	buffer[5].beginEnd = Vector4( 1.f, length2, lineData->multiColorBorder, length2 - length1 );
-	buffer[5].color = SwizzleColor( col2 );
-	buffer[5].overrideColor = SwizzleColor( lineData->multiColor );
-	buffer[5].overlayColor = SwizzleColor( lineData->overlayColor );
-	buffer[5].animationData = Vector3( lineData->animationSpeed, lineData->animationScale, (float)lineID );
+	LineVertex& v5 = buffer[5];
+	v5.position = pos2;
+	v5.lineDir = Vector4( -1.f * dirOffset, -1.f * m_lineWidthFactor * lineData->width );
+	v5.beginEnd = Vector4( 1.f, length2, lineData->multiColorBorder, length2 - length1 );
+	v5.color = col2Swizzled;
+	v5.overrideColor = multiColorSwizzled;
+	v5.overlayColor = overlayColorSwizzled;
+	v5.animationData = animationData;
 }
 
 // ------------------------------------------------------------------------------------------------------
@@ -317,6 +330,8 @@ void Tr2CurveLineSet::WriteParticleVerticesToBuffer( const Vector3& pos1, const 
 // ------------------------------------------------------------------------------------------------------
 bool Tr2CurveLineSet::FillVertexBuffer()
 {
+	CCP_STATS_ZONE( __FUNCTION__ );
+
 	USE_MAIN_THREAD_RENDER_CONTEXT();
 
 	// collect this while looping through the list
@@ -346,9 +361,9 @@ bool Tr2CurveLineSet::FillVertexBuffer()
 			m_vertexBufferSize = currentNumOfLines;
 		}
 
-		// lock and fill it
-		LineVertex* vertexBuffer;
-		CR_RETURN_VAL( m_vertexBuffer.Lock( vertexBuffer, LOCK_WRITEONLY, renderContext ), false );
+		size_t byteSize = m_vertexBufferSize * 6 * sizeof( LineVertex );
+		CcpMallocBuffer buffer( "curveLineSetBuffer", byteSize );
+		LineVertex* vertexBuffer = reinterpret_cast<LineVertex*>( buffer.get() );
 
 		for( unsigned int i = 0; i < m_lines.size(); ++i )
 		{
@@ -506,6 +521,11 @@ bool Tr2CurveLineSet::FillVertexBuffer()
 				break;
 			}
 		}
+
+		// lock and fill it
+		CR_RETURN_VAL( m_vertexBuffer.Lock( vertexBuffer, LOCK_WRITEONLY, renderContext ), false );
+
+		memcpy( vertexBuffer, buffer.get(), byteSize );
 
 		m_vertexBuffer.Unlock( renderContext );
 	}
