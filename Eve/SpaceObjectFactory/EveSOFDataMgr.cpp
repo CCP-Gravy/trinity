@@ -716,7 +716,7 @@ void EveSOFDataMgr::GenerateFactionData( FactionData& fd, EveSOFDataFactionPtr s
 	}
 
 	// area parameters
-	for( auto hait = srcData->m_opaqueAreas.begin(); hait != srcData->m_opaqueAreas.end(); ++hait )
+	for( auto hait = srcData->m_areas.begin(); hait != srcData->m_areas.end(); ++hait )
 	{
 		EveSOFDataFactionHullAreaPtr hullAreaData = (*hait);
 
@@ -726,31 +726,7 @@ void EveSOFDataMgr::GenerateFactionData( FactionData& fd, EveSOFDataFactionPtr s
 			EveSOFDataParameterPtr parameterData = (*hapit);
 			ad.parameters[parameterData->m_name] = parameterData->m_value;
 		}
-		fd.opaqueAreaParameters[hullAreaData->m_name] = ad;
-	}
-	for( auto hait = srcData->m_transparentAreas.begin(); hait != srcData->m_transparentAreas.end(); ++hait )
-	{
-		EveSOFDataFactionHullAreaPtr hullAreaData = (*hait);
-
-		FactionAreaData ad;
-		for( auto hapit = hullAreaData->m_parameters.begin(); hapit != hullAreaData->m_parameters.end(); ++hapit )
-		{
-			EveSOFDataParameterPtr parameterData = (*hapit);
-			ad.parameters[parameterData->m_name] = parameterData->m_value;
-		}
-		fd.transparentAreaParameters[hullAreaData->m_name] = ad;
-	}
-	for( auto hait = srcData->m_additiveAreas.begin(); hait != srcData->m_additiveAreas.end(); ++hait )
-	{
-		EveSOFDataFactionHullAreaPtr hullAreaData = (*hait);
-
-		FactionAreaData ad;
-		for( auto hapit = hullAreaData->m_parameters.begin(); hapit != hullAreaData->m_parameters.end(); ++hapit )
-		{
-			EveSOFDataParameterPtr parameterData = (*hapit);
-			ad.parameters[parameterData->m_name] = parameterData->m_value;
-		}
-		fd.additiveAreaParameters[hullAreaData->m_name] = ad;
+		fd.areaParameters[hullAreaData->m_name] = ad;
 	}
 }
 

@@ -445,27 +445,9 @@ const std::vector<EveSOFDataMgr::HullAreas>* EveSOFDNA::GetHullMeshAreas( TriBat
 // Description:
 //   Return a shader parameter for a faction override
 // --------------------------------------------------------------------------------
-const Vector4* EveSOFDNA::GetFactionMeshAreaParameters( TriBatchType type, const BlueSharedString& areaDesignation, const BlueSharedString& parameterName ) const
+const Vector4* EveSOFDNA::GetFactionMeshAreaParameters( const BlueSharedString& areaDesignation, const BlueSharedString& parameterName ) const
 {
 	CCP_STATS_ZONE( __FUNCTION__ );
-
-	const std::map<BlueSharedString, EveSOFDataMgr::FactionAreaData>* areaParameters = nullptr;
-
-	// overrides are organized per areatype
-	switch( type )
-	{
-	case TRIBATCHTYPE_OPAQUE:
-		areaParameters = &m_factionData->opaqueAreaParameters;
-		break;
-	case TRIBATCHTYPE_TRANSPARENT:
-		areaParameters = &m_factionData->transparentAreaParameters;
-		break;
-	case TRIBATCHTYPE_ADDITIVE:
-		areaParameters = &m_factionData->additiveAreaParameters;
-		break;
-	default:
-		return nullptr;
-	}
 
 	// do we have a dna mesh command for this?
 	std::vector<std::string> meshCommandArgs;
@@ -502,8 +484,8 @@ const Vector4* EveSOFDNA::GetFactionMeshAreaParameters( TriBatchType type, const
 	}
 
 	// find the area, by designation string
-	auto parameterListIt = areaParameters->find( areaDesignation );
-	if( parameterListIt == areaParameters->end() )
+	auto parameterListIt = m_factionData->areaParameters.find( areaDesignation );
+	if( parameterListIt == m_factionData->areaParameters.end() )
 	{
 		return nullptr;
 	}

@@ -227,7 +227,7 @@ void EveSOF::FillMeshAreaVector( std::map<std::string, Tr2LodResourcePtr>& lodRe
 		// parameters
 		for( auto hullAreaParamsIt = area->parameters.begin(); hullAreaParamsIt != area->parameters.end(); ++hullAreaParamsIt )
 		{
-			const Vector4* factionParam = dna->GetFactionMeshAreaParameters( areaType, area->designation, hullAreaParamsIt->first );
+			const Vector4* factionParam = dna->GetFactionMeshAreaParameters( area->designation, hullAreaParamsIt->first );
 			if( factionParam )
 			{
 				newShader->AddParameterVector4( hullAreaParamsIt->first, factionParam );
@@ -1063,12 +1063,12 @@ void EveSOF::SetupTurretMaterial( EveTurretSet* turretSet, const char* parentFac
 	const EveSOFDataMgr::FactionData* parentFactionData = m_dataMgr.GetFactionData( parentFactionName );
 	const EveSOFDataMgr::FactionData* turretFactionData = m_dataMgr.GetFactionData( turretFactionName );
 
-	// only interested in opaque hull for turrets
+	// only interested in hull area for turrets
 	const EveSOFDataMgr::FactionAreaData* parentAreaData = nullptr;
 	if( parentFactionData )
 	{
-		auto parentAreaFinder = parentFactionData->opaqueAreaParameters.find( BlueSharedString( "hull" ) );
-		if( parentAreaFinder != parentFactionData->opaqueAreaParameters.end() )
+		auto parentAreaFinder = parentFactionData->areaParameters.find( BlueSharedString( "hull" ) );
+		if( parentAreaFinder != parentFactionData->areaParameters.end() )
 		{
 			parentAreaData = &parentAreaFinder->second;
 		}
@@ -1077,8 +1077,8 @@ void EveSOF::SetupTurretMaterial( EveTurretSet* turretSet, const char* parentFac
 	const EveSOFDataMgr::FactionAreaData* turretAreaData = nullptr;
 	if( turretFactionData )
 	{
-		auto turretAreaFinder = turretFactionData->opaqueAreaParameters.find( BlueSharedString( "hull" ) );
-		if( turretAreaFinder != turretFactionData->opaqueAreaParameters.end() )
+		auto turretAreaFinder = turretFactionData->areaParameters.find( BlueSharedString( "hull" ) );
+		if( turretAreaFinder != turretFactionData->areaParameters.end() )
 		{
 			turretAreaData = &turretAreaFinder->second;
 		}

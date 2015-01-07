@@ -48,11 +48,7 @@ EveSOFDataGeneric::EveSOFDataGeneric( IRoot* lockobj )
 
 
 EveSOFDataFaction::EveSOFDataFaction( IRoot* lockobj ) :
-	PARENTLOCK( m_opaqueAreas ),
-	PARENTLOCK( m_transparentAreas ),
-	PARENTLOCK( m_additiveAreas ),
-	PARENTLOCK( m_depthAreas ),
-	PARENTLOCK( m_distortionAreas ),
+	PARENTLOCK( m_areas ),
 	PARENTLOCK( m_decals ),
 	PARENTLOCK( m_spriteSets ),
 	PARENTLOCK( m_spotlightSets ),

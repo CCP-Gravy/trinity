@@ -498,12 +498,7 @@ public:
 	std::string m_resPathInsert;
 
 	// data
-	PEveSOFDataFactionHullAreaVector m_opaqueAreas;
-	PEveSOFDataFactionHullAreaVector m_transparentAreas;
-	PEveSOFDataFactionHullAreaVector m_additiveAreas;
-	PEveSOFDataFactionHullAreaVector m_depthAreas;
-	PEveSOFDataFactionHullAreaVector m_distortionAreas;
-
+	PEveSOFDataFactionHullAreaVector m_areas;
 	PEveSOFDataFactionSpriteSetVector m_spriteSets;
 	PEveSOFDataFactionSpotlightSetVector m_spotlightSets;
 	PEveSOFDataFactionPlaneSetVector m_planeSets;

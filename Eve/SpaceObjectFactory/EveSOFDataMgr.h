@@ -228,10 +228,8 @@ public:
 		int materialUsageMain;
 		int materialUsageMask;
 
-		// hull area paramaters
-		std::map<BlueSharedString, FactionAreaData> opaqueAreaParameters;
-		std::map<BlueSharedString, FactionAreaData> transparentAreaParameters;
-		std::map<BlueSharedString, FactionAreaData> additiveAreaParameters;
+		// hull area parameter overloads
+		std::map<BlueSharedString, FactionAreaData> areaParameters;
 		// spritesets
 		std::map<int, FactionSpriteSetColorData> spriteSetsColor;
 		// spotlight sets
