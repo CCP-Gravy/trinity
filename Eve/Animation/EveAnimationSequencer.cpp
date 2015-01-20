@@ -5,15 +5,17 @@
 #include "../../Tr2GrannyAnimation.h"
 
 
-EveAnimationStateSequencer::EveAnimationStateSequencer( IRoot* lockobj ) :
+EveAnimationStateMachine::EveAnimationStateMachine( IRoot* lockobj ) :
 	PARENTLOCK( m_pendingStates ),
 	PARENTLOCK( m_states ),
+	PARENTLOCK( m_transitions ),
 	m_isTransitioning( false ),
-	m_update( true )
+	m_update( true ),
+	m_autoPlayDefault( false )
 {
 }
 
-EveAnimationStateSequencer::~EveAnimationStateSequencer() 
+EveAnimationStateMachine::~EveAnimationStateMachine() 
 {
 }
 
@@ -21,9 +23,9 @@ EveAnimationStateSequencer::~EveAnimationStateSequencer()
 // Description:
 //   Get the animation state with the name provided(or nullptr if it doesn't exist)
 // --------------------------------------------------------------------------------
-EveAnimationStatePtr EveAnimationStateSequencer::GetAnimationState( const std::string& name )
+EveAnimationStatePtr EveAnimationStateMachine::GetAnimationState( const std::string& name, const PEveAnimationStateVector& states )
 {
-	for( auto it = m_states.begin(); it != m_states.end(); it++ )
+	for( auto it = states.begin(); it != states.end(); it++ )
 	{
 		if( (*it)->GetName() == name )
 		{
@@ -37,25 +39,29 @@ EveAnimationStatePtr EveAnimationStateSequencer::GetAnimationState( const std::s
 // Description:
 //   Set the owner. Triggers the extra animation.
 // --------------------------------------------------------------------------------
-void EveAnimationStateSequencer::SetOwner( EveSpaceObject2Ptr owner )
+void EveAnimationStateMachine::SetOwner( EveSpaceObject2* owner )
 {
-	m_owner = owner;
 	if( !owner )
 	{
 		return;
 	}
 	if( m_currentState )
 	{
-		m_currentState->Start( this, EVE_ANIM_START_INIT );
+		m_currentState->Start( this, owner, EVE_ANIM_START_INIT );
 	}
-	if( !m_extraAnimation.empty() && !m_extraAnimationTrackMask.empty() )
+
+	auto ac = owner->GetAnimationController();
+	if( !m_trackMask.empty() )
 	{
-		auto ac = m_owner->GetAnimationController();
-		if( ac->FindAnimationByName( m_extraAnimation.c_str() ) )
+		ac->AddAnimationLayerWithTrackMask( m_trackMask.c_str(), m_trackMask.c_str() );
+		if( m_autoPlayDefault && !m_defaultAnimation.empty() )
 		{
-			ac->AddAnimationLayerWithTrackMask( "extraLayer", m_extraAnimationTrackMask.c_str() );
-			ac->PlayLayerAnimationByName( "extraLayer", m_extraAnimation.c_str(), 0, 0, 0, 1, false );
+			ac->PlayLayerAnimationByName( m_trackMask.c_str(), m_defaultAnimation.c_str(), false, 0, 0, 1, false );
 		}
+	}
+	else if( m_autoPlayDefault && !m_defaultAnimation.empty() )
+	{
+		ac->PlayAnimationEx( m_defaultAnimation.c_str(), 0, 0, 1 );
 	}
 }
 
@@ -63,15 +69,15 @@ void EveAnimationStateSequencer::SetOwner( EveSpaceObject2Ptr owner )
 // Description:
 //   Go to the state specified
 // --------------------------------------------------------------------------------
-void EveAnimationStateSequencer::GoToState( const std::string& name )
+void EveAnimationStateMachine::GoToState( EveSpaceObject2* owner, const std::string& name )
 {
-	EveAnimationStatePtr state = GetAnimationState( name );
+	EveAnimationStatePtr state = GetAnimationState( name, m_states );
 	if( !state )
 	{
 		return;
 	}
 
-	if( !m_owner )
+	if( !owner )
 	{
 		m_currentState = state;
 		return;
@@ -80,7 +86,7 @@ void EveAnimationStateSequencer::GoToState( const std::string& name )
 	if( !m_currentState || m_currentState->GetProgress() == EVE_ANIM_DONE )
 	{
 		m_currentState = state;
-		state->Start( this, EVE_ANIM_START_INIT );
+		state->Start( this, owner, EVE_ANIM_START_INIT );
 		return;
 	}
 
@@ -89,7 +95,7 @@ void EveAnimationStateSequencer::GoToState( const std::string& name )
 	{
 		if( state->GetName() != m_currentState->GetName() )
 		{
-			m_currentState->Stop( m_owner );
+			m_currentState->Stop( owner );
 			m_pendingStates.Clear();
 			m_pendingStates.Append( state );
 		}
@@ -121,7 +127,7 @@ void EveAnimationStateSequencer::GoToState( const std::string& name )
 //   Check if the current state is complete and swap for a new state if one is
 //   available.
 // --------------------------------------------------------------------------------
-bool EveAnimationStateSequencer::CheckCompletionAndChangeStates()
+bool EveAnimationStateMachine::CheckCompletionAndChangeStates( EveSpaceObject2* owner )
 {
 	ssize_t pendingCount = m_pendingStates.GetSize();
 	if( m_currentState->GetProgress() != EVE_ANIM_DONE || !pendingCount )
@@ -136,21 +142,21 @@ bool EveAnimationStateSequencer::CheckCompletionAndChangeStates()
 	{
 		if( !m_isTransitioning && (stateName=m_currentState->GetTransition( lastState->GetName() )) )
 		{
-			nextState = GetAnimationState( stateName );
+			nextState = GetAnimationState( stateName, m_transitions );
 			m_isTransitioning = true;
-			nextState->Start( this, EVE_ANIM_START_TRANSITION );
+			nextState->Start( this, owner, EVE_ANIM_START_TRANSITION );
 		}
 		else if( m_isTransitioning )
 		{
 			m_pendingStates.Clear();
 			m_isTransitioning = false;
-			nextState->Start( this );
+			nextState->Start( this, owner );
 		}
 		else
 		{
 			m_pendingStates.Clear();
 			m_isTransitioning = false;
-			nextState->Start( this, EVE_ANIM_START_INIT );
+			nextState->Start( this, owner, EVE_ANIM_START_INIT );
 		}
 	}
 	else if( m_isTransitioning )
@@ -159,16 +165,16 @@ bool EveAnimationStateSequencer::CheckCompletionAndChangeStates()
 		{
 			// We're just finished transitioning into the first pending state. That state has a transition
 			// into the last pending state so we start transitioning into that immediately.
-			nextState = GetAnimationState( stateName );
+			nextState = GetAnimationState( stateName, m_transitions );
 			m_pendingStates.Clear();
 			m_pendingStates.Append( lastState );
-			nextState->Start( this, EVE_ANIM_START_TRANSITION );
+			nextState->Start( this, owner, EVE_ANIM_START_TRANSITION );
 		}
 		else
 		{
 			m_pendingStates.Clear();
 			m_isTransitioning = false;
-			nextState->Start( this, EVE_ANIM_START_INIT );
+			nextState->Start( this, owner, EVE_ANIM_START_INIT );
 		}
 	}
 	//else{} only way get more than 1 pending is if we're transitioning, see GoToState
@@ -177,21 +183,88 @@ bool EveAnimationStateSequencer::CheckCompletionAndChangeStates()
 	return true;
 }
 
-void EveAnimationStateSequencer::Update( Be::Time time )
+void EveAnimationStateMachine::Update( EveSpaceObject2* owner, Be::Time time )
 {
-	if( !m_currentState || !m_update || !m_owner )
+	if( !m_currentState || !m_update || !owner )
 	{
 		return;
 	}
 
 	do 
 	{
-		m_currentState->Update( time, m_owner );
-	} while( CheckCompletionAndChangeStates() );
+		m_currentState->Update( time, owner );
+	} while( CheckCompletionAndChangeStates( owner ) );
 }
 
-void EveAnimationStateSequencer::Clear()
+void EveAnimationStateMachine::Clear()
 {
 	m_currentState = nullptr;
 	m_pendingStates.Clear();
+}
+
+
+
+EveAnimationSequencer::EveAnimationSequencer( IRoot* lockobj ) :
+	PARENTLOCK( m_stateMachines )
+{
+	m_stateMachines.SetNotify( this );
+}
+
+
+EveAnimationSequencer::~EveAnimationSequencer()
+{
+}
+
+
+void EveAnimationSequencer::SetOwner( EveSpaceObject2* owner )
+{
+	m_owner = owner;
+	for( auto it = m_stateMachines.begin(); it != m_stateMachines.end(); it++ )
+	{
+		(*it)->SetOwner( owner );
+	}
+}
+
+
+void EveAnimationSequencer::Update( Be::Time time )
+{
+	for( auto it = m_stateMachines.begin(); it != m_stateMachines.end(); it++ )
+	{
+		(*it)->Update( m_owner, time );
+	}
+}
+
+
+void EveAnimationSequencer::GoToState( const std::string& name )
+{
+	for( auto it = m_stateMachines.begin(); it != m_stateMachines.end(); it++ )
+	{
+		(*it)->GoToState( m_owner, name );
+	}
+}
+
+
+void EveAnimationSequencer::OnListModified(
+	long event,
+	ssize_t key,
+	ssize_t key2,
+	IRoot* value,
+	const IList* theList
+	)
+{
+	if( theList != &m_stateMachines || !value )
+	{
+		return;
+	}
+
+	if( !m_owner || ( event & BELIST_EVENTMASK ) != BELIST_INSERTED )
+	{
+		return;
+	}
+
+	EveAnimationStateMachinePtr sm;
+	if( value->QueryInterface( BlueInterfaceIID<EveAnimationStateMachine>(), (void**)&sm, BEQI_SILENT ) )
+	{
+		sm->SetOwner( m_owner );
+	}
 }

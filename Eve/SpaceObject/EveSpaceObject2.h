@@ -56,7 +56,7 @@ BLUE_DECLARE_VECTOR( Tr2GPUParticleEmitter );
 
 BLUE_DECLARE( Tr2BindingVector3 );
 
-BLUE_DECLARE( EveAnimationStateSequencer );
+BLUE_DECLARE( EveAnimationSequencer );
 
 struct granny_skeleton;
 
@@ -432,7 +432,7 @@ protected:
 	PTriCurveSetVector m_curveSets;
 
 private:
-	EveAnimationStateSequencerPtr m_animationSequencer;
+	EveAnimationSequencerPtr m_animationSequencer;
 };
 
 TYPEDEF_BLUECLASS( EveSpaceObject2 );

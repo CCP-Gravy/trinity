@@ -9,43 +9,68 @@ BLUE_DECLARE( EveSpaceObject2 );
 BLUE_DECLARE( EveAnimationState );
 BLUE_DECLARE_VECTOR( EveAnimationState );
 
-BLUE_CLASS( EveAnimationStateSequencer ) :
+BLUE_CLASS( EveAnimationStateMachine ) :
 	public IRoot
 {
 public:
 	EXPOSE_TO_BLUE();
 	
-	EveAnimationStateSequencer( IRoot* lockobj = NULL );
-	~EveAnimationStateSequencer();
+	EveAnimationStateMachine( IRoot* lockobj = NULL );
+	~EveAnimationStateMachine();
 
 	void Clear();
-	void Update( Be::Time time );
-	void GoToState( const std::string& name );
+	void Update( EveSpaceObject2* owner, Be::Time time );
+	void GoToState( EveSpaceObject2* owner, const std::string& name );
 	void Rebuild();
 
 	const char* GetDefaultAnimation() const { return m_defaultAnimation.c_str(); }
-	EveSpaceObject2Ptr GetOwner() const { return (EveSpaceObject2Ptr)m_owner; }
-	void SetOwner( EveSpaceObject2Ptr owner );
+	void SetOwner( EveSpaceObject2* owner );
+
+	bool HasTrackMask() const { return !m_trackMask.empty(); };
+	const char* GetTrackMask() const { return m_trackMask.c_str(); };
+
 private:
-	std::map<std::string, EveAnimationStatePtr> m_stateMap;
-	
 	bool m_update;
 	bool m_isTransitioning;
-	bool m_useExtraAnimation;
+	bool m_autoPlayDefault;
 
 	EveAnimationStatePtr m_currentState;
 	PEveAnimationStateVector m_pendingStates;
-	EveSpaceObject2Ptr m_owner;
 
 	PEveAnimationStateVector m_states;
+	PEveAnimationStateVector m_transitions;
 	BlueSharedString m_defaultAnimation;
-	BlueSharedString m_extraAnimation;
-	BlueSharedString m_extraAnimationTrackMask;
+	BlueSharedString m_defaultState;
+	BlueSharedString m_trackMask;
+	BlueSharedString m_name;
 	
-	EveAnimationStatePtr GetAnimationState( const std::string& name );
-	bool CheckCompletionAndChangeStates();
-
+	EveAnimationStatePtr GetAnimationState( const std::string& name, const PEveAnimationStateVector& states );
+	bool CheckCompletionAndChangeStates( EveSpaceObject2* owner );
 };
-TYPEDEF_BLUECLASS( EveAnimationStateSequencer );
+TYPEDEF_BLUECLASS( EveAnimationStateMachine );
+BLUE_DECLARE_VECTOR( EveAnimationStateMachine );
 
+
+BLUE_CLASS( EveAnimationSequencer ) :
+	public IListNotify
+{
+public:
+	EXPOSE_TO_BLUE();
+	
+	EveAnimationSequencer( IRoot* lockobj = NULL );
+	~EveAnimationSequencer();
+	
+	void SetOwner( EveSpaceObject2* owner );
+	void Update( Be::Time time );
+	void GoToState( const std::string& name );
+	
+	/////////////////////////////////////////////////////////////////////////////////////
+	// IListNotify
+	void OnListModified( long event, ssize_t key, ssize_t key2, IRoot* value, const IList* theList );
+
+private:
+	PEveAnimationStateMachineVector m_stateMachines;
+	BlueWeakRef<EveSpaceObject2> m_owner;
+};
+TYPEDEF_BLUECLASS( EveAnimationSequencer );
 #endif

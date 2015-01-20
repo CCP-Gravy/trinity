@@ -6,7 +6,7 @@
 #include "EveAnimationData.h"
 
 BLUE_DECLARE( EveSpaceObject2 );
-BLUE_DECLARE( EveAnimationStateSequencer );
+BLUE_DECLARE( EveAnimationStateMachine );
 
 enum EveAnimationStateStartCommand {
 	EVE_ANIM_START_DEFAULT,
@@ -30,13 +30,14 @@ public:
 	EveAnimationState( IRoot* lockobj = NULL );
 	~EveAnimationState();
 	
-	void Start( EveAnimationStateSequencerPtr owner, EveAnimationStateStartCommand mode=EVE_ANIM_START_DEFAULT );
-	void Stop( EveSpaceObject2Ptr owner );
-	void Update( Be::Time time, EveSpaceObject2Ptr owner );
+	void Start( EveAnimationStateMachine* sm, EveSpaceObject2* so, EveAnimationStateStartCommand mode=EVE_ANIM_START_DEFAULT );
+	void Stop( EveSpaceObject2* owner );
+	void Update( Be::Time time, EveSpaceObject2* owner );
 	
 	EveAnimationStateProgress GetProgress() const { return m_progress; }
 	const std::string& GetName() const { return m_name; }
 	const char* GetTransition( const std::string& stateName ) const;
+
 private:
 	std::string m_name;
 	
@@ -57,13 +58,13 @@ private:
 	float m_animationDuration;
 	float m_secondsRemaining;
 
-	void PlayCurves( EveSpaceObject2Ptr owner );
-	void ExecuteCommands( EveSpaceObject2Ptr owner );
-	void PlayAnimation( EveAnimationStateSequencerPtr owner );
-	void EndAnimation( EveSpaceObject2Ptr owner );
-	void UpdateDuration( EveSpaceObject2Ptr owner );
+	void PlayCurves( EveSpaceObject2* owner );
+	void ExecuteCommands( EveSpaceObject2* owner );
+	void PlayAnimation( EveAnimationStateMachine* sm, EveSpaceObject2* so );
+	void EndAnimation( EveSpaceObject2* owner );
+	void UpdateDuration( EveSpaceObject2* owner );
 
-	void Cleanup( EveSpaceObject2Ptr owner, Be::Time time );
+	void Cleanup( EveSpaceObject2* owner, Be::Time time );
 };
 TYPEDEF_BLUECLASS( EveAnimationState );
 BLUE_DECLARE_VECTOR( EveAnimationState );

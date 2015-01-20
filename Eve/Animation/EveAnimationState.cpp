@@ -43,7 +43,7 @@ EveAnimationState::~EveAnimationState()
 // Description:
 //   Update the time when animations/curves are completed for this state.
 // --------------------------------------------------------------------------------
-void EveAnimationState::UpdateDuration( EveSpaceObject2Ptr owner )
+void EveAnimationState::UpdateDuration( EveSpaceObject2* owner )
 {
 	float currentAnimationTime = Tr2Renderer::GetAnimationTime();
 	m_startTime = currentAnimationTime;
@@ -67,7 +67,7 @@ void EveAnimationState::UpdateDuration( EveSpaceObject2Ptr owner )
 // Description:
 //   Deactivate this state. May take a while to wind down.
 // --------------------------------------------------------------------------------
-void EveAnimationState::Stop( EveSpaceObject2Ptr owner )
+void EveAnimationState::Stop( EveSpaceObject2* owner )
 {
 	m_progress = EVE_ANIM_FINALIZING;
 	EndAnimation( owner );
@@ -80,7 +80,7 @@ void EveAnimationState::Stop( EveSpaceObject2Ptr owner )
 //   owner - the owning animation sequencer
 //   mode - is it a transition, does it need to run init curves etc.
 // --------------------------------------------------------------------------------
-void EveAnimationState::Start( EveAnimationStateSequencerPtr owner, EveAnimationStateStartCommand mode )
+void EveAnimationState::Start( EveAnimationStateMachine* sm, EveSpaceObject2* so, EveAnimationStateStartCommand mode )
 {
 	m_doInitialization = mode == EVE_ANIM_START_INIT;
 
@@ -96,8 +96,8 @@ void EveAnimationState::Start( EveAnimationStateSequencerPtr owner, EveAnimation
 		m_progress = EVE_ANIM_RUNNING;
 	}
 
-	PlayAnimation( owner );
-	UpdateDuration( owner->GetOwner() );
+	PlayAnimation( sm, so );
+	UpdateDuration( so );
 }
 
 // --------------------------------------------------------------------------------
@@ -124,7 +124,7 @@ const char* EveAnimationState::GetTransition( const std::string& stateName ) con
 // Description:
 //   Play curves in the animation sequence
 // --------------------------------------------------------------------------------
-void EveAnimationState::PlayCurves( EveSpaceObject2Ptr owner )
+void EveAnimationState::PlayCurves( EveSpaceObject2* owner )
 {
 	if( m_doInitialization )
 	{	
@@ -143,7 +143,7 @@ void EveAnimationState::PlayCurves( EveSpaceObject2Ptr owner )
 // Description:
 //   Play commands in the animation sequence
 // --------------------------------------------------------------------------------
-void EveAnimationState::ExecuteCommands( EveSpaceObject2Ptr owner )
+void EveAnimationState::ExecuteCommands( EveSpaceObject2* owner )
 {
 	if( m_doInitialization )
 	{
@@ -163,20 +163,35 @@ void EveAnimationState::ExecuteCommands( EveSpaceObject2Ptr owner )
 // Description:
 //   Play animations, commands and curves in the animation sequence
 // --------------------------------------------------------------------------------
-void EveAnimationState::PlayAnimation( EveAnimationStateSequencerPtr owner )
+void EveAnimationState::PlayAnimation( EveAnimationStateMachine* sm, EveSpaceObject2* so )
 {
 	if( m_animation )
 	{
-		auto ac = owner->GetOwner()->GetAnimationController();
-		bool success = ac->PlayAnimation( m_animation->m_name.c_str(), false, m_animation->m_loops, m_animation->m_delay, m_animation->m_speed, false );
+		auto ac = so->GetAnimationController();
+		bool success = false;
+		if( sm->HasTrackMask() )
+		{
+			success = ac->PlayLayerAnimationByName( sm->GetTrackMask(), m_animation->m_name.c_str(), false, m_animation->m_loops, m_animation->m_delay, m_animation->m_speed, false );
+		}
+		else
+		{
+			success = ac->PlayAnimation( m_animation->m_name.c_str(), false, m_animation->m_loops, m_animation->m_delay, m_animation->m_speed, false );
+		}
 		if( m_progress == EVE_ANIM_RUNNING && !success )
 		{
-			ac->PlayAnimation( owner->GetDefaultAnimation(), false, m_animation->m_loops, m_animation->m_delay, m_animation->m_speed, false );
+			if( sm->HasTrackMask() )
+			{
+				ac->PlayLayerAnimationByName( sm->GetTrackMask(), sm->GetDefaultAnimation(), false, m_animation->m_loops, m_animation->m_delay, m_animation->m_speed, false );
+			}
+			else
+			{
+				ac->PlayAnimation( sm->GetDefaultAnimation(), false, m_animation->m_loops, m_animation->m_delay, m_animation->m_speed, false );
+			}
 		}
 	}
 
-	PlayCurves( owner->GetOwner() );
-	ExecuteCommands( owner->GetOwner() );
+	PlayCurves( so );
+	ExecuteCommands( so );
 }
 
 
@@ -184,7 +199,7 @@ void EveAnimationState::PlayAnimation( EveAnimationStateSequencerPtr owner )
 // Description:
 //   End current animation.
 // --------------------------------------------------------------------------------
-void EveAnimationState::EndAnimation( EveSpaceObject2Ptr owner )
+void EveAnimationState::EndAnimation( EveSpaceObject2* owner )
 {
 	auto ac = owner->GetAnimationController();
 	ac->EndAnimation();
@@ -203,7 +218,7 @@ void EveAnimationState::EndAnimation( EveSpaceObject2Ptr owner )
 // Description:
 //   Update the state
 // --------------------------------------------------------------------------------
-void EveAnimationState::Update( Be::Time time, EveSpaceObject2Ptr owner )
+void EveAnimationState::Update( Be::Time time, EveSpaceObject2* owner )
 {
 	float animationDelta = Tr2Renderer::GetAnimationTimeElapsed( m_startTime );
 	m_secondsRemaining = m_animationDuration - animationDelta;
@@ -224,7 +239,7 @@ void EveAnimationState::Update( Be::Time time, EveSpaceObject2Ptr owner )
 // Description:
 //   Stop animations/curves associated with this state.
 // --------------------------------------------------------------------------------
-void EveAnimationState::Cleanup( EveSpaceObject2Ptr owner, Be::Time time )
+void EveAnimationState::Cleanup( EveSpaceObject2* owner, Be::Time time )
 {
 	for( auto it = m_curves.cbegin(); it != m_curves.cend(); it++ )
 	{
