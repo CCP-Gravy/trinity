@@ -8,6 +8,11 @@
 #ifndef Tr2ShLightingManager_H
 #define Tr2ShLightingManager_H
 
+BLUE_DECLARE( Tr2PointLight );
+BLUE_DECLARE_VECTOR( Tr2PointLight );
+BLUE_DECLARE( TriCurveSet );
+BLUE_DECLARE_VECTOR( TriCurveSet );
+
 // --------------------------------------------------------------------------------------
 // Description:
 //   Tr2ShLightingManager is a class for computing SH coefficients to approximate. 
@@ -78,10 +83,14 @@ private:
 	// Directional light color
 	Vector3 m_sunColor;
 
-	// Overall intensity for SH lighting
-	float m_intensity;
+	// Overall intensity for secondary SH lighting
+	float m_secondaryIntensity;
+	// Overall intensity for primary SH lighting (from a list of point lights)
+	float m_primaryIntensity;
 	// SH lighting order
 	Quality m_quality;
+
+	PTr2PointLightVector m_lights;
 };
 
 TYPEDEF_BLUECLASS( Tr2ShLightingManager );

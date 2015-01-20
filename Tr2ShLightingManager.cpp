@@ -6,6 +6,7 @@
 
 #include "StdAfx.h"
 #include "Tr2ShLightingManager.h"
+#include "Tr2PointLight.h"
 
 CCP_STATS_DECLARE( shLightingSamples, "Trinity/shLighting/samples", true, CST_COUNTER_LOW, "How many SH lighting samples are evaluated per frame?" );
 CCP_STATS_DECLARE( shLightingSecondarySources, "Trinity/shLighting/secondarySources", true, CST_COUNTER_LOW, "How many SH lighting secondary sources are evaluated per frame?" );
@@ -225,8 +226,10 @@ Tr2ShLightingManager::Tr2ShLightingManager( IRoot* lockobj )
 	:m_sources( "Tr2ShLightingManager.m_sources" ),
 	m_sourceData( "Tr2ShLightingManager.m_sourceData", sizeof( SourceData ) * 8, 16 ),
 	m_sourceCount( 0 ),
-	m_intensity( 1.f ),
-	m_quality( L2 )
+	m_primaryIntensity( 1.f ),
+	m_secondaryIntensity( 1.f ),
+	m_quality( L2 ),
+	PARENTLOCK( m_lights )
 {
 }
 
@@ -346,7 +349,7 @@ void Tr2ShLightingManager::CalculateSecondaryLighting( const Vector3& position, 
 		}
 	}
 
-	ShSolver<Order>::NormalizeShCoefficients( sh, m_intensity * intensity );
+	ShSolver<Order>::NormalizeShCoefficients( sh, intensity );
 	ShSolver<Order>::PackCoefficients( sh, lightingCoefficients );
 }
 
@@ -382,7 +385,7 @@ void Tr2ShLightingManager::UpdateSourceData()
 	CCP_STATS_ZONE( __FUNCTION__ );
 
 	m_sourceCount = 0;
-	size_t dataSize = sizeof( SourceData ) * ( ( m_sources.size() + 3 ) / 4 ) * 4;
+	size_t dataSize = sizeof( SourceData ) * ( ( m_sources.size() + m_lights.size() + 3 ) / 4 ) * 4;
 	if( m_sourceData.size() < dataSize )
 	{
 		m_sourceData.resize( "Tr2ShLightingManager.m_sourceData", dataSize );
@@ -396,11 +399,20 @@ void Tr2ShLightingManager::UpdateSourceData()
 	{
 		data->position = *it->position;
 		data->radius = *it->radius;
-		data->albedo = *reinterpret_cast<const Vector4*>( it->albedo );
-		data->emissive = *reinterpret_cast<const Vector4*>( it->emissive );
+		data->albedo = *reinterpret_cast<const Vector4*>( it->albedo ) * m_secondaryIntensity;
+		data->emissive = *reinterpret_cast<const Vector4*>( it->emissive ) * m_secondaryIntensity;
 		++data;
 		++m_sourceCount;
 	}
-	memset( data, 0, dataSize - sizeof( SourceData ) * m_sources.size() );
+	for( auto it = m_lights.begin(); it != m_lights.end(); ++it )
+	{
+		data->position = ( *it )->m_position;
+		data->radius = ( *it )->m_radius;
+		data->albedo = Vector4( 0, 0, 0, 0 );
+		data->emissive = *reinterpret_cast<const Vector4*>( &( *it )->m_color ) * m_primaryIntensity;
+		++data;
+		++m_sourceCount;
+	}
+	memset( data, 0, dataSize - sizeof( SourceData ) * ( m_sources.size() + m_lights.size() ) );
 	CCP_STATS_ADD( shLightingSecondarySources, m_sourceCount );
 }

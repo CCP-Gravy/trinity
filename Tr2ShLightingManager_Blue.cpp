@@ -26,9 +26,14 @@ const Be::ClassInfo* Tr2ShLightingManager::ExposeToBlue()
         MAP_INTERFACE( Tr2ShLightingManager )
 
 		MAP_ATTRIBUTE( 
-			"intensity", 
-			m_intensity, 
-			"Overall SH lighting intensity", 
+			"primaryIntensity", 
+			m_primaryIntensity, 
+			"Overall intensity for primary SH lighting (from a list of point lights)", 
+			Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( 
+			"secondaryIntensity", 
+			m_secondaryIntensity, 
+			"Overall intensity for secondary SH lighting", 
 			Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE_WITH_CHOOSER( 
 			"quality", 
@@ -36,5 +41,10 @@ const Be::ClassInfo* Tr2ShLightingManager::ExposeToBlue()
 			"Lighting quality (SH order)", 
 			Be::READWRITE | Be::PERSIST | Be::ENUM,
 			Tr2ShLightingManagerQualityChooser )
+		MAP_ATTRIBUTE( 
+			"lights", 
+			m_lights, 
+			"Additional lights", 
+			Be::READWRITE | Be::PERSIST )
 	EXPOSURE_END()
 }
