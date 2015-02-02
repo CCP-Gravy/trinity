@@ -455,6 +455,16 @@ float Tr2GrannyAnimation::GetAnimationChainCompleteTime()
 	return m_baseLayer.GetAnimationChainCompleteTime();
 }
 
+float Tr2GrannyAnimation::GetAnimationChainCompleteTimeForLayer( const char* layerName )
+{
+	Tr2GrannyAnimationLayer* layer = GetAnimationLayer( layerName );
+	if( !layer )
+	{
+		return 0;
+	}
+	return layer->GetAnimationChainCompleteTime();
+}
+
 void Tr2GrannyAnimation::PostPhysicsAnimation( Be::Time time, const Matrix& modelTransform )
 {
 	return;

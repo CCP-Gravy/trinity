@@ -100,7 +100,7 @@ void EveAnimationStateMachine::GoToState( EveSpaceObject2* owner, const std::str
 	{
 		if( state->GetName() != m_currentState->GetName() )
 		{
-			m_currentState->Stop( owner );
+			m_currentState->Stop( this, owner );
 			m_pendingStates.Clear();
 			m_pendingStates.Append( state );
 		}
@@ -143,27 +143,36 @@ bool EveAnimationStateMachine::CheckCompletionAndChangeStates( EveSpaceObject2* 
 	EveAnimationStatePtr lastState = m_pendingStates[pendingCount - 1];
 	EveAnimationStatePtr nextState = lastState;
 	const char* stateName;
+	// We have a pending state
 	if( pendingCount == 1 )
 	{
+		// Current state is done and we were not transitioning and the newly finished state has a transition to the pending state
 		if( !m_isTransitioning && (stateName=m_currentState->GetTransition( lastState->GetName() )) )
 		{
+			// So we start transitioning into the pending state(the transition will be the new current state)
+			// We don't clear the pending list because the pending state is the next one we play after the transition(see next else if block)
 			nextState = GetAnimationState( stateName, m_transitions );
 			m_isTransitioning = true;
 			nextState->Start( this, owner, EVE_ANIM_START_TRANSITION );
 		}
+		// We only had one pending state and we're already transitioning into it.
 		else if( m_isTransitioning )
 		{
+			// Clear the single pending state from the list, that will be the result of out newly finished transition
 			m_pendingStates.Clear();
 			m_isTransitioning = false;
 			nextState->Start( this, owner );
 		}
+		// We have a pending state but no transition into it, which can be fine I guess
 		else
 		{
+			// Just start the pending state
 			m_pendingStates.Clear();
 			m_isTransitioning = false;
 			nextState->Start( this, owner, EVE_ANIM_START_INIT );
 		}
 	}
+	// We have more than one(max of 2 states allowed, see GoToState) and we're already transitioning into the first pending state
 	else if( m_isTransitioning )
 	{
 		if( ( stateName = m_pendingStates[0]->GetTransition( lastState->GetName() ) ) )
@@ -171,12 +180,14 @@ bool EveAnimationStateMachine::CheckCompletionAndChangeStates( EveSpaceObject2* 
 			// We're just finished transitioning into the first pending state. That state has a transition
 			// into the last pending state so we start transitioning into that immediately.
 			nextState = GetAnimationState( stateName, m_transitions );
+			// The final destination state is the only state left on the pending list
 			m_pendingStates.Clear();
 			m_pendingStates.Append( lastState );
 			nextState->Start( this, owner, EVE_ANIM_START_TRANSITION );
 		}
 		else
 		{
+			// Transition is done, we don't have a transition into the next state so we just play it directly
 			m_pendingStates.Clear();
 			m_isTransitioning = false;
 			nextState->Start( this, owner, EVE_ANIM_START_INIT );

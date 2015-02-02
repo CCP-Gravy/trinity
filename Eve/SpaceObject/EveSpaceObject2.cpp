@@ -1161,6 +1161,10 @@ void EveSpaceObject2::RebuildCachedData( BlueAsyncRes* p )
 	{
 		m_animationSequencer->SetOwner( this );
 	}
+	else if( m_geometryResFromMesh->GetAnimationCount() == 0 && m_animationSequencer )
+	{
+		m_animationSequencer->SetOwner( this );
+	}
 
 	if( m_boundingSphereRadius < 0.0f )
 	{

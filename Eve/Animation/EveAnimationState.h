@@ -31,7 +31,7 @@ public:
 	~EveAnimationState();
 	
 	void Start( EveAnimationStateMachine* sm, EveSpaceObject2* so, EveAnimationStateStartCommand mode=EVE_ANIM_START_DEFAULT );
-	void Stop( EveSpaceObject2* owner );
+	void Stop( EveAnimationStateMachine* sm, EveSpaceObject2* owner );
 	void Update( Be::Time time, EveSpaceObject2* owner );
 	
 	EveAnimationStateProgress GetProgress() const { return m_progress; }
@@ -61,8 +61,8 @@ private:
 	void PlayCurves( EveSpaceObject2* owner );
 	void ExecuteCommands( EveSpaceObject2* owner );
 	void PlayAnimation( EveAnimationStateMachine* sm, EveSpaceObject2* so );
-	void EndAnimation( EveSpaceObject2* owner );
-	void UpdateDuration( EveSpaceObject2* owner );
+	void EndAnimation( EveAnimationStateMachine* sm, EveSpaceObject2* owner );
+	void UpdateDuration( EveAnimationStateMachine* sm, EveSpaceObject2* so );
 
 	void Cleanup( EveSpaceObject2* owner, Be::Time time );
 };

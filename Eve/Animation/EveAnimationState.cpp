@@ -43,21 +43,28 @@ EveAnimationState::~EveAnimationState()
 // Description:
 //   Update the time when animations/curves are completed for this state.
 // --------------------------------------------------------------------------------
-void EveAnimationState::UpdateDuration( EveSpaceObject2* owner )
+void EveAnimationState::UpdateDuration( EveAnimationStateMachine* sm, EveSpaceObject2* so )
 {
 	float currentAnimationTime = Tr2Renderer::GetAnimationTime();
 	m_startTime = currentAnimationTime;
 	m_animationDuration = 0;
-	auto ac = owner->GetAnimationController();
+	auto ac = so->GetAnimationController();
 	if( ac && ac->IsInitialized() )
 	{
-		m_animationDuration = ac->GetAnimationChainCompleteTime() - currentAnimationTime;
+		if( sm->HasTrackMask() )
+		{
+			m_animationDuration = ac->GetAnimationChainCompleteTimeForLayer( sm->GetTrackMask() ) - currentAnimationTime;
+		}
+		else
+		{
+			m_animationDuration = ac->GetAnimationChainCompleteTime() - currentAnimationTime;
+		}
 	}
 
 	float maxCurveDuration = 0.f;
 	for( auto it = m_curves.cbegin(); it != m_curves.cend(); it++ )
 	{
-		maxCurveDuration = max( maxCurveDuration, owner->GetCurveSetDuration( (*it)->m_name ) );
+		maxCurveDuration = max( maxCurveDuration, so->GetCurveSetDuration( (*it)->m_name ) );
 	}
 
 	m_animationDuration = max( m_animationDuration, maxCurveDuration );
@@ -67,10 +74,10 @@ void EveAnimationState::UpdateDuration( EveSpaceObject2* owner )
 // Description:
 //   Deactivate this state. May take a while to wind down.
 // --------------------------------------------------------------------------------
-void EveAnimationState::Stop( EveSpaceObject2* owner )
+void EveAnimationState::Stop( EveAnimationStateMachine* sm, EveSpaceObject2* owner )
 {
 	m_progress = EVE_ANIM_FINALIZING;
-	EndAnimation( owner );
+	EndAnimation( sm, owner );
 }
 
 // --------------------------------------------------------------------------------
@@ -97,7 +104,7 @@ void EveAnimationState::Start( EveAnimationStateMachine* sm, EveSpaceObject2* so
 	}
 
 	PlayAnimation( sm, so );
-	UpdateDuration( so );
+	UpdateDuration( sm, so );
 }
 
 // --------------------------------------------------------------------------------
@@ -199,7 +206,7 @@ void EveAnimationState::PlayAnimation( EveAnimationStateMachine* sm, EveSpaceObj
 // Description:
 //   End current animation.
 // --------------------------------------------------------------------------------
-void EveAnimationState::EndAnimation( EveSpaceObject2* owner )
+void EveAnimationState::EndAnimation( EveAnimationStateMachine* sm, EveSpaceObject2* owner )
 {
 	auto ac = owner->GetAnimationController();
 	ac->EndAnimation();
@@ -208,7 +215,14 @@ void EveAnimationState::EndAnimation( EveSpaceObject2* owner )
 	float animationDuration = 0;
 	if( ac && ac->IsInitialized() )
 	{
-		animationDuration = ac->GetAnimationChainCompleteTime() - currentAnimationTime;
+		if( sm->HasTrackMask() )
+		{
+			m_animationDuration = ac->GetAnimationChainCompleteTimeForLayer( sm->GetTrackMask() ) - currentAnimationTime;
+		}
+		else
+		{
+			m_animationDuration = ac->GetAnimationChainCompleteTime() - currentAnimationTime;
+		}
 	}
 
 	m_animationDuration = max( m_animationDuration, animationDuration );
