@@ -238,7 +238,7 @@ unsigned Tr2RuntimeInstanceData::GetCount() const
 // --------------------------------------------------------------------------------------
 void Tr2RuntimeInstanceData::SetLayout( const Tr2VertexDefinition& layout )
 {
-	m_data.release();
+	m_data.reset();
 	m_vb.Destroy();
 	m_uavBuffer.Destroy();
 	m_stride = 0;
