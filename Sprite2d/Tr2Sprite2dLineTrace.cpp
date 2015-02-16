@@ -210,8 +210,7 @@ ITr2SpriteObject* Tr2Sprite2dLineTrace::PickPoint( float x, float y, Tr2Sprite2d
 			float len = XMVectorGetX(XMVector2LengthSq( d ));
 			if( len > FLT_EPSILON )
 			{
-				d = XMVector2Normalize( d );
-				if( renderer->IsInsideLineSegment( Vector2( x, y ), fromPos + d, toPos - d, halfWidth ) )
+				if( renderer->IsInsideLineSegment( Vector2( x, y ), fromPos, toPos, halfWidth ) )
 				{
 					return this;
 				}
@@ -226,8 +225,7 @@ ITr2SpriteObject* Tr2Sprite2dLineTrace::PickPoint( float x, float y, Tr2Sprite2d
 			float len = XMVectorGetX(XMVector2LengthSq( d ));
 			if( len > FLT_EPSILON )
 			{
-				d = XMVector2Normalize( d );
-				if( renderer->IsInsideLineSegment( Vector2( x, y ), fromPos + d, toPos - d, halfWidth ) )
+				if( renderer->IsInsideLineSegment( Vector2( x, y ), fromPos, toPos, halfWidth ) )
 				{
 					return this;
 				}
