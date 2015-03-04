@@ -1456,9 +1456,29 @@ static float Sign( const Vector2& v1, const Vector2& v2, const Vector2& v3 )
 	return (v1.x - v3.x) * (v2.y - v3.y) - (v2.x - v3.x) * (v1.y - v3.y);
 }
 
+static bool IsDegenerateTriangle( const Vector2& v0, const Vector2& v1, const Vector2& v2 )
+{
+	if( (fabs( v0.x - v1.x) < FLT_EPSILON) && (fabs( v0.y - v1.y) < FLT_EPSILON) )
+	{
+		return true;
+	}
+
+	if( (fabs( v0.x - v2.x) < FLT_EPSILON) && (fabs( v0.y - v2.y) < FLT_EPSILON) )
+	{
+		return true;
+	}
+
+	return false;
+}
+
 bool Tr2Sprite2dScene::IsInsideTriangle( const Vector2& pointIn, const Vector2& v0, const Vector2& v1, const Vector2& v2 )
 {
 	if( !IsInsideClipRect( pointIn ) )
+	{
+		return false;
+	}
+
+	if( IsDegenerateTriangle( v0, v1, v2 ) )
 	{
 		return false;
 	}
