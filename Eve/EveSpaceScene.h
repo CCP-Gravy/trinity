@@ -431,7 +431,7 @@ protected:
 	PerFrameVSData m_perFrameVS;
 
 	EveVisualizeMethod m_visualizeMethod;
-	bool m_isWireframe;
+	float m_perFrameDebug;
 
 	EveTransformPtr m_dustfield;
 	EveDustfieldConstraintPtr m_dustfieldConstaint;

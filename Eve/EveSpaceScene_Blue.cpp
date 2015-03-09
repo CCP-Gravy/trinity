@@ -502,14 +502,8 @@ const Be::ClassInfo* EveSpaceScene::ExposeToBlue()
 			EveVisualizerChooser
 		)
 
-		MAP_ATTRIBUTE
-		(
-			"wireframe",
-			m_isWireframe,
-			"Forces rendering to wireframe mode",
-			Be::READWRITE
-		)
-		
+		MAP_ATTRIBUTE( "perFrameDebug", m_perFrameDebug, "This is a debug/visualization value, which gets passed to the perframePS data, so the shader can use it.", Be::READWRITE )
+
 		MAP_ATTRIBUTE
 		(
 			"dynamicClipPlanes",

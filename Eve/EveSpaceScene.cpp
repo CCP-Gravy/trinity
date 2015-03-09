@@ -127,7 +127,7 @@ EveSpaceScene::EveSpaceScene( IRoot* lockobj ) :
 	m_shadowReceiverMaxCount( 16 ),
 	m_shadowCasterMaxCount( 16 ),
 	m_visualizeMethod( VM_NONE ),
-	m_isWireframe( false ),
+	m_perFrameDebug( 0.f ),
 	m_pickBuffer( NULL,  Tr2RenderContextEnum::PIXEL_FORMAT_B8G8R8A8_UNORM, 1 ),
 	m_envMapRotation( 0.0f, 0.0f, 0.0f, 1.0f ),
 	m_backgroundRenderingEnabled( false ),
@@ -1038,7 +1038,6 @@ void EveSpaceScene::BeginRender( Tr2RenderContext& renderContext )
 	}
 
 	SetNoShadow();
-	renderContext.m_esm.SetWireframeRendering( m_isWireframe );
 
 	// Set up the frustum for visibility checking.
 	// Todo: Solve the issue of getting renderables from objects that aren't visible but
@@ -1879,7 +1878,7 @@ void EveSpaceScene::PopulatePerFramePSData( PerFramePSData &data )
 	data.ProjectionToView.x = projection._43;
 	data.ProjectionToView.y = projection._33;
 
-	data.Debug = 0.f;
+	data.Debug = m_perFrameDebug;
 }
 
 bool EveSpaceScene::Initialize()
