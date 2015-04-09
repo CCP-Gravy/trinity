@@ -8,11 +8,11 @@
 #ifndef Tr2Texture2dLodParameter_h
 #define Tr2Texture2dLodParameter_h
 
-#include "TriTexture2DParameter.h"
+#include "TriTextureParameter.h"
 
 BLUE_DECLARE( Tr2LodResource );
 
-BLUE_CLASS( Tr2Texture2dLodParameter ) : public TriTexture2DParameter
+BLUE_CLASS( Tr2Texture2dLodParameter ) : public TriTextureParameter
 {
 public:
 	EXPOSE_TO_BLUE();

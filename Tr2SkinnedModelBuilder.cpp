@@ -7,7 +7,7 @@
 #include "EffectParameter/Tr2Vector4Parameter.h"
 #include "EffectParameter/Tr2FloatParameter.h"
 #include "EffectParameter/TriFloatArrayParameter.h"
-#include "EffectParameter/TriTexture2DParameter.h"
+#include "EffectParameter/TriTextureParameter.h"
 #include "Tr2SkinnedModel.h"
 #include "Tr2PerObjectData.h"
 #include "Tr2Effect.h"
@@ -1411,7 +1411,7 @@ void Tr2SkinnedModelBuilder::CopyAreas( Tr2MeshAreaVector* src, Tr2MeshAreaVecto
 					if( resourceName && ( strcmp( resourceName, "FresnelLookupMap" ) == 0 ) )
 					{
 						// is resource we ant to change
-						TriTexture2DParameter* destTextureParameter = dynamic_cast<TriTexture2DParameter*>( *it );
+						TriTextureParameter* destTextureParameter = dynamic_cast<TriTextureParameter*>( *it );
 						if( destTextureParameter )
 						{
 							destTextureParameter->SetResourcePath( "res:/Texture/Global/brdfLibrary.dds" );

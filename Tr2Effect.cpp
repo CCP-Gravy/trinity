@@ -9,9 +9,8 @@
 #include "EffectParameter/Tr2Vector4Parameter.h"
 #include "EffectParameter/Tr2Matrix4Parameter.h"
 #include "EffectParameter/TriFloatArrayParameter.h"
-#include "EffectParameter/TriTexture2DParameter.h"
+#include "EffectParameter/TriTextureParameter.h"
 #include "EffectParameter/Tr2Texture2DLodParameter.h"
-#include "EffectParameter/TriTextureCubeParameter.h"
 #include "EffectParameter/Tr2GeometryBufferParameter.h"
 #include "EffectParameter/TriVariableParameter.h"
 
@@ -295,7 +294,7 @@ void Tr2Effect::SetEffectPathName( const char* path )
 void Tr2Effect::AddResourceTexture2D( const BlueSharedString& name, const char* resPath )
 {
 	// alloc and init the texture parameter
-	TriTexture2DParameterPtr texture2d;
+	TriTextureParameterPtr texture2d;
 	texture2d.CreateInstance();
 	texture2d->SetParameterName( name );
 	texture2d->SetResourcePath( resPath );
@@ -1332,29 +1331,12 @@ void ConvertEffectResource(	const Tr2EffectResource& resource,
 	switch( resource.type )
 	{
 	case Tr2EffectResource::TEXTURE_CUBE:
-		if( strstr( resource.name, "Reflection" ) )
-		{
-			OTriVariableParameter* p = new OTriVariableParameter;
-			p->m_name = BlueSharedString( resource.name );
-			p->m_variableName = BlueSharedString( "EnvMap1" );
-			p->Initialize();
-			paramAdder( p );
-			p->Unlock(); // Remove the original lock created by 'new'.
-		}
-		else
-		{
-			OTriTextureCubeParameter* newTexCube = new OTriTextureCubeParameter();
-			newTexCube->SetParameterName( BlueSharedString( resource.name ) );
-			resourceAdder( newTexCube );
-			newTexCube->Unlock(); // Remove the original lock created by 'new'.
-		}
-		break;
 	case Tr2EffectResource::TEXTURE_1D:
 	case Tr2EffectResource::TEXTURE_2D:
 	case Tr2EffectResource::TEXTURE_3D:
 	case Tr2EffectResource::TEXTURE_TYPELESS:
 		{
-			OTriTexture2DParameter* newTex2D = new OTriTexture2DParameter();
+			OTriTextureParameter* newTex2D = new OTriTextureParameter();
 			newTex2D->SetParameterName( BlueSharedString( resource.name ) );
 			resourceAdder( newTex2D );
 			newTex2D->Unlock(); // Remove the original lock created by 'new'.

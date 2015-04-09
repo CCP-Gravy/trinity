@@ -6,7 +6,7 @@
 #include "EffectParameter/Tr2Vector2Parameter.h"
 #include "EffectParameter/Tr2Vector3Parameter.h"
 #include "EffectParameter/Tr2Vector4Parameter.h"
-#include "EffectParameter/TriTexture2DParameter.h"
+#include "EffectParameter/TriTextureParameter.h"
 
 // --------------------------------------------------------------------------------------
 // Description:
@@ -292,14 +292,14 @@ bool Tr2ShaderTexDesc::Initialize()
 // --------------------------------------------------------------------------------------
 // Description:
 //   Constructs a new texture parameter from the default texture parameter path.  Note
-//   that the created TriTexture2DParameter has a reference count of 1, so the caller
+//   that the created TriTextureParameter has a reference count of 1, so the caller
 //   is responsible for calling Unlock (if needed).
 // Return Value:
-//   New default TriTexture2DParameter
+//   New default TriTextureParameter
 // --------------------------------------------------------------------------------------
 ITriEffectParameter* Tr2ShaderTexDesc::CreateDefaultParameter( void ) const
 {
-	OTriTexture2DParameter* param = new OTriTexture2DParameter();
+	OTriTextureParameter* param = new OTriTextureParameter();
 	param->SetParameterName( BlueSharedString( m_parameterName.c_str() ) );
 	param->SetResourcePath( m_defaultValue.c_str() );
 

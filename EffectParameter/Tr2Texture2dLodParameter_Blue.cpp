@@ -19,5 +19,5 @@ const Be::ClassInfo* Tr2Texture2dLodParameter::ExposeToBlue()
 			"Resource LOD wrapper for texture",
 			Be::READWRITE | Be::PERSIST
 		)
-	EXPOSURE_CHAINTO( TriTexture2DParameter )
+	EXPOSURE_CHAINTO( TriTextureParameter )
 }

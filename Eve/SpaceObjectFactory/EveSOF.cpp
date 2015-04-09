@@ -20,7 +20,7 @@
 #include "Tr2MeshLod.h"
 #include "Tr2MeshArea.h"
 #include "Tr2Effect.h"
-#include "EffectParameter/TriTexture2DParameter.h"
+#include "EffectParameter/TriTextureParameter.h"
 #include "EffectParameter/Tr2Vector4Parameter.h"
 #include "EffectParameter/Tr2FloatParameter.h"
 #include "include/ITriFunction.h"
