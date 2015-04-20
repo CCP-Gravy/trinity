@@ -49,7 +49,6 @@ public:
 	Vector4 m_baseCutoffData;
 	Matrix m_shipMatrix;
 	// per turret data
-	Vector4 m_turretData[EVE_MAX_TURRETS_PER_SET];
 	Matrix m_turretLocal[EVE_MAX_TURRETS_PER_SET];
 	// pose matrices are 4x3, since there is a lot of them
 	float m_turretPose[EVE_MAX_BONES_PER_TURRET * EVE_MAX_TURRETS_PER_SET][4 * 3];
@@ -271,8 +270,6 @@ private:
 		Matrix					localMatrix;
 		Matrix					worldMatrix;
 		Matrix					invWorldMatrix;
-		// extra glow
-		float					extraGlowStrength;
 		// animation
 		granny_skeleton*		grnSkeleton;
 		granny_model_instance*	grnModelInstance;

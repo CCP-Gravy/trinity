@@ -705,12 +705,6 @@ void EveTurretSet::UpdateAsyncronous( float deltaT, Be::Time time, const ParentD
 
 			GrannyBuildWorldPose( it->grnSkeleton, 0, it->grnSkeleton->BoneCount, it->grnLocalPose, &Tr2Renderer::GetIdentityTransform().m[0][0], it->grnWorldPose );
 		}
-
-		// color animation
-		if( it->extraGlowStrength > 0.f )
-		{
-			it->extraGlowStrength = Clamp( it->extraGlowStrength - 0.2f * deltaT, 0.f, 1.f );
-		}
 	}
 
 	// update the target locator position, but do it smoothly by using another locator (if set!)
@@ -788,12 +782,6 @@ void EveTurretSet::UpdateAsyncronous( float deltaT, Be::Time time, const ParentD
 			PopShotMissed();
 			m_firingEffect->SetEndPosition( GetShotMissed() ? &m_targetPositionMiss : &m_targetPosition );
 			m_firingEffect->SetDisplayDestObject( !GetShotMissed() || m_projectileMissBehaviour );
-
-			// we did just fire, so increase heat glow strength on this turret
-			if( m_activeTurret != INVALID_TURRET_INDEX )
-			{
-				m_singleTurrets[m_activeTurret].extraGlowStrength = Clamp( m_singleTurrets[m_activeTurret].extraGlowStrength + 0.3f, 0.f, 1.f );
-			}
 
 			// pop miss state
 			m_randomMissDistanceOffset = TriFloatRandom01();
@@ -1056,7 +1044,6 @@ void EveTurretSet::SetLocalTransform( unsigned int turretIndex, const Matrix* lo
 			D3DXMatrixIdentity( &data.invWorldMatrix );
 			data.valid = false;
 			data.visible = false;
-			data.extraGlowStrength = 0.f;
 
 			m_singleTurrets.push_back( data );
 
@@ -1407,9 +1394,6 @@ Tr2PerObjectData* EveTurretSet::GetPerObjectData( ITriRenderBatchAccumulator* ac
 				{
 					perObjectData->m_turretLocal[baseTurretIndex] = idMatrix;
 				}
-
-				// extra data per turret (glow, ...)
-				perObjectData->m_turretData[baseTurretIndex] = Vector4( m_singleTurrets[i].extraGlowStrength, 0.f, 0.f, 0.f );
 
 				// increment base bone index for next turret
 				baseBoneIndex += EVE_MAX_BONES_PER_TURRET;
