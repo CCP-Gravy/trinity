@@ -342,10 +342,12 @@ Tr2PerObjectData* EveCloud::GetPerObjectData( ITriRenderBatchAccumulator* accumu
 	Vector3 zero( 0.f, 0.f, 0.f );
 	D3DXVec3TransformCoord( &data->m_data.m_eyePosLocal, &zero, &worldViewInv );
 
-	Matrix projectionInv;
-	D3DXMatrixInverse( &projectionInv, nullptr, &Tr2Renderer::GetProjectionTransform() );
-	D3DXMatrixTranspose( &data->m_data.m_projectionInv, &projectionInv );
-
+	// We modify the original projection matrix by changing clip planes to avoid precision problems
+	Matrix fakeProjectionInv = Tr2Renderer::GetProjectionTransform();
+	fakeProjectionInv._33 = -1;
+	fakeProjectionInv._43 = -500 * 2;
+	D3DXMatrixInverse( &fakeProjectionInv, nullptr, &fakeProjectionInv );
+	D3DXMatrixTranspose( &data->m_data.m_projectionInv, &fakeProjectionInv );
 
 	Vector3 center;
 	D3DXVec3TransformCoord( &center, &zero, &worldViewProjection );
