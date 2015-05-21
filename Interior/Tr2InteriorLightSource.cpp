@@ -404,7 +404,7 @@ void Tr2InteriorLightSource::RecalculateUnitToWorldMatrix()
 		D3DXMatrixIdentity( &orientation );
 		D3DXVec3Normalize( &orientation.GetZ(), &m_coneDirection );
 		Vector3 y( 0.0f, 1.0f, 0.0f );
-		if( abs( D3DXVec3Dot( &orientation.GetZ(), &y ) ) > 0.9f )
+		if( std::abs( D3DXVec3Dot( &orientation.GetZ(), &y ) ) > 0.9f )
 		{
 			y = Vector3( 1.0f, 0.0f, 0.0f );
 		}
@@ -425,7 +425,7 @@ void Tr2InteriorLightSource::RecalculateUnitToWorldMatrix()
 		Vector3 eye = m_position;
 		Vector3 at = m_position + m_coneDirection;
 		Vector3 up;
-		if( abs( m_coneDirection.y ) < 0.99f )
+		if( std::abs( m_coneDirection.y ) < 0.99f )
 		{
 			Vector3 y( 0, 1, 0 );
 			D3DXVec3Cross( &up, &m_coneDirection, &y );

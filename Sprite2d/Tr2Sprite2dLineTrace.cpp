@@ -494,7 +494,7 @@ void Tr2Sprite2dLineTrace::AddRoundJoint(
 		}
 		else
 		{
-			m_textureOffsetAccum += abs(arcLength) / float(numSteps);
+			m_textureOffsetAccum += std::abs(arcLength) / float(numSteps);
 			float texOffset = m_textureOffsetAccum / m_textureWidth - m_textureOffset;
 			if( sign > 0.0f )
 				v.texCoord[0] = Vector2( texOffset, 1.0f );
@@ -590,7 +590,7 @@ void Tr2Sprite2dLineTrace::AddMiterJoint(
 	{	
 		float arcLength;
 		XMStoreFloat(&arcLength, XMVector2Length(p - topPoint));
-		m_textureOffsetAccum += abs(arcLength);
+		m_textureOffsetAccum += std::abs(arcLength);
 		float texOffset = m_textureOffsetAccum / m_textureWidth - m_textureOffset;
 		if( sign > 0.0f )
 			v.texCoord[0] = Vector2( texOffset, 1.0f );
