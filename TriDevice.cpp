@@ -42,7 +42,7 @@ namespace {
 		NvAPI_Status status = NvAPI_Initialize();
 		if (status != NVAPI_OK)
 		{
-			CCP_LOGWARN( "Unable to initialize NVAPI" );
+			CCP_LOG( "Unable to initialize NVAPI - probably not on Nvidia hardware" );
 		}
 #endif
 	}
