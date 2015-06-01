@@ -57,7 +57,7 @@ bool TriValueBinding::OnModified( Be::Var* val )
 
 static void Copy8Bit( void* srcVar, void* dstVar, float scale, const Vector4& offset )
 {
-	*(uint8_t*)dstVar = (uint8_t)(*static_cast<float*>( srcVar ) * scale + offset.x);
+	*(uint8_t*)dstVar = (uint8_t)(*static_cast<bool*>( srcVar ) * scale + offset.x);
 }
 
 static void Copy16Bit( void* srcVar, void* dstVar, float scale, const Vector4& offset )
