@@ -611,6 +611,7 @@ void EveSpaceScene::PrepareShadowMap(
 	{
 		renderContext.m_esm.SetInvertedDepthTest( false );
 		ON_BLOCK_EXIT( [&] { renderContext.m_esm.SetInvertedDepthTest( true ); } );
+		renderContext.m_esm.ApplyStandardStates( Tr2EffectStateManager::RM_OPAQUE );
 		renderContext.RenderBatches( m_shadowBatches );
 	}
 	m_shadowMap->EndShadowRendering();
