@@ -234,6 +234,8 @@ EveSpaceScene::EveSpaceScene( IRoot* lockobj ) :
 	m_taaSamplingPatterns[6] = Vector2( -.67f, -.1f );
 	m_taaSamplingPatterns[7] = Vector2( .1f, .67f );
 	m_taaSamplingPatterns[8] = Vector2( .67f, -.67f );
+
+	Tr2LightManager::ResetVariableStore();
 }
 
 EveSpaceScene::~EveSpaceScene()

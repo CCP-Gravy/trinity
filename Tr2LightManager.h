@@ -68,6 +68,7 @@ public:
 
 	virtual void ReleaseResources( TriStorage s );
 
+	static void ResetVariableStore();
 	static Tr2LightManager* GetOrCreateInstance( const char* effectPath );
 	static Tr2LightManager* GetInstance();
 	static void DeleteInstance();

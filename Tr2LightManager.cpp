@@ -83,11 +83,16 @@ Tr2LightManager::Tr2LightManager( const char* effectPath )
 
 Tr2LightManager::~Tr2LightManager()
 {
+	ResetVariableStore();
+}
+
+void Tr2LightManager::ResetVariableStore()
+{
 	Tr2GpuStructuredBufferPtr empty;
 	empty.CreateInstance();
 
-	m_lightBufferVariable.Register( "LightBuffer", empty );
-	m_indexBufferVariable.Register( "LightIndexBuffer", empty );
+	GlobalStore().RegisterVariable( "LightBuffer", empty );
+	GlobalStore().RegisterVariable( "LightIndexBuffer", empty );
 }
 
 Tr2LightManager* Tr2LightManager::GetOrCreateInstance( const char* effectPath )

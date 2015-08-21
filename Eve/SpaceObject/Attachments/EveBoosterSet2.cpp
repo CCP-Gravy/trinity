@@ -1056,7 +1056,7 @@ void EveBoosterSet2::RegisterWithQuadRenderer( Tr2QuadRenderer& quadRenderer )
 // --------------------------------------------------------------------------------
 void EveBoosterSet2::AddToQuadRenderer( Tr2QuadRenderer& quadRenderer, const Matrix& world )
 {
-	if( m_glows )
+	if( m_glows && m_boosterLOD > g_eveSpaceSceneLowDetailThreshold )
 	{
 		m_glows->AddBoosterGlowToQuadRenderer( quadRenderer, world, m_overallIntensity );
 	}
