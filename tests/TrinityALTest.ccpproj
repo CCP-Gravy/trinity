@@ -97,16 +97,6 @@ BaseConfigurations:
       PreprocessorDefinitions:
       - D3DTARGET=9
 
-  Orbis:
-    # These are settings that apply to all variants of Trinity that use Orbis
-    Imports:
-    - ../TrinityAL/uses_TrinityALOrbis.yaml
-    - ../CcpCore/uses_CcpCore.yaml
-    Link:
-      AdditionalDependencies:
-      - SceUserService_stub_weak
-      - ScePad_stub_weak
-
   GLES2:
     # These are settings that apply to all variants of Trinity that use OpenGL ES 2
     Imports:
@@ -226,20 +216,6 @@ Configurations:
       OptimizationLevel: O3
     AntBuild:
       AndroidManifestLocation: AndroidManifest.xml
-
-  Debug_Orbis|ORBIS:
-    BaseConfigurations:
-    - Debug
-    - Orbis
-    General: 
-      TargetName: TrinityALTestOrbis_dev
-
-  Release_Orbis|ORBIS:
-    BaseConfigurations:
-    - Release
-    - Orbis
-    General:
-      TargetName: TrinityALTestOrbis
 
   Dev_STUB|Win32,x64:
     BaseConfigurations:

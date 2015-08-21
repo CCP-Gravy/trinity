@@ -21,13 +21,8 @@ void WithValidRenderContext::SetUpTestCase()
 	Tr2PrimaryRenderContextAL::SetPrimaryRenderContext( renderContext );
 
 	CR( Tr2VideoAdapterInfo::GetAdapterDisplayMode( Tr2VideoAdapterInfo::DEFAULT_ADAPTER, presentParameters.mode ) );
-#if TRINITY_PLATFORM==TRINITY_ORBIS
-	presentParameters.mode.width = 1920;
-	presentParameters.mode.height = 1080;
-#else
 	presentParameters.mode.width = 640;
 	presentParameters.mode.height = 480;
-#endif
 	presentParameters.backBufferCount = 1;
 	presentParameters.msaaType = 0;
 	presentParameters.msaaQuality = 0;

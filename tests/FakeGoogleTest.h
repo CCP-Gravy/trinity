@@ -2,7 +2,7 @@
 #ifndef FakeGoogleTest_H
 #define FakeGoogleTest_H
 
-#if defined(__ORBIS__) || defined(TRINITY_AL_MOBILE)
+#if defined(TRINITY_AL_MOBILE)
 
 #if defined(__ANDROID__)
 #include <android/log.h>

@@ -19,17 +19,12 @@ typedef uintptr_t Tr2WindowHandle;
 #define SHADER_PATH Shaders.dx11
 #elif( TRINITY_PLATFORM==TRINITY_OPENGLES2 )
 #define SHADER_PATH Shaders.gles2
-#elif( TRINITY_PLATFORM==TRINITY_ORBIS )
-#define SHADER_PATH Shaders.orbis
 #elif( TRINITY_PLATFORM==TRINITY_STUB )
 #define SHADER_PATH Shaders.dx11
 #endif
 
 #define INCLUDE_SHADER_CODE( name ) CCP_STRINGIZE(SHADER_PATH/name.h)
 
-#if defined(__ORBIS__)
-#include "FakeGoogleTest.h"
-#else
 #include "gtest/gtest.h"
 
 #ifndef ASSERT_HRESULT_SUCCEEDED
@@ -69,8 +64,6 @@ namespace testing
 #define ASSERT_HRESULT_SUCCEEDED(expr) ASSERT_PRED_FORMAT1(::testing::internal::IsHRESULTSuccess, (expr))
 #define EXPECT_HRESULT_FAILED(expr) EXPECT_PRED_FORMAT1(::testing::internal::IsHRESULTFailure, (expr))
 #define ASSERT_HRESULT_FAILED(expr) ASSERT_PRED_FORMAT1(::testing::internal::IsHRESULTFailure, (expr))
-
-#endif
 
 #endif
 
