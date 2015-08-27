@@ -456,7 +456,15 @@ void EveSOFDNA::ModifyTextureResPath( std::string& resPath, const char* resName 
 		// has only one parameter: a string
 		if( commandArgs.size() == 1 )
 		{
-			pathInsert = commandArgs[0].c_str();
+			// check for "none", which will null-ify the respathinsert
+			if(commandArgs[0] == "none")
+			{
+				pathInsert = nullptr;
+			}
+			else
+			{
+				pathInsert = commandArgs[0].c_str();
+			}
 		}
 	}
 
