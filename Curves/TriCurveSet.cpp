@@ -140,6 +140,12 @@ void TriCurveSet::PlayFrom( double time )
 	m_lastTime = 0.0;
 	m_scaledTime = time;
 
+	// some curves need to know about a play start (event curves)
+	for( ITriFunctionVector::const_iterator it = m_curves.begin(); it != m_curves.end(); ++it )
+	{
+		(*it)->Reset();
+	}
+
 	m_callback.Destroy();
 }
 
