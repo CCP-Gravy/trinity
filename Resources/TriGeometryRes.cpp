@@ -3096,3 +3096,32 @@ Be::Result<std::string> TriGeometryRes::CalculateBoundingBoxFromTransform( unsig
 	bounds = std::make_pair( ctx.min, ctx.max );
 	return Be::Result<std::string>();
 }
+
+
+Be::BlueStdResult TriGeometryRes::GetMeshVertexElements( size_t meshIndex, std::vector<std::pair<uint32_t, uint32_t>>& elements ) const
+{
+	elements.clear();
+
+	if( !IsGood() )
+	{
+		return Be::BlueStdResult( Be::BLUE_STD_RESULT_RUNTIME_ERROR, "TriGeometryRes is not prepared" );
+	}
+	if( meshIndex >= m_meshes.size() )
+	{
+		return Be::BlueStdResult( Be::BLUE_STD_RESULT_INDEX_ERROR, "mesh index out of range" );
+	}
+
+	auto mesh = m_meshes[meshIndex];
+	Tr2VertexDefinition decl;
+	if ( !Tr2EffectStateManager::GetVertexDeclarationElements( mesh->m_vertexDeclaration, decl ) )
+	{
+		return Be::BlueStdResult( Be::BLUE_STD_RESULT_RUNTIME_ERROR, "could not retrieve vertex declaration" );
+	}
+
+	PyObject *result =  PyTuple_New( decl.m_items.size() );
+	for( auto it = std::begin( decl.m_items ); it != std::end( decl.m_items ); ++it )
+	{
+		elements.push_back( std::make_pair( it->m_usage, it->m_usageIndex ) );
+	}
+	return Be::BLUE_STD_RESULT_OK;
+}

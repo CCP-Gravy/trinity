@@ -222,6 +222,14 @@ const Be::ClassInfo* TriGeometryRes::ExposeToBlue()
 			"( pos ) ->( dist, pos )\nGet the closest vertex of this model to the given point."
 		)
 
+		MAP_METHOD_AND_WRAP
+		(
+			"GetMeshVertexElements",
+			GetMeshVertexElements,
+			"Returns a list of (usage, usage index) tuples for vertex layout of the specified mesh.\n"
+			"Arguments:\n"
+			"index - mesh index"
+		)
     EXPOSURE_CHAINTO( BlueAsyncRes )
 }
 

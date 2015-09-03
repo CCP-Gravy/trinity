@@ -325,6 +325,15 @@ const Tr2EffectParameterAnnotationMap* Tr2EffectRes::GetParameterAnnotations( co
 	return it == m_effect.annotations.end() ? nullptr : &it->second;
 }
 
+const Tr2EffectResourceMap* Tr2EffectRes::GetResources( uint32_t pass, Tr2RenderContextEnum::ShaderType type ) const
+{
+	if( pass > m_effect.passes.size() || type < SHADER_TYPE_FIRST || type >= SHADER_TYPE_COUNT )
+	{
+		return nullptr;
+	}
+	return &m_effect.passes[pass].stageInputs[type].resources;
+}
+
 // --------------------------------------------------------------------------------------
 // Description:
 //   Returns effect pass data.  

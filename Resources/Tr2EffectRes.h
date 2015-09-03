@@ -138,6 +138,7 @@ public:
 	const Tr2EffectConstant* GetConstant( const char* name ) const;
 	const Tr2EffectResource* GetResource( const char* name ) const;
 	const Tr2EffectParameterAnnotationMap* GetParameterAnnotations( const char* parameterName ) const;
+	const Tr2EffectResourceMap* GetResources( uint32_t pass, Tr2RenderContextEnum::ShaderType type ) const;
 	///////////////
 
 	const Tr2Pass& GetPass( unsigned int passIx ) const;

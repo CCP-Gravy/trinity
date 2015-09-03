@@ -244,6 +244,7 @@ public:
 		TriGeometryCollisionResultFlags resultFlags, 
 		TriGeometryCollisionCullingFlags culling );
 
+	Be::BlueStdResult GetMeshVertexElements( size_t meshIndex, std::vector<std::pair<uint32_t, uint32_t>>& elements ) const;
 
 	//////////////////////////////////////////////////////////////////////////
 	// IBlueResource

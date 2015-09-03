@@ -33,6 +33,40 @@ PyObject* PyGetShaderInputDefinition( PyObject* self, PyObject* args )
 	}
 	return result;
 }
+
+PyObject* PyGetShaderResourceInputs( PyObject* self, PyObject* args )
+{
+	Tr2EffectRes* pThis = BluePythonCast<Tr2EffectRes*>( self );
+	if( !pThis || !pThis->IsGood() )
+	{
+		PyErr_SetString(PyExc_RuntimeError, "Tr2EffectRes.GetShaderInputDefinition: invalid effect resource");
+		return NULL;
+	}
+	uint32_t pass, shaderType;
+	if( !PyArg_ParseTuple( args, "ii", &pass, &shaderType ) )
+	{
+		return nullptr;
+	}
+
+	auto resources = pThis->GetResources( pass, Tr2RenderContextEnum::ShaderType( shaderType ) );
+	if( !resources )
+	{
+		PyErr_SetString( PyExc_IndexError, "pass out of range" );
+		return nullptr;
+	}
+
+	PyObject *result =  PyTuple_New( resources->size() );
+	int index = 0;
+	for( auto it = std::begin( *resources ); it != std::end( *resources ); ++it )
+	{
+		PyTuple_SET_ITEM( 
+			result, 
+			index++, 
+			Py_BuildValue("(sibb)", it->second.name, it->second.type, it->second.isSRGB, it->second.isAutoregister ) ); 
+	}
+	return result;
+}
+
 #endif
 
 const Be::ClassInfo* Tr2EffectRes::ExposeToBlue()
@@ -52,6 +86,15 @@ const Be::ClassInfo* Tr2EffectRes::ExposeToBlue()
 			PyGetShaderInputDefinition, 
 			"Returns shader input definition (inputs from graphics pipeline).\n"
 			"Result is an n-tuple of tuples (usage, usageIndex, inputRegisterIndex, usageMask).\n" 
+			"\nArguments:"
+			"\npass : Pass index"
+			"\nshader : Shader type" 
+			);
+
+		MAP_METHOD( 
+			"GetShaderResourceInputs", 
+			PyGetShaderResourceInputs, 
+			"Returns shader resource inputs as a sequence of (name, type, sRGB, autoregister) tuples.\n"
 			"\nArguments:"
 			"\npass : Pass index"
 			"\nshader : Shader type" 
