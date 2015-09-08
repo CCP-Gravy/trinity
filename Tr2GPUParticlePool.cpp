@@ -545,16 +545,8 @@ void Tr2GPUParticlePool::Update( float deltaTime, const Vector3 &egoMotion, Tr2R
 	CCP_STATS_ZONE( __FUNCTION__ );
 	if( !m_updateParticleShader || !m_updateParticleShader->GetShaderStateInterface() )
 	{
-		CCP_LOGERR( "Tr2GPUParticlePool::Update error. Update shader: %p | %p", 
-			m_updateParticleShader.p, 
-			m_updateParticleShader ? m_updateParticleShader->GetShaderStateInterface() : nullptr );
 		return;
 	}
-	
-	auto guard = createScopeGuard( [=]()
-	{ 
-		CCP_LOGERR("Tr2GPUParticlePool::Update() early-out"); 
-	} );
 	
 	Tr2PushPopDS pushPop( nullDS );
 	Tr2Renderer::PushViewport();
@@ -664,7 +656,6 @@ void Tr2GPUParticlePool::Update( float deltaTime, const Vector3 &egoMotion, Tr2R
 	renderContext.m_esm.ApplyTexture( PIXEL_SHADER, 0, nullTX );
 	renderContext.m_esm.ApplyTexture( PIXEL_SHADER, 1, nullTX );
 	Tr2Renderer::PopViewport();
-	guard.Complete();
 }
 
 
