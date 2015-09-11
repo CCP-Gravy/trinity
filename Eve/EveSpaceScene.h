@@ -245,7 +245,7 @@ protected:
 		float GammaBrightness;
 	};
 	double m_viewProjectLastD[16];
-	Vector3 m_lastLookAt;
+	Matrix m_viewProjectLast;
 
 	// Per-frame vertex constants for rendering scene
 	struct PerFrameVSData
@@ -257,6 +257,7 @@ protected:
 		Matrix ShadowViewMat;
 		Matrix ShadowViewProjectionMat;
 		Matrix EnvMapRotationMat;
+		Matrix ViewProjectionLast;
 
 		// pass sun data to vertexshader, so certain lighting-calculations can be done per-vertex and not per-pixel
 		SunData Sun;
@@ -435,6 +436,7 @@ protected:
 	Tr2Variable m_depthMapMsaaVar;
 
 	Tr2RenderTargetPtr m_distortionMap;
+	Tr2RenderTargetPtr m_velocityMap;
 
 	SunData m_sunData;
 

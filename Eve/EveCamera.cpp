@@ -63,7 +63,6 @@ EveCamera::EveCamera(IRoot* lockobj) :
 	m_rotationAroundParent( 0.f, 0.f, 0.f, 1.f ),
 	m_rotationOfInterest( 0.f, 0.f, 0.f, 1.f ),
 	m_translationFromParent(0, 0, 20.0f),
-	m_lookAtPosition( 0.f, 0.f, 0.f ),
 
 	m_pos(0, 0, 0),
 	m_intr(0, 0, 0),
@@ -233,7 +232,6 @@ void EveCamera::Update( Be::Time t )
 	{
 		parentPosition += m_extraParentTranslation;
 	}
-	m_lookAtPosition = parentPosition;
 
 	// Limit camera translation by parent bounding radius
 	if ( m_translationFromParent.z < max(1.f, m_frontClip) )

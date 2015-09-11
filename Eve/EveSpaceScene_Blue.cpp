@@ -389,6 +389,13 @@ const Be::ClassInfo* EveSpaceScene::ExposeToBlue()
 			Be::READWRITE
 		)
 		MAP_ATTRIBUTE
+		(
+			"velocityMap",
+			m_velocityMap,
+			".",
+			Be::READWRITE
+		)
+		MAP_ATTRIBUTE
 		(    
 			"sunBall",
 			m_sunBall,
@@ -592,7 +599,7 @@ const Be::ClassInfo* EveSpaceScene::ExposeToBlue()
 			"\n 3 - 3x pattern"
 			"\n 4 - 4x pattern",
 			Be::READWRITE )
-			
+
 		MAP_PROPERTY_READONLY(
 			"quadRenderer",
 			GetQuadRenderer,

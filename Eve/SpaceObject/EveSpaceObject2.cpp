@@ -182,6 +182,7 @@ void EveSpaceObject2::UnregisterSecondaryLightSource( Tr2ShLightingManager& mana
 void EveSpaceObject2::UpdateSyncronous( EveUpdateContext& updateContext )
 {
 	Be::Time time = updateContext.GetTime();
+	D3DXMatrixTranspose( &m_vsData.m_worldTransformLast, &m_worldTransform );;
 
 	UpdateWorldTransform( time );
 

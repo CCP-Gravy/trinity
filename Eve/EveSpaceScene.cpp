@@ -1033,7 +1033,15 @@ void EveSpaceScene::RenderObjectsReceivingShadows(	std::vector<ShadowReceiver>& 
 		FinalizeBatches( m_secondaryBatches );
 		{
 			CCP_STATS_GPU_ZONE( "RenderObjectsReceivingShadoes/RenderOpaqueBatches" );
-			RenderOpaqueBatches( m_secondaryBatches, renderContext );
+			if( m_velocityMap )
+			{
+				Tr2PushPopRT rt( *m_velocityMap, renderContext, 1 );
+				RenderOpaqueBatches( m_secondaryBatches, renderContext );
+			}
+			else
+			{
+				RenderOpaqueBatches( m_secondaryBatches, renderContext );
+			}
 		}
 		ClearBatches( m_secondaryBatches );
 
@@ -1089,7 +1097,7 @@ void EveSpaceScene::UpdatePostProcessPSData()
 		currentProj = m_frameData.projection;
 		currentProj = EveCamera::AddCenterOffset( currentProj, -m_xProjOffset, -m_yProjOffset, Tr2Renderer::GetFrontClip(), Tr2Renderer::GetBackClip() );
 	}
-	
+
 	// Find the current inverse view projection
 	double viewTransform[16];
 	double currentProjection[16];
@@ -1100,48 +1108,9 @@ void EveSpaceScene::UpdatePostProcessPSData()
 	double invViewProjD[16];
 	Matrix4dInvert( invViewProjD, currentViewProjD );
 
-	/* Explanation:
-		We need to try and compensate for look-at targets. To do this we must guesstimate weather we're
-		actually looking at something else than the ego ship and compensate with a world transform that
-		we use to construct a better reprojection matrix.
-		Sadly we need some magic number estimations to fake this.
-	*/
-	double translationThisFrame[16];
-	// Amount to translate by this frame
-	Vector3 lookAdjustment(0, 0, 0);
-	// How much the look-at position has changed, ego look-at shift is(almost) stationary
-	Vector3 lookAtShift = Tr2Renderer::GetViewLookAtPosition() - m_lastLookAt;
-	m_lastLookAt = Tr2Renderer::GetViewLookAtPosition();
-	// Estimation of actual look-at target movement
-	Vector3 lookAtTargetShift = lookAtShift + m_egoDisplacement;
-
-	float lookAtTargetShiftLength = D3DXVec3Length( &lookAtTargetShift );
-	float lookAtLength = D3DXVec3Length( &lookAtShift );
-	float originShiftLength = D3DXVec3Length( &m_egoDisplacement );
-	// If origin is not moving or the look-at has not changed(significantly) we don't have to do anything
-	if( originShiftLength > 0.01f && lookAtLength > 0.5f )
-	{
-		// If we're looking at a stationary object while ego is moving we want to add the ego-shift to the world position
-		if( lookAtTargetShiftLength <= 0.01f )
-		{
-			lookAdjustment = m_egoDisplacement;
-		}
-		// But if the target is moving we adjust with the camera shift
-		else
-		{
-			lookAdjustment = -lookAtShift;
-		}
-	}
-
-	Matrix trans;
-	D3DXMatrixTranslation( &trans, lookAdjustment.x, lookAdjustment.y, lookAdjustment.z );
-	Matrix4dFromMatrix( translationThisFrame, trans );
-
 	// Now construct the reprojection matrix
 	double reprojection[16];
-	double temp[16];
-	Matrix4dMultiply( temp, translationThisFrame, m_viewProjectLastD );
-	Matrix4dMultiply( reprojection, invViewProjD, temp );
+	Matrix4dMultiply( reprojection, invViewProjD, m_viewProjectLastD );
 	Matrix repro = Matrix4dToMatrix( reprojection );
 	D3DXMatrixTranspose( &m_postProcessPSData.ReprojectionMatrix, &repro );
 
@@ -1209,7 +1178,7 @@ void EveSpaceScene::BeginRender( Tr2RenderContext& renderContext )
 	{
 		m_frameData.projectionDynamic = EveCamera::ModifyClipPlanes( Tr2Renderer::GetProjectionTransform(), m_nearClip, m_farClip );
 	}
-	
+
 	UpdatePostProcessPSData();
 	UpdateVariableStore();
 
@@ -1253,6 +1222,12 @@ void EveSpaceScene::BeginRender( Tr2RenderContext& renderContext )
 		(*it)->PrepareRender( frustum );
 	}
 	
+	if( m_velocityMap )
+	{
+		Tr2PushPopRT rt( *m_velocityMap, renderContext, 1 );
+		renderContext.Clear( CLEARFLAGS_TARGET, 0x00000000, 1.f, 0, 1 );
+	}
+
 	if( m_dynamicClipPlanes )
 	{
 		Tr2Renderer::SetProjectionTransform( m_frameData.projection );
@@ -1730,7 +1705,15 @@ void EveSpaceScene::RenderMainPass( Tr2RenderContext& renderContext )
 
 	{
 		CCP_STATS_GPU_ZONE( "RenderMainPass/RenderOpaqueBatches" );
-		RenderOpaqueBatches( m_primaryBatches, renderContext );	
+		if( m_velocityMap )
+		{
+			Tr2PushPopRT rt( *m_velocityMap, renderContext, 1 );
+			RenderOpaqueBatches( m_primaryBatches, renderContext );
+		}
+		else
+		{
+			RenderOpaqueBatches( m_primaryBatches, renderContext );
+		}
 	}
 	RenderObjectsReceivingShadows( m_frameData.objectsReceivingShadow, true, renderContext );
 
@@ -1761,8 +1744,6 @@ void EveSpaceScene::RenderMainPass( Tr2RenderContext& renderContext )
 	
 
 	renderContext.m_esm.EndManagedRendering();
-
-	// At this point we render scene1 so we keep managed rendering turned off
 
 	// Don't leave vertex/pixel shaders assigned - this is so we don't clash with classic rendering.
 	CR( renderContext.SetShader( nullShader[PIXEL_SHADER] ) );
@@ -1899,6 +1880,8 @@ void EveSpaceScene::EndRender( Tr2RenderContext& renderContext )
 			Tr2Renderer::DrawTexture( m_shadowMap->GetTexture() );
 		}
 	}
+	
+	m_viewProjectLast = Tr2Renderer::GetViewTransform() * Tr2Renderer::GetReversedDepthProjectionTransform();
 
 	ClearVariableStore();
 }
@@ -2026,6 +2009,8 @@ void EveSpaceScene::PopulatePerFrameVSData( PerFrameVSData &data )
 	D3DXMatrixTranspose( &data.ViewProjectionMat, &viewProject );
 	// attention: need the transposed, but shader also needs column_major, so it is transpose(transpose(m)) == m
 	data.ViewInverseTransposeMat = Tr2Renderer::GetInverseViewTransform();
+	
+	D3DXMatrixTranspose( &data.ViewProjectionLast, &m_viewProjectLast );
 
 	// each scene has a nebula and that can be rotated and inverted (via scaling)
 	D3DXMatrixRotationQuaternion( &data.EnvMapRotationMat, &m_envMapRotation );
@@ -2071,7 +2056,7 @@ void EveSpaceScene::PopulatePerFramePSData( PerFramePSData &data )
 	D3DXMatrixTranspose( &data.ViewMat, &Tr2Renderer::GetViewTransform() );
 	// attention: need the transposed, but shader also needs column_major, so it is transpose(transpose(m)) == m
 	data.ViewInverseTransposeMat = *gTriDev->GetInvViewMatrix();
-
+	
 	// each scene has a nebula and that can be rotated
 	D3DXMatrixRotationQuaternion( &data.EnvMapRotationMat, &m_envMapRotation );
 	D3DXMatrixTranspose( &data.EnvMapRotationMat, &data.EnvMapRotationMat );

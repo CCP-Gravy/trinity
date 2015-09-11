@@ -85,6 +85,7 @@ BLUE_DECLARE_STRUCTURE_LIST( EveDamageLocator );
 struct EveSpaceObjectVSData
 {
 	Matrix m_worldTransform;
+	Matrix m_worldTransformLast;
 	Vector4 m_spaceObjectMiscData;
 	Vector4 m_spaceObjectClipData;
 };
