@@ -11,6 +11,7 @@
 #include "ITr2Renderable.h"
 #include "ITr2GeometryProvider.h"
 #include "Eve/IEveSpaceObject2.h"
+#include "Eve/SpaceObject/Children/IEveSpaceObjectChild.h"
 #include "Tr2Renderer.h"
 
 BLUE_DECLARE( EveCloudEditableVolume );
@@ -29,7 +30,8 @@ BLUE_CLASS( EveCloud ) :
 	public ITr2GeometryProvider,
 	public Tr2DeviceResource,
 	public IInitialize,
-	public INotify
+	public INotify,
+	public IEveSpaceObjectChild
 {
 public:
 	EXPOSE_TO_BLUE();
@@ -58,6 +60,14 @@ public:
 	bool GetLocalBoundingBox( Vector3 &min, Vector3 &max );
 	void GetLocalToWorldTransform( Matrix &transform ) const;
 
+	//////////////////////////////////////////////////////////////////////////////////////
+	// IEveSpaceObjectChild
+	virtual void UpdateSyncronous( EveUpdateContext& updateContext, EveSpaceObject2* parent );
+	virtual void UpdateAsyncronous( EveUpdateContext& updateContext, EveSpaceObject2* parent );
+	virtual void PlayCurveSet( const std::string& name );
+	virtual void StopCurveSet( const std::string& name );
+	virtual float GetCurveSetDuration( const std::string& name ) const; 
+
 	/////////////////////////////////////////////////////////////////////////////////////
 	// ITr2Renderable
 	virtual void GetBatches( ITriRenderBatchAccumulator* batches, TriBatchType batchType, const Tr2PerObjectData* perObjectData );
@@ -82,6 +92,7 @@ private:
 	bool OnPrepareResources();
 
 	// data for positioning
+	Matrix m_localTransform;
 	Matrix m_worldTransform;
 
 	// bounding sphere

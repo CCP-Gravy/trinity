@@ -155,7 +155,8 @@ void GetProjectedCubeBounds(  AxisAlignedBoundingBox& box, const Matrix& worldVi
 
 
 EveCloud::EveCloud( IRoot* lockobj )
-	:m_worldTransform( Tr2Renderer::GetIdentityTransform() ),
+	:m_localTransform( Tr2Renderer::GetIdentityTransform() ),
+	m_worldTransform( Tr2Renderer::GetIdentityTransform() ),
 	m_scaling( 1.0f, 1.0f, 1.0f ),
 	m_display( true ),
 	m_declaration( Tr2EffectStateManager::UNINITIALIZED_DECLARATION ),
@@ -207,7 +208,8 @@ void EveCloud::UpdateSyncronous( EveUpdateContext& updateContext )
 		m_ballRotation->Update( &rotation, updateContext.GetTime() );
 	}
 
-	D3DXMatrixTransformation( &m_worldTransform, 0, 0, &m_scaling, 0, &rotation, &translation );
+	D3DXMatrixTransformation( &m_localTransform, 0, 0, &m_scaling, 0, &rotation, &translation );
+	m_worldTransform = m_localTransform;
 }
 
 void EveCloud::UpdateAsyncronous( EveUpdateContext& updateContext )
@@ -217,6 +219,8 @@ void EveCloud::UpdateAsyncronous( EveUpdateContext& updateContext )
 
 void EveCloud::GetRenderables( const TriFrustum& frustum, std::vector<ITr2Renderable*>& renderables, const Matrix& parentTransform )
 {
+	m_worldTransform = m_localTransform * parentTransform;
+	BoundingSphereFromBox( m_boundingSphere, m_min, m_max, &m_worldTransform );
 	if( !m_display || !frustum.IsSphereVisible( &m_boundingSphere ) )
 	{
 		return;
@@ -445,4 +449,27 @@ void EveCloud::GetPickingBatches( ITriRenderBatchAccumulator* batches, Tr2PickTy
 	{
 		m_volume->GetPickingBatches( batches, perObjectData );
 	}
+}
+
+void EveCloud::UpdateSyncronous( EveUpdateContext& updateContext, EveSpaceObject2* parent )
+{
+	UpdateSyncronous( updateContext );
+}
+
+void EveCloud::UpdateAsyncronous( EveUpdateContext& updateContext, EveSpaceObject2* parent )
+{
+	UpdateAsyncronous( updateContext );
+}
+
+void EveCloud::PlayCurveSet( const std::string& name )
+{
+}
+
+void EveCloud::StopCurveSet( const std::string& name )
+{
+}
+
+float EveCloud::GetCurveSetDuration( const std::string& name ) const
+{
+	return 0;
 }

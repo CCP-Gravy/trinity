@@ -20,6 +20,7 @@ const Be::ClassInfo* EveCloud::ExposeToBlue()
 		MAP_INTERFACE( ITr2GeometryProvider )
 		MAP_INTERFACE( IInitialize )
 		MAP_INTERFACE( INotify )
+		MAP_INTERFACE( IEveSpaceObjectChild )
 
 		MAP_ATTRIBUTE( "name", m_name, "The name of the cloud", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "display", m_display, "Toggle display", Be::READWRITE )
