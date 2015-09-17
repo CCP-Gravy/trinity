@@ -122,6 +122,37 @@ PyObject* Tr2HostBitmap::PyGetMipRawData( PyObject* self, PyObject* args )
 	Py_RETURN_FALSE;
 }
 
+PyObject* Tr2HostBitmap::PySetMipRawData( PyObject* self, PyObject* args )
+{
+	unsigned int mipLevel = 0;
+	Py_buffer buffer;
+	if( !PyArg_ParseTuple( args, "iw*", &mipLevel, &buffer ))
+		return nullptr;
+	ON_BLOCK_EXIT( [&] { PyBuffer_Release( &buffer ); } );
+
+	Tr2HostBitmap* pThis = BluePythonCast<Tr2HostBitmap*>( self );
+	if( !pThis->IsValid() )
+	{
+		PyErr_SetString( PyExc_ValueError, "invalid bitmap" );
+		return nullptr;
+	}
+
+	if( mipLevel >= pThis->GetTrueMipCount() )
+	{
+		PyErr_SetString( PyExc_ValueError, "mip level out of range" );
+		return nullptr;
+	}
+
+	if( buffer.len < Py_ssize_t( pThis->GetMipSize( mipLevel ) ) )
+	{
+		PyErr_SetString( PyExc_ValueError, "buffer too small" );
+		return nullptr;
+	}
+
+	memcpy( pThis->GetMipRawData( mipLevel ), buffer.buf, pThis->GetMipSize( mipLevel ) );
+	Py_RETURN_NONE;
+}
+
 PyObject* Tr2HostBitmap::PyLoadFromPngInMemory( PyObject* args )
 {
 	PyObject *buffer = nullptr;
@@ -551,6 +582,16 @@ const Be::ClassInfo* Tr2HostBitmap::ExposeToBlue()
 			"GetMipRawData",
 			PyGetMipRawData, 
 			"Returns a tuple with (raw data pointer, width, height, pitch in bytes) of the specified mip level"
+		)
+
+		MAP_METHOD
+		(
+			"SetMipRawData",
+			PySetMipRawData, 
+			"Copies raw mip data to the bitmap\n"
+			"Arguments:\n"
+			"mip - mip level index\n"
+			"buffer - single-segment buffer"
 		)
 
 		MAP_METHOD_AND_WRAP

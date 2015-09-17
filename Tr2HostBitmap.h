@@ -63,6 +63,7 @@ private:
 	PyObject* PyApplyConvFilter ( PyObject* args );
 	static PyObject* PyGetRawData( PyObject* self, PyObject* args );
 	static PyObject* PyGetMipRawData( PyObject* self, PyObject* args );
+	static PyObject* PySetMipRawData( PyObject* self, PyObject* args );
 #endif
 
 #if BLUE_WITH_PYTHON
