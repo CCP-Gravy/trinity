@@ -920,7 +920,6 @@ Matrix EveTurretSet::GetFiringBoneWorldTransform( unsigned int muzzle ) const
 // --------------------------------------------------------------------------------
 void EveTurretSet::ModifySystemBoneTransform( SystemBones bone, const Vector3* target, granny_transform* transform ) const
 {
-	CCP_LOGWARN("bone index %d, max bone %d", bone, SYSBONE_MAX);
 	switch( bone )
 	{
 	case SYSBONE_INVALID:
