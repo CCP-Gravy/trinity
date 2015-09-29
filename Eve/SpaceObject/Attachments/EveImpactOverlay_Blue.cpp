@@ -1,0 +1,29 @@
+////////////////////////////////////////////////////////////
+//
+//    Created:   September 2015
+//    Copyright: CCP 2015
+//
+
+#include "StdAfx.h"
+#include "EveImpactOverlay.h"
+
+BLUE_DEFINE( EveImpactOverlay );
+
+const Be::ClassInfo* EveImpactOverlay::ExposeToBlue()
+{
+    EXPOSURE_BEGIN( EveImpactOverlay, "" )
+        MAP_INTERFACE( EveImpactOverlay )
+
+		MAP_ATTRIBUTE( "name", m_name, "", Be::READWRITE | Be::PERSIST	)
+		MAP_ATTRIBUTE( "display", m_display, "", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "mesh", m_mesh, "", Be::READWRITE | Be::PERSIST )
+
+		MAP_METHOD_AND_WRAP( "CreateShieldImpact", CreateShieldImpact, "" )
+
+		MAP_ATTRIBUTE( "maxShieldImpacts", m_maxShieldImpacts, "", Be::READ )
+		MAP_ATTRIBUTE( "shieldEllipsoidCenter", m_shieldEllipsoidCenter, "", Be::READ )
+		MAP_ATTRIBUTE( "shieldEllipsoidRadii", m_shieldEllipsoidRadii, "", Be::READ )
+		MAP_ATTRIBUTE( "shieldImpactDataNextIdx", m_shieldImpactDataNextIdx, "", Be::READ )
+
+    EXPOSURE_END()
+}

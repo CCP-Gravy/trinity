@@ -12,12 +12,12 @@
 
 #include "Eve/EveTransform.h"
 #include "EveSpaceObject2.h"
-#include "Attachments/EveSpaceObjectDecal.h"
 #include "Eve/EveSpaceScene.h"
 #include "Utils/EveLocator2.h"
 #include "Attachments/EveSpriteSet.h"
 #include "Attachments/EveSpotlightSet.h"
 #include "Attachments/EvePlaneSet.h"
+#include "Attachments/EveImpactOverlay.h"
 #include "Tr2GPUParticleEmitter.h"
 #include "Tr2MeshLod.h"
 #include "Tr2GrannyAnimation.h"
@@ -271,9 +271,14 @@ void EveSpaceObject2::UpdateSyncronous( EveUpdateContext& updateContext )
 		(*it)->Update( m_worldTransform );
 	}
 
+	// trigger syncronous update of attachements here
 	for( auto ecIt = m_effectChildren.begin(); ecIt != m_effectChildren.end(); ++ecIt ) 
 	{
 		(*ecIt)->UpdateSyncronous( updateContext, this );
+	}
+	if( m_impactOverlay )
+	{
+		m_impactOverlay->UpdateSyncronous( updateContext, this );
 	}
 
 	Tr2MeshBase* mesh = m_meshLod;
@@ -339,6 +344,7 @@ void EveSpaceObject2::UpdateAsyncronous( EveUpdateContext& updateContext )
 		}
 	}
 
+	// trigger syncronous update of attachements here
 	for( IEveTransformVector::const_iterator it = m_children.begin(); it != m_children.end(); ++it )
 	{
 		(*it)->Update( updateContext );
@@ -347,6 +353,11 @@ void EveSpaceObject2::UpdateAsyncronous( EveUpdateContext& updateContext )
 	for( auto ecIt = m_effectChildren.begin(); ecIt != m_effectChildren.end(); ++ecIt ) 
 	{
 		(*ecIt)->UpdateAsyncronous( updateContext, this );
+	}
+
+	if( m_impactOverlay )
+	{
+		m_impactOverlay->UpdateAsyncronous( updateContext, this );
 	}
 }
 
@@ -486,15 +497,20 @@ void EveSpaceObject2::GetBatches( ITriRenderBatchAccumulator* batches, TriBatchT
 			(*it)->GetBatches( batches, perObjectData );
 		}
 
-		for (auto it = m_spotlightSets.begin(); it != m_spotlightSets.end(); ++it )
+		for( auto it = m_spotlightSets.begin(); it != m_spotlightSets.end(); ++it )
 		{
 			(*it)->GetBatches( batches, perObjectData );
 		}
 
-		for (auto it = m_planeSets.begin(); it != m_planeSets.end(); ++it )
+		for( auto it = m_planeSets.begin(); it != m_planeSets.end(); ++it )
 		{
 			(*it)->GetBatches( batches, perObjectData );
 		}
+	}
+
+	if( m_impactOverlay )
+	{
+		m_impactOverlay->GetBatches( batches, batchType, perObjectData );
 	}
 
 	// Everything except for shadow batches
@@ -1062,6 +1078,11 @@ void EveSpaceObject2::GetRenderables( const TriFrustum& frustum, std::vector<ITr
 			TriGeometryResPtr geometryRes = m_mesh->GetGeometryResource();
 			if( geometryRes )
 			{
+				// put together parent data for the decals
+				EveSpaceObjectDecal::ParentData pd;
+				FillDecalParentData( &pd );
+
+				// runn over every decal and update it
 				for( EveSpaceObjectDecalVector::const_iterator it = m_decals.begin(); it != m_decals.end(); ++it )
 				{
 					// assign this space-object's cache to the decal
@@ -1072,18 +1093,29 @@ void EveSpaceObject2::GetRenderables( const TriFrustum& frustum, std::vector<ITr
 						(*it)->SetBoneMatrix( m_animationUpdater->GetMeshBoneMatrixList(), m_animationUpdater->GetMeshBoneCount() );
 					}
 					// now prep to get the renderables
-					EveSpaceObjectDecal::ParentData pd;
-					pd.transform = m_worldTransform;
-					pd.shipData = m_spaceObjectMiscData;
-					pd.clipData = m_psData.clipData;
-					pd.clipDataEx = m_psData.clipDataEx;
-					pd.shLighting = m_psData.shLightingCoefficients;
 					(*it)->GetRenderables( geometryRes, frustum, renderables, &pd );
 				}
 				m_decalCache->Clear();
 			}
 		}
 	}
+}
+
+// --------------------------------------------------------------------------------
+// Description:
+//   This funstion fills all the relevant data to pass to each decal as "parent's
+//   data. With it being virtual, sub classes can add more data.
+// Arguments:
+//   pd - the data buffer
+// --------------------------------------------------------------------------------
+void EveSpaceObject2::FillDecalParentData( EveSpaceObjectDecal::ParentData* pd ) const
+{
+	memset( pd, 0, sizeof( EveSpaceObjectDecal::ParentData ) );
+	pd->transform = m_worldTransform;
+	pd->shipData = m_spaceObjectMiscData;
+	pd->clipData = m_psData.clipData;
+	pd->clipDataEx = m_psData.clipDataEx;
+	pd->shLighting = m_psData.shLightingCoefficients;
 }
 
 // --------------------------------------------------------------------------------
@@ -1613,7 +1645,7 @@ void EveSpaceObject2::GetModelCenterWorldPosition( Vector3 &position, Be::Time t
 	}
 }
 
-Vector3 EveSpaceObject2::GetModelWorldPosition()
+Vector3 EveSpaceObject2::GetModelWorldPosition() const
 {
 	return Vector3( m_boundingSphereWorld.x, m_boundingSphereWorld.y, m_boundingSphereWorld.z );
 }
@@ -2046,6 +2078,32 @@ void EveSpaceObject2::SetDnaString( const char* dna )
 void EveSpaceObject2::SetDirtLevel( float lvl )
 {
 	m_dirtLevel = lvl;
+}
+
+// -----------------------------------------------------------------------------
+// Description:
+//   Create a shield impact effect on this object
+// -----------------------------------------------------------------------------
+int EveSpaceObject2::CreateShieldImpact( const Vector3& position, const Vector3& direction )
+{
+	if( m_impactOverlay )
+	{
+		return m_impactOverlay->CreateShieldImpact( position, direction );
+	}
+	return -1;
+}
+
+// -----------------------------------------------------------------------------
+// Description:
+//   Hand out the exact intercept position of a given shield impact
+// -----------------------------------------------------------------------------
+bool EveSpaceObject2::GetShieldImpactPosition( Vector3& out, int shieldImpactIndex ) const
+{
+	if( m_impactOverlay )
+	{
+		return m_impactOverlay->GetShieldImpactPosition( out, shieldImpactIndex );
+	}
+	return false;
 }
 
 //GPU ship explosion test

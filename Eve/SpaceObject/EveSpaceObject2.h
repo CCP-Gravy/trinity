@@ -21,6 +21,7 @@
 #include "Eve/Animation/EveAnimationData.h"
 #include "Tr2ShLightingManager.h"
 #include "Eve/SpaceObject/Attachments/EveMeshOverlayEffect.h"
+#include "Eve/SpaceObject/Attachments/EveSpaceObjectDecal.h"
 #include "Eve/SpaceObject/Children/IEveSpaceObjectChild.h"
 
 // consts
@@ -34,8 +35,6 @@ BLUE_DECLARE( Tr2MeshBase );
 BLUE_DECLARE( Tr2MeshLod );
 BLUE_DECLARE( Tr2MeshArea );
 BLUE_DECLARE_VECTOR( Tr2MeshArea );
-BLUE_DECLARE( EveSpaceObjectDecal );
-BLUE_DECLARE_VECTOR( EveSpaceObjectDecal );
 BLUE_DECLARE( EveLocator2 );
 BLUE_DECLARE_VECTOR( EveLocator2 );
 BLUE_DECLARE( EveSpriteSet );
@@ -47,7 +46,7 @@ BLUE_DECLARE_VECTOR( EvePlaneSet );
 BLUE_DECLARE( Tr2GrannyAnimation );
 BLUE_DECLARE( EveTransform );
 BLUE_DECLARE( EveCustomMask );
-
+BLUE_DECLARE( EveImpactOverlay );
 BLUE_DECLARE( TriCurveSet );
 BLUE_DECLARE_VECTOR( TriCurveSet );
 
@@ -112,7 +111,7 @@ struct EveSpaceObjectPSData
 //   it has any). Note that the locator transforms are expected to be static and are not
 //   updated per frame, for performance reasons.
 // --------------------------------------------------------------------------------
-class EveSpaceObject2 :
+BLUE_CLASS( EveSpaceObject2 ):
 	public IInitialize,
 	public ITr2Renderable,
 	public IEveSpaceObject2,
@@ -231,6 +230,10 @@ public:
 	virtual bool ExecuteAnimationStateCommand( EveAnimationCmd cmd, const std::string& data, const std::map<std::string, float>& parameters );
 
 	/////////////////////////////////////////////////////////////////////////////////////
+	// decal
+	virtual void FillDecalParentData( EveSpaceObjectDecal::ParentData* pd ) const;
+
+	/////////////////////////////////////////////////////////////////////////////////////
 	// ITr2ShLightingReceiver
 	virtual void UpdateShLighting( Tr2ShLightingManager& );
 	virtual void ClearShLighting();
@@ -243,7 +246,7 @@ public:
 	// For stateful GPU particles
 	ITriVectorFunctionPtr GetPositionFunction();
 
-	Vector3 GetModelWorldPosition();
+	Vector3 GetModelWorldPosition() const;
 	Tr2GrannyAnimationPtr GetAnimationController() { return m_animationUpdater; }
 
 	// bounding sphere
@@ -285,6 +288,10 @@ public:
 
 	// access to dirt level
 	void SetDirtLevel( float lvl );
+
+	// access to impacts
+	int CreateShieldImpact( const Vector3& position, const Vector3& direction );
+	bool GetShieldImpactPosition( Vector3& out, int shieldImpactIndex ) const;
 
 	uint32_t GetPerObjectDataSize( Tr2RenderContextEnum::ShaderType shaderType ) const;
 	void UpdatePerObjectBuffer( Tr2RenderContextEnum::ShaderType shaderType, uint32_t size, void* );
@@ -406,6 +413,9 @@ protected:
 	bool FindLocatorJointByName( const char* name, unsigned int& ix ) const;
 	unsigned int CountLocatorsByPrefix( const char* namePrefix ) const;
 
+	/////////////////////////////////////////////////////////////////////////////////////
+	// Damage
+	EveImpactOverlayPtr m_impactOverlay;
 
 	/////////////////////////////////////////////////////////////////////////////////////
 	// PlacementObservers

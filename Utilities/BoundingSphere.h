@@ -14,6 +14,7 @@ void BoundingSphereFromBox( Vector4& sphere, const Vector3& minBounds, const Vec
 void BoundingSphereFromPoints( Vector4& sphere, Vector3 const** points, size_t pointsCount );
 
 bool IntersectSphereAxisAlignedBox( const Vector4& sphere, const Vector3& minBounds, const Vector3& maxBounds );
+bool IntersectEllipsoidRay( Vector3& out, const Vector3& ellipsoidCenter, const Vector3& ellipsoidRadii, const Vector3& rayOrigin, const Vector3& rayDir );
 
 inline void BoundingSphereSetOrUpdate( Vector4& addSphere, Vector4& resultSphere, bool update )
 {
