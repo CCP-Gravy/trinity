@@ -480,7 +480,7 @@ void EveBoosterSet2::Add( const Matrix* localMatrix, const Vector4* functionalit
 			if( m_isVolumetric )
 			{
 				Matrix offset = *localMatrix;
-				offset.GetTranslation() -= offset.GetZ();
+				offset.GetTranslation() -= offset.GetZ() * 0.5f;
 				m_trails->Add( &offset, scale );
 			}
 			else
