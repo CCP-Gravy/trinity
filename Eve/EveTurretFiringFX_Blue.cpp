@@ -32,6 +32,10 @@ const Be::ClassInfo* EveTurretFiringFX::ExposeToBlue()
 		MAP_ATTRIBUTE( "firingDelay6", m_perMuzzleData[5].constantDelay, "Delay in seconds for firing effect 6", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "firingDelay7", m_perMuzzleData[6].constantDelay, "Delay in seconds for firing effect 7", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "firingDelay8", m_perMuzzleData[7].constantDelay, "Delay in seconds for firing effect 8", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "firingDelay8", m_perMuzzleData[8].constantDelay, "Delay in seconds for firing effect 9", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "firingDelay8", m_perMuzzleData[9].constantDelay, "Delay in seconds for firing effect 10", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "firingDelay8", m_perMuzzleData[10].constantDelay, "Delay in seconds for firing effect 11", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "firingDelay8", m_perMuzzleData[11].constantDelay, "Delay in seconds for firing effect 12", Be::READWRITE | Be::PERSIST )
 
 		MAP_ATTRIBUTE( "stretch", m_stretch, "A list of stretch effects for this firing effect", Be::READWRITE | Be::PERSIST )
 

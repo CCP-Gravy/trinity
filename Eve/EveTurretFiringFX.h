@@ -47,7 +47,7 @@ public:
 	// max muzzle effects
 	enum MaxMuzzleCount
 	{
-		MUZZLECOUNT_MAX = 8,
+		MUZZLECOUNT_MAX = 12
 	};
 	
 public:
