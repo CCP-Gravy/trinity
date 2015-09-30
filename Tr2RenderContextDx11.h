@@ -51,7 +51,7 @@ public:
 
 	ALResult SetIndices( const Tr2IndexBufferAL & buffer ) throw();
 	ALResult SetTopology( Tr2RenderContextEnum::Topology topology ) throw();
-	ALResult SetVertexLayout( Tr2VertexLayoutAL& layout ) throw();
+	ALResult SetVertexLayout( const Tr2VertexLayoutAL& layout ) throw();
 	ALResult SetShader( const Tr2ShaderAL& shader ) throw();
 
 	ALResult SetShaderBuffer( 
@@ -197,9 +197,9 @@ public:
 	CComPtr<ID3D11DeviceContext>	m_context;
 private:
 	// Current vertex layout (for creating vertex layout)
-	Tr2VertexLayoutAL*				m_vertexLayout;
-	Tr2VertexLayoutAL*				m_lastSetVertexLayout;
-	uint32_t						m_lastSetVertexLayoutVSHash;
+	const Tr2VertexLayoutAL* m_vertexLayout;
+	const Tr2VertexLayoutAL* m_lastSetVertexLayout;
+	uint32_t m_lastSetVertexLayoutVSHash;
 
 	// Current vertex shader (for creating vertex layout)
 	const Tr2ShaderAL* m_vertexShader;
@@ -264,6 +264,7 @@ private:
 	bool	ApplyDepthStencilState() throw();
 	bool	ApplyRasterizerState() throw();
 	void ApplyReadOnlyDepth() throw();
+	void ApplyUavs() throw();
 
 	Tr2ConstantBufferAL	m_fragmentOpBuffer;
 

@@ -27,8 +27,7 @@ public:
 	}
 	void Destroy();
 
-	ALResult SetLayout( const Tr2ShaderAL* vertexShader,
-						Tr2RenderContextAL& renderContext );
+	ALResult SetLayout( const Tr2ShaderAL* vertexShader, Tr2RenderContextAL& renderContext ) const;
 
 	bool operator==( const Tr2VertexLayoutAL& other ) const
 	{

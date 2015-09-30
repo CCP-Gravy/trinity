@@ -17,8 +17,7 @@ public:
 	}
 	void Destroy();
 
-	ALResult SetLayout( const Tr2ShaderAL* vertexShader,
-						Tr2RenderContextAL& renderContext );
+	ALResult SetLayout( const Tr2ShaderAL* vertexShader, Tr2RenderContextAL& renderContext ) const;
 
 	Tr2ALMemoryType GetMemoryClass() const
 	{

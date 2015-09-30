@@ -31,8 +31,7 @@ public:
 	}
 	void Destroy();
 
-	ALResult SetLayout( const Tr2ShaderAL* vertexShader,
-						Tr2RenderContextAL& renderContext );
+	ALResult SetLayout( const Tr2ShaderAL* vertexShader, Tr2RenderContextAL& renderContext ) const;
 
 	Tr2ALMemoryType GetMemoryClass() const
 	{
@@ -44,8 +43,7 @@ private:
 	Tr2VertexLayoutAL& operator=( const Tr2VertexLayoutAL& )/* = delete */;
 
 	TrackableStdVector<D3D11_INPUT_ELEMENT_DESC> m_definition;
-	std::map<unsigned, CComPtr<ID3D11InputLayout>>
-	m_layout;
+	mutable std::map<unsigned, CComPtr<ID3D11InputLayout>> m_layout;
 };
 
 #endif // DX11?

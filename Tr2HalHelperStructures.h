@@ -210,6 +210,12 @@ extern const Tr2RenderTargetAL	nullRT;
 // -------------------------------------------------------------
 extern const Tr2GpuBufferAL		nullGB;
 
+// -------------------------------------------------------------
+// Description:
+// This is a null vertex layout.
+// -------------------------------------------------------------
+extern const Tr2VertexLayoutAL	nullVL;
+
 
 bool Crop(	Tr2TextureSubresource& sourceSR,
 			const Tr2BitmapDimensions& sourceBD, 

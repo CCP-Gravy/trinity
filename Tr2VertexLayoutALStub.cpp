@@ -28,7 +28,7 @@ void Tr2VertexLayoutAL::Destroy()
 	m_definition.reset();
 }
 
-ALResult Tr2VertexLayoutAL::SetLayout( const Tr2ShaderAL* /*vertexShader*/, Tr2RenderContextAL& renderContext )
+ALResult Tr2VertexLayoutAL::SetLayout( const Tr2ShaderAL* /*vertexShader*/, Tr2RenderContextAL& renderContext ) const
 {
 	return E_FAIL;
 }

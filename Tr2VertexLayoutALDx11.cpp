@@ -145,7 +145,7 @@ static bool FindInputElement( const TrackableStdVector<D3D11_INPUT_ELEMENT_DESC>
 	return false;
 }
 
-ALResult Tr2VertexLayoutAL::SetLayout( const Tr2ShaderAL* vertexShader, Tr2RenderContextAL& renderContext )
+ALResult Tr2VertexLayoutAL::SetLayout( const Tr2ShaderAL* vertexShader, Tr2RenderContextAL& renderContext ) const
 {
 	if( !renderContext.m_secondaryDevice11 || !vertexShader || m_definition.empty() )
 	{
@@ -166,6 +166,7 @@ ALResult Tr2VertexLayoutAL::SetLayout( const Tr2ShaderAL* vertexShader, Tr2Rende
 	bool fixedupError = false;
 
 	const Tr2ShaderInputDefinition& definition = vertexShader->GetInputDefinition();
+	auto patchedDefinition = m_definition;
 	for( auto it = definition.elements.begin(); it != definition.elements.end(); ++it )
 	{
 		if( !FindInputElement( m_definition, *it ) )
@@ -187,7 +188,7 @@ ALResult Tr2VertexLayoutAL::SetLayout( const Tr2ShaderAL* vertexShader, Tr2Rende
 				fakeElement.InputSlot = 4;
 				fixedupError = true;
 			}
-			m_definition.push_back( fakeElement );
+			patchedDefinition.push_back( fakeElement );
 		}
 	}
 	if( fixedupError )
@@ -201,8 +202,8 @@ ALResult Tr2VertexLayoutAL::SetLayout( const Tr2ShaderAL* vertexShader, Tr2Rende
 
 	CComPtr<ID3D11InputLayout> layout;
 	long result = renderContext.m_secondaryDevice11->CreateInputLayout(
-						m_definition.data(), 
-						(uint32_t)m_definition.size(), 
+						patchedDefinition.data(), 
+						(uint32_t)patchedDefinition.size(), 
 						bytecode, 
 						bytecodeSize, 
 						&layout );

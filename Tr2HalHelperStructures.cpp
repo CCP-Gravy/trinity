@@ -29,6 +29,7 @@ const Tr2TextureAL		nullTX;
 const Tr2RenderTargetAL	nullRT;
 const Tr2GpuBufferAL	nullGB;
 const Tr2ConstantBufferAL	nullCB;
+const Tr2VertexLayoutAL	nullVL;
 
 // --------------------------------------------------------------------------------------
 // Description:

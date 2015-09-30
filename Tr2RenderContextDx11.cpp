@@ -956,6 +956,7 @@ ALResult Tr2RenderContextAL::RunComputeShader( unsigned groupDimX, unsigned grou
 	{
 		return E_FAIL;
 	}
+	ApplyUavs();
 	m_context->Dispatch( groupDimX, groupDimY, groupDimZ );
 	return S_OK;
 }
@@ -973,11 +974,12 @@ ALResult Tr2RenderContextAL::RunComputeShader( unsigned groupDimX, unsigned grou
 // --------------------------------------------------------------------------------------
 ALResult Tr2RenderContextAL::RunComputeShaderIndirect( Tr2GpuBufferAL& indirectParams, unsigned offset ) throw()
 {
-	if( !indirectParams.IsValid() || !ApplyShadowRenderStates() )
+	if( !indirectParams.IsValid() )
 	{
 		return E_FAIL;
 	}
 	AL_UPDATE_RESOURCE_FRAME_USAGE( indirectParams );
+	ApplyUavs();
 
 	m_context->DispatchIndirect( indirectParams.m_buffer, offset );
 	return S_OK;
@@ -1354,15 +1356,15 @@ ALResult Tr2RenderContextAL::SetIndices( const Tr2IndexBufferAL & buffer )
 	return S_OK;
 }
 
-ALResult Tr2RenderContextAL::SetVertexLayout( Tr2VertexLayoutAL& layout )
+ALResult Tr2RenderContextAL::SetVertexLayout( const Tr2VertexLayoutAL& layout )
 {
-	if( !layout.IsValid() )
+	if( !layout.IsValid() && &layout != &nullVL )
 	{
 		return E_INVALIDARG;
 	}
 
 	AL_UPDATE_RESOURCE_FRAME_USAGE( layout );
-	m_vertexLayout = &layout;
+	m_vertexLayout = &layout == &nullVL ? nullptr : &layout;
 
 	return S_OK;
 }
@@ -1778,6 +1780,12 @@ bool Tr2RenderContextAL::ApplyShadowRenderStates()
 			m_lastSetVertexLayoutVSHash = m_vertexShader->GetInputDefinition().hash;
 		}
 	}
+	else
+	{
+		m_lastSetVertexLayout = nullptr;
+		m_lastSetVertexLayoutVSHash = -1;
+		m_context->IASetInputLayout( nullptr );
+	}
 
 	if( m_dirtyFlag )
 	{
@@ -1868,7 +1876,14 @@ bool Tr2RenderContextAL::ApplyShadowRenderStates()
 		m_previouslyHadHullShader = m_hasHullShader;
 		m_lastSetTopology = m_topology;
 	}
+
+	ApplyUavs();
 	
+	return OK;
+}
+
+void Tr2RenderContextAL::ApplyUavs() throw()
+{
 	if( m_psUavsDirtyBegin < m_psUavsDirtyEnd )
 	{
 		m_context->OMSetRenderTargetsAndUnorderedAccessViews( 
@@ -1882,8 +1897,6 @@ bool Tr2RenderContextAL::ApplyShadowRenderStates()
 		m_psUavsDirtyBegin = sizeof( m_pixelShaderUavs ) / sizeof( m_pixelShaderUavs[0] );
 		m_psUavsDirtyEnd = 0;
 	}
-
-	return OK;
 }
 
 bool Tr2RenderContextAL::ApplyBlendState()
