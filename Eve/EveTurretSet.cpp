@@ -82,6 +82,7 @@ EveTurretSet::EveTurretSet( IRoot* lockobj ) :
 	m_useRandomFiringDelay( true ),
 	m_randomFiringDelay( 0.f ),
 	m_maxCyclingFirePos( 1 ),
+	m_cyclingFireGroupCount( 1 ),
 	m_currentCyclingFiresPos( 0 ),
 	m_sysBoneHeight( 1.f ),
 	m_sysBonePitchOffset( 0.f ),
@@ -1629,7 +1630,7 @@ std::string EveTurretSet::GetFireAnimationName() const
 {
 	// if m_currentCyclingFiresPos is 0, it's just "Fire"
 	std::string res = "Fire";
-	if( m_currentCyclingFiresPos )
+	if( m_currentCyclingFiresPos > 0 )
 	{
 		res.push_back('0');
 		res.push_back('0' + m_currentCyclingFiresPos);
@@ -1845,7 +1846,7 @@ void EveTurretSet::EnterStateFiring()
 	{
 		if( m_maxCyclingFirePos > 1 )
 		{
-			m_firingEffect->PrepareFiring( m_randomFiringDelay, m_currentCyclingFiresPos );
+			m_firingEffect->PrepareFiring( m_randomFiringDelay, m_currentCyclingFiresPos, m_cyclingFireGroupCount );
 		}
 		else 
 		{
@@ -1873,8 +1874,8 @@ bool EveTurretSet::SetupFiringState()
 	// if this turret is set to cycle through the muzzles for firing, do it here
 	if( m_maxCyclingFirePos > 1 )
 	{
-		++m_currentCyclingFiresPos;
-		if( m_currentCyclingFiresPos >= m_maxCyclingFirePos )
+		m_currentCyclingFiresPos += m_cyclingFireGroupCount;
+		if( m_currentCyclingFiresPos >= m_maxCyclingFirePos * m_cyclingFireGroupCount )
 		{
 			m_currentCyclingFiresPos = 0;
 		}

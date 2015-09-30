@@ -82,6 +82,7 @@ const Be::ClassInfo* EveTurretSet::ExposeToBlue()
 		MAP_ATTRIBUTE( "useRandomFiringDelay", m_useRandomFiringDelay, "Each firing could be hold of by a random amount of time", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "randomFiringDelay", m_randomFiringDelay, "The actual delay in seconds for this firing cycle", Be::READ )
 		MAP_ATTRIBUTE( "maxCyclingFirePos", m_maxCyclingFirePos, "If greater than one we cycle through the given number of muzzles.", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "cyclingFireGroupCount", m_cyclingFireGroupCount, "The number of muzzles in one cycle group, usually only one.", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "currentCyclingFiresPos", m_currentCyclingFiresPos, "Current muzzle id due to cycling muzzles", Be::READ )
 		MAP_ATTRIBUTE( "trackingFadeTime", m_trackingFadeTime, "Time it takes this turret to go from IDLE into TRACKING", Be::READWRITE | Be::PERSIST )
 

@@ -76,7 +76,7 @@ public:
 	void SetScaleByRadius( float radius );
 
 	// action: prepare (== "start with delay" ) firing
-	void PrepareFiring( float delay, unsigned int muzzleID = 0xffffffff );
+	void PrepareFiring( float delay, unsigned int muzzleID = 0xffffffff, unsigned int muzzleCount = 0xffffffff );
 	// action: stop all firing
 	void StopFiring();
 

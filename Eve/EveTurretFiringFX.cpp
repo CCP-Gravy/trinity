@@ -166,14 +166,14 @@ bool EveTurretFiringFX::OnModified( Be::Var* val )
 // Arguments:
 //   delay - the delay until it starts
 // --------------------------------------------------------------------------------
-void EveTurretFiringFX::PrepareFiring( float delay, unsigned int muzzleID )
+void EveTurretFiringFX::PrepareFiring( float delay, unsigned int muzzleID, unsigned int muzzleCount )
 {
 	// just set a positive time delay and the effect will get triggered in ::Update()
 	for( unsigned int i = 0; i < m_stretch.size(); ++i )
 	{
 		// launch this muzzle effect either when caller wants them all to fire (0xffffffff) or
 		// an individual one is selected
-		if( ( muzzleID == 0xffffffff ) || ( muzzleID == i ) )
+		if( ( muzzleID == 0xffffffff ) || ( ( i >= muzzleID ) && ( i < muzzleID + muzzleCount ) ) )
 		{
 			m_perMuzzleData[i].currentStartDelay = delay + m_perMuzzleData[i].constantDelay;
 			m_perMuzzleData[i].started = false;
