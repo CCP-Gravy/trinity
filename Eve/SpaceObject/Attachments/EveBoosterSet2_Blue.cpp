@@ -18,7 +18,7 @@ const Be::ClassInfo* EveBoosterSet2::ExposeToBlue()
 			"",
 			Be::READWRITE | Be::PERSIST
 		)
-		MAP_ATTRIBUTE( "volumetric", m_isVolumetric, "booster uses volumetric shader", Be::READWRITE | Be::NOTIFY )
+		MAP_ATTRIBUTE( "volumetric", m_isVolumetric, "booster uses volumetric shader", Be::READWRITE | Be::PERSIST | Be::NOTIFY )
 		MAP_ATTRIBUTE( "physicsUpdate", m_physicsUpdate, "This enables updating of the boosters trails based on physics sim", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "destinyUpdate", m_destinyUpdate, "This enables updating speed etc. from destiny simulation", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "drawDebugInfo", m_drawDebugInfo, "Enable debug drawing", Be::READWRITE )
@@ -142,6 +142,15 @@ const Be::ClassInfo* EveBoosterSet2::ExposeToBlue()
 
 		MAP_ATTRIBUTE( "trailIntensity", m_trailIntensity, "", Be::READ )
 		MAP_ATTRIBUTE( "trailsTotalLength", m_trailsTotalLength, "", Be::READ )
+
+		MAP_ATTRIBUTE( "lightOffset", m_lightOffset, "", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "lightFlickerAmplitude", m_lightFlickerAmplitude, "", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "lightFlickerFrequency", m_lightFlickerFrequency, "", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "lightRadius", m_lightRadius, "", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "lightColor", m_lightColor, "", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "lightWarpRadius", m_lightWarpRadius, "", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "lightWarpColor", m_lightWarpColor, "", Be::READWRITE | Be::PERSIST )
+
 
 	EXPOSURE_END()
 }
