@@ -8,11 +8,13 @@
 #include "EveImpactOverlay.h"
 
 #include "include/TriMath.h"
+#include "Curves/TriCurveSet.h"
 #include "Utilities/BoundingSphere.h"
 #include "Tr2MeshBase.h"
 #include "Eve/EveUpdateContext.h"
 
-EveImpactOverlay::EveImpactOverlay( IRoot* lockobj ):
+EveImpactOverlay::EveImpactOverlay( IRoot* lockobj ) :
+	PARENTLOCK( m_curveSets ),
 	m_display( true ),
 	m_overallShieldImpact( -1.f ),
 	m_maxShieldImpacts( 128 ),
@@ -228,6 +230,13 @@ void EveImpactOverlay::UpdateAsyncronous( EveUpdateContext& updateContext, EveSp
 
 		++i;
 	}
+
+	// don't forget the curves
+	Be::Time time = updateContext.GetTime();
+	for( auto it = m_curveSets.begin(); it != m_curveSets.end(); ++it )
+	{
+		(*it)->Update( time, time );
+	}
 }
 
 // --------------------------------------------------------------------------------
@@ -255,6 +264,33 @@ void EveImpactOverlay::GetBatches( ITriRenderBatchAccumulator* accumulator, TriB
 		GlobalStore().RegisterVariable( "ImpactShieldDataMap", &m_shieldDataTexture );
 		const Tr2MeshAreaVector* areas = m_mesh->GetAreas( batchType );
 		m_mesh->GetBatches( accumulator, areas, perObjectData );
+	}
+}
+
+// --------------------------------------------------------------------------------
+// Description:
+//   Easy-to-use access to the internal animation curves
+// --------------------------------------------------------------------------------
+void EveImpactOverlay::PlayCurveSet( const std::string& name )
+{
+	for( auto it = m_curveSets.begin(); it != m_curveSets.end(); ++it )
+	{
+		if( (*it)->GetName() == name )
+		{
+			(*it)->Play();
+		}
+	}
+}
+
+// --------------------------------------------------------------------------------
+// Description:
+//   Easy-to-use access to the internal animation curves
+// --------------------------------------------------------------------------------
+void EveImpactOverlay::StopAllCurveSets()
+{
+	for( auto it = m_curveSets.begin(); it != m_curveSets.end(); ++it )
+	{
+		(*it)->Stop();
 	}
 }
 

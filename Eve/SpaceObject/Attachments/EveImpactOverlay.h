@@ -85,6 +85,10 @@ public:
 	void GetBatches( ITriRenderBatchAccumulator* accumulator, TriBatchType batchType, const Tr2PerObjectData* perObjectData );
 	Tr2EffectPtr GetArmorDamageShader( TriBatchType batchType ) const;
 
+	// control animation
+	void PlayCurveSet( const std::string& name );
+	void StopAllCurveSets();
+
 	// control shield impacts
 	int CreateShieldImpact( int damageLocatorIndex, const Vector3& direction, float lifeTime );
 	bool UpdateShieldImpact( const Vector3& direction, int shieldImpactIndex );
@@ -130,6 +134,9 @@ private:
 
 	// armor damage shader
 	Tr2EffectPtr m_armorDamageShader;
+
+	// animate
+	PTriCurveSetVector m_curveSets;
 };
 
 TYPEDEF_BLUECLASS( EveImpactOverlay );

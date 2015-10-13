@@ -28,5 +28,7 @@ const Be::ClassInfo* EveImpactOverlay::ExposeToBlue()
 
 		MAP_ATTRIBUTE( "armorDamageShader", m_armorDamageShader, "", Be::READWRITE | Be::PERSIST )
 
+		MAP_ATTRIBUTE( "curveSets", m_curveSets, "", Be::READWRITE | Be::PERSIST )
+
     EXPOSURE_END()
 }
