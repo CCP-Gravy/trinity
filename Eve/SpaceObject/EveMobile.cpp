@@ -142,7 +142,7 @@ void EveMobile::PrepareShaderData( EveUpdateContext& updateContext )
 	{
 		float deltaT = updateContext.GetDeltaT();
 		m_activationDelta += deltaT;
-		m_spaceObjectMiscData.y = m_activationStrengthCurve->Update( m_activationDelta );
+		m_spaceObjectShipData.y = m_activationStrengthCurve->Update( m_activationDelta );
 	}
 
 	if( m_clipSphereFactorCurve && m_playClipSphereFactorCurve )
@@ -159,7 +159,7 @@ void EveMobile::PrepareShaderData( EveUpdateContext& updateContext )
 	float insideSpherePercentage = std::min( 1.f, D3DXVec3Length( &m_clipSphereCenter ) / GetBoundingSphereRadius() );
 	float disolveRadius = nearDist + m_clipSphereFactor * GetBoundingSphereRadius() * ( 1.f + insideSpherePercentage );
 	m_psData.clipData = m_vsData.clipData = Vector4( m_clipSphereCenter + GetBoundingSphereCenter(), TriFloatSign( disolveRadius ) * disolveRadius * disolveRadius );
-	m_psData.clipDataEx = Vector4( TriFloatSign( disolveRadius ), 0.f, 0.f, 0.f );
+	m_psData.miscData.x = TriFloatSign( disolveRadius );
 }
 
 // --------------------------------------------------------------------------------
@@ -179,9 +179,9 @@ void EveMobile::UpdateAsyncronous( EveUpdateContext& updateContext )
 	// now prep to get the renderables
 	EveTurretSet::ParentData pd;
 	pd.transform = m_worldTransform;
-	pd.shipData = m_spaceObjectMiscData;
+	pd.shipData = m_spaceObjectShipData;
 	pd.clipData = m_psData.clipData;
-	pd.clipDataEx = m_psData.clipDataEx;
+	pd.clipDataEx = m_psData.miscData;
 
 	for( EveTurretSetVector::iterator it = m_turretSets.begin(); it != m_turretSets.end(); ++it )
 	{
@@ -543,9 +543,9 @@ void EveMobile::ResetTurretLocatorCounter( bool updateTotal )
 // --------------------------------------------------------------------------------
 bool EveMobile::DisplayChildren() const
 {
-	// so in m_spaceObjectMiscData.y we store the current activation strength.
+	// so in m_spaceObjectShipData.y we store the current activation strength.
 	// if it is more than .5 -> render the children!
-	return ( m_spaceObjectMiscData.y > 0.5f );
+	return ( m_spaceObjectShipData.y > 0.5f );
 }
 
 // --------------------------------------------------------------------------------
@@ -634,12 +634,12 @@ bool EveMobile::ExecuteAnimationStateCommand( EveAnimationCmd cmd, const std::st
 		return true;
 
 	case ANIM_CMD_ACTIVATION_STRENGTH_ZERO:
-		m_spaceObjectMiscData.y = 0.f;
+		m_spaceObjectShipData.y = 0.f;
 		m_playActivationCurve = false;
 		return true;
 
 	case ANIM_CMD_ACTIVATION_STRENGTH_ONE:
-		m_spaceObjectMiscData.y = 1.f;
+		m_spaceObjectShipData.y = 1.f;
 		m_playActivationCurve = false;
 		return true;
 

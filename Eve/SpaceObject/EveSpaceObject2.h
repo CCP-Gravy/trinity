@@ -83,7 +83,7 @@ struct EveSpaceObjectVSData
 {
 	Matrix worldTransform;
 	Matrix worldTransformLast;
-	Vector4 miscData;
+	Vector4 shipData;
 	Vector4 clipData;
 	Vector4 ellpsoidRadii;
 	Vector4 ellpsoidCenter;
@@ -95,9 +95,9 @@ struct EveSpaceObjectVSData
 // --------------------------------------------------------------------------------
 struct EveSpaceObjectPSData
 {
-	Vector4 miscData;
+	Vector4 shipData;
 	Vector4 clipData;
-	Vector4 clipDataEx;
+	Vector4 miscData;
 	Vector4 shLightingCoefficients[Tr2ShLightingManager::PACKED_COEFFICIENT_COUNT];
 };
 
@@ -335,7 +335,7 @@ protected:
 	// per-object data
 	Tr2PersistentPerObjectData<EveSpaceObject2> m_perObjectDataVs;
 	Tr2PersistentPerObjectData<EveSpaceObject2> m_perObjectDataPs;
-	Vector4 m_spaceObjectMiscData;
+	Vector4 m_spaceObjectShipData;
 	EveSpaceObjectPSData m_psData;
 	EveSpaceObjectVSData m_vsData;
 

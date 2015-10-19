@@ -23,7 +23,8 @@ EveImpactOverlay::EveImpactOverlay( IRoot* lockobj ) :
 	m_shieldEllipsoidRadii( 1.f, 1.f, 1.f ),
 	m_shieldImpactDataNextIdx( 1 ),
 	m_armorImpactDataNextIdx( 1 ),
-	m_dataTextureBlockID( -1 )
+	m_dataTextureBlockID( -1 ),
+	m_dataTextureOffset( -1 )
 {
 }
 
@@ -59,6 +60,9 @@ void EveImpactOverlay::UpdateSyncronous( EveUpdateContext& updateContext, EveSpa
 	// this comes from the scene via EveUpdateContext
 	Tr2DataTextureManagerPtr dataTextureMgr = updateContext.GetDataTextureManager();
 
+	// what's our ofset in pixels for the data texture?
+	m_dataTextureOffset = dataTextureMgr->GetTextureOffset( m_dataTextureBlockID );
+
 	// the block header is the first column in the data texture, set it!
 	DataRow header;
 	header.v[0] = Vector4( float( m_shieldImpactData.size() ), m_overallShieldImpact, 0.f, 0.f );
@@ -67,7 +71,7 @@ void EveImpactOverlay::UpdateSyncronous( EveUpdateContext& updateContext, EveSpa
 	header.v[3] = Vector4( 0.f, 0.f, 0.f, 0.f );
 
 	// update block data
-	m_dataTextureBlockID = dataTextureMgr->requestBlockData( &header.v[0], m_impactTexelData.size(), m_impactTexelData.empty() ? nullptr : &m_impactTexelData[0].v[0] );
+	m_dataTextureBlockID = dataTextureMgr->RequestBlockData( &header.v[0], m_impactTexelData.size(), m_impactTexelData.empty() ? nullptr : &m_impactTexelData[0].v[0] );
 }
 
 // --------------------------------------------------------------------------------
@@ -196,6 +200,15 @@ void EveImpactOverlay::GetBatches( ITriRenderBatchAccumulator* accumulator, TriB
 bool EveImpactOverlay::HasActivity() const
 {
 	return !m_armorImpactData.empty() || !m_shieldImpactData.empty() || ( m_overallShieldImpact > 0.f );
+}
+
+// --------------------------------------------------------------------------------
+// Description:
+//   Just a getter for the texture offset. Nothing special. Move on.
+// --------------------------------------------------------------------------------
+int32_t EveImpactOverlay::GetDataTextureOffset() const
+{
+	return m_dataTextureOffset;
 }
 
 // --------------------------------------------------------------------------------

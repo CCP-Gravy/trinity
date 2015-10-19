@@ -18,6 +18,8 @@ const Be::ClassInfo* Tr2DataTextureManager::ExposeToBlue()
 		MAP_ATTRIBUTE( "maxDataSize", m_maxDataSize, "", Be::READ )
 		MAP_ATTRIBUTE( "textureHeight", m_textureHeight, "", Be::READ )
 		MAP_ATTRIBUTE( "blockDataNextIdx", m_blockDataNextIdx, "", Be::READ )
+		MAP_ATTRIBUTE( "maxBlockCount", m_maxBlockCount, "", Be::READ )
+		MAP_ATTRIBUTE( "maxTextureCount", m_maxTextureCount, "", Be::READ )
 
     EXPOSURE_END()
 }

@@ -47,7 +47,10 @@ public:
 	void Update( EveUpdateContext& updateContext );
 
 	// access block IDs
-	int32_t requestBlockData( const Vector4* headerData, size_t blockLength, const Vector4* blockData );
+	int32_t RequestBlockData( const Vector4* headerData, size_t blockLength, const Vector4* blockData );
+
+	// get texture offset
+	int32_t GetTextureOffset( int32_t blockID ) const;
 	
 private:
 	// general data
@@ -61,6 +64,11 @@ private:
 
 	// the texture
 	Tr2TextureAL m_dataTexture;
+	std::map<int32_t, int32_t> m_dataTextureOffsets;
+
+	// debug
+	size_t m_maxBlockCount;
+	size_t m_maxTextureCount;
 };
 
 TYPEDEF_BLUECLASS( Tr2DataTextureManager );

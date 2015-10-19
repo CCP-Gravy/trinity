@@ -204,7 +204,7 @@ Tr2PerObjectData* EveShip2::GetPerObjectData( ITriRenderBatchAccumulator* accumu
 	}
 
 	// extra data for ps and vs: booster glow intensity
-	m_spaceObjectMiscData.x = boosterGlowIntensity;
+	m_spaceObjectShipData.x = boosterGlowIntensity;
 
 	// parent
 	return EveMobile::GetPerObjectData( accumulator );

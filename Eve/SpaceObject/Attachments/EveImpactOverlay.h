@@ -72,6 +72,9 @@ public:
 	void GetBatches( ITriRenderBatchAccumulator* accumulator, TriBatchType batchType, const Tr2PerObjectData* perObjectData );
 	Tr2EffectPtr GetArmorDamageShader( TriBatchType batchType ) const;
 
+	// getters
+	int32_t GetDataTextureOffset() const;
+
 	// control animation
 	void PlayCurveSet( const std::string& name );
 	void StopAllCurveSets();
@@ -115,6 +118,7 @@ private:
 
 	// the data texture block ID
 	int32_t m_dataTextureBlockID;
+	int32_t m_dataTextureOffset;
 
 	// what to render
 	Tr2MeshBasePtr m_mesh;

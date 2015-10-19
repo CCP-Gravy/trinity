@@ -27,6 +27,7 @@
 #include "Utils/EveCustomMask.h"
 #include "TriSettingsRegistrar.h"
 #include "Tr2PointLight.h"
+#include "Shader/Utils/Tr2DataTextureManager.h"
 
 #include <limits>
 
@@ -95,7 +96,7 @@ EveSpaceObject2::EveSpaceObject2( IRoot* lockobj ) :
 	m_shapeEllipsoidRadius( -1.f, -1.f, -1.f ),
 	m_lastCurveUpdateTime( 0 ),
 	m_previousPosition( UNINITIALIZED_POSITION, UNINITIALIZED_POSITION, UNINITIALIZED_POSITION ),
-	m_spaceObjectMiscData( 1.f, 1.f, EVE_SPACEOBJECT_DIRT_LEVEL_DEFAULT, 1.f ),
+	m_spaceObjectShipData( 1.f, 1.f, EVE_SPACEOBJECT_DIRT_LEVEL_DEFAULT, 1.f ),
 	m_displayChildren( true ),
 	m_dirtLevel( EVE_SPACEOBJECT_DIRT_LEVEL_DEFAULT ),
 	m_isAnimated( false )
@@ -312,14 +313,19 @@ void EveSpaceObject2::UpdateAsyncronous( EveUpdateContext& updateContext )
 	m_perObjectDataPs.InvalidateBufferData();
 
 	PrepareShaderData( updateContext );
-	m_psData.miscData = m_spaceObjectMiscData;
+	m_psData.shipData = m_spaceObjectShipData;
 	D3DXMatrixTranspose( &m_vsData.worldTransform, &m_worldTransform );
-	m_vsData.miscData = m_spaceObjectMiscData;
+	m_vsData.shipData = m_spaceObjectShipData;
 
 	Vector3 shapeCenter( 0.f, 0.f, 0.f ), shapeRadius( 0.f, 0.f, 0.f );
 	GetShapeEllipsoid( shapeCenter, shapeRadius );
 	m_vsData.ellpsoidRadii = Vector4( shapeRadius, 0.f );
 	m_vsData.ellpsoidCenter = Vector4( shapeCenter, 0.f );
+
+	if( m_impactOverlay )
+	{
+		m_psData.miscData.y = (float)m_impactOverlay->GetDataTextureOffset();
+	}
 
 	if( !m_curveSets.empty() || !m_overlayEffects.empty() )
 	{
@@ -372,9 +378,9 @@ void EveSpaceObject2::PrepareShaderData( EveUpdateContext& updateContext )
 	}
 
 	// shader needs to know size of this object for some surface-scaling issues
-	m_spaceObjectMiscData.w = GetBoundingSphereRadius();
+	m_spaceObjectShipData.w = GetBoundingSphereRadius();
 	// dirt level of a spaceobject
-	m_spaceObjectMiscData.z = m_dirtLevel;
+	m_spaceObjectShipData.z = m_dirtLevel;
 }
 
 void EveSpaceObject2::RenderDebugInfo( Tr2RenderContext& renderContext )
@@ -926,7 +932,7 @@ uint32_t EveSpaceObject2::GetPerObjectDataSize( Tr2RenderContextEnum::ShaderType
 
 void EveSpaceObject2::UpdatePerObjectBuffer( Tr2RenderContextEnum::ShaderType shaderType, uint32_t size, void* data )
 {
-	m_spaceObjectMiscData.w = GetBoundingSphereRadius();
+	m_spaceObjectShipData.w = GetBoundingSphereRadius();
 
 	if( shaderType == Tr2RenderContextEnum::PIXEL_SHADER )
 	{
@@ -1126,9 +1132,9 @@ void EveSpaceObject2::FillDecalParentData( EveSpaceObjectDecal::ParentData* pd )
 {
 	memset( pd, 0, sizeof( EveSpaceObjectDecal::ParentData ) );
 	pd->transform = m_worldTransform;
-	pd->shipData = m_spaceObjectMiscData;
+	pd->shipData = m_spaceObjectShipData;
 	pd->clipData = m_psData.clipData;
-	pd->clipDataEx = m_psData.clipDataEx;
+	pd->clipDataEx = m_psData.miscData;
 	pd->shLighting = m_psData.shLightingCoefficients;
 }
 
@@ -1176,11 +1182,11 @@ void EveSpaceObject2::AddQuadsToQuadRenderer( Tr2QuadRenderer& quadRenderer )
 
 	for( auto it = m_spriteSets.begin(); it != m_spriteSets.end(); ++it )
 	{
-		(*it)->AddToQuadRenderer( quadRenderer, m_worldTransform, m_spaceObjectMiscData.y, bones, boneCount );
+		(*it)->AddToQuadRenderer( quadRenderer, m_worldTransform, m_spaceObjectShipData.y, bones, boneCount );
 	}
 	for( auto it = m_spotlightSets.begin(); it != m_spotlightSets.end(); ++it )
 	{
-		(*it)->AddToQuadRenderer( quadRenderer, m_worldTransform, m_spaceObjectMiscData.y, m_spaceObjectMiscData.x, bones, boneCount );
+		(*it)->AddToQuadRenderer( quadRenderer, m_worldTransform, m_spaceObjectShipData.y, m_spaceObjectShipData.x, bones, boneCount );
 	}
 }
 

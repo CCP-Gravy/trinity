@@ -10,9 +10,11 @@
 #include "Tr2VariableStore.h"
 
 Tr2DataTextureManager::Tr2DataTextureManager( IRoot* lockobj ) :
-	m_maxDataSize( 512 ),
+	m_maxDataSize( 32 ),
 	m_textureHeight( 4 ),
-	m_blockDataNextIdx( 1 )
+	m_blockDataNextIdx( 1 ),
+	m_maxBlockCount( 0 ),
+	m_maxTextureCount( 0 )
 {
 	GlobalStore().RegisterVariable( "ImpactShieldDataMap", &m_dataTexture );
 
@@ -80,15 +82,20 @@ void Tr2DataTextureManager::Update( EveUpdateContext& updateContext )
 {
 	USE_MAIN_THREAD_RENDER_CONTEXT();
 
+	// 0
+	m_maxTextureCount = m_maxBlockCount = 0;
+
 	// do not update anything if data is totally empty
 	if( m_blockData.empty() )
 	{
 		return;
 	}
 
-	// update data texture
+	// update data texture and keep track of the pixel offsets!
 	void* data = nullptr;
 	uint32_t pitch = 0;
+	int32_t pixelOffset = 0;
+	m_dataTextureOffsets.clear();
 	if( SUCCEEDED( m_dataTexture.Lock( 0, data, pitch, Tr2RenderContextEnum::LOCK_WRITEONLY, renderContext ) ) )
 	{
 		uint8_t* mem = (uint8_t*)data;
@@ -96,7 +103,17 @@ void Tr2DataTextureManager::Update( EveUpdateContext& updateContext )
 		// encode all the blocks in the texture
 		for( auto it = m_blockData.begin(); it != m_blockData.end(); ++it )
 		{
+			int32_t blockID = it->first;
 			BlockData* block = &it->second;
+
+			// check if we still have room for one more block
+			if( pixelOffset + block->blockLength + 1 >= m_maxDataSize )
+			{
+				break;
+			}
+
+			// save pixeloffset
+			m_dataTextureOffsets[ blockID ] = pixelOffset;
 
 			// header
 			for( uint32_t y = 0; y < m_textureHeight; ++y )
@@ -113,9 +130,17 @@ void Tr2DataTextureManager::Update( EveUpdateContext& updateContext )
 					memcpy( &mem[ y * pitch + x * sizeof( Vector4 )], &block->data[ x * m_textureHeight + y ], sizeof( Vector4 ) );
 				}
 			}
+
+			// next
+			mem += block->blockLength * sizeof( Vector4 );
+			pixelOffset += block->blockLength + 1;
 		}
 		m_dataTexture.Unlock( renderContext );
 	}
+
+	// keep track of some numbers, just for debugging
+	m_maxTextureCount = pixelOffset;
+	m_maxBlockCount = m_blockData.size();
 
 	// ok, the texture and the per-block offsets are done, so we don't need the data blocks anymore!
 	m_blockData.clear();
@@ -131,7 +156,7 @@ void Tr2DataTextureManager::Update( EveUpdateContext& updateContext )
 //   blockLength - the number of columns in the data texture (NOT including the header!)
 //   blockData - the block data, column-wise (column0[n], column1[n], column2[n], ...)
 // --------------------------------------------------------------------------------
-int32_t Tr2DataTextureManager::requestBlockData( const Vector4* headerData, size_t blockLength, const Vector4* blockData )
+int32_t Tr2DataTextureManager::RequestBlockData( const Vector4* headerData, size_t blockLength, const Vector4* blockData )
 {
 	// set the data
 	BlockData bd;
@@ -150,6 +175,25 @@ int32_t Tr2DataTextureManager::requestBlockData( const Vector4* headerData, size
 	m_blockData[ m_blockDataNextIdx ] = bd;
 	return m_blockDataNextIdx++;
 }
+
+// --------------------------------------------------------------------------------
+// Description:
+//   Query the actual in-texture offset in pixel for each data block
+// Arguments:
+//   blockID - the block ID previously returned by the update function
+// --------------------------------------------------------------------------------
+int32_t Tr2DataTextureManager::GetTextureOffset( int32_t blockID ) const
+{
+	// find it!
+	auto finder = m_dataTextureOffsets.find( blockID );
+	if( finder == m_dataTextureOffsets.end() )
+	{
+		return -1;
+	}
+	return finder->second;
+}
+
+
 
 
 

@@ -44,11 +44,11 @@ public:
 	}
 
 	// Any extra objects you would like to pass along
-	Tr2DataTextureManagerPtr GetDataTextureManager() const
+	Tr2DataTextureManager* GetDataTextureManager() const
 	{
 		return m_dataTextureManager;
 	}
-	void SetDataTextureManager( Tr2DataTextureManagerPtr manager )
+	void SetDataTextureManager( Tr2DataTextureManager* manager )
 	{
 		m_dataTextureManager = manager;
 	}
