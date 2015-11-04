@@ -32,10 +32,17 @@ public:
 	int FindClosestLocator( const Vector3* source, Vector3* position ) const;
 
 	// updates
-	void Update( float deltaT );
+	void Update( float deltaT, const Vector3* source );
 
 	// hit/miss
-	void GetMissPosition( const Vector3* hit, const Vector3* source, Vector3* out );
+	void SetBehaviour( bool laserMiss, bool projectileMiss );
+	bool GetShotMissed() const;
+	void SetShotMissed( bool missed );
+	double GetLastShotTime() const;
+	void PopShotMissed();
+	void ResetMissQueue();
+	void UpdateMissPosition( const Matrix* );
+	size_t MissQueueSize() const;
 
 	// target object queries
 	float GetRadius() const;
@@ -45,10 +52,27 @@ private:
 	ITriTargetablePtr m_object;
 	int m_locator;
 
+	// impacts
+	int m_shieldImpactID;
+
 	// actual target position and smoothing
 	Vector3 m_position;
 	Vector3 m_positionOld;
 	float m_positionOldInfluence;
+
+	// direction to source
+	Vector3 m_dirToSource;
+
+	// hit/miss related data
+	Vector3 m_targetPositionMiss;
+	TrackableStdDeque<bool> m_missQueue;
+	bool m_lastShotIsMiss;
+	double m_lastShotTime;
+	bool m_laserMissBehaviour, m_projectileMissBehaviour;
+	bool m_readyToFireEffect;
+	bool m_trackMissPoint;
+	float m_randomMissDistanceOffset;
+	Vector3 m_randomMissPositionOffset;
 };
 
 TYPEDEF_BLUECLASS( EveTurretTarget );

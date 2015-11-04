@@ -66,7 +66,6 @@ EveTurretSet::EveTurretSet( IRoot* lockobj ) :
 	m_visibleCount( 0 ),
 	m_estimatedPixelDiameter( -1.f ),
 	m_lodLevel( LOD_INVALID ),
-	m_targetPositionMiss( 0.f, 0.f, 0.f ),
 	m_trackingInfluence( 0.f ),
 	m_trackingInfluenceDelta( 0.f ),
 	m_delayToFadeOutTracking( 0.f ),
@@ -95,15 +94,8 @@ EveTurretSet::EveTurretSet( IRoot* lockobj ) :
 	m_state( STATE_IDLE ),
 	m_activeTurret( INVALID_TURRET_INDEX ),
 	m_recheckTimeLeft( -1.f ),
-	m_missQueue( "EveTurretSet::m_missQueue" ),
-	m_lastShotAccuracy( ACCURACY_INDETERMINATE ),
-	m_lastShotTime( 0.0 ),
 	m_laserMissBehaviour( false ),
 	m_projectileMissBehaviour( false ),
-	m_readyToFireEffect( false ),
-	m_randomMissDistanceOffset( 0.5f ),
-	m_randomMissPositionOffset( 0, 0, 0 ),
-	m_trackMissPoint( false ),
 	m_firingEffectMuzzlePosSet( false ),
 	m_slotNumber( -1 ),
 	m_parentShLighting( nullptr ),
@@ -155,6 +147,9 @@ EveTurretSet::~EveTurretSet()
 // --------------------------------------------------------------------------------
 bool EveTurretSet::Initialize()
 {
+	// pass down some user-defined data into sub-modules we don't save out
+	m_target->SetBehaviour( m_laserMissBehaviour, m_projectileMissBehaviour );
+
 	// geom path is here, so load it
 	InitializeGeometryResource();
 	return true;
@@ -753,7 +748,12 @@ void EveTurretSet::UpdateAsyncronous( float deltaT, Be::Time time, const ParentD
 	}
 
 	// update the target locator position
-	m_target->Update( deltaT );
+	Vector3 p = m_parentData.transform.GetTranslation();
+	if( m_firingEffect )
+	{
+		m_firingEffect->GetStartPosition( p );
+	}
+	m_target->Update( deltaT, &p );
 
 	// setup and update attached firing effect
 	if( m_firingEffect )
@@ -773,13 +773,13 @@ void EveTurretSet::UpdateAsyncronous( float deltaT, Be::Time time, const ParentD
 
 		if( m_firingEffect->ReadyToFire() )
 		{
-			PopShotMissed();
-			UpdateMissPosition( &m_parentData.transform );
+			m_target->PopShotMissed();
+			m_target->UpdateMissPosition( &m_parentData.transform );
 			SetEffectEndPoint();
 		}
 		else if( m_laserMissBehaviour )
 		{
-			UpdateMissPosition( &m_parentData.transform );
+			m_target->UpdateMissPosition( &m_parentData.transform );
 			SetEffectEndPoint();
 		}		
 		else
@@ -806,12 +806,6 @@ void EveTurretSet::UpdateAsyncronous( float deltaT, Be::Time time, const ParentD
 				m_firingEffectMuzzlePosSet = true;
 			}
 			m_firingEffect->SetDisplayDestObject( !GetShotMissed() || m_projectileMissBehaviour );
-
-			m_randomMissDistanceOffset = TriFloatRandom01();
-			const float u = TriFloatRandom01(), v = TriFloatRandom01();
-			const float phi = u * 3.14159f * 2.f;
-			const float theta = acosf( 1.f - sqrtf(v) ) * 2.f;
-			TriVectorSpherical( &m_randomMissPositionOffset, phi, theta, 3.f );
 		}
 	}
 }
@@ -1648,7 +1642,7 @@ void EveTurretSet::EnterStateDeactive()
 			PlayAnimation( i, "Pack", "Inactive", TRACKING_FADE_TIME );
 		}
 
-		ResetMissQueue();
+		m_target->ResetMissQueue();
 		break;
 
 	default:
@@ -1707,7 +1701,7 @@ void EveTurretSet::EnterStateIdle()
 			PlayAnimation( i, "", "Active", TRACKING_FADE_TIME );
 		}
 
-		ResetMissQueue();
+		m_target->ResetMissQueue();
 		break;
 	}
 	// finally, we can set state
@@ -1762,7 +1756,7 @@ void EveTurretSet::EnterStateTargeting()
 			PlayAnimation( i, "", "Active", 0.f );
 		}
 		
-		ResetMissQueue();
+		m_target->ResetMissQueue();
 		break;
 
 	default:
@@ -1935,7 +1929,7 @@ void EveTurretSet::EnterStateReloading()
 			PlayAnimation( i, "Reload", "Active", TRACKING_FADE_TIME );
 		}
 
-		ResetMissQueue();
+		m_target->ResetMissQueue();
 		break;
 
 	default:
@@ -2135,42 +2129,11 @@ Tr2Effect* EveTurretSet::GetShader()
 
 // --------------------------------------------------------------------------------
 // Description:
-//   Clears the miss queue. Do this when changing target, disabling turrets etc.
-// --------------------------------------------------------------------------------
-void EveTurretSet::ResetMissQueue()
-{
-	m_lastShotAccuracy = ACCURACY_INDETERMINATE;
-	m_trackMissPoint = false;
-	while( !m_missQueue.empty() ) 
-	{
-		m_missQueue.pop_front();
-	}
-}
-
-// --------------------------------------------------------------------------------
-// Description:
-//   Private method to pop from the miss queue.
-// --------------------------------------------------------------------------------
-void EveTurretSet::PopShotMissed() 
-{ 
-	m_lastShotAccuracy = m_missQueue.empty() ? ACCURACY_INDETERMINATE : (ShotAccuracy)m_missQueue.front();
-	if( !m_missQueue.empty() )
-		m_missQueue.pop_front(); 
-}
-
-// --------------------------------------------------------------------------------
-// Description:
 //   Get the hit/miss status of the last shot info.
 // --------------------------------------------------------------------------------
-bool EveTurretSet::GetShotMissed() const 
+bool EveTurretSet::GetShotMissed() const
 { 
-	if( m_lastShotAccuracy == ACCURACY_INDETERMINATE )
-	{
-		// take a guess as to whether it hit... or just default to something
-		m_lastShotAccuracy = ACCURACY_HIT;
-	}
-
-	return m_lastShotAccuracy != ACCURACY_HIT;
+	return m_target->GetShotMissed();
 }
 
 // --------------------------------------------------------------------------------
@@ -2179,53 +2142,7 @@ bool EveTurretSet::GetShotMissed() const
 // --------------------------------------------------------------------------------
 void EveTurretSet::SetShotMissed( const bool missed ) 
 { 
-	if( !m_trackMissPoint )
-	{
-		m_lastShotAccuracy = (ShotAccuracy)missed;
-	}
-	m_trackMissPoint = true;
-	m_missQueue.push_back(missed); 
-	m_lastShotTime = TimeAsDouble(BeOS->GetActualTime());
-	//in case we get way behind, start dropping miss events,
-	// rather than infinitely accumulating.
-	//should still be representative.
-	while( m_missQueue.size() > 4 )
-	{
-		m_missQueue.pop_front();
-	}
-}
-
-// --------------------------------------------------------------------------------
-// Description:
-//   Still to come
-// --------------------------------------------------------------------------------
-void EveTurretSet::UpdateMissPosition( const Matrix *parentMatrix )
-{
-	//early out if we're not tracking miss positions
-	if( !m_trackMissPoint || !m_target->GetTargetable() )
-	{
-		m_targetPositionMiss = *m_target->GetTargetPosition();
-		return;
-	}
-
-
-	const Vector3 muzzlePos = Vector3( parentMatrix->_41, parentMatrix->_42, parentMatrix->_43 );
-
-	m_target->GetMissPosition( m_target->GetTargetPosition(), &muzzlePos, &m_targetPositionMiss );
-	m_targetPositionMiss += m_randomMissPositionOffset;
-	Vector3 direction = m_targetPositionMiss - muzzlePos;
-
-	if( m_laserMissBehaviour )
-	{
-		D3DXVec3Normalize( &direction, &direction );
-		m_targetPositionMiss += direction * 250000.f;
-	}
-	else
-	{
-		float dist = D3DXVec3Length( &direction );
-		direction /= dist;
-		m_targetPositionMiss += direction * (dist + 5000.f) * (1.f + 0.5f * m_randomMissDistanceOffset);
-	}
+	m_target->SetShotMissed( missed );
 }
 
 // --------------------------------------------------------------------------------
@@ -2234,9 +2151,17 @@ void EveTurretSet::UpdateMissPosition( const Matrix *parentMatrix )
 // --------------------------------------------------------------------------------
 size_t EveTurretSet::MissQueueSize() const
 {
-	return m_missQueue.size();
+	return m_target->MissQueueSize();
 }
 
+// --------------------------------------------------------------------------------
+// Description:
+//   Return the time of the last shot.
+// --------------------------------------------------------------------------------
+double EveTurretSet::GetLastShotTime() const
+{
+	return m_target->GetLastShotTime();
+}
 
 // --------------------------------------------------------------------------------
 // Description:
@@ -2244,14 +2169,7 @@ size_t EveTurretSet::MissQueueSize() const
 // --------------------------------------------------------------------------------
 void EveTurretSet::SetEffectEndPoint()
 {
-	if( GetShotMissed() )
-	{
-		m_firingEffect->SetEndPosition( &m_targetPositionMiss );
-	}
-	else
-	{
-		m_firingEffect->SetEndPosition( m_target->GetTargetPosition() );
-	}
+	m_firingEffect->SetEndPosition( m_target->GetTargetPosition() );
 }
 
 // --------------------------------------------------------------------------------

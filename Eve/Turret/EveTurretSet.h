@@ -176,9 +176,10 @@ public:
 
 	// missed shots
 	bool GetShotMissed() const;
-	void SetShotMissed( const bool missed );
-	double GetLastShotTime() const { return m_lastShotTime; }
+	void SetShotMissed( bool missed );
+	double GetLastShotTime() const;
 	float GetShotTimeVariance() const { return EVE_TURRET_RANDOM_DELAY_MAX; }
+	size_t MissQueueSize() const;
 
 	// turret LOD
 	enum LOD
@@ -191,11 +192,6 @@ public:
 	};
 
 private:
-	void PopShotMissed();
-	void ResetMissQueue();
-	void UpdateMissPosition(const Matrix *);
-	size_t MissQueueSize() const;
-
 	// turret set states
 	enum State
 	{
@@ -226,14 +222,6 @@ private:
 		SYSBONE_SCALED_PITCH06,
 		SYSBONE_MAX,
 	};
-	// accuracy of shot
-	enum ShotAccuracy
-	{
-		ACCURACY_HIT = 0,
-		ACCURACY_MISS = 1,
-		ACCURACY_INDETERMINATE = 2
-	};
-
 
 	// geom res load
 	void InitializeGeometryResource();
@@ -336,15 +324,7 @@ private:
 	EveTurretTargetPtr m_target;
 
 	// miss-related state
-	Vector3 m_targetPositionMiss;
-	TrackableStdDeque<bool> m_missQueue;
-	mutable ShotAccuracy m_lastShotAccuracy;
-	double m_lastShotTime;
 	bool m_laserMissBehaviour, m_projectileMissBehaviour;
-	bool m_readyToFireEffect;
-	bool m_trackMissPoint;
-	float m_randomMissDistanceOffset;
-	Vector3 m_randomMissPositionOffset;
 
 	// tracking
 	float m_trackingInfluence;

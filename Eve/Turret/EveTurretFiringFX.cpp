@@ -217,6 +217,37 @@ float EveTurretFiringFX::GetCurveDuration()
 	}
 	return maxDuration;
 }
+
+// --------------------------------------------------------------------------------
+// Description:
+//   Get the start position of this firing effect. This is most likely only
+//   an average, because the firing effects contains multiple beams from
+//   multiple muzzles.
+// --------------------------------------------------------------------------------
+bool EveTurretFiringFX::GetStartPosition( Vector3& pos ) const
+{
+	// sum all of them up
+	Vector3 p = Vector3( 0.f, 0.f, 0.f );
+	uint32_t cntr = 0;
+	for( size_t i = 0; i < m_stretch.size(); ++i )
+	{
+		if( m_perMuzzleData[ i ].started )
+		{
+			p += m_perMuzzleData[ i ].muzzleTransform.GetTranslation();
+			++cntr;
+		}
+	}
+	// did we get any?
+	if( cntr == 0 )
+	{
+		return false;
+	}
+
+	// devide and return
+	pos = p / (float)cntr;
+	return true;
+}
+
 // --------------------------------------------------------------------------------
 // Description:
 //   Start a muzzle effect, usually means calling ::Play() on the right

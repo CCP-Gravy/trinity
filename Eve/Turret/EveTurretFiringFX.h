@@ -56,7 +56,7 @@ public:
 	bool Update( Be::Time time, float deltaT );
 	// rendering
 	void GetRenderables( const TriFrustum& frustum, std::vector<ITr2Renderable*>& renderables );
-        // bounds
+	// bounds
 	bool GetBoundingSphere( Vector4& bounds ) const;
 
 	// query: get the number of per-muzzle effects
@@ -65,6 +65,8 @@ public:
 	unsigned int GetPerMuzzleBoneID( int muzzleID ) const;
 	// query: is looping
 	bool IsLooping() const;
+	// query: get start position
+	bool GetStartPosition( Vector3& pos ) const;
 
 	// setup this effect: muzzle bone IDs
 	void SetMuzzleBoneID( int muzzleID, unsigned int boneID );

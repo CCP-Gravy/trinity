@@ -57,8 +57,11 @@ void EveImpactOverlay::UpdateSyncronous( EveUpdateContext& updateContext, EveSpa
 		return;
 	}
 
-	// temporary
-	CCP_ASSERT( m_impactTexelData.size() == std::max( m_shieldImpactData.size(), m_armorImpactData.size() ) );
+	// the texture buffer needs to be up-to-date to be passed to the shader via texture
+	if( m_impactTexelData.size() != std::max( m_shieldImpactData.size(), m_armorImpactData.size() ) )
+	{
+		return;
+	}
 
 	// this comes from the scene via EveUpdateContext
 	Tr2DataTextureManagerPtr dataTextureMgr = updateContext.GetDataTextureManager();
