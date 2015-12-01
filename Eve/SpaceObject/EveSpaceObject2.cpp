@@ -121,6 +121,8 @@ EveSpaceObject2::EveSpaceObject2( IRoot* lockobj ) :
 
 	memset( &m_psData, 0, sizeof( EveSpaceObjectPSData ) );
 	memset( &m_vsData, 0, sizeof( EveSpaceObjectVSData ) );
+
+	GetObjectMutex();
 }
 
 EveSpaceObject2::~EveSpaceObject2()
