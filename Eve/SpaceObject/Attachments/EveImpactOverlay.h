@@ -97,7 +97,7 @@ public:
 
 	// control animation
 	void SetToSkinned();
-	void ToggleEffect( const std::string& name, bool on );
+	void ToggleEffect( const std::string& name, bool on, float duration );
 
 	// set the damages
 	void SetDamageState( float shield, float armor, float hull, bool doCreateArmorImpacts );

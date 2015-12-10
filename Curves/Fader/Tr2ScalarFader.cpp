@@ -65,8 +65,9 @@ void Tr2ScalarFader::Update( EveUpdateContext& updateContext )
 // Description:
 //   Start a fadein or fadeout
 // --------------------------------------------------------------------------------
-void Tr2ScalarFader::StartFade( bool isFadeIn )
+void Tr2ScalarFader::StartFade( bool isFadeIn, float fadeLength )
 {
+	m_kickInLength = fadeLength;
 	m_fading = isFadeIn ? 1.f / m_kickInLength : -1.f / m_kickInLength;
 	if( isFadeIn )
 	{
@@ -95,7 +96,7 @@ float Tr2ScalarFader::GetKickInValue() const
 		return 0.f;
 	}
 	// calc some simple kicking curve
-	return sinf( TRI_PI * pow( Clamp( m_fadeTime / m_kickInLength, 0.f, 1.f ), 0.5f ) );
+	return sinf( TRI_PI * Clamp( m_fadeTime / m_kickInLength, 0.f, 1.f ) );
 }
 
 // --------------------------------------------------------------------------------

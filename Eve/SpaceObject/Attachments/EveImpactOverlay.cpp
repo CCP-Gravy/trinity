@@ -439,23 +439,23 @@ void EveImpactOverlay::SetToSkinned()
 // Description:
 //   Easy-to-use access to the internal effects/faders
 // --------------------------------------------------------------------------------
-void EveImpactOverlay::ToggleEffect( const std::string& name, bool on )
+void EveImpactOverlay::ToggleEffect( const std::string& name, bool on, float duration )
 {
 	if( name == "shieldboost" )
 	{
-		m_shieldBoosting->StartFade( on );
+		m_shieldBoosting->StartFade( on, duration / 4.f );
 	}
 	else if( name == "shieldhardening" )
 	{
-		m_shieldHardening->StartFade( on );
+		m_shieldHardening->StartFade( on, duration / 4.f );
 	}
 	else if( name == "armorhardening" )
 	{
-		m_armorHardening->StartFade( on );
+		m_armorHardening->StartFade( on, duration / 4.f );
 	}
 	else if( name == "armorrepair" )
 	{
-		m_armorRepairing->StartFade( on );
+		m_armorRepairing->StartFade( on, duration / 4.f );
 	}
 }
 

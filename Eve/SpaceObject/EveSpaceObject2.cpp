@@ -2201,11 +2201,11 @@ void EveSpaceObject2::SetImpactDamageState( float shield, float armor, float hul
 // Description:
 //   Toggle an animation on the impacts: for boosters, hardeners, et.c
 // --------------------------------------------------------------------------------
-void EveSpaceObject2::SetImpactAnimation( const std::string& name, bool enable )
+void EveSpaceObject2::SetImpactAnimation( const std::string& name, bool enable, float duration )
 {
 	if( m_impactOverlay )
 	{
-		m_impactOverlay->ToggleEffect( name, enable );
+		m_impactOverlay->ToggleEffect( name, enable, duration );
 	}
 }
 

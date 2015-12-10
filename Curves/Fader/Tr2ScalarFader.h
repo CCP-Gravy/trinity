@@ -24,7 +24,7 @@ public:
 	void Update( EveUpdateContext& updateContext );
 
 	// start/stop fade
-	void StartFade( bool isFadeIn );
+	void StartFade( bool isFadeIn, float fadeLength );
 
 	// access
 	bool IsZero() const;
