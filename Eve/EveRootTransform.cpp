@@ -97,11 +97,6 @@ int EveRootTransform::GetClosestDamageLocatorIndex( const Vector3* position )
 	return 0;
 }
 
-int EveRootTransform::GetInterestingDamageLocatorIndex( const Vector3 &position ) const
-{
-	return 0;
-}
-
 int EveRootTransform::GetGoodDamageLocatorIndex( const Vector3 &position )
 {
 	return 0;
