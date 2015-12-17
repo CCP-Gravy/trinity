@@ -215,8 +215,6 @@ const Be::ClassInfo* EveSpaceObject2::ExposeToBlue()
 		MAP_ATTRIBUTE( "impactOverlay", m_impactOverlay, "object for rendering damage/impact fx on this space object.", Be::READWRITE )
 		MAP_ATTRIBUTE( "decals", m_decals, "list of all decals on this space object.", Be::READWRITE | Be::PERSIST )
 
-		MAP_ATTRIBUTE( "particleEmittersGPU", m_particleEmittersGPU, "A list of GPU emitters owned by this object", Be::READWRITE | Be::PERSIST )
-
 		MAP_ATTRIBUTE
 		(
 			"estimatedPixelDiameter",

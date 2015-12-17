@@ -555,12 +555,6 @@ const Be::ClassInfo* EveSpaceScene::ExposeToBlue()
 		MAP_METHOD_AND_WRAP("UpdateScene", UpdateSceneFromScript, "Run the scene's update loop")
 		
 		MAP_METHOD_AND_WRAP("PickInfinity", PickInfinity, "Pick infinity")
-		
-		MAP_PROPERTY( 
-			"gpuParticlePoolManager", 
-			GetParticlePoolManager,
-			SetParticlePoolManager,
-			"Apply a particle pool manager to the update context" )
 
 		MAP_ATTRIBUTE(
 			"updateTime",

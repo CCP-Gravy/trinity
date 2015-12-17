@@ -18,7 +18,6 @@
 #include "Attachments/EveSpotlightSet.h"
 #include "Attachments/EvePlaneSet.h"
 #include "Attachments/EveImpactOverlay.h"
-#include "Tr2GPUParticleEmitter.h"
 #include "Tr2MeshLod.h"
 #include "Tr2GrannyAnimation.h"
 #include "Tr2BindingVector3.h"
@@ -68,7 +67,6 @@ EveSpaceObject2::EveSpaceObject2( IRoot* lockobj ) :
 	PARENTLOCK( m_children ),
 	PARENTLOCK( m_curveSets ),
 	PARENTLOCK( m_overlayEffects ),
-	PARENTLOCK( m_particleEmittersGPU ),
 	PARENTLOCK( m_effectChildren ),
 	PARENTLOCK( m_lights ),
 	m_display( true ),
@@ -203,30 +201,6 @@ void EveSpaceObject2::UpdateSyncronous( EveUpdateContext& updateContext )
 		m_positionDelta->m_value = Vector3( 0.f, 0.f, 0.f );
 	}
 	m_previousPosition = referencePosition;
-	
-	//update GPU emitters (these only need an egoball-relative position)
-	if( !m_particleEmittersGPU.empty() ) 
-	{
-		Matrix transformWithoutTranslation = m_worldTransform;
-		transformWithoutTranslation._41 -= m_worldPosition.x;
-		transformWithoutTranslation._42 -= m_worldPosition.y;
-		transformWithoutTranslation._43 -= m_worldPosition.z;
-
-		Tr2GPUParticlePoolManager* manager = updateContext.GetParticlePoolManager();
-		if( manager != NULL )
-		{
-			Vector3 relativePosition(0,0,0), relativeVelocity(0,0,0);
-			if( m_ballPosition ) {
-				m_ballPosition->GetValueAt( &relativePosition, time );
-				m_ballPosition->GetValueDotAt( &relativeVelocity, time );
-			}
-			for( auto it = m_particleEmittersGPU.begin(); it != m_particleEmittersGPU.end(); ++it )
-			{
-				(*it)->ApplyPool( manager );
-				(*it)->UpdateTransform( relativePosition, relativeVelocity, manager->GetLastEgoTranslation(), transformWithoutTranslation );
-			}
-		}
-	}
 
 	//
 	// Animation

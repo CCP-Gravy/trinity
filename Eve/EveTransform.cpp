@@ -23,7 +23,6 @@ EveTransform::EveTransform( IRoot* lockobj ) :
 	PARENTLOCK( m_observers ),
 	PARENTLOCK( m_particleEmitters ),
 	PARENTLOCK( m_particleSystems ),
-	PARENTLOCK( m_particleEmittersGPU ),
 	m_debugShowBoundingBox( true ),
 	m_debugRenderDebugInfoForChildren( true ),
 	m_isVisible( true ),
@@ -83,34 +82,6 @@ void EveTransform::Update( EveUpdateContext& updateContext )
 
 void EveTransform::UpdateSyncronous( EveUpdateContext& updateContext )
 {
-	CCP_STATS_ZONE( __FUNCTION__ );
-
-	// is this one here enabled?
-	if( m_hideOnLowQuality && Tr2Renderer::IsLowQuality() )
-	{
-		return;
-	}
-
-	if( !m_particleEmittersGPU.empty() )
-	{
-		Tr2GPUParticlePoolManager* manager = updateContext.GetParticlePoolManager();
-		if( manager != NULL )
-		{
-			Vector3 relativePos(0,0,0);
-			D3DXVec3TransformCoord( &relativePos, &relativePos, &m_worldTransform );
-			Matrix transformWithoutTranslation = m_worldTransform;
-			transformWithoutTranslation._41 = 0.f;
-			transformWithoutTranslation._42 = 0.f;
-			transformWithoutTranslation._43 = 0.f;
-			const Vector3 relativeVel = m_lastDeltaTime > 0.f ? (relativePos - m_lastRelativePosition) / m_lastDeltaTime : Vector3(0,0,0);
-			m_lastRelativePosition = relativePos;
-			for( auto it = m_particleEmittersGPU.begin(); it != m_particleEmittersGPU.end(); ++it )
-			{
-				(*it)->ApplyPool( manager );				
-				(*it)->UpdateTransform( relativePos, relativeVel, manager->GetLastEgoTranslation(), transformWithoutTranslation );
-			}
-		}
-	}
 }
 
 void EveTransform::UpdateAsyncronous( EveUpdateContext& updateContext )
@@ -294,7 +265,7 @@ void EveTransform::GetRenderables( const TriFrustum& frustum, std::vector<ITr2Re
 		m_isVisible = true;
 	}
 
-	if( !m_particleSystems.empty() || !m_particleEmittersGPU.empty() )
+	if( !m_particleSystems.empty() )
 	{
 		// Because bounding info is currently unreliable for particle systems
 		// we use LOD high.
@@ -309,31 +280,6 @@ void EveTransform::GetRenderables( const TriFrustum& frustum, std::vector<ITr2Re
 		
 		// Use the highest child LOD level.
 		m_lodLevel = EveLODHelper::MergeLOD( m_lodLevel, p->GetLODLevel() );
-	}
-
-	if( !m_particleEmittersGPU.empty() ) 
-	{
-		Vector4 boundingSphere(0,0,0,100.f);
-		BoundingSphereTransform( m_worldTransform, boundingSphere );
-		boundingSphere.w = 100.f;
-		
-		float visibilityDensityScale = 1.f;
-
-		if( frustum.IsSphereVisible( &boundingSphere ) ) 
-		{
-			const float estimatedSize = frustum.GetPixelSizeAccross( &boundingSphere );
-
-			visibilityDensityScale = std::min( 1.f, std::max( 0.25f, std::abs( estimatedSize ) / 5.f ) );
-		}
-		else 
-		{
-			visibilityDensityScale = 0.15f;
-		}
-
-		for( auto it = m_particleEmittersGPU.begin(); it != m_particleEmittersGPU.end(); ++it ) 
-		{
-			(*it)->UpdateVisibilityBasedDensity( visibilityDensityScale );
-		}
 	}
 }
 
@@ -350,14 +296,6 @@ bool EveTransform::GetBoundingSphere( Vector4& sphere, BoundingSphereQuery query
 	if( query == EVE_BOUNDS_WITH_CHILDREN )
 	{
 		Vector4 boundingSphere(0,0,0,100.f);
-		if( !m_particleEmittersGPU.empty() ) 
-		{
-			// This is better than nothing i suppose
-			BoundingSphereTransform( m_worldTransform, boundingSphere );
-			boundingSphere.w = 100.f;
-			BoundingSphereSetOrUpdate( boundingSphere, sphere, valid );
-			valid = true;
-		}
 		for( auto it = m_children.cbegin(); it != m_children.cend(); it++ )
 		{
 			if( (*it)->GetBoundingSphere( boundingSphere, query ) )

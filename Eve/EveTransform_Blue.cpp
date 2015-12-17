@@ -82,14 +82,6 @@ const Be::ClassInfo* EveTransform::ExposeToBlue()
 
 		MAP_ATTRIBUTE
 		(
-			"particleEmittersGPU",
-			m_particleEmittersGPU,
-			"A list of GPU particle emitters owned by this transform",
-			Be::READWRITE | Be::PERSIST
-		)
-
-		MAP_ATTRIBUTE
-		(
 			"useLodLevel",
 			m_useLodLevel,
 			"Use the lodLevel to downscale this object",

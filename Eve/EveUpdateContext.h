@@ -2,7 +2,6 @@
 #ifndef EveUpdateContext_h
 #define EveUpdateContext_h
 #include "Include/IEveBallpark.h"
-#include "Tr2GPUParticlePoolManager.h"
 #include "Vector3d.h"
 
 BLUE_DECLARE( Tr2DataTextureManager );
@@ -54,14 +53,6 @@ public:
 	{
 		m_dataTextureManager = manager;
 	}
-	Tr2GPUParticlePoolManager* GetParticlePoolManager()
-	{
-		return m_gpuParticleManager;
-	}
-	void SetParticlePoolManager( Tr2GPUParticlePoolManager* manager )
-	{
-		m_gpuParticleManager = manager;
-	}
 
 	Tr2GpuParticleSystem* GetGpuParticleSystem() const
 	{
@@ -106,7 +97,6 @@ private:
 	Be::Time m_lastTime;
 
 	// extra stuff
-	Tr2GPUParticlePoolManagerPtr m_gpuParticleManager;
 	Tr2DataTextureManagerPtr m_dataTextureManager;
 	Tr2GpuParticleSystemPtr m_gpuParticleSystem;
 

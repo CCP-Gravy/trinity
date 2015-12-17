@@ -12,7 +12,6 @@
 
 #include "IEveTransform.h"
 #include "IWorldPosition.h"
-#include "Tr2GPUParticleEmitter.h"
 
 BLUE_DECLARE( Tr2MeshLod );
 BLUE_DECLARE( Tr2ParticleSystem );
@@ -84,9 +83,6 @@ public:
 	// Generic particle system/emitter lists (Python-exposed)
 	PTr2ParticleSystemVector m_particleSystems;
 	PITr2GenericEmitterVector m_particleEmitters;
-
-	// GPU particles
-	PTr2GPUParticleEmitterVector m_particleEmittersGPU;
 	
 	Tr2Lod GetLODLevel() const;
 

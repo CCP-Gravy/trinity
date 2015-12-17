@@ -23,7 +23,6 @@
 #include "Tr2DepthStencil.h"
 #include "EveTransform.h"
 #include "EveDustfieldConstraint.h"
-#include "Tr2GPUParticlePool.h"
 #include "TbbStub.h"
 #include "Include/TriMath.h"
 #include "EveDistanceField.h"
@@ -86,14 +85,6 @@ static Tr2EffectPtr f_writeDepthOpaqueOverride = NULL;
 
 const char* s_evePickingEffectPath = "res:/Graphics/Effect/Managed/space/system/Picking.fx";
 
-extern bool s_gpuParticlesEnabled;
-extern float s_gpuParticleUpdateRate;
-extern bool s_gpuParticlesRender;
-
-TRI_REGISTER_SETTING( "gpuParticleRender", s_gpuParticlesRender );
-TRI_REGISTER_SETTING( "gpuParticleUpdateRate", s_gpuParticleUpdateRate );
-TRI_REGISTER_SETTING( "gpuParticlesEnabled", s_gpuParticlesEnabled );
-
 bool g_eveSpaceSceneDynamicLighting = false;
 TRI_REGISTER_SETTING( "eveSpaceSceneDynamicLighting", g_eveSpaceSceneDynamicLighting );
 
@@ -149,9 +140,6 @@ EveSpaceScene::EveSpaceScene( IRoot* lockobj ) :
 	m_enableShadowObb( true ),
 	m_enableShadowDistanceTweak( true ),
 	m_shadowCameraDistance( 50.0f ),
-	m_egoPositionInit( false ),
-	m_egoPosition( 0, 0, 0 ),
-	m_egoDisplacement( 0, 0, 0 ),
 	m_updateContext( NULL ),
 	m_envMapHandle( NULL ),
 	m_envMap1Var( "EnvMap1", m_envMap1 ),
@@ -397,10 +385,6 @@ void EveSpaceScene::Update( Be::Time realTime, Be::Time simTime )
 		Tr2Renderer::GetIdentityTransform(), 
 		m_updateContext.GetOriginShift() );
 	Tr2ParticleSystem::UpdateAllSystems( args );
-	
-	//GPU particles need to perform rendering calls in order to update,
-	// but we set some state here needed to allow 'global' particle behaviour
-	UpdateEgoPosition( sceneReferencePoint.x, sceneReferencePoint.y, sceneReferencePoint.z );
 
 	m_updateTime = simTime;
 }
@@ -949,11 +933,6 @@ void EveSpaceScene::RenderDistortionBatches( BatchMap& batches, Tr2RenderContext
 
 	renderContext.m_esm.ApplyStandardStates( Tr2EffectStateManager::RM_ALPHA_ADDITIVE );
     renderContext.RenderBatches( batches[TRIBATCHTYPE_DISTORTION] );
-	Tr2GPUParticlePoolManager* manager = m_updateContext.GetParticlePoolManager();
-	if( manager )
-	{
-		RenderStatefulParticles( GPUPRM_Distortion, renderContext, manager );
-	}
 	renderContext.m_esm.UnsetAllTextures();
 }
 
@@ -1208,12 +1187,6 @@ void EveSpaceScene::BeginRender( Tr2RenderContext& renderContext )
 
 	renderContext.m_esm.BeginManagedRendering();
 	renderContext.m_esm.ApplyStandardStates( Tr2EffectStateManager::RM_OPAQUE );
-	Tr2GPUParticlePoolManager* manager = m_updateContext.GetParticlePoolManager();
-	if( manager ) 
-	{
-		UpdateStatefulParticles(m_updateTime, m_egoDisplacement, renderContext, manager );
-		m_egoDisplacement = Vector3(0,0,0);
-	}
 	
 	//  the lensflares need a special pre-render update
 	for( auto it = m_lensflares.cbegin(); it != m_lensflares.cend(); ++it )
@@ -1665,20 +1638,11 @@ void EveSpaceScene::RenderMainPass( Tr2RenderContext& renderContext )
 	renderContext.SetReadOnlyDepth( false );
 
 	//GPU particles
-	Tr2GPUParticlePoolManager* manager = m_updateContext.GetParticlePoolManager();
 	if( GetGpuParticleSystem() )
 	{
 		GetGpuParticleSystem()->Update( m_updateTime, m_updateContext.GetOriginShift(), renderContext );
 		GetGpuParticleSystem()->Render( renderContext );
 	}
-
-	if( manager )
-	{	
-		RenderStatefulParticles( GPUPRM_Transparent, renderContext, manager );
-		RenderStatefulParticles( GPUPRM_PreMultipliedAlpha, renderContext, manager );
-		RenderStatefulParticles( GPUPRM_Additive, renderContext, manager );
-	}
-	
 
 	renderContext.m_esm.EndManagedRendering();
 
@@ -2585,114 +2549,6 @@ void EveSpaceScene::RenderDebugInfo( Tr2RenderContext& renderContext )
 	}
 
 	Tr2Renderer::RenderDebugInfo( renderContext );
-}
-
-
-//GPU particle stuff
-void EveSpaceScene::UpdateEgoPosition( double x, double y, double z )
-{
-	if( !m_egoPositionInit ) 
-	{
-		m_egoPositionInit = true;
-		m_egoPosition = Vector3d(x,y,z);
-		return;
-	}
-
-	m_egoDisplacement += Vector3( 
-		float(x - m_egoPosition.x), 
-		float(y - m_egoPosition.y), 
-		float(z - m_egoPosition.z) );
-	m_egoPosition = Vector3d(x,y,z);
-}
-
-void EveSpaceScene::UpdateStatefulParticles( 
-	Be::Time time,
-	const Vector3 &deltaEgo, Tr2RenderContext &renderContext, Tr2GPUParticlePoolManager* manager )
-{
-	if( !Tr2GPUParticlePool::HardwareSupport() ) return;
-	if( !manager ) return;
-
-	if( true )
-	{
-		//destroy all current resources if we turned GPU particles off
-		if( !manager->m_particles.empty() &&
-			manager->m_particles[0]->IsValid() )
-		{
-			for( unsigned i=0; i<manager->m_particles.size(); ++i ) 
-			{	
-				manager->m_particles[i]->ReleaseResources( 0x3 );
-			}
-		}
-
-		return;
-	}
-
-	return;
-
-
-	static Be::Time previousTime = 0;
-	if( previousTime == 0 ) previousTime = time - 1;
-	const float deltaTime = float(TimeAsDouble(time - previousTime)) * s_gpuParticleUpdateRate;
-
-	previousTime = time;
-	if( deltaTime <= 0.f ) return;
-
-	if( manager->m_particles.empty() && s_gpuParticlesEnabled )
-	{
-		const bool multiStream = false;
-		
-		const unsigned largePoolSizeX = Tr2Renderer::GetShaderModel() <= TR2SM_3_0_LO ? 256 : 512;
-		const unsigned largePoolSizeY = Tr2Renderer::GetShaderModel() <= TR2SM_3_0_LO ? 128 : 256;
-
-		USE_MAIN_THREAD_RENDER_CONTEXT();
-
-		manager->Add();
-		manager->m_particles[0]->Initialise( 
-					largePoolSizeX, 
-					largePoolSizeY, 
-					GPUPRM_Additive, 
-					renderContext, 
-					multiStream );
-		manager->m_particles[0]->m_name = "AdditivePool";
-
-		manager->Add();
-		manager->m_particles[1]->Initialise( 
-					largePoolSizeX, 
-					largePoolSizeY, 
-					GPUPRM_Transparent, 
-					renderContext, 
-					multiStream );
-		manager->m_particles[1]->m_name = "TransparentPool";
-	}
-
-	for( auto i = manager->m_particles.begin(); i != manager->m_particles.end(); ++i ) 
-	{
-		if( !(*i)->IsValid() ) 
-		{
-			USE_MAIN_THREAD_RENDER_CONTEXT();
-			(*i)->ReInitialise( renderContext );
-		} 
-		else 
-		{ 
-			manager->m_lastEgoTranslation = deltaEgo;
-			(*i)->Update( deltaTime, deltaEgo, renderContext );
-		}
-	}
-
-}
-
-void EveSpaceScene::RenderStatefulParticles( const Tr2GPUParticleRenderMode mode, Tr2RenderContext &context, Tr2GPUParticlePoolManager* manager )
-{
-	return;
-	if( !manager ) return;
-
-	if( s_gpuParticlesRender ) 
-	{
-		for( auto i = manager->m_particles.begin(); i != manager->m_particles.end(); ++i ) 
-		{
-			if( (*i)->GetRenderMode() == mode )	(*i)->Render(context);
-		}
-	}
 }
 
 Vector3 EveSpaceScene::PickInfinity( int x, int y, Matrix proj, Matrix view )

@@ -16,7 +16,6 @@
 #include "include/ITr2MultiPassScene.h"
 #include "Tr2Variable.h"
 #include "EveUpdateContext.h"
-#include "Tr2GPUParticlePool.h"
 #include "Tr2QuadRenderer.h"
 #include "Tr2LightManager.h"
 
@@ -433,13 +432,6 @@ protected:
 
 	//For GPU particles
 private:
-	void UpdateEgoPosition( double x, double y, double z );
-
-	Tr2GPUParticlePoolManager* GetParticlePoolManager(){ return m_updateContext.GetParticlePoolManager();}
-	void SetParticlePoolManager(Tr2GPUParticlePoolManager* manager){ return m_updateContext.SetParticlePoolManager(manager);}
-	void UpdateStatefulParticles( Be::Time time, const Vector3 &, Tr2RenderContext &, Tr2GPUParticlePoolManager* manager );
-	void RenderStatefulParticles( const Tr2GPUParticleRenderMode mode, Tr2RenderContext& context, Tr2GPUParticlePoolManager* manager );
-
 	Tr2GpuParticleSystem* GetGpuParticleSystem() const
 	{
 		return m_updateContext.GetGpuParticleSystem();
@@ -449,9 +441,6 @@ private:
 		m_updateContext.SetGpuParticleSystem( ps );
 	}
 
-	bool m_egoPositionInit;
-	Vector3d m_egoPosition;
-	Vector3 m_egoDisplacement;
 	Be::Time m_updateTime;
 	EveSpaceObject2Ptr m_egoBall;
 
