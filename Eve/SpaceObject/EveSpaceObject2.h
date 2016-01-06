@@ -210,6 +210,8 @@ public:
 	int GetGoodDamageLocatorIndex( const Vector3& position );
 	float GetRadius() const;
 	int CreateImpact( int damageLocatorIndex, const Vector3& direction, float lifeTime, float size );
+	int CreateImpactFromPosition( const Vector3& position, const Vector3& direction, float lifeTime, float size );
+
 	bool UpdateImpact( Vector3& out, const Vector3& direction, int impactIndex );
 	void GetImpactPosition( Vector3& out, int damageLocatorIndex, const Vector3& direction );
 	bool HasImpactConfigurationShield() const;

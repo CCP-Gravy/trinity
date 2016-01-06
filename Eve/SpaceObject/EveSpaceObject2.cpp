@@ -2008,6 +2008,17 @@ int EveSpaceObject2::CreateImpact( int damageLocatorIndex, const Vector3& direct
 
 // -----------------------------------------------------------------------------
 // Description:
+//   Create an impact effect on this object by getting the closest damage locator from the position
+// -----------------------------------------------------------------------------
+int EveSpaceObject2::CreateImpactFromPosition( const Vector3& position, const Vector3& direction, float lifeTime, float size )
+{
+	int closestDamageLocator = GetClosestDamageLocatorIndex( &position );
+	return CreateImpact( closestDamageLocator, direction, lifeTime, size );
+}
+
+
+// -----------------------------------------------------------------------------
+// Description:
 //   Update the effect on this object
 // -----------------------------------------------------------------------------
 bool EveSpaceObject2::UpdateImpact( Vector3& out, const Vector3& direction, int impactIndex )
