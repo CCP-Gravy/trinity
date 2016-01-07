@@ -109,6 +109,14 @@ const Be::ClassInfo* EveLocalPositionCurve::ExposeToBlue()
 			Be::READWRITE | Be::PERSIST
 		)
 
+		MAP_ATTRIBUTE
+		(  
+			"damageLocatorIndex",         
+			m_damageLocatorIndex,         
+			"The damage locator index that is being used by the curve", 
+			Be::READ
+		)
+
 		MAP_ATTRIBUTE( "impactSize", m_impactSize, "Holds the size of the impact effect", Be::READWRITE )
 
 		MAP_METHOD_AND_WRAP_OPTIONAL_ARGS
