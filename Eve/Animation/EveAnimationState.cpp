@@ -72,7 +72,8 @@ void EveAnimationState::LoadOverlayEffect( EveSpaceObject2* owner )
 		return;
 	}
 
-	if( !p->QueryInterface( BlueInterfaceIID<IInitialize>(), (void**)&m_overlay ) )
+	m_overlay.Unlock();
+	if( !( m_overlay = BlueCastPtr( p ) ) )
 	{
 		CCP_LOGERR( "EveMobile: Overlay effect resource file %s is not of correct type!", tmpShaderPath.c_str() );
 		return;
