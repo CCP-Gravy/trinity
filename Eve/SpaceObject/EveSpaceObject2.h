@@ -248,7 +248,7 @@ public:
 	Vector3 GetModelWorldPosition() const;
 	void GetWorldVelocity( Vector3& velocity ) const;
 	Tr2GrannyAnimationPtr GetAnimationController() { return m_animationUpdater; }
-	bool IsAnimated() const { return m_isAnimated; } 
+	bool IsAnimated() const; 
 
 	// bounding sphere
 	void SetBoundingSphereInformation( const Vector4* centerAndRadius );

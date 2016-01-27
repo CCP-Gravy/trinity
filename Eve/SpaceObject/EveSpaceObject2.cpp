@@ -28,6 +28,7 @@
 #include "TriSettingsRegistrar.h"
 #include "Tr2PointLight.h"
 #include "Shader/Utils/Tr2DataTextureManager.h"
+#include "Utilities/StringUtils.h"
 
 #include <limits>
 
@@ -1329,6 +1330,19 @@ bool EveSpaceObject2::GetBoundingSphere( Vector4& sphere, BoundingSphereQuery qu
 		}
 	}
 	return true;
+}
+
+bool EveSpaceObject2::IsAnimated() const 
+{
+	if( !m_shadowEffect )
+	{
+		CCP_LOGWARN( "EveSpaceObject2::IsAnimated No shadow effect found for %s, returning false", m_name );
+		return false;
+	}
+
+	// I don't like this, but we will need to do this while we don't have everything in the SOF 
+	// (because the isSkinned parameter is stored in the sofHull) - Oli
+	return StringFind( m_shadowEffect->GetEffectPathName(), "skinned" );
 }
 
 void EveSpaceObject2::PlayAnimation( const char* animName, bool replace, int loopCount, float delay, float speed )
