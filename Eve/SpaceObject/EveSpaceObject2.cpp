@@ -168,6 +168,11 @@ void EveSpaceObject2::UnregisterSecondaryLightSource( Tr2ShLightingManager& mana
 	manager.UnregisterSecondaryLightSource( &m_worldTransform.GetTranslation() );
 }
 
+Matrix EveSpaceObject2::GetObserverTransform()
+{
+	return m_worldTransform;
+}
+
 void EveSpaceObject2::UpdateSyncronous( EveUpdateContext& updateContext )
 {
 	Be::Time time = updateContext.GetTime();
@@ -223,9 +228,10 @@ void EveSpaceObject2::UpdateSyncronous( EveUpdateContext& updateContext )
 	}
 
 	TriObserverLocalVector::iterator observersEnd = m_observers.end();
+	Matrix observerTransform = GetObserverTransform();
 	for( TriObserverLocalVector::iterator it = m_observers.begin(); it != observersEnd; ++it )
 	{
-		(*it)->Update( m_worldTransform );
+		(*it)->Update( observerTransform );
 	}
 
 	// trigger syncronous update of attachements here
@@ -937,6 +943,65 @@ std::pair<Vector3, Vector3> EveSpaceObject2::CalculateSkinnedBoundingBoxFromTran
 	return std::pair<Vector3, Vector3>( bbMin, bbMax );
 }
 
+
+// Actually submit renderables to the list, called from GetRenderables
+void EveSpaceObject2::PushRenderables( const TriFrustum& frustum, std::vector<ITr2Renderable*>& renderables )
+{
+	if( m_mesh && !m_mesh->IsLoading() && m_isMeshVisible )
+	{
+		renderables.push_back( this );
+
+		if( m_estimatedPixelDiameter >= g_eveSpaceSceneLowDetailThreshold )
+		{
+			CCP_STATS_INC( eveHighDetailObjects );
+		}
+		else
+		{
+			CCP_STATS_INC( eveLowDetailObjects );
+		}
+	}
+
+	if( DisplayChildren() )
+	{
+		for( IEveTransformVector::const_iterator it = m_children.begin(); it != m_children.end(); ++it )
+		{
+			IEveTransform* p = *it;
+			p->GetRenderables( frustum, renderables, m_worldTransform );
+		}
+		for( auto ecIt = m_effectChildren.begin(); ecIt != m_effectChildren.end(); ++ecIt )
+		{
+			(*ecIt)->GetRenderables( frustum, renderables, m_worldTransform );
+		}
+	}
+
+	// are decals visible?
+	if( DisplayDecals() && m_mesh && m_isMeshVisible )
+	{
+		TriGeometryResPtr geometryRes = m_mesh->GetGeometryResource();
+		if( geometryRes )
+		{
+			// put together parent data for the decals
+			EveSpaceObjectDecal::ParentData pd;
+			FillDecalParentData( &pd );
+
+			// runn over every decal and update it
+			for( EveSpaceObjectDecalVector::const_iterator it = m_decals.begin(); it != m_decals.end(); ++it )
+			{
+				// assign this space-object's cache to the decal
+				(*it)->SetCache( m_decalCache );
+				// tell the decal of animation, IF we have any
+				if( m_animationUpdater && m_animationUpdater->GetMeshBoneCount() && m_animationUpdater->IsInitialized() )
+				{
+					(*it)->SetBoneMatrix( m_animationUpdater->GetMeshBoneMatrixList(), m_animationUpdater->GetMeshBoneCount() );
+				}
+				// now prep to get the renderables
+				(*it)->GetRenderables( geometryRes, frustum, renderables, &pd );
+			}
+			m_decalCache->Clear();
+		}
+	}
+}
+
 void EveSpaceObject2::GetRenderables( const TriFrustum& frustum, std::vector<ITr2Renderable*>& renderables, const Matrix& parentTransform )
 {
 	CCP_STATS_ZONE( __FUNCTION__ );
@@ -1011,59 +1076,7 @@ void EveSpaceObject2::GetRenderables( const TriFrustum& frustum, std::vector<ITr
 		{
 			SelectMeshLevelOfDetail();
 		}
-		if( m_mesh && !m_mesh->IsLoading() && m_isMeshVisible )
-		{
-			renderables.push_back( this );
-
-			if( m_estimatedPixelDiameter >= g_eveSpaceSceneLowDetailThreshold )
-			{
-				CCP_STATS_INC( eveHighDetailObjects );
-			}
-			else
-			{
-				CCP_STATS_INC( eveLowDetailObjects );
-			}
-		}
-
-		if( DisplayChildren() )
-		{
-			for( IEveTransformVector::const_iterator it = m_children.begin(); it != m_children.end(); ++it )
-			{
-				IEveTransform* p = *it;
-				p->GetRenderables( frustum, renderables, m_worldTransform );
-			}
-			for( auto ecIt = m_effectChildren.begin(); ecIt != m_effectChildren.end(); ++ecIt )
-			{
-				(*ecIt)->GetRenderables( frustum, renderables, m_worldTransform );
-			}
-		}
-
-		// are decals visible?
-		if( DisplayDecals() && m_mesh && m_isMeshVisible )
-		{
-			TriGeometryResPtr geometryRes = m_mesh->GetGeometryResource();
-			if( geometryRes )
-			{
-				// put together parent data for the decals
-				EveSpaceObjectDecal::ParentData pd;
-				FillDecalParentData( &pd );
-
-				// runn over every decal and update it
-				for( EveSpaceObjectDecalVector::const_iterator it = m_decals.begin(); it != m_decals.end(); ++it )
-				{
-					// assign this space-object's cache to the decal
-					(*it)->SetCache( m_decalCache );
-					// tell the decal of animation, IF we have any
-					if( m_animationUpdater && m_animationUpdater->GetMeshBoneCount() && m_animationUpdater->IsInitialized() )
-					{
-						(*it)->SetBoneMatrix( m_animationUpdater->GetMeshBoneMatrixList(), m_animationUpdater->GetMeshBoneCount() );
-					}
-					// now prep to get the renderables
-					(*it)->GetRenderables( geometryRes, frustum, renderables, &pd );
-				}
-				m_decalCache->Clear();
-			}
-		}
+		PushRenderables( frustum, renderables );
 	}
 }
 

@@ -52,10 +52,10 @@ public:
 	void SetBoosterSet( EveBoosterSet2Ptr set );
 	// re-positions all attached boosters to the corresponding locators
 	void RebuildBoosterSet();
-
-private:
+protected:
 	// keep track of some ship's speed (in m/s)
 	TriFloatPtr m_speed;
+private:
 	Vector3 m_acceleration;
 
 	// For Audio

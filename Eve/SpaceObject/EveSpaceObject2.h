@@ -163,6 +163,9 @@ public:
 	// query for the number of bones in the gr2
 	int GetBoneCount() const;
 
+	// Actually submit renderables to the list, called from GetRenderables
+	virtual void PushRenderables( const TriFrustum& frustum, std::vector<ITr2Renderable*>& renderables );
+
 	//////////////////////////////////////////////////////////////////////////////////////
 	// IEveSpaceObject2
 	virtual void UpdateSyncronous( EveUpdateContext& updateContext );
@@ -210,8 +213,8 @@ public:
 	// ITriTargetable
 	unsigned int GetDamageLocatorCount() const;
 	int GetClosestDamageLocatorIndex( const Vector3* position );
-	bool GetDamageLocatorPosition( Vector3* out, int index, bool inWorldSpace );
-	bool GetDamageLocatorDirection( Vector3* out, int index, bool inWorldSpace );
+	virtual bool GetDamageLocatorPosition( Vector3* out, int index, bool inWorldSpace );
+	virtual bool GetDamageLocatorDirection( Vector3* out, int index, bool inWorldSpace );
 	void GetMissPosition( const Vector3* hit, const Vector3* source, Vector3* out );
 	int GetGoodDamageLocatorIndex( const Vector3& position );
 	float GetRadius() const;
@@ -503,14 +506,19 @@ protected:
 	Tr2BindingVector3Ptr m_positionDelta;
 	PTriCurveSetVector m_curveSets;
 	
+	/////////////////////////////////////////////////////////////////////////////////////
+	// Object space damage locator information
+	virtual Vector3 GetObjectSpaceDamageLocatorPosition( uint32_t index ) const;
+	virtual Vector3 GetObjectSpaceDamageLocatorDirection( uint32_t index ) const;
+
+	
+	/////////////////////////////////////////////////////////////////////////////////////
+	// Observer position
+	virtual Matrix GetObserverTransform();
 private:
 	bool m_isAnimated;
 	EveAnimationSequencerPtr m_animationSequencer;
 
-	/////////////////////////////////////////////////////////////////////////////////////
-	// Object space damage locator information
-	Vector3 GetObjectSpaceDamageLocatorPosition( uint32_t index ) const;
-	Vector3 GetObjectSpaceDamageLocatorDirection( uint32_t index ) const;
 };
 
 TYPEDEF_BLUECLASS( EveSpaceObject2 );

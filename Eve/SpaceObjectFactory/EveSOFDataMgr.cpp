@@ -1063,6 +1063,12 @@ void EveSOFDataMgr::GenerateGenericData( GenericData& gd, EveSOFDataGenericPtr s
 		gd.damage.shieldGeometryResFilePath = srcData->m_damage->m_shieldGeometryResFilePath;
 	}
 
+	// swarm
+	if( srcData->m_swarm )
+	{
+		gd.swarmBehavior = srcData->m_swarm->m_behavior;
+	}
+
 	// shader material name prefixes
 	gd.materialPrefixes.clear();
 	for( auto mpit = srcData->m_materialPrefixes.begin(); mpit != srcData->m_materialPrefixes.end(); ++mpit )

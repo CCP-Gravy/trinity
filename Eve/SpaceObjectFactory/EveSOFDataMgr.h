@@ -386,6 +386,8 @@ public:
 		std::map<BlueSharedString, FactionAreaData> hullAreaParameters;
 		// variants
 		std::map<BlueSharedString, HullAreas> variants;
+		// swarm behavior
+		EveSwarm::BehaviorProperties swarmBehavior;
 	};
 
 

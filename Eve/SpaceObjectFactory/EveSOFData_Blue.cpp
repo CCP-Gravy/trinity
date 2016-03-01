@@ -444,6 +444,11 @@ Be::VarChooser EveSOFBuildClassChooser[] =
 		BeCast( EveSOFDataHull::BUILDCLASS_STATIONARY ),
 		"Build an EveStation2"
 	},
+	{
+		"EveSwarm",
+		BeCast( EveSOFDataHull::BUILDCLASS_SWARM ),
+		"Build an EveSwarm"
+	},
 	{ 0 }
 };
 
@@ -693,6 +698,37 @@ const Be::ClassInfo* EveSOFDataGenericDamage::ExposeToBlue()
 }
 
 
+BLUE_DEFINE( EveSOFDataGenericSwarm );
+const Be::ClassInfo* EveSOFDataGenericSwarm::ExposeToBlue()
+{
+	EXPOSURE_BEGIN( EveSOFDataGenericSwarm, "" )
+		MAP_INTERFACE( EveSOFDataGenericSwarm )
+
+		MAP_ATTRIBUTE( "speedMultiplier", m_behavior.m_speedMultiplier, "Max swarmer speed = shipSpeed*speedMultiplier+speedMinimum", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "speedMinimum", m_behavior.m_speedMinimum, "Max swarmer speed = shipSpeed*speedMultiplier+speedMinimum", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "maxDistance", m_behavior.m_maxDistance, "Max allowed distance from world position", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "maxTime", m_behavior.m_maxTime, "Maximum time for simulation per update", Be::READWRITE | Be::PERSIST )
+		
+		MAP_ATTRIBUTE( "weightFormation", m_behavior.m_weightFormation, "Weight of triangle formation", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "weightCohesion", m_behavior.m_weightCohesion, "Cohesion weight, steer swarmers to center of mass", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "weightSeparation", m_behavior.m_weightSeparation, "Weight of steering away from nearby swarmers", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "weightAlign", m_behavior.m_weightAlign, "This should be in newtons, based of average direction of swarmers", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "weightWander", m_behavior.m_weightWander, "Weight of wandering behavior", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "weightAnchor", m_behavior.m_weightAnchor, "Weight of the force steering swarmers to the world position", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "weightDeceleration", m_behavior.m_weightDecelerate, "Weight of deceleration(multiplied with current velocity)", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "maxDeceleration", m_behavior.m_maxDeceleration, "Maximum amount of deceleration in newtons", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "weightParentVelocity", m_behavior.m_weightParentVelocity, "Force derived from parent velocity", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "weightParentAcceleration", m_behavior.m_weightParentAcceleration, "Force derived from parent acceleration", Be::READWRITE | Be::PERSIST )
+		
+		MAP_ATTRIBUTE( "separationDistance", m_behavior.m_separationDistance, "Distance for separation", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "formationDistance", m_behavior.m_formationDistance, "Distance formation", Be::READWRITE | Be::PERSIST )
+
+		MAP_ATTRIBUTE( "wanderFluctuation", m_behavior.m_wanderFluctuation, "Defines how fast wander target point on projected sphere fluctuates", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "wanderDistance", m_behavior.m_wanderDistance, "Distance of projected sphere in front of swarmers", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "wanderRadius", m_behavior.m_wanderRadius, "Radius of the projected sphere", Be::READWRITE | Be::PERSIST )
+	EXPOSURE_END()
+}
+
 
 BLUE_DEFINE( EveSOFDataGenericShader );
 const Be::ClassInfo* EveSOFDataGenericShader::ExposeToBlue()
@@ -723,6 +759,7 @@ const Be::ClassInfo* EveSOFDataGeneric::ExposeToBlue()
 		MAP_ATTRIBUTE( "areaShaders", m_areaShaders, "List of all the area shaders and their generic data", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "decalShaders", m_decalShaders, "List of all the decal shaders and their generic data", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "damage", m_damage, "Global visual damage data", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "swarm", m_swarm, "Global swarm behavior preset data", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "hullAreas", m_hullAreas, "Global hull area shader data", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "variants", m_variants, "All the hull  variants", Be::READWRITE | Be::PERSIST )
 		EXPOSURE_END()

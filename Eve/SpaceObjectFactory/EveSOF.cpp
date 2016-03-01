@@ -12,6 +12,7 @@
 #include "Eve/Turret/EveTurretSet.h"
 #include "Eve/SpaceObject/EveShip2.h"
 #include "Eve/SpaceObject/EveStation2.h"
+#include "Eve/SpaceObject/EveSwarm.h"
 #include "Eve/SpaceObject/Attachments/Sets/EveSpriteSet.h"
 #include "Eve/SpaceObject/Attachments/Sets/EveSpriteLineSet.h"
 #include "Eve/SpaceObject/Attachments/EveTrailsSet.h"
@@ -120,7 +121,7 @@ IRootPtr EveSOF::BuildFromDNA( const char* dnaString )
 		return nullptr;
 	}
 
-	// set all easey consts
+	// set all easy consts
 	SetupConsts( newObj, dna );
 
 	// get us the base geometry
@@ -234,6 +235,14 @@ EveSpaceObject2Ptr EveSOF::CreateSpaceObject( const EveSOFDNAPtr dna ) const
 			EveShip2Ptr newShip;
 			newShip.CreateInstance();
 			spaceObject = newShip;
+		}
+		break;
+	case EveSOFDataHull::BUILDCLASS_SWARM:
+		{
+			EveSwarmPtr newSwarm;
+			newSwarm.CreateInstance();
+			newSwarm->SetBehavior( dna->GetGenericSwarmProperties() );
+			spaceObject = newSwarm;
 		}
 		break;
 	}

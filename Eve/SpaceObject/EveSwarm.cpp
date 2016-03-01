@@ -11,7 +11,9 @@
 
 #include "include/TriMath.h"
 #include "Utilities/BoundingBox.h"
+#include "Utilities/BoundingSphere.h"
 
+#include "Eve/SpaceObject/Attachments/EveBoosterSet2.h"
 #include "Eve/SpaceObject/Attachments/Sets/EveSpriteSet.h"
 #include "Eve/SpaceObject/Attachments/Sets/EveSpotlightSet.h"
 
@@ -19,8 +21,8 @@ EveSwarmRenderable::EveSwarmRenderable( IRoot* lockobj )
 {
 	memset( &m_psData, 0, sizeof( EveSpaceObjectPSData ) );
 	memset( &m_vsData, 0, sizeof( EveSpaceObjectVSData ) );
-	
 }
+
 EveSwarmRenderable::~EveSwarmRenderable()
 {
 }
@@ -96,8 +98,6 @@ bool EveSwarmRenderable::HasTransparentBatches()
 	return false;
 }
 
-/////////////////////////////////////////////////////////////////////////////////////
-// EveSwarmRenderable
 void EveSwarmRenderable::SetMesh( Tr2MeshBase* mesh )
 {
 	m_mesh = mesh;
@@ -122,42 +122,655 @@ void EveSwarmRenderable::SetWorldTransform( const Matrix& transform )
 
 
 
+EveSwarm::EveSwarm( IRoot* lockobj ) :
+	PARENTLOCK( m_renderables ),
+	m_squadBoundsMax( 0, 0, 0 ),
+	m_squadBoundsMin( 0, 0, 0 ),
+	m_started( false ),
+	m_targetIndex( 0 ),
+	m_firingIndex( 0 ),
+	m_worldAcceleration( 0, 0, 0 ),
 
+	m_swarmingEnabled( false ),
+	m_debugSize( 24.f ),
+	m_count( 10 ),
 
-
-Vector3 SwarmBehavior::CalculateForces( int i0, std::vector<SwarmVehicle>& swarmers, Vector3 anchorPosition, float timeSeconds )
+	m_debugShowSwarmBounds( true ),
+	m_debugShowVehicle( true ),
+	m_debugShowForces( false )
 {
-	Vector3 force( 0, 0, 0 );
-	float one_over_count = 0;
-	if( swarmers.size() > 1 )
-	{
-		one_over_count = 1.f / ( swarmers.size() - 1 );
-	}
-	force += m_weightWander * Calculate_Wander( swarmers[i0], m_wanderDistance, m_wanderRadius, m_wanderFluctuation, timeSeconds );
-	force += m_weightAnchor * Calculate_Cohesion( swarmers[i0].position, anchorPosition );
-	for( unsigned i = 0; i < swarmers.size(); i++ )
-	{
-		if( i0 == i )
-		{
-			continue;
-		}
-		force += m_weightCohesion * Calculate_Cohesion( swarmers[i0].position, swarmers[i].position ) * one_over_count;
-		//separation += m_weightSeparation * Calculate_Cohesion( m_swarmers[i].position, m_swarmers[i0].position ) * one_over_count;
-		force += m_weightSeparation * Calculate_Separation( swarmers[i0].position, swarmers[i].position );// don't care about averages, if it's too close it's too close * one_over_count;
-		force += swarmers[i].velocity * one_over_count * m_weightAlign;
-		
-	}
-	return force;
 }
 
-Vector3 SwarmBehavior::Calculate_Cohesion( Vector3 p0, Vector3 p1 )
+EveSwarm::~EveSwarm()
+{
+}
+
+// --------------------------------------------------------------------------------
+// Description:
+//   Clamp vector length to maxLength
+// --------------------------------------------------------------------------------
+inline void EveSwarm::Clamp( Vector3* v, float maxLength ) const
+{
+	if( D3DXVec3Length( v ) > maxLength )
+	{
+		D3DXVec3Normalize( v, v );
+		D3DXVec3Scale( v, v, maxLength );
+	}
+}
+
+// --------------------------------------------------------------------------------
+// Description:
+//   Return a transform used for audio observers
+// --------------------------------------------------------------------------------
+Matrix EveSwarm::GetObserverTransform() const
+{
+	Vector3 translation = GetModelWorldPosition() - m_worldPosition;
+	Matrix translationMatrix;
+	D3DXMatrixTranslation( &translationMatrix, translation.x, translation.y, translation.z );
+	return m_worldTransform * translationMatrix;
+}
+
+// --------------------------------------------------------------------------------
+// Description:
+//   Return a transform used for turret locators
+// --------------------------------------------------------------------------------
+const Matrix* EveSwarm::GetTurretTransform() const
+{
+	if( m_count < 1 )
+	{
+		return &m_worldTransform;
+	}
+	if( (unsigned)m_firingIndex > m_renderables.size() )
+	{
+		return m_renderables[0]->GetWorldTransform();
+	}
+	return m_renderables[m_firingIndex]->GetWorldTransform();
+}
+
+// --------------------------------------------------------------------------------
+// Description:
+//   From EveShip2
+// --------------------------------------------------------------------------------
+void EveSwarm::RebuildCachedData( BlueAsyncRes* p )
+{
+	EveShip2::RebuildCachedData( p );
+	for( auto it = m_renderables.begin(); it != m_renderables.end(); ++it )
+	{
+		(*it)->SetMesh( m_mesh );
+	}
+}
+
+// --------------------------------------------------------------------------------
+// Description:
+//   From EveShip2
+// --------------------------------------------------------------------------------
+void EveSwarm::UpdateSyncronous( EveUpdateContext& updateContext )
+{
+	Vector3 velocityLast = m_worldVelocity;
+	EveShip2::UpdateSyncronous( updateContext );
+	m_worldAcceleration = m_worldVelocity - velocityLast;
+}
+
+// --------------------------------------------------------------------------------
+// Description:
+//   Calculate and set the vehcile's rotation
+// --------------------------------------------------------------------------------
+void UpdateOrientation( SwarmVehicle* vehicle, float timeDiff )
+{
+	Vector3 frontDir( 0, 0, 1 ), upDir( 0, 1, 0 ), dir, side;
+	D3DXVec3Normalize( &dir, &vehicle->velocity );
+	D3DXVec3Cross( &side, &dir, &upDir );
+	float yaw = atan2( dir.x, dir.z );
+	float pitch = asin( -dir.y );
+	float roll = 0;
+	float speed = D3DXVec3Length( &vehicle->velocity );
+	if( speed > 0 )
+	{
+		// Roll is based on how large acceleration is in the direction of the side vector
+		roll = 0.8f * D3DXVec3Dot( &vehicle->acceleration, &side ) * TRI_PI / speed;
+	}
+	vehicle->roll = Lerp( vehicle->roll, roll, timeDiff );
+	D3DXQuaternionRotationYawPitchRoll( &vehicle->rotation, yaw, pitch, vehicle->roll );
+}
+
+// --------------------------------------------------------------------------------
+// Description:
+//   From EveShip2
+// --------------------------------------------------------------------------------
+void EveSwarm::UpdateAsyncronous( EveUpdateContext& context )
+{
+	EveShip2::UpdateAsyncronous( context );
+
+	float timeSeconds = context.GetDeltaT() * m_behavior.m_timeMultiplier;
+	if( timeSeconds > m_behavior.m_maxTime )
+	{
+		timeSeconds = m_behavior.m_maxTime;
+	}
+
+	if( !m_swarmingEnabled || m_count == 0 )
+	{
+		m_squadBoundsMax = Vector3( 0, 0, 0 );
+		m_squadBoundsMin = Vector3( 0, 0, 0 );
+		if( m_renderables.size() > 0 )
+		{
+			m_renderables[0]->SetWorldTransform( m_worldTransform );
+		}
+		return;
+	}
+	
+	BoundingBoxInitialize( m_squadBoundsMin, m_squadBoundsMax );
+
+	if( !m_started )
+	{
+		// Set initial position
+		for( unsigned i = 0; i < m_vehicles.size(); i++ )
+		{
+			m_vehicles[i].position = m_worldPosition;
+		}
+		m_started = true;
+	}
+	else
+	{
+		for( unsigned i = 0; i < m_vehicles.size(); i++ )
+		{
+			m_vehicles[i].position += context.GetOriginShift();
+		}
+	}
+
+	// Calculate average velocity direction(alignment and center position(pre update)
+	Vector3 center( 0, 0, 0 );
+	Vector3 alignment( 0, 0, 0 );
+	for( unsigned i = 0; i < m_vehicles.size(); i++ )
+	{
+		center += m_vehicles[i].position;
+		alignment += m_vehicles[i].velocity;
+	}
+	if( m_vehicles.size() > 0 )
+	{
+		center *= 1.f / (float)m_vehicles.size();
+		D3DXVec3Normalize( &alignment, &alignment );
+	}
+
+	// Max speed is based of the ball speed + a minimum allowed speed
+	float maxSpeed = m_behavior.m_speedMinimum;
+	if( m_speed )
+	{
+		maxSpeed += m_behavior.m_speedMultiplier * m_speed->m_value;
+	}
+	float maxAcceleration = maxSpeed;
+
+	// Calculate formation directions
+	Vector3 formationSide, formationDirection, up( 0, 1, 0 );
+	D3DXVec3Normalize( &formationDirection, &m_vehicles[0].velocity );
+	D3DXVec3Cross( &formationSide, &formationDirection, &up );
+
+	// Calculate forces and acceleration
+	for( unsigned i = 0; i < m_vehicles.size(); i++ )
+	{
+		Vector3 force = CalculateForces( i, m_vehicles, center, alignment, formationDirection, formationSide, timeSeconds );
+		force += m_behavior.m_weightParentVelocity * m_worldVelocity;
+		force += m_behavior.m_weightParentAcceleration * m_worldAcceleration;
+		Vector3 acc = force * 1.f / m_behavior.m_mass;
+		m_vehicles[i].acceleration = acc;
+		Clamp( &m_vehicles[i].acceleration, maxAcceleration );
+	}
+
+	// Update velocities and positions
+	for( unsigned i = 0; i < m_vehicles.size(); i++ )
+	{
+		m_vehicles[i].velocity = m_vehicles[i].velocity + m_vehicles[i].acceleration * timeSeconds;
+		Clamp( &m_vehicles[i].velocity, maxSpeed );
+		m_vehicles[i].position += m_vehicles[i].velocity * timeSeconds;
+		BoundingBoxUpdate( m_squadBoundsMin, m_squadBoundsMax, m_vehicles[i].position );
+	}
+
+	// Never let the center of the squadron get more than m_maxDistance from the world position(client hangs for while f.x.)
+	center = 0.5f * (m_squadBoundsMin + m_squadBoundsMax);
+	Vector3 d = m_worldPosition - center;
+	float distance = D3DXVec3Length( &d );
+	if( distance > m_behavior.m_maxDistance )
+	{
+		// Move the center of the squad to maxDistance away from the world position
+		D3DXVec3Normalize( &d, &d );
+		d *= distance - m_behavior.m_maxDistance;
+		for( unsigned i = 0; i < m_vehicles.size(); i++ )
+		{
+			m_vehicles[i].position += d;
+		}
+	}
+
+	// Update world transforms
+	auto rit = m_renderables.begin();
+	for( unsigned i = 0; i < m_vehicles.size() && rit != m_renderables.end(); i++, rit++ )
+	{
+		Matrix world;
+		UpdateOrientation( &m_vehicles[i], timeSeconds );
+		D3DXMatrixAffineTransformation( &world, 1.f, nullptr, &(m_vehicles[i].rotation), &(m_vehicles[i].position) );
+		(*rit)->SetWorldTransform( world );
+	}
+}
+
+// --------------------------------------------------------------------------------
+// Description:
+//   Registers space object attachments (sprite and spotlight sets) with quad 
+//   renderer.
+// Arguments:
+//   quadRenderer - quad renderer
+// --------------------------------------------------------------------------------
+void EveSwarm::RegisterWithQuadRenderer( Tr2QuadRenderer& quadRenderer )
+{
+	for( auto it = m_spriteSets.begin(); it != m_spriteSets.end(); ++it )
+	{
+		(*it)->UseQuadRenderer( true, false );
+		(*it)->RegisterWithQuadRenderer( quadRenderer );
+	}
+	for( auto it = m_spotlightSets.begin(); it != m_spotlightSets.end(); ++it )
+	{
+		(*it)->UseQuadRenderer( true, false );
+		(*it)->RegisterWithQuadRenderer( quadRenderer );
+	}
+}
+
+// --------------------------------------------------------------------------------
+// Description:
+//   Adds sprites from sprite sets and spotlight sets to quad renderer.
+// Arguments:
+//   quadRenderer - quad renderer
+// --------------------------------------------------------------------------------
+void EveSwarm::AddQuadsToQuadRenderer( Tr2QuadRenderer& quadRenderer )
+{
+	if( !m_isInFrustum || !m_display )
+	{
+		return;
+	}
+
+	for( auto rit = m_renderables.begin(); rit != m_renderables.end(); ++rit )
+	{
+		for( auto it = m_spriteSets.begin(); it != m_spriteSets.end(); ++it )
+		{
+			(*it)->AddToQuadRenderer( quadRenderer, *(*rit)->GetWorldTransform(), 1, nullptr, 0 );
+		}
+		for( auto it = m_spotlightSets.begin(); it != m_spotlightSets.end(); ++it )
+		{
+			(*it)->AddToQuadRenderer( quadRenderer, *(*rit)->GetWorldTransform(), 1, 1, nullptr, 0 );
+		}
+	}
+}
+
+// --------------------------------------------------------------------------------
+// Description:
+//   From EveShip2
+// --------------------------------------------------------------------------------
+void EveSwarm::RenderDebugInfo( Tr2RenderContext& renderContext )
+{
+	EveShip2::RenderDebugInfo( renderContext );
+
+	for( unsigned i = 0; i < m_vehicles.size(); i++ )
+	{
+		Vector3 pos = m_vehicles[i].position;
+		if( m_debugShowVehicle )
+		{
+			Tr2Renderer::DrawSphere( pos, m_debugSize, 4, 0xffff00ff );
+			Tr2Renderer::DrawLine( pos, pos + m_vehicles[i].velocity, 0xffff00ff );
+			Tr2Renderer::DrawLine( pos, pos + m_vehicles[i].acceleration, 0xff0000ff );
+		}
+		
+		if( m_debugShowForces && m_debugInfo.size() > i )
+		{
+			Tr2Renderer::DrawLine( pos, pos + m_debugInfo[i].alignment, 0xff7f7f00 );
+			Tr2Renderer::DrawLine( pos, pos + m_debugInfo[i].anchor, 0xff007f7f );
+			Tr2Renderer::DrawLine( pos, pos + m_debugInfo[i].cohesion, 0xff00007f );
+			Tr2Renderer::DrawLine( pos, pos + m_debugInfo[i].separation, 0xff007f00 );
+			Tr2Renderer::DrawLine( pos, pos + m_debugInfo[i].wander, 0xff7f0000 );
+			Tr2Renderer::DrawLine( pos, pos + m_debugInfo[i].formation, 0xff7f7f7f );
+		}
+	}
+
+	if( m_debugShowSwarmBounds )
+	{
+		Vector4 bs;
+		Vector3 min, max;
+		GetBoundingSphere( bs );
+		GetLocalBoundingBox( min, max );
+		Tr2Renderer::DrawSphere( bs, 6, 0xffff00ff );
+		Tr2Renderer::DrawBox( min, max, 0xffff00ff );
+	}
+}
+
+// --------------------------------------------------------------------------------
+// Description:
+//   Actually add renderables to the list of renderables after culling
+// --------------------------------------------------------------------------------
+void EveSwarm::PushRenderables( const TriFrustum& frustum, std::vector<ITr2Renderable*>& renderables )
+{
+	for( auto it = m_renderables.begin(); it != m_renderables.end(); it++ )
+	{
+		renderables.push_back( *it );
+	}
+
+	// decals? children? boosters?
+}
+
+// --------------------------------------------------------------------------------
+// Description:
+//    GetBoundingSphere. See EveSpaceObject2
+// --------------------------------------------------------------------------------
+bool EveSwarm::GetBoundingSphere( Vector4& sphere, BoundingSphereQuery query ) const 
+{
+	Vector4 s;
+	EveShip2::GetBoundingSphere( s, query );
+	BoundingSphereFromBox( sphere, m_squadBoundsMin, m_squadBoundsMax );
+	sphere.w += s.w;
+	return true;
+}
+
+// --------------------------------------------------------------------------------
+// Description:
+//     This returns the last computed center world position. Will try to figure out
+//     how to do this on demand.
+// Original description: This version of the function should perform an update on the model / ball position
+// --------------------------------------------------------------------------------
+void EveSwarm::GetModelCenterWorldPosition( Vector3 &position, Be::Time t )
+{
+	position = ( m_squadBoundsMax + m_squadBoundsMin ) * 0.5f;
+}
+
+// --------------------------------------------------------------------------------
+// Description:
+//   From EveShip2
+// --------------------------------------------------------------------------------
+void EveSwarm::GetCurrentModelCenterWorldPosition( Vector3 &position )
+{
+	position = ( m_squadBoundsMax + m_squadBoundsMin ) * 0.5f;
+}
+
+// --------------------------------------------------------------------------------
+// Description:
+//   From EveShip2
+// --------------------------------------------------------------------------------
+bool EveSwarm::GetLocalBoundingBox( Vector3 &min, Vector3 &max )
+{
+	if( EveShip2::GetLocalBoundingBox( min, max ) )
+	{
+		min += m_squadBoundsMin;
+		max += m_squadBoundsMax;
+	}
+	else
+	{
+		min = m_squadBoundsMin;
+		max = m_squadBoundsMax;
+	}
+	m_localAabbMin = min - m_worldPosition;
+	m_localAabbMax = max - m_worldPosition;
+	return true;
+}
+
+// --------------------------------------------------------------------------------
+// Description:
+//   From EveShip2
+// --------------------------------------------------------------------------------
+bool EveSwarm::Initialize()
+{
+	EveShip2::Initialize();
+	int count = m_count;
+	m_count = 0;
+	SetCount( count );
+	EnableSwarmForceDebug( m_debugShowForces );
+	return true;
+}
+
+// --------------------------------------------------------------------------------
+// Description:
+//   From EveShip2
+// --------------------------------------------------------------------------------
+bool EveSwarm::OnModified( Be::Var* val )
+{
+	EveShip2::OnModified( val );
+	if( IsMatch( val, m_debugShowForces ) )
+	{
+		EnableSwarmForceDebug( m_debugShowForces );
+	}
+	return true;
+}
+
+// --------------------------------------------------------------------------------
+// Description:
+//   Adds one swarmer to this swarm
+// --------------------------------------------------------------------------------
+void EveSwarm::AddSwarmer()
+{
+	EveSwarmRenderablePtr renderable;
+	renderable.CreateInstance();
+	renderable->SetMesh( m_mesh );
+	m_renderables.Append( renderable->GetRootObject() );
+	SwarmVehicle v;
+	v.position = m_worldPosition;
+	m_vehicles.push_back( v );
+	if( m_debugShowForces )
+	{
+		m_debugInfo.push_back( SwarmVehicleDebug() );
+	}
+	m_count++;
+}
+
+// --------------------------------------------------------------------------------
+// Description:
+//   Removes one swarmer from this swarm
+// --------------------------------------------------------------------------------
+Vector3 EveSwarm::RemoveSwarmer()
+{
+	if( m_vehicles.size() < 1 )
+	{
+		return Vector3( 0, 0, 0 );
+	}
+	Vector3 position = m_vehicles.back().position;
+	m_vehicles.erase(m_vehicles.begin() + m_targetIndex);
+	m_renderables.Remove( m_targetIndex );
+	if( m_debugShowForces )
+	{
+		m_debugInfo.pop_back();
+	}
+	m_count--;
+	m_targetIndex = TriRandInt( m_count );
+	return position;
+}
+
+// --------------------------------------------------------------------------------
+// Description:
+//   Sets swarmer count
+// --------------------------------------------------------------------------------
+void EveSwarm::SetCount( int count )
+{
+	while( m_count != count )
+	{
+		if( m_count > count )
+		{
+			RemoveSwarmer();
+		}
+		else
+		{
+			AddSwarmer();
+		}
+		m_targetIndex = TriRandInt( m_count );
+	}
+}
+
+// --------------------------------------------------------------------------------
+// Description:
+//   Toggle swarm behavior. If disabled swarm count is set to 1 and the swarmer
+//   does not use the behavior but acts like a 'normal' space object.
+// --------------------------------------------------------------------------------
+void EveSwarm::EnableSwarming( bool enable )
+{
+	if( m_swarmingEnabled == enable )
+	{
+		return;
+	}
+
+	m_swarmingEnabled = enable;
+	if( !enable )
+	{
+		SetCount( 0 ); // Remove all
+		SetCount( 1 ); // Add a single 'neutral' swarmer
+		m_squadBoundsMin = Vector3( 0, 0, 0 );
+		m_squadBoundsMax = Vector3( 0, 0, 0 );
+	}
+}
+
+// --------------------------------------------------------------------------------
+// Description:
+//   Select which fighter is the origin of firing effects
+// --------------------------------------------------------------------------------
+void EveSwarm::PickFiringOrigin()
+{
+	m_firingIndex = TriRandInt( m_count );
+}
+
+// --------------------------------------------------------------------------------
+// Description:
+//   Keep track of swarm forces for debug rendering
+// --------------------------------------------------------------------------------
+void EveSwarm::EnableSwarmForceDebug( bool enable )
+{
+	m_debugInfo.clear();
+
+	if( !enable )
+	{
+		return;
+	}
+	for( unsigned i = 0; i < m_vehicles.size(); i++ )
+	{
+		m_debugInfo.push_back( SwarmVehicleDebug() );
+	}
+}
+
+// --------------------------------------------------------------------------------
+// Description:
+//   Override from EveSpaceObject2
+// --------------------------------------------------------------------------------
+Vector3 EveSwarm::GetObjectSpaceDamageLocatorPosition( uint32_t index ) const
+{
+	Vector3 position = EveShip2::GetObjectSpaceDamageLocatorPosition( index );
+	if( !m_count )
+	{
+		return position;
+	}
+	Matrix localTransform = m_invWorldTransform * *m_renderables[m_targetIndex]->GetWorldTransform();
+	return *D3DXVec3TransformCoord( &position, &position, &localTransform );
+}
+
+// --------------------------------------------------------------------------------
+// Description:
+//   Override from EveSpaceObject2
+// --------------------------------------------------------------------------------
+Vector3 EveSwarm::GetObjectSpaceDamageLocatorDirection( uint32_t index ) const
+{
+	Vector3 direction = EveShip2::GetObjectSpaceDamageLocatorDirection( index );
+	if( !m_count )
+	{
+		return direction;
+	}
+	Matrix localTransform = m_invWorldTransform * *m_renderables[m_targetIndex]->GetWorldTransform();
+	return *D3DXVec3TransformNormal( &direction, &direction, &localTransform );
+}
+
+// --------------------------------------------------------------------------------
+// Description:
+//   Override from EveSpaceObject2
+// --------------------------------------------------------------------------------
+bool EveSwarm::GetDamageLocatorPosition( Vector3* out, int index, bool inWorldSpace )
+{
+	CCP_STATS_ZONE( __FUNCTION__ );
+	if( !m_count )
+	{
+		return EveShip2::GetDamageLocatorPosition( out, index, inWorldSpace );
+	}
+	if( ( index < 0 ) || ( index >= int( m_persistedDamageLocators.size() ) ) )
+	{
+		if( inWorldSpace )
+		{
+			*out = m_renderables[m_targetIndex]->GetWorldTransform()->GetTranslation();
+		}
+		else
+		{
+			Matrix localTransform = m_invWorldTransform * *m_renderables[m_targetIndex]->GetWorldTransform();
+			*out = localTransform.GetTranslation();
+		}
+		return false;
+	}
+
+	*out = inWorldSpace ? GetTransformedDamageLocator( index ) : GetObjectSpaceDamageLocatorPosition( index );
+	
+	return true;
+}
+
+// --------------------------------------------------------------------------------
+// Description:
+//   Calculate all forces influencing the swarm vehicle i0
+// --------------------------------------------------------------------------------
+Vector3 EveSwarm::CalculateForces( int i0, std::vector<SwarmVehicle>& swarmers, const Vector3& centerOfMass, const Vector3& alignment, const Vector3& formationDirection, const Vector3& formationSide, float timeSeconds )
+{
+	Vector3 force( 0, 0, 0 ), wander, separation( 0, 0, 0 ), align, cohesion, anchor, decelerate, formation;
+
+	wander = m_behavior.m_weightWander * Calculate_Wander( swarmers[i0], m_behavior.m_wanderDistance, m_behavior.m_wanderRadius, m_behavior.m_wanderFluctuation, timeSeconds );
+	cohesion = m_behavior.m_weightCohesion * Calculate_Cohesion( swarmers[i0].position, centerOfMass );
+	anchor = m_behavior.m_weightAnchor * Calculate_Cohesion( swarmers[i0].position, m_worldPosition );
+	align = m_behavior.m_weightAlign * alignment;
+	decelerate = swarmers[i0].velocity * -m_behavior.m_weightDecelerate;
+	Clamp( &decelerate, m_behavior.m_maxDeceleration );
+
+	for( unsigned i = 0; i < swarmers.size(); i++ )
+	{
+		if( i0 != i )
+		{
+			separation += m_behavior.m_weightSeparation * Calculate_Separation( swarmers[i0].position, swarmers[i].position );
+		}
+	}
+
+	// Formation
+	Vector3 formationPosition = m_vehicles[0].position + formationDirection * m_behavior.m_formationDistance * (float)m_vehicles.size() * 0.25f;
+	if( i0 && i0 & 1 )
+	{
+		float rankMultiplier = floor( 0.5f * (float)i0 + 0.5f );
+		formationPosition = formationPosition - formationDirection * m_behavior.m_formationDistance * rankMultiplier + formationSide * m_behavior.m_formationDistance * rankMultiplier * 0.5f;
+	}
+	else if( i0 )
+	{
+		float rankMultiplier = floor( 0.5f * (float)i0 + 0.5f );
+		formationPosition = formationPosition - formationDirection * m_behavior.m_formationDistance * rankMultiplier - formationSide * m_behavior.m_formationDistance * rankMultiplier * 0.5f;
+	}
+	formation = m_behavior.m_weightFormation * Calculate_Cohesion( swarmers[i0].position, formationPosition );
+	
+	// Debug info
+	if( m_debugShowForces && m_debugInfo.size() > (unsigned)i0 )
+	{
+		m_debugInfo[i0].alignment = align;
+		m_debugInfo[i0].anchor = anchor;
+		m_debugInfo[i0].cohesion = cohesion;
+		m_debugInfo[i0].separation = separation;
+		m_debugInfo[i0].wander = wander;
+		m_debugInfo[i0].formation = formation;
+		m_debugInfo[i0].deceleration = decelerate;
+	}
+	return wander + separation + align + cohesion + anchor + decelerate + formation;
+}
+
+// --------------------------------------------------------------------------------
+// Description:
+//   Cohesion. The vector from p0 to p1
+// --------------------------------------------------------------------------------
+inline Vector3 EveSwarm::Calculate_Cohesion( Vector3 p0, Vector3 p1 )
 {
 	Vector3 d;
 	D3DXVec3Subtract( &d, &p1, &p0 );
 	return d;
 }
 
-Vector3 SwarmBehavior::Calculate_Separation( Vector3 p0, Vector3 p1 )
+// --------------------------------------------------------------------------------
+// Description:
+//   Force that pushes p0 away from p1 depending on distance
+// --------------------------------------------------------------------------------
+inline Vector3 EveSwarm::Calculate_Separation( Vector3 p0, Vector3 p1 )
 {
 	Vector3 d;
 	D3DXVec3Subtract( &d, &p0, &p1 );
@@ -166,10 +779,14 @@ Vector3 SwarmBehavior::Calculate_Separation( Vector3 p0, Vector3 p1 )
 	{
 		return Vector3( TriRand() - 0.5f, TriRand() - 0.5f, TriRand() - 0.5f );
 	}
-	return *D3DXVec3Normalize( &d, &d ) * 1000.f / length;
+	return *D3DXVec3Normalize( &d, &d ) * m_behavior.m_separationDistance / length;
 }
 
-Vector3 SwarmBehavior::Calculate_Wander( SwarmVehicle& s, float wanderDistance, float radius, float fluctuation, float t )
+// --------------------------------------------------------------------------------
+// Description:
+//   A random wandering behavior
+// --------------------------------------------------------------------------------
+Vector3 EveSwarm::Calculate_Wander( SwarmVehicle& s, float wanderDistance, float radius, float fluctuation, float t )
 {
 	// Evolve the target point on the 'sphere' around a point wanderDistance in front of our swarmer
 	Vector3 target = s.wanderTarget;
@@ -197,217 +814,3 @@ Vector3 SwarmBehavior::Calculate_Wander( SwarmVehicle& s, float wanderDistance, 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-EveSwarm::EveSwarm( IRoot* lockobj ) :
-	PARENTLOCK( m_renderables ),
-	m_rootVelocity( 0, 0, 0 ),
-	m_rootPosition( 0, 0, 0 ),
-	m_mass( 1.f ),
-	m_maxAcceleration( 100.f ),
-	m_maxSpeed( 100.f ),
-	m_maxOffset( 0.f ),
-	m_timeMultiplier( 1.f ),
-	m_debugSize( 24.f ),
-	m_count( 10 )
-{
-}
-
-EveSwarm::~EveSwarm()
-{
-}
-
-void EveSwarm::UpdateSyncronous( EveUpdateContext& updateContext ) {}
-void EveSwarm::UpdateAsyncronous( EveUpdateContext& context )
-{
-	BoundingBoxInitialize( m_squadBoundsMin, m_squadBoundsMax );
-	float timeSeconds = context.GetDeltaT() * m_timeMultiplier;
-	if( timeSeconds > m_maxTime )
-	{
-		timeSeconds = m_maxTime;
-	}
-
-	// Calculate acceleration
-	for( unsigned i = 0; i < m_vehicles.size(); i++ )
-	{
-		Vector3 force = m_behavior.CalculateForces( i, m_vehicles, m_rootPosition, timeSeconds );
-		Vector3 acc = force * 1.f / m_mass;
-		m_vehicles[i].acceleration += acc * timeSeconds;
-		if( D3DXVec3Length( &m_vehicles[i].acceleration ) > m_maxAcceleration )
-		{
-			D3DXVec3Normalize( &m_vehicles[i].acceleration, &m_vehicles[i].acceleration );
-			m_vehicles[i].acceleration *= m_maxAcceleration;
-		}
-	}
-
-	// Update velocities and positions
-	for( unsigned i = 0; i < m_vehicles.size(); i++ )
-	{
-		m_vehicles[i].velocity = m_vehicles[i].velocity + m_vehicles[i].acceleration * timeSeconds;
-		if( D3DXVec3Length( &m_vehicles[i].velocity ) > m_maxSpeed )
-		{
-			D3DXVec3Normalize( &m_vehicles[i].velocity, &m_vehicles[i].velocity );
-			m_vehicles[i].velocity *= m_maxSpeed;
-		}
-		m_vehicles[i].position += m_vehicles[i].velocity * timeSeconds;
-	}
-
-	// Update world transforms
-	auto rit = m_renderables.begin();
-	Vector3 baseDir( 0, 0, 1 );
-	for( unsigned i = 0; i < m_vehicles.size() && rit != m_renderables.end(); i++, rit++ )
-	{
-		Matrix world;
-		Quaternion rotation;
-		Vector3 dir, cross;
-		D3DXVec3Normalize( &dir, &(m_vehicles[i].velocity ) );
-		float dot = D3DXVec3Dot( &baseDir, &dir );
-		D3DXVec3Cross( &cross, &baseDir, &dir );
-		D3DXQuaternionRotationAxis( &rotation, &cross, acos( dot ) );
-		D3DXMatrixAffineTransformation( &world, 1.f, nullptr, &rotation, &(m_vehicles[i].position) );
-		(*rit)->SetWorldTransform( world );
-		BoundingBoxUpdate( m_squadBoundsMin, m_squadBoundsMax, m_vehicles[i].position );
-	}
-}
-
-// --------------------------------------------------------------------------------
-// Description:
-//   Registers space object attachments (sprite and spotlight sets) with quad 
-//   renderer.
-// Arguments:
-//   quadRenderer - quad renderer
-// --------------------------------------------------------------------------------
-void EveSwarm::RegisterWithQuadRenderer( Tr2QuadRenderer& quadRenderer )
-{
-	/*for( auto it = m_spriteSets.begin(); it != m_spriteSets.end(); ++it )
-	{
-		// TODO: needs to be per set and swarmer so the hash used won't be good enough
-		(*it)->RegisterWithQuadRenderer( quadRenderer );
-	}
-	for( auto it = m_spotlightSets.begin(); it != m_spotlightSets.end(); ++it )
-	{
-		(*it)->RegisterWithQuadRenderer( quadRenderer );
-	}*/
-}
-
-// --------------------------------------------------------------------------------
-// Description:
-//   Adds sprites from sprite sets and spotlight sets to quad renderer.
-// Arguments:
-//   quadRenderer - quad renderer
-// --------------------------------------------------------------------------------
-void EveSwarm::AddQuadsToQuadRenderer( Tr2QuadRenderer& quadRenderer )
-{
-	/*if( !m_isInFrustum || !m_display )
-	{
-		return;
-	}
-
-	for( auto rit = m_renderables.begin(); rit != m_renderables.end(); ++rit )
-	{
-		for( auto it = m_spriteSets.begin(); it != m_spriteSets.end(); ++it )
-		{
-			// Assume no animation at least for now... and perhaps forever
-			(*it)->AddToQuadRenderer( quadRenderer, (*rit)->GetWorldTransform(), 1, nullptr, 0 );
-		}
-		for( auto it = m_spotlightSets.begin(); it != m_spotlightSets.end(); ++it )
-		{
-			(*it)->AddToQuadRenderer( quadRenderer, (*rit)->GetWorldTransform(), 1, 1, nullptr, 0 );
-		}
-	}*/
-}
-
-void EveSwarm::RenderDebugInfo( Tr2RenderContext& renderContext )
-{
-	for( unsigned i = 0; i < m_vehicles.size(); i++ )
-	{
-		Vector3 pos = m_vehicles[i].position;
-		Tr2Renderer::DrawSphere( pos, m_debugSize, 4, 0xffff00ff );
-		Tr2Renderer::DrawLine( pos, pos + m_vehicles[i].velocity, 0xffff00ff );
-		Tr2Renderer::DrawLine( pos, pos + m_vehicles[i].acceleration, 0xff0000ff );
-	}
-}
-
-
-void EveSwarm::GetRenderables( const TriFrustum& frustum, std::vector<ITr2Renderable*>& renderables, const Matrix& parentTransform )
-{
-	for( auto it = m_renderables.begin(); it != m_renderables.end(); it++ )
-	{
-		// TODO: cull the bastard
-		renderables.push_back( *it );
-	}
-}
-
-bool EveSwarm::GetBoundingSphere( Vector4& sphere, BoundingSphereQuery query ) const 
-{
-	sphere = Vector4( 0, 0, 0, 10000000.f );
-	return true;
-}
-
-// This version of the function should perform an update on the model / ball position
-void EveSwarm::GetModelCenterWorldPosition( Vector3 &position, Be::Time t )
-{
-	position = ( m_squadBoundsMax + m_squadBoundsMin ) * 0.5f;
-}
-
-// This version of the function should not update the object
-void EveSwarm::GetCurrentModelCenterWorldPosition( Vector3 &position )
-{
-	position = ( m_squadBoundsMax + m_squadBoundsMin ) * 0.5f;
-}
-
-// If possible, return an AABB in local coordinates
-bool EveSwarm::GetLocalBoundingBox( Vector3 &min, Vector3 &max )
-{
-	min = m_squadBoundsMin;
-	max = m_squadBoundsMax;
-	return true;
-}
-// Get the local to world transform
-void EveSwarm::GetLocalToWorldTransform( Matrix &transform ) const 
-{
-	D3DXMatrixIdentity( &transform );
-}
-
-bool EveSwarm::Initialize()
-{
-	for( int i = 0; i < m_count; i++ )
-	{
-		AddSwarmer();
-	}
-	return true;
-}
-
-bool EveSwarm::OnModified( Be::Var* val )
-{
-	for( auto it = m_renderables.begin(); it != m_renderables.end(); it++ )
-	{
-		(*it)->SetMesh( m_mesh );
-	}
-	return true;
-}
-
-void EveSwarm::AddSwarmer()
-{
-	EveSwarmRenderablePtr renderable;
-	renderable.CreateInstance();
-	renderable->SetMesh( m_mesh );
-	m_renderables.Append( renderable->GetRootObject() );
-	m_vehicles.push_back( SwarmVehicle() );
-}

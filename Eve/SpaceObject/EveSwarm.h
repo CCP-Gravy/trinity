@@ -32,7 +32,6 @@ public:
     float GetSortValue(); 
 
 	Tr2PerObjectData* GetPerObjectData( ITriRenderBatchAccumulator* accumulator );
-
 	
 	/////////////////////////////////////////////////////////////////////////////////////
 	// PerObjectData
@@ -44,7 +43,7 @@ public:
 	// EveSwarmRenderable
 	void SetMesh( Tr2MeshBase* mesh );
 	void SetWorldTransform( const Matrix& transform );
-	Matrix GetWorldTransform() { return m_worldTransform; }
+	const Matrix* GetWorldTransform() const { return &m_worldTransform; }
 
 private:
 	Tr2MeshBasePtr m_mesh;
@@ -66,7 +65,8 @@ public:
 		acceleration( 0, 0, 0 ),
 		velocity( 0, 0, 0 ),
 		position( 0, 0, 0 ),
-		wanderTarget( 0, 0, 0 )
+		wanderTarget( 0, 0, 0 ),
+		roll( 0.f )
 	{}
 
 	Quaternion rotation;
@@ -74,47 +74,18 @@ public:
 	Vector3 velocity;
 	Vector3 position;
 	Vector3 wanderTarget;
+	float roll;
 };
 
-
-struct SwarmBehavior
+// For force debug
+struct SwarmVehicleDebug
 {
-public:
-	SwarmBehavior() :
-		m_wanderDistance( 100.f ),
-		m_wanderRadius( 80.f ),
-		m_wanderFluctuation( 0.05f ),
-		m_weightAlign( 0.1f ),
-		m_weightAnchor( 0.5f ),
-		m_weightCohesion( 0.1f ),
-		m_weightSeparation( 0.1f ),
-		m_weightWander( 0.25f ),
-		m_separationDistance( 250.f )
-	{}
-
-	Vector3 CalculateForces( int i0, std::vector<SwarmVehicle>& swarmers, Vector3 anchorPosition, float timeSeconds );
-
-//private:
-	float m_weightCohesion;
-	float m_weightSeparation;
-	float m_weightAlign;
-	float m_weightWander;
-	float m_weightAnchor;
-
-	float m_wanderFluctuation;
-	float m_wanderDistance;
-	float m_wanderRadius;
-
-	float m_separationDistance;
-
-
-	Vector3 Calculate_Cohesion( Vector3 p0, Vector3 p1 );
-	Vector3 Calculate_Separation( Vector3 p0, Vector3 p1 );
-	Vector3 Calculate_Wander( SwarmVehicle& s, float wanderDistance, float radius, float fluctuation, float t );
+	Vector3 separation, cohesion, alignment, wander, anchor, formation, deceleration;
 };
+
 
 BLUE_CLASS( EveSwarm ) :
-	public EveSpaceObject2
+	public EveShip2
 {
 public:
 	EXPOSE_TO_BLUE();
@@ -125,15 +96,92 @@ public:
 	/////////////////////////////////////////////////////////////////////////////////////
 	// EveSwarm
 	void AddSwarmer();
-	//void 
+	Vector3 RemoveSwarmer();
+	void SetCount( int count );
+	void EnableSwarming( bool enable );
+	void PickFiringOrigin();
+	
+	struct BehaviorProperties
+	{
+		BehaviorProperties() :
+			m_speedMultiplier( 1.5f ),
+			m_speedMinimum( 50.f ),
+			m_mass( 1.f ),
+			m_maxDistance( 5000.f ),
+			m_timeMultiplier( 1.f ),
+			m_maxTime( 1.f ),
+
+			// Behavior characteristics
+			m_wanderDistance( 100.f ),
+			m_wanderRadius( 80.f ),
+			m_wanderFluctuation( 0.05f ),
+			m_weightAlign( 50.f ),
+			m_weightAnchor( 0.5f ),
+			m_weightCohesion( 0.1f ),
+			m_weightSeparation( 0.1f ),
+			m_separationDistance( 250.f ),
+			m_weightWander( 0.25f ),
+			m_weightDecelerate( 0.1f ),
+			m_maxDeceleration( 200.f ),
+			m_weightFormation( 1.f ),
+			m_formationDistance( 50.f ),
+			m_weightParentVelocity( 0.25f ),
+			m_weightParentAcceleration( 1.f )
+		{}
+
+		float m_mass;
+		float m_speedMultiplier;
+		float m_speedMinimum;
+	
+		float m_maxDistance;  // Max allowed distance from ball
+		float m_timeMultiplier; // Time multiplier, mostly for debug
+		float m_maxTime; // Never update by more than this, anything too long and things stop making sense
+
+		// Cohesion: steers all vehicles/swarmers towards their average position, keeps vehicles close to each other
+		float m_weightCohesion;
+
+		// Separation: steers vehicles away from other vehicles depending on (inverted)distance, avoiding bumping etc
+		float m_weightSeparation;
+		float m_separationDistance;
+
+		// Align: Steers each vehicle in the average direction of all vehicles. Gives a sense of formation and shared... purpose?
+		// This weight is in newtons and uses direction rather than velocity so we don't have to change all paremeters if max
+		// velocity changes.
+		float m_weightAlign;
+
+		// Wander: Steers a vehicle to a fluctuating point on a sphere in front of the vehicle. Creates some interesting 'natural'
+		// looking random movement characteristics.
+		float m_weightWander;
+		float m_wanderFluctuation; // How fast the point on the sphere changes
+		float m_wanderDistance;  // How far in front of the vehicle is the sphere
+		float m_wanderRadius;  // Radius of the sphere
+
+		// Anchor: Steer vehicles toward the center point/ball
+		float m_weightAnchor;
+
+		// Decelerate: Basically works to avoid the vehicles maintaining maximum velocity all the time(if the ball is stationary f.x.) resulting
+		// in ugly orbiting style behaviors
+		float m_weightDecelerate;
+		float m_maxDeceleration;
+
+		// Formation: Have all swarmer except the first try to form a v behind the swarmer 0
+		float m_weightFormation;
+		float m_formationDistance;
+
+		// Velocity and acceleration inherited from parent position function
+		float m_weightParentVelocity;
+		float m_weightParentAcceleration;
+	};
+	void SetBehavior( const BehaviorProperties* behavior ) { m_behavior = *behavior; }
 
 	/////////////////////////////////////////////////////////////////////////////////////
-	// IEveSpaceObject2 / EVESpaceObject2
+	// EveShip2 overrides
 	void UpdateSyncronous( EveUpdateContext& updateContext );
 	void UpdateAsyncronous( EveUpdateContext& updateContext );
 	void RenderDebugInfo( Tr2RenderContext& renderContext );
-	void GetRenderables( const TriFrustum& frustum, std::vector<ITr2Renderable*>& renderables, const Matrix& parentTransform );
 	bool GetBoundingSphere( Vector4& sphere, BoundingSphereQuery query=EVE_BOUNDS_NORMAL ) const;
+	void PushRenderables( const TriFrustum& frustum, std::vector<ITr2Renderable*>& renderables );
+	void RebuildCachedData( BlueAsyncRes* p );
 
 	// This version of the function should perform an update on the model / ball position
 	void GetModelCenterWorldPosition( Vector3 &position, Be::Time t );
@@ -143,8 +191,6 @@ public:
 
 	// If possible, return an AABB in local coordinates
 	bool GetLocalBoundingBox( Vector3 &min, Vector3 &max );
-	// Get the local to world transform
-	void GetLocalToWorldTransform( Matrix &transform ) const;
 	
 	virtual void RegisterWithQuadRenderer( Tr2QuadRenderer& quadRenderer );
 	virtual void AddQuadsToQuadRenderer( Tr2QuadRenderer& quadRenderer );
@@ -157,32 +203,55 @@ public:
 	// INotify
 	bool OnModified( Be::Var* val );
 
+protected:
+	/////////////////////////////////////////////////////////////////////////////////////
+	// Object space damage locator information
+	Vector3 GetObjectSpaceDamageLocatorPosition( uint32_t index ) const;
+	Vector3 GetObjectSpaceDamageLocatorDirection( uint32_t index ) const;
+	bool GetDamageLocatorPosition( Vector3* out, int index, bool inWorldSpace );
+	
+	/////////////////////////////////////////////////////////////////////////////////////
+	// EveShip2 override
+	Matrix GetObserverTransform() const;
+	const Matrix* GetTurretTransform() const;
 private:
-	Tr2MeshBasePtr m_mesh;
-
 	std::vector<SwarmVehicle> m_vehicles;
+	std::vector<SwarmVehicleDebug> m_debugInfo;
 	PEveSwarmRenderableVector m_renderables;
 
+	// Which fighter is being shot
+	int m_targetIndex;
+	// And which fighter is the origin for firing effects
+	int m_firingIndex;
+
 	// Swarming properties
+	bool m_swarmingEnabled;
+	bool m_started;
+
 	int m_count;
 	float m_debugSize;
-	
-	float m_mass;
-	float m_maxSpeed;
-	float m_maxAcceleration;
-	
-	float m_maxOffset;
-	float m_timeMultiplier;
-	// Never update by more than this, anything too long and things stop looking right
-	float m_maxTime;
 
-	SwarmBehavior m_behavior;
 
-	// Positional data
-	Vector3 m_rootVelocity;
-	Vector3 m_rootPosition;
+	// Squad bounds
 	Vector3 m_squadBoundsMin;
 	Vector3 m_squadBoundsMax;
+
+	Vector3 m_worldAcceleration;
+
+	// Behavior data and functions
+	BehaviorProperties m_behavior;
+
+	Vector3 CalculateForces( int i0, std::vector<SwarmVehicle>& swarmers, const Vector3& centerOfMass, const Vector3& alignment, const Vector3& formationDirection, const Vector3& formationSide, float timeSeconds );
+	Vector3 Calculate_Cohesion( Vector3 p0, Vector3 p1 );
+	Vector3 Calculate_Separation( Vector3 p0, Vector3 p1 );
+	Vector3 Calculate_Wander( SwarmVehicle& s, float wanderDistance, float radius, float fluctuation, float t );
+	void Clamp( Vector3* v, float maxLength ) const;
+
+	
+	bool m_debugShowSwarmBounds;
+	bool m_debugShowVehicle;
+	bool m_debugShowForces;
+	void EnableSwarmForceDebug( bool enable );
 };
 TYPEDEF_BLUECLASS( EveSwarm );
 

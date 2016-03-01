@@ -86,6 +86,15 @@ void EveMobile::OnListModified( long event, ssize_t key, ssize_t key2, IRoot* va
 
 // --------------------------------------------------------------------------------
 // Description:
+//   Return a transform used for turret locators
+// --------------------------------------------------------------------------------
+const Matrix* EveMobile::GetTurretTransform() const
+{
+	return &m_worldTransform;
+}
+
+// --------------------------------------------------------------------------------
+// Description:
 //   Override base ::UpdateSyncronous() function, so we can update the turrets and 
 //   their positions (if they are attached to animated bones!)
 // --------------------------------------------------------------------------------
@@ -124,7 +133,7 @@ void EveMobile::UpdateSyncronous( EveUpdateContext& updateContext )
 		++locatorInfoIdx;
 
 		// call standard update function
-		(*it)->UpdateSyncronous( deltaT, time, &m_worldTransform );
+		(*it)->UpdateSyncronous( deltaT, time, GetTurretTransform() );
 	}
 }
 

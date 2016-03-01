@@ -353,6 +353,15 @@ const EveSOFDataMgr::GenericDamageData* EveSOFDNA::GetGenericDamageData() const
 
 // --------------------------------------------------------------------------------
 // Description:
+//   Return the generic damage data, impacts are mostly the same for everything
+// --------------------------------------------------------------------------------
+const EveSwarm::BehaviorProperties* EveSOFDNA::GetGenericSwarmProperties() const
+{
+	return &m_genericData->swarmBehavior;
+}
+
+// --------------------------------------------------------------------------------
+// Description:
 //   Return the factional group-decal-data by a given groupindex
 // --------------------------------------------------------------------------------
 const EveSOFDataMgr::FactionDecalData* EveSOFDNA::GetFactionDecalData( int groupIndex ) const

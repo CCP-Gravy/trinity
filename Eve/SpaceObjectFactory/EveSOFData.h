@@ -7,6 +7,7 @@
 #ifndef EveSOFData_H
 #define EveSOFData_H
 
+#include "Eve/SpaceObject/EveSwarm.h"
 
 // --------------------------------------------------------------------------------
 // All data storage classes for gerenal purposes
@@ -424,6 +425,7 @@ public:
 		BUILDCLASS_SHIP = 0,
 		BUILDCLASS_MOBILE,
 		BUILDCLASS_STATIONARY,
+		BUILDCLASS_SWARM,
 	};
 
 	// hull name
@@ -820,6 +822,19 @@ public:
 TYPEDEF_BLUECLASS( EveSOFDataGenericShader );
 BLUE_DECLARE_VECTOR( EveSOFDataGenericShader );
 
+BLUE_CLASS( EveSOFDataGenericSwarm ) :
+	public IRoot
+{
+public:
+	EXPOSE_TO_BLUE();
+	EveSOFDataGenericSwarm( IRoot* lockobj = NULL ) {}
+	~EveSOFDataGenericSwarm() {}
+
+	EveSwarm::BehaviorProperties m_behavior;
+};
+TYPEDEF_BLUECLASS( EveSOFDataGenericSwarm );
+BLUE_DECLARE_VECTOR( EveSOFDataGenericSwarm );
+
 BLUE_CLASS( EveSOFDataGeneric ) :
 	public IRoot
 {
@@ -843,6 +858,9 @@ public:
 
 	// damage data
 	EveSOFDataGenericDamagePtr m_damage;
+	
+	// swarm data
+	EveSOFDataGenericSwarmPtr m_swarm;
 
 	// faction area data
 	PEveSOFDataFactionHullAreaVector m_hullAreas;

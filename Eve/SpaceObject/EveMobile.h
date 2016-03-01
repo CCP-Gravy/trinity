@@ -76,6 +76,7 @@ protected:
 	// children
 	virtual bool DisplayChildren() const;
 
+	virtual const Matrix* GetTurretTransform() const;
 private:
 	/////////////////////////////////////////////////////////////////////////////////////
 	// activation
