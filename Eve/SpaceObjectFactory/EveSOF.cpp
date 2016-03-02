@@ -156,6 +156,13 @@ IRootPtr EveSOF::BuildFromDNA( const char* dnaString )
 		SetupBoosters( newShip, dna );
 	}
 
+	// EveSwarm-specific setups
+	EveSwarmPtr newSwarm;
+	if( newObj->GetRawRoot()->QueryInterface( BlueInterfaceIID<EveSwarm>(), (void**)&newSwarm, BEQI_SILENT ) )
+	{
+		newSwarm->SetBehavior( dna->GetGenericSwarmProperties() );
+	}
+
 	// ships needs a final ::Initialize call
 	newObj->Initialize();
 
@@ -241,7 +248,6 @@ EveSpaceObject2Ptr EveSOF::CreateSpaceObject( const EveSOFDNAPtr dna ) const
 		{
 			EveSwarmPtr newSwarm;
 			newSwarm.CreateInstance();
-			newSwarm->SetBehavior( dna->GetGenericSwarmProperties() );
 			spaceObject = newSwarm;
 		}
 		break;
@@ -1416,6 +1422,11 @@ void EveSOF::SetupLocators( EveSpaceObject2Ptr obj, const EveSOFDNAPtr dna ) con
 	if( pdbLocators )
 	{
 		obj->AddLocatorSet( "defensebattery", (const Locator*)&( *pdbLocators )[0], pdbLocators->size() );
+	}
+	const std::vector<EveSOFDataMgr::LocatorDirectionData>* explosionsLocators = dna->GetHullLocators( "explosions" );
+	if( explosionsLocators )
+	{
+		obj->AddLocatorSet( "explosions", (const Locator*)&( *explosionsLocators )[0], explosionsLocators->size() );
 	}
 
 	// create and setup the audio locator
