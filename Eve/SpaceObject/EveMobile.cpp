@@ -183,7 +183,7 @@ void EveMobile::UpdateAsyncronous( EveUpdateContext& updateContext )
 
 	// now prep to get the renderables
 	EveTurretSet::ParentData pd;
-	pd.transform = m_worldTransform;
+	pd.transform = *GetTurretTransform();
 	pd.shipData = m_spaceObjectShipData;
 	pd.clipData = m_psData.clipData;
 	pd.clipDataEx = m_psData.miscData;

@@ -59,6 +59,7 @@ const Be::ClassInfo* EveSwarm::ExposeToBlue()
 		MAP_METHOD_AND_WRAP( "RemoveSwarmer", RemoveSwarmer, "" )
 		MAP_METHOD_AND_WRAP( "SetCount", SetCount, "" )
 		MAP_METHOD_AND_WRAP( "EnableSwarming", EnableSwarming, "" )
+		MAP_METHOD_AND_WRAP( "PickFiringOrigin", PickFiringOrigin, "" )
 		
     EXPOSURE_CHAINTO( EveShip2 )
 }
