@@ -1,0 +1,107 @@
+////////////////////////////////////////////////////////////
+//
+//    Created:   March 2016
+//    Copyright: CCP 2016
+//
+
+#include "StdAfx.h"
+#include "EveExplosion.h"
+
+
+BLUE_DEFINE( EveExplosion );
+
+const Be::ClassInfo* EveExplosion::ExposeToBlue()
+{
+    EXPOSURE_BEGIN( EveExplosion, "Specialized explosion space object child" )
+        MAP_INTERFACE( EveChildContainer )
+		MAP_INTERFACE( IEveSpaceObjectChild )
+
+		MAP_ATTRIBUTE( "name", m_name, "", Be::READWRITE | Be::PERSIST )
+
+		MAP_ATTRIBUTE( 
+			"localExplosion", 
+			m_localExplosion, 
+			"Child containing local explosion effect", 
+			Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( 
+			"localExplosionShared", 
+			m_localExplosionShared, 
+			"Child containing shared parts of the local explosion effect (particle systems etc.)", 
+			Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( 
+			"globalExplosion", 
+			m_globalExplosion, 
+			"Child containing global explosion effect", 
+			Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( 
+			"localExplosionDelay", 
+			m_localExplosionDelay, 
+			"Delay from explosion start to the first \"local\" explosion in seconds", 
+			Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( 
+			"localExplosionInterval", 
+			m_localExplosionInterval, 
+			"Maximum interval between local explosions in seconds", 
+			Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( 
+			"localExplosionIntervalFactor", 
+			m_localExplosionIntervalFactor, 
+			"Coefficent to apply to m_localExplosionInterval for consecutive explosions", 
+			Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( 
+			"globalExplosionDelay", 
+			m_globalExplosionDelay, 
+			"Delay from explosion start to the \"global\" explosion in seconds", 
+			Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( 
+			"wreckSwitchTime", 
+			m_wreckSwitchTime, 
+			"Time from the start of the explosion to the point when original model needs to be switched to the wreck", 
+			Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( 
+			"localDuration", 
+			m_localDuration, 
+			"Total duration of a single local explosion", 
+			Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( 
+			"globalDuration", 
+			m_globalDuration, 
+			"Duration of the global explosion", 
+			Be::READWRITE | Be::PERSIST )
+
+		MAP_ATTRIBUTE( 
+			"isPlaying", 
+			m_isPlaying, 
+			"Is the effect playing", 
+			Be::READ )
+		MAP_ATTRIBUTE( 
+			"playTime", 
+			m_playTime, 
+			"Time since the start of playback", 
+			Be::READ )
+
+		MAP_ATTRIBUTE( "translation", m_translation, "", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "rotation", m_rotation, "", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "scaling", m_scaling,"", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "localTransform", m_localTransform, "", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "worldTransform", m_worldTransform, "", Be::READ )
+		MAP_ATTRIBUTE( "useSRT", m_useSRT, "Should local transform be built from scaling, rotation and translation attributes.", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "staticTransform", m_staticTransform, "Does local transform need to be rebuilt every frame.", Be::READWRITE | Be::PERSIST )
+		MAP_METHOD_AND_WRAP( "RebuildLocalTransform", RebuildLocalTransform, "Rebuilds local transform." )
+
+		MAP_METHOD_AND_WRAP( 
+			"Play", 
+			Play, 
+			"Starts effect playback." )
+		MAP_METHOD_AND_WRAP( 
+			"Stop", 
+			Stop, 
+			"Stops effect playback." )
+		MAP_METHOD_AND_WRAP( 
+			"SetLocalExplosionTransforms", 
+			SetLocalExplosionTransforms, 
+			"Assigns transforms for local explosions.\n"
+			":param transforms: list of matricies to be used as local explosion transforms" )
+    EXPOSURE_END()
+}
+
