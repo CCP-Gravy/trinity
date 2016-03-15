@@ -22,6 +22,8 @@ const Be::ClassInfo* Tr2DynamicEmitter::ExposeToBlue()
 		MAP_ATTRIBUTE( "isValid", m_isValid, "If the emitter successfully bound to the particle system", Be::READ )
 		MAP_ATTRIBUTE( "particleSystem", m_particleSystem, "Particle system to emit particles to", Be::READWRITE | Be::PERSIST | Be::NOTIFY )
 		MAP_ATTRIBUTE( "rate", m_rate, "Number of particles to emit per second", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "maxParticles", m_maxParticles, "Maximum number of particles to emit (set to <0 for no limit)", Be::READWRITE | Be::PERSIST )
+		MAP_PROPERTY_READONLY( "emittedParticles", GetEmittedParticleCount, "Number of particles emitted" )
 
 		MAP_METHOD_AND_WRAP( "Rebind", Rebind, "Re-binds emitter to the particle system" )
 		MAP_METHOD_AND_WRAP( 

@@ -21,7 +21,9 @@ Tr2DynamicEmitter::Tr2DynamicEmitter( IRoot* lockobj )
 	m_rate( 0.0f ),
 	m_accumulatedRate( 0.0f ),
 	m_lastUpdate( 0 ),
-	m_lastEmitterPos( 0.f, 0.f, 0.f, 0.f )
+	m_lastEmitterPos( 0.f, 0.f, 0.f, 0.f ),
+	m_maxParticles( -1 ),
+	m_emittedParticles( 0 )
 {
 }
 
@@ -172,8 +174,13 @@ void Tr2DynamicEmitter::SpawnParticles( const UpdateArguments& arguments,
 		return;
 	}
 	m_accumulatedRate += m_rate*rateModifier;
-	int count = int( m_accumulatedRate );
+	int32_t count = int32_t( m_accumulatedRate );
 	m_accumulatedRate -= floor( m_accumulatedRate );
+	if( m_maxParticles >= 0 && int32_t( m_emittedParticles ) + count > m_maxParticles )
+	{
+		count = std::max( m_maxParticles - int32_t( m_emittedParticles ),  0 );
+	}
+	m_emittedParticles += count;
 
 	// update position if we have any
 	Vector3 transformedEmitterPos( 0.f, 0.f, 0.f );
@@ -183,7 +190,7 @@ void Tr2DynamicEmitter::SpawnParticles( const UpdateArguments& arguments,
 	}
 
 	float* particle[Tr2ParticleElementData::COUNT];
-	for( int i = 0; i < count; ++i )
+	for( int32_t i = 0; i < count; ++i )
 	{
 		if( !m_particleSystem->InsertParticle( particle ) )
 		{
@@ -223,6 +230,7 @@ void Tr2DynamicEmitter::SpawnParticles( const UpdateArguments& arguments,
 // --------------------------------------------------------------------------------------
 void Tr2DynamicEmitter::Rebind()
 {
+	m_emittedParticles = 0;
 	m_isValid = false;
 	if( m_particleSystem == nullptr )
 	{
@@ -248,4 +256,22 @@ void Tr2DynamicEmitter::Rebind()
 	}
 	m_isValid = true;
 	m_declarationHash = m_particleSystem->GetElementDeclarationHash();
+}
+
+// --------------------------------------------------------------------------------------
+// Description:
+//   Resets the number of emitted particles.
+// --------------------------------------------------------------------------------------
+void Tr2DynamicEmitter::ResetEmittedParticleCount()
+{
+	m_emittedParticles = 0;
+}
+
+// --------------------------------------------------------------------------------------
+// Description:
+//   Returns the number of emitted particles.
+// --------------------------------------------------------------------------------------
+uint32_t Tr2DynamicEmitter::GetEmittedParticleCount() const
+{
+	return m_emittedParticles;
 }

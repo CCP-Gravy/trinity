@@ -58,6 +58,9 @@ public:
 
 	bool IsValid() const;
 	void Rebind();
+
+	void ResetEmittedParticleCount();
+	uint32_t GetEmittedParticleCount() const;
 private:
 	void UpdateSimulation( float dt );
 	// Just a name
@@ -80,6 +83,9 @@ private:
 	Be::Time m_lastUpdate;
 	// Position of last emit
 	Vector4 m_lastEmitterPos;
+
+	int32_t m_maxParticles;
+	CcpAtomic<uint32_t> m_emittedParticles;
 };
 
 TYPEDEF_BLUECLASS( Tr2DynamicEmitter );
