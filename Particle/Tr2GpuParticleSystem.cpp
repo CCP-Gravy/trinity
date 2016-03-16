@@ -232,6 +232,9 @@ void Tr2GpuParticleSystem::SetMaxParticles( uint32_t maxParticles )
 {
 #if GPU_PARTICLES_METHOD == GPU_PARTICLES_BUFFER_METHOD
 	m_maxParticles = maxParticles;
+	m_particleData->ReleaseResources( TRISTORAGE_ALL );
+	m_deadList->ReleaseResources( TRISTORAGE_ALL );
+	m_visibleList->ReleaseResources( TRISTORAGE_ALL );
 #else
 	uint32_t width, height;
 	GetMinPow2Rectange( maxParticles, width, height );
