@@ -50,6 +50,7 @@ void EveChildExplosion::Play()
 	m_objects.Append( m_localExplosionShared );
 	FindSharedObjects();
 	m_isPlaying = true;
+	m_playTime = 0;
 }
 
 // --------------------------------------------------------------------------------------
