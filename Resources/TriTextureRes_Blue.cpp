@@ -361,6 +361,15 @@ const Be::ClassInfo* TriTextureRes::ExposeToBlue()
 
 		MAP_METHOD_AND_WRAP
 		(
+			"CreateFromTexture",
+			CreateFromTexture,
+			"Creates a new TriTextureRes with a copy of provided TriTextureRes argument.\n"
+			"Arguments:\n"
+			"texture - valid TriTextureRes"
+		)
+
+		MAP_METHOD_AND_WRAP
+		(
 			"HasALObject",
 			HasALObject,
 			"Returns True iff TriTextureRes contains a reference to passed AL object ID.\n"

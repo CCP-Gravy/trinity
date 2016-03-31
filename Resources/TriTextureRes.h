@@ -83,6 +83,7 @@ public:
 
 	// Make an immutable TriTextureRes that takes a copy of the hostBitmap contents and sticks with it (not a live view).
 	bool CreateFromHostBitmap( Tr2HostBitmap* bitmap );
+	BlueStdResult CreateFromTexture( TriTextureRes* texture );
 
 	// Create a new TriTextureRes with undefined contents.  It's implied that the usage is dynamic.
 	bool Create(	uint32_t width, 

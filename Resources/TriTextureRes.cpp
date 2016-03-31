@@ -541,6 +541,47 @@ bool TriTextureRes::CreateFromHostBitmap( Tr2HostBitmap* bitmap )
 	return true;	
 }
 
+BlueStdResult TriTextureRes::CreateFromTexture( TriTextureRes* texture )
+{
+	if( this == texture )
+	{
+		return BLUE_STD_RESULT_OK;
+	}
+	if( !texture || !texture->IsGood() || !texture->GetTexture() )
+	{
+		return BlueStdResult( BLUE_STD_RESULT_VALUE_ERROR, "invalid texture" );
+	}
+	if( !Tr2Renderer::IsResourceCreationAllowed() )
+	{
+		return BlueStdResult( BLUE_STD_RESULT_RUNTIME_ERROR, "resource creation is not allowed at this time" );
+	}
+
+	auto& other = *texture->GetTexture();
+
+	m_texture.Destroy();
+	ON_BLOCK_EXIT( [&]{ SetTexture( m_texture ); } );
+
+	auto width = other.GetWidth();
+	auto height = other.GetHeight();
+
+	USE_MAIN_THREAD_RENDER_CONTEXT();
+	
+	Tr2BitmapDimensions bd( other );
+
+	CR_RETURN_VAL( 
+		m_texture.Create2D( width, height, other.GetTrueMipCount(), other.GetFormat(), USAGE_CPU_READ, nullptr, renderContext ), 
+		BlueStdResult( BLUE_STD_RESULT_RUNTIME_ERROR, "could not create a texture" ) );
+
+	Tr2TextureSubresource dst;
+	dst.m_right  = width;
+	dst.m_bottom = height;
+	CR_RETURN_VAL( 
+		m_texture.CopySubresourceRegion( Tr2TextureSubresource(), other, dst, renderContext ), 
+		BlueStdResult( BLUE_STD_RESULT_RUNTIME_ERROR, "could not copy a texture" ) );
+	m_isTextureResizable = false;
+	return BLUE_STD_RESULT_OK;
+}
+
 bool TriTextureRes::SetTextureFromDS( Tr2DepthStencil* depthStencil )
 {
 	m_wrappedDepthStencil = depthStencil;
