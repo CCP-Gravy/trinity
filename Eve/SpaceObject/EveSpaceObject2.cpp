@@ -1691,6 +1691,12 @@ void EveSpaceObject2::SelectMeshLevelOfDetail()
 		m_lodLevel = TR2_LOD_HIGH;
 	}
 
+	// pass it down to the impact effects, they use LODing too!
+	if( m_impactOverlay )
+	{
+		m_impactOverlay->SelectLod( m_lodLevel );
+	}
+
 	if( m_mesh )
 	{
 		PrepareForAnimation();

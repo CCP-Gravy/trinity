@@ -806,7 +806,8 @@ public:
 
 	// resources
 	std::string m_armorShader;
-	std::string m_shieldShader;
+	std::string m_shieldShaderEllipsoid;
+	std::string m_shieldShaderHull;
 	std::string m_shieldGeometryResFilePath;
 };
 TYPEDEF_BLUECLASS( EveSOFDataGenericDamage );

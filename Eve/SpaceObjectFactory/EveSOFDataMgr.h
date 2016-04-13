@@ -357,7 +357,8 @@ public:
 
 		// shaders & resources
 		std::string armorShader;
-		std::string shieldShader;
+		std::string shieldShaderEllipsoid;
+		std::string shieldShaderHull;
 		std::string shieldGeometryResFilePath;
 	};
 

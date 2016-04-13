@@ -851,11 +851,53 @@ EveSOFDataHull::ImpactEffectType EveSOFDNA::GetImpactEffectType() const
 
 // --------------------------------------------------------------------------------
 // Description:
+//   What shader to use for the shield?
+// --------------------------------------------------------------------------------
+const char* EveSOFDNA::GetImpactShieldShader() const
+{
+	const EveSOFDataMgr::GenericDamageData* data = GetGenericDamageData();
+	if( data )
+	{
+		switch( m_hullData->impactEffectType )
+		{
+		case EveSOFDataHull::IMPACTEFFECT_NONE:
+			return nullptr;
+		case EveSOFDataHull::IMPACTEFFECT_ELLIPSOID:
+			return data->shieldShaderEllipsoid.c_str();
+		case EveSOFDataHull::IMPACTEFFECT_HULL:
+			return data->shieldShaderHull.c_str();
+		}
+	}
+	return nullptr;
+}
+
+// --------------------------------------------------------------------------------
+// Description:
 //   Return a pointer to the hull part of booster data
 // --------------------------------------------------------------------------------
 const EveSOFDataMgr::HullBoosterData* EveSOFDNA::GetHullBoosterData() const
 {
 	return &m_hullData->boosters;
+}
+
+// --------------------------------------------------------------------------------
+// Description:
+//   Sometimes it is good to know how high an ID of a mesharea can go!
+// --------------------------------------------------------------------------------
+unsigned int EveSOFDNA::GetHighestMeshAreaIndex( TriBatchType areaType ) const
+{
+	unsigned int cntr = 0;
+	if( areaType == TRIBATCHTYPE_OPAQUE )
+	{
+		for( auto it = m_hullData->opaqueAreas.cbegin(); it != m_hullData->opaqueAreas.cend(); ++it )
+		{
+			if( it->index > cntr )
+			{
+				cntr = it->index;
+			}
+		}
+	}
+	return cntr;
 }
 
 // --------------------------------------------------------------------------------

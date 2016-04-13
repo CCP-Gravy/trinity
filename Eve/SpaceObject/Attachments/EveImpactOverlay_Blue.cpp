@@ -22,6 +22,7 @@ const Be::ClassInfo* EveImpactOverlay::ExposeToBlue()
 		MAP_ATTRIBUTE( "armorImpactParentSize", m_armorImpactParentSize, "", Be::READ )
 		MAP_ATTRIBUTE( "shieldImpactColorFade", m_shieldImpactColorFade, "", Be::READWRITE )
 		MAP_ATTRIBUTE( "shieldImpactParentSize", m_shieldImpactParentSize, "", Be::READ )
+		MAP_ATTRIBUTE( "shieldIsEllipsoid", m_shieldIsEllipsoid, "", Be::READWRITE )
 		MAP_ATTRIBUTE( "debugForceSpawnDebris", m_debugForceSpawnDebris, "", Be::READWRITE )
 		MAP_ATTRIBUTE( "renderPriority", m_renderPriority, "", Be::READ )
 

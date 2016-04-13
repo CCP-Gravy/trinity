@@ -1045,16 +1045,16 @@ void EveSOF::SetupEffects( EveSpaceObject2Ptr obj, const EveSOFDNAPtr dna ) cons
 			EveImpactOverlayPtr impactOverlay;
 			impactOverlay.CreateInstance();
 
-			// shield impact effect via Tr2Mesh
-			Tr2MeshPtr shieldMesh;
+			// shield impact effect via Tr2Mesh with LOD
+			Tr2MeshLodPtr shieldMesh;
 
-			// what type of shield effect?
 			if( impactType == EveSOFDataHull::IMPACTEFFECT_ELLIPSOID )
 			{
+				// shield shader
 				Tr2EffectPtr shieldShader;
 				shieldShader.CreateInstance();
 				shieldShader->StartUpdate();
-				std::string shaderPath = dna->GetAreaShaderLocationResPath() + std::string( "/" ) + genericDamageData->shieldShader;
+				std::string shaderPath = dna->GetAreaShaderLocationResPath() + std::string( "/" ) + dna->GetImpactShieldShader();
 				shieldShader->SetEffectPathName( shaderPath.c_str() );
 				for( auto it = raceDamageData->shieldDamageParameters.begin(); it != raceDamageData->shieldDamageParameters.end(); ++it )
 				{
@@ -1069,32 +1069,34 @@ void EveSOF::SetupEffects( EveSpaceObject2Ptr obj, const EveSOFDNAPtr dna ) cons
 				meshArea.CreateInstance();
 				meshArea->SetMaterial( shieldShader );
 
+				// what type of shield effect determines the geometry resource
+				Tr2LodResourcePtr lodResource;
+				lodResource.CreateInstance();
+				if( impactType == EveSOFDataHull::IMPACTEFFECT_ELLIPSOID )
+				{
+					// only the ellpisoid geometry
+					lodResource->SetResourcePath( TR2_LOD_HIGH, genericDamageData->shieldGeometryResFilePath.c_str() );
+				}
+				else if( impactType == EveSOFDataHull::IMPACTEFFECT_HULL )
+				{
+					// use the ships main geometry incl LODs
+					std::string highDetail = dna->GetHullGeometryResPath();
+					std::string mediumDetail = highDetail;
+					std::string lowDetail = highDetail;
+					StringInsertStubBefore( mediumDetail, ".gr2", "_mediumDetail" );
+					StringInsertStubBefore( lowDetail, ".gr2", "_lowDetail" );
+					lodResource->SetResourcePath( TR2_LOD_LOW, lowDetail.c_str() );
+					lodResource->SetResourcePath( TR2_LOD_MEDIUM, mediumDetail.c_str() );
+					lodResource->SetResourcePath( TR2_LOD_HIGH, highDetail.c_str() );
+
+					// adjust mesharea count to that from the mesh
+					meshArea->SetCount( 1 + dna->GetHighestMeshAreaIndex( TRIBATCHTYPE_OPAQUE ) );
+				}
+
 				shieldMesh.CreateInstance();
-				shieldMesh->SetMeshResPath( genericDamageData->shieldGeometryResFilePath.c_str() );
+				shieldMesh->SetGeometryResource( lodResource );
 				shieldMesh->GetAreas( TRIBATCHTYPE_ADDITIVE )->Append( meshArea );
 			}
-
-			/*
-			Tr2MeshLodPtr shieldMeshLod;
-			shieldMeshLod.CreateInstance();
-
-			std::string highDetail = dna->GetHullGeometryResPath();
-			std::string mediumDetail = highDetail;
-			std::string lowDetail = highDetail;
-			StringInsertStubBefore( mediumDetail, ".gr2", "_mediumDetail" );
-			StringInsertStubBefore( lowDetail, ".gr2", "_lowDetail" );
-
-			Tr2LodResourcePtr lodResource;
-			lodResource.CreateInstance();
-			lodResource->SetName( BlueSharedString( "Geometry" ) );
-			lodResource->SetResourcePath( TR2_LOD_LOW, lowDetail.c_str() );
-			lodResource->SetResourcePath( TR2_LOD_MEDIUM, mediumDetail.c_str() );
-			lodResource->SetResourcePath( TR2_LOD_HIGH, highDetail.c_str() );
-			lodResource->SelectLod( TR2_LOD_LOW );
-
-			shieldMeshLod->SetGeometryResource( lodResource );
-			shieldMeshLod->GetAreas( TRIBATCHTYPE_ADDITIVE )->Append( meshArea );
-			*/
 
 			// armor damage impact via shader
 			Tr2EffectPtr armorDamageShader;
@@ -1144,7 +1146,7 @@ void EveSOF::SetupEffects( EveSpaceObject2Ptr obj, const EveSOFDNAPtr dna ) cons
 			flickerCurve->mSpeed = genericDamageData->flickerPerlinSpeed;
 
 			// setup the overlay effect and add it the object
-			impactOverlay->Set( flickerCurve, impactEmitter, armorDamageShader, shieldMesh );
+			impactOverlay->Set( flickerCurve, impactEmitter, armorDamageShader, shieldMesh, impactType == EveSOFDataHull::IMPACTEFFECT_ELLIPSOID );
 			obj->SetImpactOverlay( impactOverlay );
 		}
 	}

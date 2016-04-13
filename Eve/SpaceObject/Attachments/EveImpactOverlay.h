@@ -16,7 +16,7 @@
 BLUE_DECLARE( TriPerlinCurve );
 BLUE_DECLARE( Tr2ScalarFader );
 BLUE_DECLARE( TriFrustum );
-BLUE_DECLARE( Tr2Mesh );
+BLUE_DECLARE( Tr2MeshLod );
 BLUE_DECLARE( EveUpdateContext );
 BLUE_DECLARE( EveSpaceObject2 );
 BLUE_DECLARE( Tr2Effect );
@@ -91,7 +91,7 @@ public:
 	Tr2EffectPtr GetArmorDamageShader( TriBatchType batchType ) const;
 
 	// setup
-	void Set( TriPerlinCurvePtr hullDamageFlickerCurve, Tr2GpuUniqueEmitterPtr armorDamageEmitter, Tr2EffectPtr armorDamageShader, Tr2MeshPtr shieldImpactMesh );
+	void Set( TriPerlinCurvePtr hullDamageFlickerCurve, Tr2GpuUniqueEmitterPtr armorDamageEmitter, Tr2EffectPtr armorDamageShader, Tr2MeshLodPtr shieldImpactMesh, bool shieldIsEllipsoid );
 
 	// getters
 	int32_t GetDataTextureOffset() const;
@@ -100,6 +100,8 @@ public:
 
 	// control animation
 	void ToggleEffect( const std::string& name, bool on, float duration );
+	// lod
+	void SelectLod( Tr2Lod lod );
 
 	// set the damages
 	void SetDamageState( float shield, float armor, float hull, bool doCreateArmorImpacts );
@@ -146,7 +148,8 @@ private:
 	std::map<int, ArmorImpactData> m_armorImpactData;
 
 	// shield damage
-	Tr2MeshPtr m_mesh;
+	Tr2MeshLodPtr m_mesh;
+	bool m_shieldIsEllipsoid;
 	uint32_t m_maxShieldImpacts;
 	float m_shieldImpactColorFade;
 	float m_shieldImpactParentSize;

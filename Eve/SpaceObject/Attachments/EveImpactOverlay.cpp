@@ -11,7 +11,7 @@
 #include "include/TriMath.h"
 #include "Curves/Fader/Tr2ScalarFader.h"
 #include "Utilities/BoundingSphere.h"
-#include "Tr2Mesh.h"
+#include "Tr2MeshLod.h"
 #include "Shader/Utils/Tr2DataTextureManager.h"
 #include "Eve/SpaceObject/EveSpaceObject2.h"
 #include "Eve/EveUpdateContext.h"
@@ -37,6 +37,7 @@ EveImpactOverlay::EveImpactOverlay( IRoot* lockobj ) :
 	m_display( true ),
 	m_configuration( IMPACT_INVALID ),
 	m_overallShieldImpact( -1.f ),
+	m_shieldIsEllipsoid( true ),
 	m_maxShieldImpacts( 8 ),
 	m_impactDataNextIdx( 1 ),
 	m_debugForceSpawnDebris( false ),
@@ -68,8 +69,9 @@ EveImpactOverlay::~EveImpactOverlay()
 // Description:
 //   Setup this overlay with data
 // --------------------------------------------------------------------------------
-void EveImpactOverlay::Set( TriPerlinCurvePtr hullDamageFlickerCurve, Tr2GpuUniqueEmitterPtr armorDamageEmitter, Tr2EffectPtr armorDamageShader, Tr2MeshPtr shieldImpactMesh )
+void EveImpactOverlay::Set( TriPerlinCurvePtr hullDamageFlickerCurve, Tr2GpuUniqueEmitterPtr armorDamageEmitter, Tr2EffectPtr armorDamageShader, Tr2MeshLodPtr shieldImpactMesh, bool shieldIsEllipsoid )
 {
+	m_shieldIsEllipsoid = shieldIsEllipsoid;
 	m_hullDamageFlickerCurve = hullDamageFlickerCurve;
 	m_armorImpactEmitter = armorDamageEmitter;
 	m_armorDamageShader = armorDamageShader;
@@ -265,13 +267,22 @@ void EveImpactOverlay::UpdateAsyncronous( EveUpdateContext& updateContext, EveSp
 			// get worldpos of damagelocator from parent
 			Vector3 tgtPosWS( 0.f, 0.f, 0.f );
 			parent->GetDamageLocatorPosition( &tgtPosWS, shieldData->damageLocatorIndex, true );
-			// convert position and direction into object space
-			Vector3 tgtPosOS, dirOS;
-			D3DXVec3TransformCoord( &tgtPosOS, &tgtPosWS, &parentInverseWorldTransform );
-			D3DXVec3TransformNormal( &dirOS, &shieldData->direction, &parentInverseWorldTransform );
-			// intersections
+			// calculate point, but depends on shield type
 			Vector3 p( 0.f, 0.f, 0.f );
-			IntersectEllipsoidRay( p, shieldEllipsoidCenter, shieldEllipsoidRadii, tgtPosOS, dirOS );
+			if( m_shieldIsEllipsoid )
+			{
+				// convert position and direction into object space
+				Vector3 tgtPosOS, dirOS;
+				D3DXVec3TransformCoord( &tgtPosOS, &tgtPosWS, &parentInverseWorldTransform );
+				D3DXVec3TransformNormal( &dirOS, &shieldData->direction, &parentInverseWorldTransform );
+				// intersections
+				IntersectEllipsoidRay( p, shieldEllipsoidCenter, shieldEllipsoidRadii, tgtPosOS, dirOS );
+			}
+			else
+			{
+				// just use locator pos, no ellipsoid
+				D3DXVec3TransformCoord( &p, &tgtPosWS, &parentInverseWorldTransform );
+			}
 			// "encode" it in texels
 			texelData->v[0] = Vector4( p, shieldData->timeLeft );
 			texelData->v[1] = Vector4( shieldData->size, 0.f, 0.f, shieldData->lifeTime );
@@ -454,6 +465,18 @@ void EveImpactOverlay::ToggleEffect( const std::string& name, bool on, float dur
 	else if( name == "armorrepair" )
 	{
 		m_armorRepairing->StartFade( on, duration / 4.f );
+	}
+}
+
+// --------------------------------------------------------------------------------
+// Description:
+//   Impact effects use the same LOD system as the parent object
+// --------------------------------------------------------------------------------
+void EveImpactOverlay::SelectLod( Tr2Lod lod )
+{
+	if( m_mesh )
+	{
+		m_mesh->SelectLod( lod );
 	}
 }
 

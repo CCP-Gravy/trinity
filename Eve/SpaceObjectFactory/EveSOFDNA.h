@@ -92,9 +92,11 @@ public:
 	const EveSOFDataMgr::FactionSpotlightSetColorData* GetFactionSpotlightSetData( int groupIndex ) const;
 	const EveSOFDataMgr::FactionSpriteSetColorData* GetFactionSpriteSetData( int groupIndex ) const;
 
-	// get dna data
+	// get mixed data
 	const char* GetDnaString() const;
 	const Vector4* GetMeshAreaParameter( const BlueSharedString& areaDesignation, const BlueSharedString& parameterName, const std::map<BlueSharedString, Vector4>* hullParameters = nullptr, unsigned int blockededMaterials = 0 ) const;
+	const char* GetImpactShieldShader() const;
+	unsigned int GetHighestMeshAreaIndex( TriBatchType areaType ) const;
 
 
 private:
