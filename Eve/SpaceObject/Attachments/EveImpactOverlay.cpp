@@ -285,7 +285,7 @@ void EveImpactOverlay::UpdateAsyncronous( EveUpdateContext& updateContext, EveSp
 			}
 			// "encode" it in texels
 			texelData->v[0] = Vector4( p, shieldData->timeLeft );
-			texelData->v[1] = Vector4( shieldData->size, 0.f, 0.f, shieldData->lifeTime );
+			texelData->v[1] = Vector4( shieldData->size, shieldData->intensity, 0.f, shieldData->lifeTime );
 			// also need this intercept position in WS
 			D3DXVec3TransformCoord( &shieldData->interceptPosition, &p, &parentWorldTransform );
 	
@@ -536,7 +536,7 @@ void EveImpactOverlay::Clear()
 //   Use this method to add a new impact effect. Internal states determines
 //   what effect to use
 // --------------------------------------------------------------------------------
-int EveImpactOverlay::CreateImpact( int damageLocatorIndex, const Vector3& direction, float lifeTime, float size )
+int EveImpactOverlay::CreateImpact( int damageLocatorIndex, const Vector3& direction, float lifeTime, float size, float intensity )
 {
 	// settings
 	if( !g_eveSpaceObjectImpactEffectEnabled )
@@ -548,7 +548,7 @@ int EveImpactOverlay::CreateImpact( int damageLocatorIndex, const Vector3& direc
 	switch( m_configuration )
 	{
 	case IMPACT_SHIELD:
-		return CreateShieldImpact( damageLocatorIndex, direction, lifeTime, size );
+		return CreateShieldImpact( damageLocatorIndex, direction, lifeTime, size, intensity );
 	case IMPACT_ARMOR:
 	case IMPACT_HULL:
 		return CreateArmorImpact( damageLocatorIndex, size, true );
@@ -596,7 +596,7 @@ bool EveImpactOverlay::UpdateImpact( Vector3& out, const Vector3& direction, int
 // Description:
 //   Use this method to add a new shield impact
 // --------------------------------------------------------------------------------
-int EveImpactOverlay::CreateShieldImpact( int damageLocatorIndex, const Vector3& direction, float lifeTime, float size )
+int EveImpactOverlay::CreateShieldImpact( int damageLocatorIndex, const Vector3& direction, float lifeTime, float size, float intensity )
 {
 	// only need normal
 	Vector3 nrmDir;
@@ -654,6 +654,7 @@ int EveImpactOverlay::CreateShieldImpact( int damageLocatorIndex, const Vector3&
 	sid.interceptPosition = Vector3( 0.f, 0.f, 0.f );
 	sid.lifeTime = sid.timeLeft = IMPACT_SHIELD_FADEOUT * lifeTime;
 	sid.size = size;
+	sid.intensity = intensity;
 	m_shieldImpactData[ m_impactDataNextIdx ] = sid;
 	return m_impactDataNextIdx++;
 }

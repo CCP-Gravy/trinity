@@ -2120,7 +2120,7 @@ int EveSpaceObject2::CreateImpact( int damageLocatorIndex, const Vector3& direct
 	{
 		if( m_lodLevel > TR2_LOD_LOW )
 		{
-			return m_impactOverlay->CreateImpact( damageLocatorIndex, direction, lifeTime, size );
+			return m_impactOverlay->CreateImpact( damageLocatorIndex, direction, lifeTime, size, 1.f );
 		}
 	}
 	return -1;
@@ -2136,7 +2136,6 @@ int EveSpaceObject2::CreateImpactFromPosition( const Vector3& position, const Ve
 	return CreateImpact( closestDamageLocator, direction, lifeTime, size );
 }
   
-
 // -----------------------------------------------------------------------------
 // Description:
 //   Update the effect on this object

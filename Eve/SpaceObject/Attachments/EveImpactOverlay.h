@@ -66,6 +66,7 @@ public:
 		float lifeTime;
 		float timeLeft;
 		float size;
+		float intensity;
 	};
 
 	// armor impacts
@@ -108,7 +109,7 @@ public:
 	void Clear();
 
 	// control impacts
-	int CreateImpact( int damageLocatorIndex, const Vector3& direction, float lifeTime, float size );
+	int CreateImpact( int damageLocatorIndex, const Vector3& direction, float lifeTime, float size, float intensity );
 	bool UpdateImpact( Vector3& out, const Vector3& direction, int impactIndex );
 
 	// helper for checking activity
@@ -118,7 +119,7 @@ public:
 
 private:
 	// helper functions to create the different types of impacts
-	int CreateShieldImpact( int damageLocatorIndex, const Vector3& direction, float lifeTime, float size );
+	int CreateShieldImpact( int damageLocatorIndex, const Vector3& direction, float lifeTime, float size, float intensity );
 	int CreateArmorImpact( int damageLocatorIndex, float size, bool spawnEffects );
 
 	// general data
