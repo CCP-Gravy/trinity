@@ -16,7 +16,9 @@
 #include "Utilities/BoundingSphere.h"
 
 EveChildBillboard::EveChildBillboard( IRoot* lockobj ):
-	EveChildTransform()
+	EveChildTransform(),
+	m_boundingSphere( 0.0, 0.0, 0.0, -1.0),
+	m_display( true )
 {
 }
 
