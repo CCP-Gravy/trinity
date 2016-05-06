@@ -45,6 +45,7 @@ const Be::ClassInfo* EveCloud::ExposeToBlue()
 		)
 		MAP_ATTRIBUTE( "scaling", m_scaling, "Object scaling", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "translation", m_translation, "Object local translation", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "rotation", m_rotation, "Object local rotation", Be::READWRITE | Be::PERSIST )
 
 		MAP_ATTRIBUTE( "boundingSphere", m_boundingSphere, "Used for culling", Be::READ )
 		MAP_ATTRIBUTE( "preTesselationLevel", m_preTesselationLevel, "Number of triangles per width/heigth", Be::READWRITE | Be::PERSIST | Be::NOTIFY )

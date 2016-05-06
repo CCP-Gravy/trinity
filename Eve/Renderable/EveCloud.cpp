@@ -158,6 +158,7 @@ EveCloud::EveCloud( IRoot* lockobj )
 	m_worldTransform( Tr2Renderer::GetIdentityTransform() ),
 	m_scaling( 1.0f, 1.0f, 1.0f ),
 	m_translation( 0.f, 0.f, 0.f ),
+	m_rotation( 0.f, 0.f, 0.f, 1.0f ),
 	m_display( true ),
 	m_declaration( Tr2EffectStateManager::UNINITIALIZED_DECLARATION ),
 	m_preTesselationLevel( 32 ),
@@ -212,13 +213,14 @@ void EveCloud::UpdateSyncronous( EveUpdateContext& updateContext )
 	}
 
 	Matrix preTransform;
-	D3DXMatrixTransformation( &preTransform, nullptr, nullptr, &m_scaling, 0, nullptr, &m_translation );
+	D3DXMatrixTransformation( &preTransform, nullptr, nullptr, &m_scaling, nullptr, &m_rotation, &m_translation );
 	D3DXMatrixTransformation( &m_localTransform, nullptr, nullptr, nullptr, nullptr, &rotation, &translation );
 	D3DXMatrixMultiply( &m_localTransform, &preTransform, &m_localTransform );
 
 	m_worldTransform = m_localTransform;
 	m_secondaryLightingSphereRadiusWorld = m_secondaryLightingSphereRadiusLocal * 
 		( D3DXVec3Length( &m_worldTransform.GetX() ) +  D3DXVec3Length( &m_worldTransform.GetY() ) + D3DXVec3Length( &m_worldTransform.GetZ() ) ) / 3.f;
+	BoundingSphereFromBox( m_boundingSphere, m_min, m_max, &m_worldTransform );
 }
 
 void EveCloud::UpdateAsyncronous( EveUpdateContext& updateContext )
@@ -233,10 +235,6 @@ void EveCloud::GetRenderables( const TriFrustum& frustum, std::vector<ITr2Render
 
 void EveCloud::GetRenderables( const TriFrustum& frustum, std::vector<ITr2Renderable*>& renderables, const Matrix& parentTransform )
 {
-	m_worldTransform = m_localTransform * parentTransform;
-	m_secondaryLightingSphereRadiusWorld = m_secondaryLightingSphereRadiusLocal * 
-		( D3DXVec3Length( &m_worldTransform.GetX() ) +  D3DXVec3Length( &m_worldTransform.GetY() ) + D3DXVec3Length( &m_worldTransform.GetZ() ) ) / 3.f;
-	BoundingSphereFromBox( m_boundingSphere, m_min, m_max, &m_worldTransform );
 	if( !m_display || !frustum.IsSphereVisible( &m_boundingSphere ) )
 	{
 		return;
@@ -460,6 +458,20 @@ void EveCloud::GetPickingBatches( ITriRenderBatchAccumulator* batches, Tr2PickTy
 void EveCloud::UpdateSyncronous( EveUpdateContext& updateContext, IEveSpaceObject2* spaceObjectParent, IEveSpaceObjectChild* childParent )
 {
 	UpdateSyncronous( updateContext );
+
+	Matrix parent;
+	if( childParent )
+	{
+		childParent->GetLocalToWorldTransform( parent );
+	}
+	else
+	{
+		spaceObjectParent->GetLocalToWorldTransform( parent );
+	}
+	D3DXMatrixMultiply( &m_worldTransform, &m_localTransform, &parent );
+	m_secondaryLightingSphereRadiusWorld = m_secondaryLightingSphereRadiusLocal * 
+		( D3DXVec3Length( &m_worldTransform.GetX() ) +  D3DXVec3Length( &m_worldTransform.GetY() ) + D3DXVec3Length( &m_worldTransform.GetZ() ) ) / 3.f;
+	BoundingSphereFromBox( m_boundingSphere, m_min, m_max, &m_worldTransform );
 }
 
 void EveCloud::UpdateAsyncronous( EveUpdateContext& updateContext, IEveSpaceObject2* spaceObjectParent, IEveSpaceObjectChild* childParent )
