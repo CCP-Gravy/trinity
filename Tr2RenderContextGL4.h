@@ -19,6 +19,7 @@ struct ITr2RenderContextEvents;
 #include "Tr2FragmentOpSettings.h"
 #include "Tr2RenderTargetALGL4.h"
 #include "Tr2CapsALGL4.h"
+#include "Tr2DrawUPHelper.h"
 
 // -------------------------------------------------------------
 // Description:
@@ -255,6 +256,8 @@ public:
 
 	ALResult InternalBlitToBackBuffer( Tr2TextureAL& source );
 	ALResult InternalResolveRT( Tr2RenderTargetAL& destination, const Tr2RenderTargetAL& source );
+
+	uint32_t ComputeVertexCount( uint32_t primitiveCount );
 private:
 	enum { MAX_RENDER_TARGET = 8 };
 	const Tr2RenderTargetAL*					m_boundRenderTarget[MAX_RENDER_TARGET];
@@ -269,8 +272,9 @@ private:
 	uint32_t m_offscreenFrameBuffer0;
 	uint32_t m_offscreenFrameBuffer1;
 
+	Tr2DrawUPHelper	m_drawUP;
+
 	bool	m_boundIndexBufferIs16Bit;
-	uint32_t ComputeVertexCount( uint32_t primitiveCount );
 
 private:
 	Tr2RenderTargetAL m_defaultBackBuffer;

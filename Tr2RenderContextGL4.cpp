@@ -362,6 +362,8 @@ Tr2PrimaryRenderContextAL* Tr2RenderContextAL::GetPrimaryRenderContextPointer()
 
 void Tr2RenderContextAL::Destroy()
 {
+	m_drawUP.Destroy();
+
 	ReleaseDeviceResources();
 
 	ReleaseOpenGLContext();
@@ -648,31 +650,10 @@ ALResult Tr2RenderContextAL::DrawPrimitiveUP(
 	const void* vertexStreamZeroData, 
 	uint32_t vertexStreamZeroStride )
 {
-	if( !IsValid() )
-	{
-		return E_FAIL;
-	}
-
-	CCP_STATS_ADD( primitiveCount, primitiveCount );
-	
-	if( m_topology >= TOP_MAX_TOPOLOGY )
-	{
-		return E_FAIL;
-	}
-
-	ShadowStateRestoreInfo restore;
-	if( !ApplyShadowRenderStates( restore ) || !ApplyVertexDeclaration( restore, vertexStreamZeroData, vertexStreamZeroStride ) )
-	{
-		RestoreState( restore );
-		return E_FAIL;
-	}
-
-	CR_GL( glDrawArrays(	
-		lookup[ m_topology ], 
-		0,
-		ComputeVertexCount( primitiveCount ) ) );
-	RestoreState( restore );
-	return S_OK;
+	return m_drawUP.DrawPrimitiveUP(	primitiveCount,
+										vertexStreamZeroData,
+										vertexStreamZeroStride,
+										*this );
 }
 
 ALResult Tr2RenderContextAL::DrawIndexedPrimitiveUP(	
@@ -682,35 +663,12 @@ ALResult Tr2RenderContextAL::DrawIndexedPrimitiveUP(
 	const void* vertexStreamZeroData, 
 	uint32_t vertexStreamZeroStride )
 {
-	if( !IsValid() )
-	{
-		return E_FAIL;
-	}
-
-	CCP_STATS_ADD( primitiveCount, primitiveCount );
-	
-	if( m_topology >= TOP_MAX_TOPOLOGY )
-	{
-		return E_FAIL;
-	}
-
-	ShadowStateRestoreInfo restore;
-	if( !ApplyShadowRenderStates( restore ) || !ApplyVertexDeclaration( restore, vertexStreamZeroData, vertexStreamZeroStride ) )
-	{
-		RestoreState( restore );
-		return E_FAIL;
-	}
-
-	GL_FAIL( glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 ) );
-
-	CR_GL( glDrawElements( 
-		lookup[ m_topology ], 
-		ComputeVertexCount( primitiveCount ), 
-		GL_UNSIGNED_INT, 
-		indexData ) );
-
-	RestoreState( restore );
-	return S_OK;
+	return m_drawUP.DrawIndexedPrimitiveUP(	numVertices,
+											primitiveCount,
+											indexData,
+											vertexStreamZeroData,
+											vertexStreamZeroStride,
+											*this );
 }
 
 ALResult Tr2RenderContextAL::DrawIndexedPrimitiveUP(	
@@ -720,35 +678,12 @@ ALResult Tr2RenderContextAL::DrawIndexedPrimitiveUP(
 	const void* vertexStreamZeroData, 
 	uint32_t vertexStreamZeroStride )
 {
-	if( !IsValid() )
-	{
-		return E_FAIL;
-	}
-
-	CCP_STATS_ADD( primitiveCount, primitiveCount );
-	
-	if( m_topology >= TOP_MAX_TOPOLOGY )
-	{
-		return E_FAIL;
-	}
-
-	ShadowStateRestoreInfo restore;
-	if( !ApplyShadowRenderStates( restore ) || !ApplyVertexDeclaration( restore, vertexStreamZeroData, vertexStreamZeroStride ) )
-	{
-		RestoreState( restore );
-		return E_FAIL;
-	}
-
-	GL_FAIL( glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 ) );
-
-	CR_GL( glDrawElements( 
-		lookup[ m_topology ], 
-		ComputeVertexCount( primitiveCount ), 
-		GL_UNSIGNED_SHORT, 
-		indexData ) );
-
-	RestoreState( restore );
-	return S_OK;
+	return m_drawUP.DrawIndexedPrimitiveUP(	numVertices,
+											primitiveCount,
+											indexData,
+											vertexStreamZeroData,
+											vertexStreamZeroStride,
+											*this );
 }
 
 ALResult Tr2RenderContextAL::SetConstants(	
@@ -1135,6 +1070,7 @@ ALResult Tr2RenderContextAL::InternalBlitToBackBuffer( Tr2TextureAL& source )
 	}
 	ALResult result = m_blitter->Blit( source );
 
+	m_boundProgramObject = nullptr;
 	m_currentActiveTexture = 0;
 	if( m_renderStates[RS_ZENABLE] )
 	{

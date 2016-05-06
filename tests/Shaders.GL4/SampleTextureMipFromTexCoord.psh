@@ -17,7 +17,7 @@ uniform sampler2D s0;
 
 void main()
 {
-    gl_FragColor = texture2DLod( s0, texCoord, cb7[0].x );
+    gl_FragColor = textureLod( s0, texCoord, cb7[0].x );
 #ifdef PS
 float av=floor(clamp(gl_FragColor.a,0.0,1.0)*255.0+0.5);
 if(ssi.z==0.0)

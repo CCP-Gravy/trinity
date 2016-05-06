@@ -381,16 +381,130 @@ ALResult Tr2TextureAL::CreateCube( uint32_t width,
 	return S_OK;
 }
 
-ALResult Tr2TextureAL::CreateVolume( uint32_t/*width*/,
-									 uint32_t/*height*/,
-									 uint32_t/*depth*/,
-									 uint32_t/*mipLevelCount*/,
-									 Tr2RenderContextEnum::PixelFormat/*format*/,
-									 Tr2RenderContextEnum::BufferUsage/*usage*/,
-									 Tr2SubresourceData* /*initialData*/,
-									 Tr2RenderContextAL& /*renderContext*/ )
+ALResult Tr2TextureAL::CreateVolume( uint32_t width,
+									 uint32_t height,
+									 uint32_t depth,
+									 uint32_t mipLevelCount,
+									 Tr2RenderContextEnum::PixelFormat format,
+									 Tr2RenderContextEnum::BufferUsage usage,
+									 Tr2SubresourceData* initialData,
+									 Tr2RenderContextAL& renderContext )
 {
-	return E_FAIL;
+	Destroy();
+
+	if ( width == 0 || height == 0 || depth == 0 )
+	{
+		return E_INVALIDARG;
+	}
+
+	if( !initialData )
+	{
+		CCP_AL_LOGERR( "CreateVolume: Trying to create volume texture without providing data" );
+		return E_INVALIDARG;
+	}
+
+	if( !renderContext.IsValid() )
+	{
+		return E_FAIL;
+	}
+
+	if ( !Tr2RenderContextAL::ConvertToGLPixelFormat( format, m_internalFormat, m_targetFormat, m_targetType ) )
+	{
+		return E_INVALIDARG;
+	}
+
+	GLuint texture;
+	GL_FAIL( glGenTextures( 1, &texture ) );
+	m_texture = std::shared_ptr<GLuint>( new GLuint( texture ), OnDeleteTexture() );
+
+	GL_FAIL( glBindTexture( GL_TEXTURE_3D, *m_texture ) );
+	GL_FAIL( glPixelStorei( GL_UNPACK_ALIGNMENT, 1 ) );
+
+	const uint32_t trueMipLevelCount = mipLevelCount ? mipLevelCount : 1;
+
+	for ( uint32_t i = 0; i != trueMipLevelCount; ++i )
+	{
+		uint32_t levelWidth = std::max( width >> i, 1U );
+		uint32_t levelHeight = std::max( height >> i, 1U );
+		uint32_t levelDepth = std::max( depth >> i, 1U );
+		if ( m_targetType )
+		{
+			GL_FAIL( glTexImage3D( GL_TEXTURE_3D, i, m_internalFormat, levelWidth, levelHeight, levelDepth, 0,
+								   m_targetFormat, m_targetType,
+								   initialData ? initialData[i].m_sysMem : nullptr ) );
+		}
+		else if ( initialData )
+		{
+			GL_FAIL( glCompressedTexImage3D( GL_TEXTURE_3D, i, m_internalFormat, levelWidth, levelHeight, levelDepth, 0,
+											 initialData[i].m_sysMemSlicePitch,
+											 initialData[i].m_sysMem ) );
+		}
+		else
+		{
+			GL_FAIL( glTexImage3D( GL_TEXTURE_3D, i, m_internalFormat, levelWidth, levelHeight, levelDepth, 0,
+								   GL_RGB, GL_UNSIGNED_BYTE,
+								   nullptr ) );
+		}
+	}
+
+	/*if ( trueMipLevelCount > 1 )
+	{
+		for ( uint32_t i = trueMipLevelCount;
+			  i < uint32_t( 0.5 + log( std::max<double>( height, width ) ) / log( 2.0 ) ) + 1; ++i )
+		{
+			uint32_t levelWidth = std::max( width >> i, 1U );
+			uint32_t levelHeight = std::max( height >> i, 1U );
+			if ( m_targetType )
+			{
+				GL_FAIL( glTexImage2D( GL_TEXTURE_2D, i, m_internalFormat, levelWidth, levelHeight, 0,
+									   m_targetFormat, m_targetType,
+									   nullptr ) );
+			}
+			else
+			{
+				GL_FAIL( glCompressedTexImage2D( GL_TEXTURE_2D, i, m_internalFormat, levelWidth, levelHeight, 0,
+												 0,
+												 nullptr ) );
+			}
+		}
+	}*/
+
+	if ( !mipLevelCount )
+	{
+		GL_FAIL( glGenerateMipmap( GL_TEXTURE_3D ) );
+	}
+	else if ( mipLevelCount == 1 )
+	{
+		CR_GL( glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR ) );
+	}
+
+	m_format = format;
+	m_usage = usage;
+	m_type = TEX_TYPE_3D;
+	m_width = width;
+	m_height = height;
+	m_volumeDepth = depth;
+	m_mipCount = mipLevelCount;
+	m_arraySize = 1;
+	m_isAlias = false;
+	ChangeObjectId();
+	float borderColor[4] = { 0.f, 0.f, 0.f, 0.f };
+	Tr2SamplerStateAL::CreateStateData( Tr2SamplerDescription( TF_POINT,
+													TF_POINT,
+													TF_POINT,
+													false,
+													TA_CLAMP,
+													TA_CLAMP,
+													TA_CLAMP,
+													0,
+													0,
+													CMP_ALWAYS,
+													borderColor,
+													0,
+													1 ), m_currentSampler );
+	Tr2SamplerStateAL::Apply( GL_TEXTURE_3D, false, m_currentSampler );
+
+	return S_OK;
 }
 
 ALResult Tr2TextureAL::CreateDepthTexture( uint32_t width,
