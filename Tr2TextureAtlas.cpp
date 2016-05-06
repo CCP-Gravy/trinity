@@ -598,6 +598,7 @@ void Tr2TextureAtlas::CollapseFreeAreas()
 				if( isAdjacent )
 				{
 					CCP_DELETE( area2 );
+					// cppcheck-suppress uninitStructMember
 					area1->rect = newRect;
 					candidate = m_freeAreas.erase( candidate );
 
@@ -661,6 +662,7 @@ void Tr2TextureAtlas::CollapseFreeAreas()
 				if( isAdjacent )
 				{
 					CCP_DELETE( area2 );
+					// cppcheck-suppress uninitStructMember
 					area1->rect = newRect;
 					candidate = m_freeAreas.erase( candidate );
 
@@ -730,6 +732,7 @@ bool Tr2TextureAtlas::CollapseAreas( Tr2TextureAtlasArea* area1, Tr2TextureAtlas
 
 	if( isAdjacent )
 	{
+		// cppcheck-suppress uninitStructMember
 		area1->rect = newRect;
 	}
 

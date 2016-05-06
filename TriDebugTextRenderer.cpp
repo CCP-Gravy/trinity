@@ -91,6 +91,7 @@ void TriDebugTextRenderer::Printf( TriDebugFont font, const Rect& rect, uint32_t
     va_start( args, msg );
 
     Vprintf( font, rect, format, color, msg, args );
+	va_end( args );
 }
 
 
@@ -100,6 +101,7 @@ void TriDebugTextRenderer::PrintfImmediate( TriDebugFont font, const Rect& rect,
 	va_start( args, msg );
 
 	VprintfImmediate( font, rect, format, color, msg, args );
+	va_end( args );
 }
 
 void TriDebugTextRenderer::Render()

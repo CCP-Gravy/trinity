@@ -151,6 +151,7 @@ void TriStepRenderDebug::Printf( int x, int y, uint32_t color, const char* msg, 
 	rect.right = rect.left + 1024;
 
 	m_textRenderer->Vprintf( TRI_DBG_FONT_SMALL, rect, TRI_DFS_LEFT, ColorToVec4( color ), msg, args );
+	va_end( args );
 }
 
 void TriStepRenderDebug::Printf( const Rect& rect, uint32_t format, uint32_t color, const char* msg, ... )
@@ -159,6 +160,7 @@ void TriStepRenderDebug::Printf( const Rect& rect, uint32_t format, uint32_t col
 	va_start( args, msg );
 
 	m_textRenderer->Vprintf( TRI_DBG_FONT_SMALL, rect, format, ColorToVec4( color ), msg, args );
+	va_end( args );
 }
 
 void TriStepRenderDebug::Printf( const Vector3& pos, uint32_t color, const char* msg, ... )
@@ -177,6 +179,7 @@ void TriStepRenderDebug::Printf( const Vector3& pos, uint32_t color, const char*
 	e.color = color;
 
 	m_projectedText.push_back( e );
+	va_end( args );
 }
 
 void TriStepRenderDebug::DrawCapsule( const Vector3& start, const Vector3& end, float radius, int segments, uint32_t color /*= 0xffffffff */ )

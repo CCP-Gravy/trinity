@@ -139,6 +139,7 @@ void Tr2LightManager::AddPointLight( const Vector3& position, float radius, cons
 		data.color.x *= radius;
 		data.color.y *= radius;
 		data.color.z *= radius;
+		data._padding = 0;
 		m_lightData.Add( data, "Tr2LightManager::m_lightData" );
 	}
 }
