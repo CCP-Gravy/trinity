@@ -567,7 +567,6 @@ void Tr2Sprite2dLineTrace::AddMiterJoint(
 	Tr2Sprite2dVertexBase* currentVertex = fanVerts;
 	
 	// Construct outer joint vertexes
-	float a = startAngle + angleDiff / 2.0f;
 	uint16_t vertexCount = (uint16_t)m_renderVertices.size();
 	
 	// Create vertex

@@ -74,7 +74,6 @@ void Tr2Sprite2dStretchVertical::GatherSprites( Tr2Sprite2dScene* renderer )
 
 		float scaledWidth = m_displayWidth - offset;
 		float scaledHeight = m_displayHeight - offset_2;
-		float offsetX = offset;
 		float offsetY = offset;
 
 		Tr2Sprite2dVertexBase vertices[8];
