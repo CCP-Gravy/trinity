@@ -75,30 +75,6 @@ BaseConfigurations:
       - dbghelp.lib
       - oldnames.lib
 
-  Orbis:
-    Imports:
-    - ../../../../../../sdk/zlib/1.2.3/zlib_1.2.3.yaml
-    - ../TrinityAL/uses_TrinityALORBIS.yaml
-    - ../../../../../../sdk/Granny/2.9.24.0/granny_2.9.24.0.yaml
-    ClCompile:
-      PreprocessorDefinitions:
-      - EVALUATION_SDKS_ENABLED=0
-      - IME_ENABLED=0
-
-      GenerateDebugInformation: true
-      CppExceptions: true
-      RuntimeTypeInfo: true
-      AdditionalOptions:
-      # We get a lot of warnings of unused functions from the exposure code
-      - -Wno-unused-function
-      # XNAMath has a lot of pragmas
-      - -Wno-unknown-pragmas
-      # XNAMath triggers many cases of this warning
-      - -Wno-missing-braces
-      # Trinity triggers too many of these warning
-      - -Wno-reorder
-      - -Wno-unused-variable
-
   DebugBase:
     UserMacros:
       CcpConfigType: Debug
@@ -241,19 +217,6 @@ Configurations:
     ClCompile:
       PreprocessorDefinitions:
       - TRINITYNAME=_trinity_dx9_internal
-
-  DebugLua|ORBIS:
-    BaseConfigurations:
-    - Orbis
-    - DebugBase
-    Imports:
-    - ../blue/uses_blue_lua.yaml
-    General:
-      TargetName: _trinity_orbis_internal
-      TargetExt: .prx
-    ClCompile:
-      PreprocessorDefinitions:
-      - TRINITYNAME=_trinity_orbis_internal
 
   Debug11|Win32,x64:
     BaseConfigurations:

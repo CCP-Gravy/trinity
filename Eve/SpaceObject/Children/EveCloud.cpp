@@ -13,7 +13,7 @@
 #include "Utilities/BoundingBox.h"
 #include "Tr2PerObjectData.h"
 #include "EveCloudEditableVolume.h"
-#include "../EveUpdateContext.h"
+#include "Eve/EveUpdateContext.h"
 
 using namespace Tr2RenderContextEnum;
 
