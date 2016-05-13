@@ -44,7 +44,7 @@ static int CreateShader( Tr2RenderContextEnum::ShaderType type, const void* byte
 	ON_BLOCK_EXIT( [&]{ if( shader ) { glDeleteShader( shader ); } } );
 
 	static const char* prefix = "#version 410 core\n";
-	static const GLint prefixLength = strlen( prefix );
+	static const GLint prefixLength = GLint( strlen( prefix ) );
 
 	const char* code[] = { prefix, reinterpret_cast<const char*>( bytecode ) };
 	GLint length[] = { prefixLength, GLint( bytecodeSize ) };
