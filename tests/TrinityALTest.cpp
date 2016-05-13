@@ -28,12 +28,6 @@ void PrintAdapterInfo( unsigned index )
 		fprintf( stderr, "Failed to get video adapter information for adapter %u\n", index );
 		return;
 	}
-	Tr2VideoDriverInfo driverInfo;
-	if( FAILED( Tr2DriverUtilities::GetDriverVersion( info.deviceID, driverInfo ) ) )
-	{
-		fprintf( stderr, "Failed to get video driver information for adapter %u\n", index );
-		return;
-	}
 
 	printf( 
 		"Device name: %s\nDescription: %ls\nVendor ID: %u\nDevice ID: %u\n", 
@@ -41,6 +35,13 @@ void PrintAdapterInfo( unsigned index )
 		info.description.c_str(), 
 		info.vendorID, 
 		info.deviceID );
+
+	Tr2VideoDriverInfo driverInfo;
+	if( FAILED( Tr2DriverUtilities::GetDriverVersion( info.deviceID, driverInfo ) ) )
+	{
+		fprintf( stderr, "Failed to get video driver information for adapter %u\n", index );
+		return;
+	}
 	printf(
 		"Driver version: %s\nDriver date: %s\nDriver vendor: %s\nIs Optimus: %s\nIs AMD Dynamic Switchable: %s\n\n",
 		driverInfo.driverVersionString.c_str(),

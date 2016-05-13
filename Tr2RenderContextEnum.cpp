@@ -167,7 +167,7 @@ bool Tr2RenderContextEnum::ValidateUsage( BufferUsage usage )
 	return true;
 }
 
-#if (defined(_WIN32) && TRINITY_PLATFORM!=TRINITY_STUB )
+#if TRINITY_PLATFORM==TRINITY_DIRECTX9
 
 D3DFORMAT Tr2RenderContextEnum::ConvertToD3D9Format( Tr2RenderContextEnum::PixelFormat format )
 {

@@ -859,9 +859,10 @@ PixelFormat Tr2RenderContextAL::GetBackBufferFormat() const
 // Return Value:
 //   HRESULT of the call.
 // --------------------------------------------------------------------------------------
-ALResult Tr2RenderContextAL::GetAFRGroupCount( uint32_t& /*count*/ )
+ALResult Tr2RenderContextAL::GetAFRGroupCount( uint32_t& count )
 {
-	return E_FAIL;
+	count = 1;
+	return S_OK;
 }
 
 #if defined( TRINITYDEV ) || !defined( NDEBUG )
@@ -926,7 +927,7 @@ ALResult Tr2RenderContextAL::CreateOpenGLContext( Tr2PresentParametersAL& pp )
 	ZeroMemory( &pfd, sizeof( pfd ) );
 	pfd.nSize = sizeof( pfd );
 	pfd.nVersion = 1;
-	pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+	pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER | PFD_SWAP_EXCHANGE;
 	pfd.iPixelType = PFD_TYPE_RGBA;
 	pfd.cColorBits = 32;
 	pfd.cDepthBits = 32;

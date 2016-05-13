@@ -6,27 +6,6 @@
 
 #ifndef _WIN32
 
-#if defined(TRINITY_AL_MOBILE)
-ALResult Tr2VideoAdapterInfo::InternalInitializeEgl()
-{
-	static bool initialized = false;
-	if( !initialized )
-	{
-		auto display = eglGetDisplay( EGL_DEFAULT_DISPLAY );
-		if( display == EGL_NO_DISPLAY )
-		{
-			return E_FAIL;
-		}
-		if( !eglInitialize( display, nullptr, nullptr ) )
-		{
-			return E_FAIL;
-		}
-		initialized = true;
-	}
-	return S_OK;
-}
-#endif
-
 ALResult Tr2VideoAdapterInfo::GetAdapterCount( unsigned& count )
 {
 	count = 1;
@@ -271,102 +250,158 @@ using namespace Tr2RenderContextEnum;
 
 namespace
 {
-CComPtr<IDirect3D9> s_direct3D;
 
-ALResult InitializeDirect3D()
+
+std::vector<std::pair<uint32_t, Tr2AdapterInfo>> s_devices;
+
+
+bool GetHexIdFromDeviceId( const wchar_t* deviceId, uint32_t& deviceIdHex, const wchar_t* prefix )
 {
-	s_direct3D = nullptr;
-
-	//
-	// First see if we the extended device is supported
-	//
-	g_usingEXDevice = false;
-
-	if ( !s_direct3D )
+	auto found = wcsstr( deviceId, prefix );
+	if( !found )
 	{
-		IDirect3D9* d3d = NULL;
-		d3d = Direct3DCreate9( D3D_SDK_VERSION );
-		if ( !d3d )
+		return false;
+	}
+	return swscanf_s( found + wcslen( prefix ), L"%x", &deviceIdHex ) == 1;
+}
+
+void GetDeviceInfo( const DISPLAY_DEVICEW& device, Tr2AdapterInfo& info )
+{
+	info.description =  device.DeviceString;
+	info.deviceName = CW2A( device.DeviceName );
+	info.vendorID = 0;
+	info.deviceID = 0;
+	GetHexIdFromDeviceId( device.DeviceID, info.vendorID, L"VEN_" );
+	GetHexIdFromDeviceId( device.DeviceID, info.deviceID, L"DEV_" );
+}
+
+void GetVideoDevices()
+{
+	if( !s_devices.empty() )
+	{
+		return;
+	}
+	uint32_t count = 0;
+	while( true )
+	{
+		DISPLAY_DEVICEW device;
+		device.cb = sizeof( device );
+		if( !EnumDisplayDevicesW( nullptr, count, &device, 0 ) )
 		{
-			CCP_LOGERR( "Failed to create the Direct3D object" );
-			g_usingEXDevice = false;
+			break;
 		}
-		CCP_LOG( "Trinity is using the regular device" );
-		s_direct3D.Attach( d3d );
+		if( ( device.StateFlags & DISPLAY_DEVICE_ACTIVE ) )
+		{
+			Tr2AdapterInfo info;
+			GetDeviceInfo( device, info );
+			if( ( device.StateFlags & DISPLAY_DEVICE_PRIMARY_DEVICE ) )
+			{
+				s_devices.insert( s_devices.begin(), std::make_pair( count, info ) );
+			}
+			else
+			{
+				s_devices.push_back( std::make_pair( count, info ) );
+			}
+		}
+		++count;
 	}
+}
 
-	if ( !s_direct3D )
+struct FindMonitorContext
+{
+	const wchar_t* device;
+	HMONITOR monitor;
+};
+
+BOOL CALLBACK FindMonitor( HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData )
+{
+	MONITORINFOEXW info;
+	info.cbSize = sizeof( info );
+	if( !GetMonitorInfoW( hMonitor, &info ) )
 	{
-		return E_FAIL;
+		return TRUE;
 	}
-	if ( !D3DXCheckVersion( D3D_SDK_VERSION, D3DX_SDK_VERSION ) )
+	auto context = reinterpret_cast<FindMonitorContext*>( dwData );
+	if( wcscmp( info.szDevice, context->device ) == 0 )
 	{
-		s_direct3D.Release();
-		return E_FAIL;
+		context->monitor = hMonitor;
+		return FALSE;
 	}
-	return S_OK;
+	return TRUE;
 }
 
 }
 
 ALResult Tr2VideoAdapterInfo::GetAdapterCount( unsigned& count )
 {
-	if ( !s_direct3D )
-	{
-		CR_RETURN_HR( InitializeDirect3D() );
-	}
-	count = s_direct3D->GetAdapterCount();
+	GetVideoDevices();
+	count = uint32_t( s_devices.size() );
 	return S_OK;
 }
 
 ALResult Tr2VideoAdapterInfo::GetAdapterInfo( unsigned adapterIndex,
 											  Tr2AdapterInfo& info )
 {
-	if ( !s_direct3D )
+	GetVideoDevices();
+	if( adapterIndex >= s_devices.size() )
 	{
-		CR_RETURN_HR( InitializeDirect3D() );
+		return E_INVALIDARG;
 	}
-	D3DADAPTER_IDENTIFIER9 id;
-	CR_RETURN_HR( s_direct3D->GetAdapterIdentifier( adapterIndex, 0, &id ) );
-	info.driver = id.Driver;
-	info.description = CA2W( id.Description );
-	info.deviceName = id.DeviceName;
-	info.driverVersion = id.DriverVersion.QuadPart;
-	info.vendorID = id.VendorId;
-	info.deviceID = id.DeviceId;
-	info.subSystemID = id.SubSysId;
-	info.revision = id.Revision;
-	info.deviceIdentifier = *reinterpret_cast<AdapterGuid*>( &id.DeviceIdentifier );
+	info = s_devices[adapterIndex].second;
 	return S_OK;
 }
 
 ALResult Tr2VideoAdapterInfo::GetAdapterMonitor( unsigned adapterIndex,
 												 void*& monitor )
 {
-	if ( !s_direct3D )
+	GetVideoDevices();
+	if( adapterIndex >= s_devices.size() )
 	{
-		CR_RETURN_HR( InitializeDirect3D() );
+		return E_INVALIDARG;
 	}
-	monitor = s_direct3D->GetAdapterMonitor( adapterIndex );
+	FindMonitorContext ctx;
+	DISPLAY_DEVICEW device;
+	device.cb = sizeof( device );
+	if( !EnumDisplayDevicesW( nullptr, s_devices[adapterIndex].first, &device, 0 ) )
+	{
+		return E_FAIL;
+	}
+	ctx.device = device.DeviceName;
+	ctx.monitor = nullptr;
+	EnumDisplayMonitors( nullptr, nullptr, &FindMonitor, reinterpret_cast<LPARAM>( &ctx ) );
+	if( !ctx.monitor )
+	{
+		return E_FAIL;
+	}
+	monitor = ctx.monitor;
 	return S_OK;
 }
 
 ALResult Tr2VideoAdapterInfo::GetAdapterDisplayMode( unsigned adapterIndex,
 													 Tr2DisplayModeInfo& mode )
 {
-	if ( !s_direct3D )
+	GetVideoDevices();
+	if( adapterIndex >= s_devices.size() )
 	{
-		CR_RETURN_HR( InitializeDirect3D() );
+		return E_INVALIDARG;
 	}
-	D3DDISPLAYMODE id;
-	CR_RETURN_HR( s_direct3D->GetAdapterDisplayMode( adapterIndex, &id ) );
-	mode.width = id.Width;
-	mode.height = id.Height;
+	DISPLAY_DEVICEW device;
+	device.cb = sizeof( device );
+	if( !EnumDisplayDevicesW( nullptr, s_devices[adapterIndex].first, &device, 0 ) )
+	{
+		return E_FAIL;
+	}
+
+	DEVMODEW devmode;
+	if( !EnumDisplaySettingsW( device.DeviceName, ENUM_CURRENT_SETTINGS, &devmode ) )
+	{
+		return E_FAIL;
+	}
+	mode.width = devmode.dmPelsWidth;
+	mode.height = devmode.dmPelsHeight;
 	mode.refreshRateNumerator = 1;
-	mode.refreshRateDenominator = id.RefreshRate;
-	mode.format = Tr2RenderContextEnum::ConvertFromD3D9Format( id.Format );
-	mode.scanlineOrdering = SCANLINE_ORDER_UNSPECIFIED;
-	mode.scaling = DISPLAY_SCALING_UNSPECIFIED;
+	mode.refreshRateDenominator = devmode.dmDisplayFrequency;
+	mode.format = Tr2RenderContextEnum::PIXEL_FORMAT_B8G8R8X8_UNORM;
 	return S_OK;
 }
 
@@ -374,38 +409,37 @@ ALResult Tr2VideoAdapterInfo::GetAdapterModeCount( unsigned adapterIndex,
 												   Tr2RenderContextEnum::PixelFormat backBufferFormat,
 												   unsigned& count )
 {
-	if ( !s_direct3D )
+	if( backBufferFormat != Tr2RenderContextEnum::PIXEL_FORMAT_B8G8R8X8_UNORM )
 	{
-		CR_RETURN_HR( InitializeDirect3D() );
+		count = 0;
+		return S_OK;
 	}
 
-	D3DFORMAT format = Tr2RenderContextEnum::ConvertToD3D9Format( backBufferFormat );
-
-	static const D3DFORMAT allowed[] =
+	GetVideoDevices();
+	if( adapterIndex >= s_devices.size() )
 	{
-		D3DFMT_X8R8G8B8,
-		D3DFMT_A8R8G8B8,
-		D3DFMT_A2R10G10B10,
-		D3DFMT_X1R5G5B5,
-		D3DFMT_A1R5G5B5,
-		D3DFMT_R5G6B5
-	};
-	const int nAllowed = sizeof( allowed ) / sizeof( allowed[0] );
-	int i;
-
-	for ( i = 0; i < nAllowed; i++ )
-	{
-		if ( format == allowed[i] )
-		{
-			break;
-		}
+		return E_INVALIDARG;
 	}
-	if ( i == nAllowed )
+	DISPLAY_DEVICEW device;
+	device.cb = sizeof( device );
+	if( !EnumDisplayDevicesW( nullptr, s_devices[adapterIndex].first, &device, 0 ) )
 	{
 		return E_FAIL;
 	}
 
-	count = s_direct3D->GetAdapterModeCount( adapterIndex, format );
+	count = 0;
+	for( uint32_t i = 0; ; ++i )
+	{
+		DEVMODEW mode;
+		if( !EnumDisplaySettingsW( device.DeviceName, i, &mode ) )
+		{
+			break;
+		}
+		if( mode.dmBitsPerPel == 32 )
+		{
+			++count;
+		}
+	}
 	return S_OK;
 }
 
@@ -414,75 +448,70 @@ ALResult Tr2VideoAdapterInfo::GetAdapterMode( unsigned adapterIndex,
 											  unsigned modeIndex,
 											  Tr2DisplayModeInfo& mode )
 {
-	if ( !s_direct3D )
+	if( backBufferFormat != Tr2RenderContextEnum::PIXEL_FORMAT_B8G8R8X8_UNORM )
 	{
-		CR_RETURN_HR( InitializeDirect3D() );
+		return E_INVALIDARG;
 	}
-	D3DDISPLAYMODE id;
-	CR_RETURN_HR( s_direct3D->EnumAdapterModes( adapterIndex, Tr2RenderContextEnum::ConvertToD3D9Format( backBufferFormat ), modeIndex, &id ) )
-	;
-	mode.width = id.Width;
-	mode.height = id.Height;
-	mode.refreshRateNumerator = 1;
-	mode.refreshRateDenominator = id.RefreshRate;
-	mode.format = Tr2RenderContextEnum::ConvertFromD3D9Format( id.Format );
-	mode.scanlineOrdering = SCANLINE_ORDER_UNSPECIFIED;
-	mode.scaling = DISPLAY_SCALING_UNSPECIFIED;
+
+	GetVideoDevices();
+	if( adapterIndex >= s_devices.size() )
+	{
+		return E_INVALIDARG;
+	}
+	DISPLAY_DEVICEW device;
+	device.cb = sizeof( device );
+	if( !EnumDisplayDevicesW( nullptr, s_devices[adapterIndex].first, &device, 0 ) )
+	{
+		return E_FAIL;
+	}
+
+	for( uint32_t i = 0; ; ++i )
+	{
+		DEVMODEW devmode;
+		if( !EnumDisplaySettingsW( device.DeviceName, i, &devmode ) )
+		{
+			break;
+		}
+		if( devmode.dmBitsPerPel == 32 )
+		{
+			if( modeIndex-- == 0 )
+			{
+				mode.width = devmode.dmPelsWidth;
+				mode.height = devmode.dmPelsHeight;
+				mode.refreshRateNumerator = 1;
+				mode.refreshRateDenominator = devmode.dmDisplayFrequency;
+				mode.format = Tr2RenderContextEnum::PIXEL_FORMAT_B8G8R8X8_UNORM;
+			}
+		}
+	}
 	return S_OK;
 }
 
 ALResult Tr2VideoAdapterInfo::GetAdapterShaderVersion( unsigned adapterIndex,
 													   unsigned& version )
 {
-	if ( !s_direct3D )
-	{
-		CR_RETURN_HR( InitializeDirect3D() );
-	}
-	D3DCAPS9 caps;
-	CR_RETURN_HR( s_direct3D->GetDeviceCaps( adapterIndex, D3DDEVTYPE_HAL, &caps ) );
-	version = std::min( caps.VertexShaderVersion, caps.PixelShaderVersion );
+	version = 5 << 8;
 	return S_OK;
 }
 
 ALResult Tr2VideoAdapterInfo::GetAdapterMaxTextureWidth( unsigned adapterIndex,
 														 unsigned& maxWidth )
 {
-	if ( !s_direct3D )
-	{
-		CR_RETURN_HR( InitializeDirect3D() );
-	}
-	D3DCAPS9 caps;
-	CR_RETURN_HR( s_direct3D->GetDeviceCaps( adapterIndex, D3DDEVTYPE_HAL, &caps ) );
-	maxWidth = caps.MaxTextureWidth;
+	maxWidth = 4096;
 	return S_OK;
 }
 
 bool Tr2VideoAdapterInfo::SupportsBackBufferFormat( unsigned adapterIndex,
 													Tr2RenderContextEnum::PixelFormat backBufferFormat,
-													bool windowed )
+													bool )
 {
-	if ( !s_direct3D && !SUCCEEDED( InitializeDirect3D() ) )
+	GetVideoDevices();
+	if( adapterIndex >= s_devices.size() )
 	{
 		return false;
 	}
-	D3DFORMAT bbFormat = Tr2RenderContextEnum::ConvertToD3D9Format( backBufferFormat );
-	D3DFORMAT displayFormat;
-	switch ( bbFormat )
-	{
-	case D3DFMT_A8R8G8B8:
-		displayFormat = D3DFMT_X8R8G8B8;
-		break;
-	case D3DFMT_A1R5G5B5:
-		displayFormat = D3DFMT_X1R5G5B5;
-		break;
-	default:
-		displayFormat = bbFormat;
-	}
-	return SUCCEEDED( s_direct3D->CheckDeviceType( adapterIndex,
-		D3DDEVTYPE_HAL,
-		displayFormat,
-		bbFormat,
-		windowed ? TRUE : FALSE ) );
+
+	return backBufferFormat == Tr2RenderContextEnum::PIXEL_FORMAT_B8G8R8X8_UNORM;
 }
 
 bool Tr2VideoAdapterInfo::SupportsRenderTargetFormat( unsigned adapterIndex,
@@ -490,49 +519,39 @@ bool Tr2VideoAdapterInfo::SupportsRenderTargetFormat( unsigned adapterIndex,
 													  Tr2RenderContextEnum::PixelFormat format,
 													  bool withAutoGenMipmap )
 {
-	if ( !s_direct3D && !SUCCEEDED( InitializeDirect3D() ) )
+	GetVideoDevices();
+	if( adapterIndex >= s_devices.size() )
 	{
 		return false;
 	}
-	return SUCCEEDED( s_direct3D->CheckDeviceFormat( adapterIndex,
-		D3DDEVTYPE_HAL,
-		Tr2RenderContextEnum::ConvertToD3D9Format( backBufferFormat ),
-		D3DUSAGE_RENDERTARGET | ( withAutoGenMipmap ? D3DUSAGE_AUTOGENMIPMAP : 0 ),
-		D3DRTYPE_SURFACE,
-		Tr2RenderContextEnum::ConvertToD3D9Format( format ) ) );
+
+	return true;
 }
 
 bool Tr2VideoAdapterInfo::SupportsDepthStencilFormat( unsigned adapterIndex,
 													  Tr2RenderContextEnum::PixelFormat backBufferFormat,
 													  Tr2RenderContextEnum::DepthStencilFormat format )
 {
-	if ( !s_direct3D && !SUCCEEDED( InitializeDirect3D() ) )
+	GetVideoDevices();
+	if( adapterIndex >= s_devices.size() )
 	{
 		return false;
 	}
-	D3DFORMAT format9 = Tr2RenderContextEnum::ConvertToD3D9DepthStencilFormat( format );
-	return SUCCEEDED( s_direct3D->CheckDeviceFormat( adapterIndex,
-		D3DDEVTYPE_HAL,
-		Tr2RenderContextEnum::ConvertToD3D9Format( backBufferFormat ),
-		D3DUSAGE_DEPTHSTENCIL,
-		D3DRTYPE_SURFACE,
-		format9 ) );
+
+	return true;
 }
 
 bool Tr2VideoAdapterInfo::SupportsVertexTextureFormat( unsigned adapterIndex,
 													   Tr2RenderContextEnum::PixelFormat backBufferFormat,
 													   Tr2RenderContextEnum::PixelFormat format )
 {
-	if ( !s_direct3D && !SUCCEEDED( InitializeDirect3D() ) )
+	GetVideoDevices();
+	if( adapterIndex >= s_devices.size() )
 	{
 		return false;
 	}
-	return SUCCEEDED( s_direct3D->CheckDeviceFormat( adapterIndex,
-		D3DDEVTYPE_HAL,
-		Tr2RenderContextEnum::ConvertToD3D9Format( backBufferFormat ),
-		D3DUSAGE_QUERY_VERTEXTEXTURE,
-		D3DRTYPE_SURFACE,
-		Tr2RenderContextEnum::ConvertToD3D9Format( format ) ) );
+
+	return true;
 }
 
 ALResult Tr2VideoAdapterInfo::GetAdapterMsaaSupport( unsigned adapterIndex,
@@ -541,16 +560,13 @@ ALResult Tr2VideoAdapterInfo::GetAdapterMsaaSupport( unsigned adapterIndex,
 													 unsigned msaaType,
 													 unsigned& msaaQuality )
 {
-	if ( !s_direct3D )
+	GetVideoDevices();
+	if( adapterIndex >= s_devices.size() )
 	{
-		CR_RETURN_HR( InitializeDirect3D() );
+		return E_INVALIDARG;
 	}
-	const auto
-	sample = static_cast<D3DMULTISAMPLE_TYPE>( msaaType > 1 ? msaaType : 0 );
-	DWORD levels = 0;
-	CR_RETURN_HR( s_direct3D->CheckDeviceMultiSampleType( adapterIndex, D3DDEVTYPE_HAL, Tr2RenderContextEnum::ConvertToD3D9Format( format ), windowed ? TRUE : FALSE, sample, &levels ) )
-	;
-	msaaQuality = levels;
+
+	msaaQuality = 0;
 	return S_OK;
 }
 
@@ -560,17 +576,13 @@ ALResult Tr2VideoAdapterInfo::GetAdapterMsaaSupport( unsigned adapterIndex,
 													 unsigned msaaType,
 													 unsigned& msaaQuality )
 {
-	if ( !s_direct3D )
+	GetVideoDevices();
+	if( adapterIndex >= s_devices.size() )
 	{
-		CR_RETURN_HR( InitializeDirect3D() );
+		return E_INVALIDARG;
 	}
-	D3DFORMAT format9 = Tr2RenderContextEnum::ConvertToD3D9DepthStencilFormat( format );
-	const auto
-	sample = static_cast<D3DMULTISAMPLE_TYPE>( msaaType > 1 ? msaaType : 0 );
-	DWORD levels = 0;
-	CR_RETURN_HR( s_direct3D->CheckDeviceMultiSampleType( adapterIndex, D3DDEVTYPE_HAL, format9, windowed ? TRUE : FALSE, sample, &levels ) )
-	;
-	msaaQuality = levels;
+
+	msaaQuality = 0;
 	return S_OK;
 }
 
@@ -582,7 +594,7 @@ bool Tr2VideoAdapterInfo::AreAdaptersDifferent( unsigned adapter1,
 
 ALResult Tr2VideoAdapterInfo::RefreshData()
 {
-	return InitializeDirect3D();
+	return S_OK;
 }
 
 #endif

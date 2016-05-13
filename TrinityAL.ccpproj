@@ -33,8 +33,6 @@ Link:
 BaseConfigurations:
   Windows:
     Imports:
-    - ../../../../../../sdk/directx/february2010/directx_february2010.yaml
-    - ../../../../../../sdk/nvidia/NVAPI/R265/NVAPI_R265.yaml
     - ../../../../../../sdk/ATI/CrossFire Detect/CrossFire.yaml
 
   Posix:
@@ -87,11 +85,17 @@ BaseConfigurations:
       DebugInformationFormat: ProgramDatabase
   
   D3D9:
+    Imports:
+    - ../../../../../../sdk/directx/february2010/directx_february2010.yaml
+    - ../../../../../../sdk/nvidia/NVAPI/R265/NVAPI_R265.yaml
     ClCompile:
       PreprocessorDefinitions:
       - TRINITY_PLATFORM=TRINITY_DIRECTX9
 
   D3D11:
+    Imports:
+    - ../../../../../../sdk/directx/february2010/directx_february2010.yaml
+    - ../../../../../../sdk/nvidia/NVAPI/R265/NVAPI_R265.yaml
     ClCompile:
       PreprocessorDefinitions:
       - TRINITY_PLATFORM=TRINITY_DIRECTX11

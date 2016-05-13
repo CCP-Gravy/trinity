@@ -422,7 +422,7 @@ namespace Tr2RenderContextEnum
 	PixelFormat	MakeTypeless( PixelFormat fmt );
 	PixelFormat MakeSrgb( PixelFormat format );
 
-#if (defined(_WIN32) && TRINITY_PLATFORM!=TRINITY_STUB )
+#if defined(_WIN32) && TRINITY_PLATFORM==TRINITY_DIRECTX9
 	// Debug helper while texture work is WIP
 	D3DFORMAT ConvertToD3D9Format( Tr2RenderContextEnum::PixelFormat format );
 	Tr2RenderContextEnum::PixelFormat ConvertFromD3D9Format( D3DFORMAT format );

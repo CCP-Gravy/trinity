@@ -33,7 +33,7 @@
 #include <Windows.h>
 // for CComPtr support
 #include <atlbase.h>
-#if( TRINITY_PLATFORM!=TRINITY_STUB )
+#if TRINITY_PLATFORM ==TRINITY_DIRECTX9 || TRINITY_PLATFORM ==TRINITY_DIRECTX11
 #include <D3D9.h>
 #include <d3dx9.h>
 #endif

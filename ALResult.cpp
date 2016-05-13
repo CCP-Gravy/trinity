@@ -7,7 +7,7 @@
 #include "StdAfx.h"
 #include "ALResult.h"
 #include "ALLog.h"
-#if (defined(_WIN32) && TRINITY_PLATFORM!=TRINITY_STUB )
+#if TRINITY_PLATFORM == TRINITY_DIRECTX9 || TRINITY_PLATFORM == TRINITY_DIRECTX11
 #define HAS_DXERR
 #endif
 #ifdef HAS_DXERR
