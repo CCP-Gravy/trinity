@@ -22,16 +22,21 @@ void EveChildTransform::RebuildLocalTransform()
 
 void EveChildTransform::Setup( const Vector3* scale, const Quaternion* rotation, const Vector3* translation, Tr2Lod lowestLodVisible )
 {
-	Matrix temp;
 	if( m_useSRT )
 	{
-		D3DXMatrixTransformation( &m_localTransform, nullptr, nullptr, &m_scaling, nullptr, &m_rotation, &m_translation );
-	}
-	D3DXMatrixTransformation( &temp, nullptr, nullptr, scale, nullptr, rotation, translation );
-	D3DXMatrixMultiply( &m_localTransform, &m_localTransform, &temp );
-	if( m_useSRT )
-	{
-		D3DXMatrixDecompose( &m_scaling, &m_rotation, &m_translation, &m_localTransform );
+		if( scale )
+		{
+			m_scaling = *scale;
+		}
+		if( rotation )
+		{
+			m_rotation = *rotation;
+		}
+		if( translation )
+		{
+			m_translation = *translation;
+		}
+		D3DXMatrixTransformation( &m_localTransform, nullptr, nullptr, &m_scaling, nullptr, &m_rotation, &m_translation);
 	}
 }
 
