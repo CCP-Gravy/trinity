@@ -2345,6 +2345,10 @@ void EveSpaceObject2::UpdateCurveSet( const std::string& name, Be::Time time )
 			(*it)->Update( time, time );
 		}
 	}
+	for( auto it = m_effectChildren.begin(); it != m_effectChildren.end(); it++ )
+	{
+		(*it)->UpdateCurveSet( name, time );
+	}
 }
 
 // --------------------------------------------------------------------------------
@@ -2364,6 +2368,10 @@ void EveSpaceObject2::PlayCurveSet( const std::string& name )
 	{
 		(*childIt)->PlayCurveSet( name );
 	}
+	for( auto childIt = m_effectChildren.begin(); childIt != m_effectChildren.end(); childIt++ )
+	{
+		(*childIt)->PlayCurveSet( name );
+	}
 }
 
 // --------------------------------------------------------------------------------
@@ -2380,6 +2388,10 @@ void EveSpaceObject2::StopCurveSet( const std::string& name )
 		}
 	}
 	for( auto childIt = m_children.begin(); childIt != m_children.end(); childIt++ )
+	{
+		(*childIt)->StopCurveSet( name );
+	}
+	for( auto childIt = m_effectChildren.begin(); childIt != m_effectChildren.end(); childIt++ )
 	{
 		(*childIt)->StopCurveSet( name );
 	}

@@ -41,6 +41,7 @@ public:
 
 	void PlayCurveSet( const std::string& name );
 	void StopCurveSet( const std::string& name );
+	void UpdateCurveSet( const std::string& name, Be::Time time );
 	float GetCurveSetDuration( const std::string& name ) const;
 
 	void PlayAllCurveSets();

@@ -211,6 +211,21 @@ void EveChildContainer::StopCurveSet( const std::string& name )
 	}
 }
 
+void EveChildContainer::UpdateCurveSet( const std::string& name, Be::Time time )
+{
+	for( auto it = m_curveSets.begin(); it != m_curveSets.end(); it++ )
+	{
+		if( (*it)->GetName() == name )
+		{
+			(*it)->Update( time, time );
+		}
+	}
+	for( auto it = m_objects.begin(); it != m_objects.end(); it++ )
+	{
+		(*it)->UpdateCurveSet( name, time );
+	}
+}
+
 float EveChildContainer::GetCurveSetDuration( const std::string& name ) const
 {
 	if( m_hideOnLowQuality && Tr2Renderer::IsLowQuality() )
