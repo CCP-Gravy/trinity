@@ -55,11 +55,6 @@ const Be::ClassInfo* EveChildExplosion::ExposeToBlue()
 			"Coefficent to apply to m_localExplosionInterval for consecutive explosions", 
 			Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( 
-			"localExplosionScaleVariance", 
-			m_localExplosionScaleVariance, 
-			"Variance for local explosion size", 
-			Be::READWRITE | Be::PERSIST )
-		MAP_ATTRIBUTE( 
 			"globalExplosionDelay", 
 			m_globalExplosionDelay, 
 			"Delay from explosion start to the \"global\" explosion in seconds", 
