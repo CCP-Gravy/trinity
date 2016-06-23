@@ -302,7 +302,7 @@ ITr2SpriteObject* Tr2Sprite2dFrame::PickPoint( float x, float y, Tr2Sprite2dScen
 
 	if( m_pickState == TR2_SPS_ON )
 	{
-		if( renderer->IsInside( Vector2( x, y ), Vector2( m_translation.x, m_translation.y ), m_displayWidth, m_displayHeight, -1.0f ) )
+		if( renderer->IsInside( Vector2( x, y ), Vector2( m_translation.x, m_translation.y ), m_displayWidth, m_displayHeight, 0.0f ) )
 		{
 			return this;
 		}
