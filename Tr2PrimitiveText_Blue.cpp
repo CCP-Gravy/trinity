@@ -24,6 +24,7 @@ const Be::ClassInfo* Tr2PrimitiveText::ExposeToBlue()
         MAP_INTERFACE( Tr2PrimitiveText )
 
 		MAP_ATTRIBUTE( "text", m_text, "", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "display", m_display, "", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "position", m_position, "", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE_WITH_CHOOSER( "font", m_font, "", Be::READWRITE | Be::PERSIST | Be::ENUM, TriDebugFontChooser )
 

@@ -25,6 +25,7 @@ private:
 	Vector3 m_position;
 	TriDebugFont m_font;
 	uint32_t m_style;
+	bool m_display;
 };
 
 TYPEDEF_BLUECLASS( Tr2PrimitiveText );
