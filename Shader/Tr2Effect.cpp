@@ -319,6 +319,28 @@ void Tr2Effect::AddResourceTexture2DLod( const BlueSharedString& name, Tr2LodRes
 
 // --------------------------------------------------------------------------------
 // Description:
+//   Manually adding a sampler override to change texture lookups
+// --------------------------------------------------------------------------------
+void Tr2Effect::AddSamplerOverride( const BlueSharedString& name, Tr2RenderContextEnum::TextureAddressMode addressMode )
+{
+	Tr2SamplerOverride o;
+
+	// set up the const stuff
+	o.name = name;
+	o.mipFilter = Tr2RenderContextEnum::TF_LINEAR;
+	o.maxAnisotropy = 4;
+	o.maxMipLevel = 0;
+	o.lodBias = 0.f;
+	o.filter = Tr2RenderContextEnum::TF_ANISOTROPIC;
+
+	// setup the non-const stuff
+	o.addressU = o.addressV = o.addressW = addressMode;
+
+	m_samplerOverrides.Append( &o );
+}
+
+// --------------------------------------------------------------------------------
+// Description:
 //   Manually adding a vector4 parameter to this effect's list with creating
 //   it
 // --------------------------------------------------------------------------------
