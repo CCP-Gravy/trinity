@@ -66,6 +66,23 @@ const Be::ClassInfo* EveEffectRoot2::ExposeToBlue()
 			Be::READWRITE | Be::PERSIST
 		)
 
+		MAP_ATTRIBUTE
+		(    
+			"modelTranslationCurve",
+			m_modelTranslation,
+			"Used to add animated translations to ships",
+			Be::READWRITE | Be::PERSIST
+		)
+		MAP_ATTRIBUTE
+		(    
+			"modelRotationCurve",
+			m_modelRotation,
+			"Used to add rotations to the basic rotation curve",
+			Be::READWRITE | Be::PERSIST
+		)
+		
+		MAP_ATTRIBUTE( "curveSets", m_curveSets, "Curvesets for animating things", Be::READWRITE | Be::PERSIST )
+
 #if BLUE_WITH_PYTHON
 		// expose bounding sphere as two variables: center pos and radius
 		MAPFLOATARRAYSIZE( "boundingSphereCenter", m_boundingSphere, BlueDefaultIID, "The center of the minimum bounding sphere of the effect in local coordinates", Be::READWRITE | Be::PERSIST, 3 )

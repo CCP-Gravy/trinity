@@ -5,6 +5,7 @@
 #include "TriFrustum.h"
 #include "Tr2PointLight.h"
 #include "Tr2LightManager.h"
+#include "Curves/TriCurveSet.h"
 #include "Eve/EveUpdateContext.h"
 #include "Eve/SpaceObject/EveSpaceObject2.h"
 #include "Eve/SpaceObject/Children/EveChildContainer.h"
@@ -17,6 +18,7 @@ EveEffectRoot2::EveEffectRoot2( IRoot* lockobj ) :
 	PARENTLOCK( m_observers ),
 	PARENTLOCK( m_lights ),
 	PARENTLOCK( m_effectChildren ),
+	PARENTLOCK( m_curveSets ),
 	m_boundingSphere( 0, 0, 0, 0 ),
 	m_scaling( 1.0f, 1.0f, 1.0f ),
 	m_rotation( 0.0f, 0.0f, 0.0f, 1.0f ),
@@ -61,6 +63,12 @@ void EveEffectRoot2::UpdateSyncronous( EveUpdateContext& updateContext )
 
 void EveEffectRoot2::UpdateAsyncronous( EveUpdateContext& updateContext ) 
 {	
+	Be::Time time = updateContext.GetTime();
+	for( auto it = m_curveSets.begin(); it != m_curveSets.end(); it++ )
+	{
+		(*it)->Update( time, time );
+	}
+
 	for( auto ecIt = m_effectChildren.begin(); ecIt != m_effectChildren.end(); ++ecIt ) 
 	{
 		(*ecIt)->UpdateAsyncronous( updateContext, this, nullptr );
@@ -148,7 +156,23 @@ void EveEffectRoot2::UpdateWorldTransform( Be::Time time )
 		rotation = Quaternion( 0.0f, 0.0f, 0.0f, 1.0f );
 	}
 
+	
+	if( m_modelRotation )
+	{
+		Quaternion modelRotation;
+		m_modelRotation->Update( &modelRotation, time );
+		D3DXQuaternionMultiply( &rotation, &modelRotation, &rotation);
+	}
+
 	D3DXMatrixTransformation( &m_worldTransform, NULL, NULL, NULL, NULL, &rotation, &translation );
+	
+	if( m_modelTranslation )
+	{
+		Vector3 modelTranslation;
+		m_modelTranslation->Update( &modelTranslation, time );
+		D3DXVec3TransformCoord( &modelTranslation, &modelTranslation, &m_worldTransform );
+		m_worldTransform.GetTranslation() = modelTranslation;
+	}
 }
 
 

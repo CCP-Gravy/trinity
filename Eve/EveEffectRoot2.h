@@ -72,6 +72,11 @@ private:
 
 	ITriVectorFunctionPtr m_ballPosition;
 	ITriQuaternionFunctionPtr m_ballRotation;
+	
+	ITriQuaternionFunctionPtr m_modelRotation;
+	ITriVectorFunctionPtr m_modelTranslation;
+	
+	PTriCurveSetVector m_curveSets;
 
 	Vector4 m_boundingSphere;
 	
