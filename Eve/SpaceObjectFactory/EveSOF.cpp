@@ -429,10 +429,14 @@ void EveSOF::FillMeshAreaVector( std::map<std::string, Tr2LodResourcePtr>& lodRe
 				}
 			}
 
-			// default shader textures from the generic data
+			// default shader textures & parameters from the generic data
 			for( auto gtit = shaderData->defaultTextures.begin(); gtit != shaderData->defaultTextures.end(); ++gtit )
 			{
 				newShader->AddResourceTexture2D( gtit->first, gtit->second.resFilePath.c_str() );
+			}
+			for( auto gpit = shaderData->defaultParameters.begin(); gpit != shaderData->defaultParameters.end(); ++gpit )
+			{
+				newShader->AddParameterVector4( gpit->first, &gpit->second );
 			}
 
 			// that's it for setting up this shader, must rebuild cache on it!
@@ -1129,7 +1133,7 @@ void EveSOF::SetupCustomMask( EveSpaceObject2Ptr obj, const EveSOFDNAPtr dna ) c
 		customMask.CreateInstance();
 		customMask->Setup( patternProjectionData->position, patternProjectionData->scaling, patternProjectionData->rotation, patternProjectionData->isMirrored, patternData->materialSourceID, patternData->materialTargets );
 
-		obj->SetCustomMask( customMask );
+		obj->AddCustomMask( customMask );
 	}
 }
 
@@ -1521,6 +1525,10 @@ void EveSOF::SetupDecals( EveSpaceObject2Ptr obj, const EveSOFDNAPtr dna ) const
 			for( auto gtit = shaderData->defaultTextures.begin(); gtit != shaderData->defaultTextures.end(); ++gtit )
 			{
 				shader->AddResourceTexture2D( gtit->first, gtit->second.resFilePath.c_str() );
+			}
+			for( auto gpit = shaderData->defaultParameters.begin(); gpit != shaderData->defaultParameters.end(); ++gpit )
+			{
+				shader->AddParameterVector4( gpit->first, &gpit->second );
 			}
 		}
 

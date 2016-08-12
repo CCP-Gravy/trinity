@@ -413,6 +413,8 @@ public:
 		std::vector<BlueSharedString> textures;
 		// global textures for this shader
 		std::map<BlueSharedString, TextureData> defaultTextures;
+		// global parameters for this shader
+		std::map<BlueSharedString, Vector4> defaultParameters;
 	};
 
 	struct GenericData

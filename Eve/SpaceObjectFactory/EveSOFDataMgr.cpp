@@ -1304,6 +1304,12 @@ void EveSOFDataMgr::GenerateGenericData( GenericData& gd, EveSOFDataGenericPtr s
 			gsd.defaultTextures[ textureData->m_name ].resFilePath = textureData->m_resFilePath;
 		}
 
+		for( auto pdit = shaderData->m_defaultParameters.begin(); pdit != shaderData->m_defaultParameters.end(); ++pdit )
+		{
+			EveSOFDataParameterPtr paramData = ( *pdit );
+			gsd.defaultParameters[ paramData->m_name ] = paramData->m_value;
+		}
+
 		for( auto spit = shaderData->m_parameters.begin(); spit != shaderData->m_parameters.end(); ++spit )
 		{
 			EveSOFDataGenericStringPtr paramData = (*spit);
@@ -1330,6 +1336,12 @@ void EveSOFDataMgr::GenerateGenericData( GenericData& gd, EveSOFDataGenericPtr s
 		{
 			EveSOFDataTexturePtr textureData = (*tdit);
 			gsd.defaultTextures[ textureData->m_name ].resFilePath = textureData->m_resFilePath;
+		}
+
+		for( auto pdit = shaderData->m_defaultParameters.begin(); pdit != shaderData->m_defaultParameters.end(); ++pdit )
+		{
+			EveSOFDataParameterPtr paramData = ( *pdit );
+			gsd.defaultParameters[ paramData->m_name ] = paramData->m_value;
 		}
 
 		for( auto spit = shaderData->m_parameters.begin(); spit != shaderData->m_parameters.end(); ++spit )

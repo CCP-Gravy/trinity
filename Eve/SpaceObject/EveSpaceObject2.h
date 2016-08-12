@@ -26,6 +26,7 @@
 
 // consts
 #define EVE_SPACEOBJECT_DIRT_LEVEL_DEFAULT (0.f)
+#define EVE_SPACEOBJECT_CUSTOWMASK_MAX (2)
 
 // forwards
 BLUE_DECLARE( EveSpaceObject2 );
@@ -48,6 +49,7 @@ BLUE_DECLARE_VECTOR( EveSpriteLineSet );
 BLUE_DECLARE( Tr2GrannyAnimation );
 BLUE_DECLARE( EveTransform );
 BLUE_DECLARE( EveCustomMask );
+BLUE_DECLARE_VECTOR( EveCustomMask );
 BLUE_DECLARE( TriCurveSet );
 BLUE_DECLARE_VECTOR( TriCurveSet );
 BLUE_DECLARE( EveLocatorSets );
@@ -96,8 +98,8 @@ struct EveSpaceObjectVSData
 	Vector4 clipData;
 	Vector4 ellpsoidRadii;
 	Vector4 ellpsoidCenter;
-	Matrix customMaskMatrix;
-	Vector4 customMaskData;
+	Matrix customMaskMatrix[ EVE_SPACEOBJECT_CUSTOWMASK_MAX ];
+	Vector4 customMaskData[ EVE_SPACEOBJECT_CUSTOWMASK_MAX ];
 };
 
 // --------------------------------------------------------------------------------
@@ -110,8 +112,8 @@ struct EveSpaceObjectPSData
 	Vector4 clipData;
 	Vector4 miscData;
 	Vector4 shLightingCoefficients[Tr2ShLightingManager::PACKED_COEFFICIENT_COUNT];
-	Vector4 customMaskMaterialIDs;
-	Vector4 customMaskTargets;
+	Vector4 customMaskMaterialIDs[ EVE_SPACEOBJECT_CUSTOWMASK_MAX ];
+	Vector4 customMaskTargets[ EVE_SPACEOBJECT_CUSTOWMASK_MAX ];
 };
 
 // ---------------------------------------------------------------------------------------
@@ -314,7 +316,7 @@ public:
 	Vector3 GetDamageLocator( uint32_t index ) const;
 	Vector3 GetDamageLocatorDirection( uint32_t index ) const;
 	const LocatorStructureList* GetLocatorsForSet( const char* setName ) const;
-	void SetCustomMask( EveCustomMaskPtr newCustomMask );
+	void AddCustomMask( EveCustomMaskPtr newCustomMask );
 
 	// access to shadows
 	void SetShadowEffect( Tr2EffectPtr newShadowEffect );
@@ -519,7 +521,7 @@ protected:
 
 	/////////////////////////////////////////////////////////////////////////////////////
 	// custom masks
-	EveCustomMaskPtr m_customMask;
+	PEveCustomMaskVector m_customMasks;
 
 	/////////////////////////////////////////////////////////////////////////////////////
 	// dirt levels

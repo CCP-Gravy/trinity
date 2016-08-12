@@ -20,7 +20,6 @@ bool FileExists( const std::string& path )
 static char s_dnaSeperatorCmd = ':';
 static char s_dnaSeperatorArg = '?';
 static char s_dnaSeperatorList = ';';
-static std::string s_dnaPatternDefaultName( "default" );
 
 // dna commands
 static std::string s_dnaCommands[] = {
@@ -252,11 +251,7 @@ void EveSOFDNA::Setup( const char* dnaString, EveSOFDataMgrPtr dataMgr )
 	}
 	// pattern data (is NOT optional, the default one must exist!)
 	m_patternData = GetPatternData();
-	if( m_patternData == nullptr )
-	{
-		CCP_LOGERR( "Couldn't find the requested pattern, not even the default one: %s", s_dnaPatternDefaultName.c_str() );
-		return;
-	}
+
 	// generics
 	m_genericData = m_dataMgr->GetGenericData();
 
@@ -968,14 +963,11 @@ const EveSOFDataMgr::HullBoosterData* EveSOFDNA::GetHullBoosterData() const
 // --------------------------------------------------------------------------------
 const EveSOFDataMgr::PatternProjectionData* EveSOFDNA::GetPatternProjectionData( const char* hullName, uint32_t layer ) const
 {
-	// find hull in the pattern data
-	BlueSharedString s( hullName );
-	// if we don't have a dna command for a pattern, the hull is also default
 	if( !HasDnaCommand( CMD_PATTERN ) )
 	{
-		s = BlueSharedString( s_dnaPatternDefaultName );
+		return nullptr;
 	}
-	auto finder = m_patternData->projectionData.find( s );
+	auto finder = m_patternData->projectionData.find( BlueSharedString( hullName ) );
 	if( finder == m_patternData->projectionData.end() )
 	{
 		return nullptr;
@@ -989,27 +981,17 @@ const EveSOFDataMgr::PatternProjectionData* EveSOFDNA::GetPatternProjectionData(
 
 // --------------------------------------------------------------------------------
 // Description:
-//   Return the pattern name, with fallback ("default") and dna commands etc.
+//   Return pattern data
 // --------------------------------------------------------------------------------
-std::string EveSOFDNA::GetPatternName() const
+const EveSOFDataMgr::PatternData* EveSOFDNA::GetPatternData() const
 {
 	// do we have a pattern DNA commmand?
 	std::vector<std::string> commandArgs;
 	if( !GetDnaCommandArgs( CMD_PATTERN, commandArgs ) )
 	{
-		return s_dnaPatternDefaultName;
+		return nullptr;
 	}
-	return commandArgs[0];
-}
-
-// --------------------------------------------------------------------------------
-// Description:
-//   Return pattern data
-// --------------------------------------------------------------------------------
-const EveSOFDataMgr::PatternData* EveSOFDNA::GetPatternData() const
-{
-	std::string patternName = GetPatternName();
-	return m_dataMgr->GetPatternData( patternName.c_str() );
+	return m_dataMgr->GetPatternData( commandArgs[0].c_str() );
 }
 
 // --------------------------------------------------------------------------------

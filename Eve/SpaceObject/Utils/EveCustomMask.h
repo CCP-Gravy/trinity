@@ -28,7 +28,7 @@ public:
 
 	// access
 	void GetDebugDrawMatrix( Matrix* matrix, float objectRadius ) const;
-	void FillPerObjectDataPS( EveSpaceObjectVSData* vsData, EveSpaceObjectPSData* psData ) const;
+	void FillPerObjectData( size_t n, EveSpaceObjectVSData* vsData, EveSpaceObjectPSData* psData ) const;
 	void Setup( const Vector3& position, const Vector3& scaling, const Quaternion& rotation, bool isMirrored, uint8_t srcID, const Vector4& targets );
 
 private:

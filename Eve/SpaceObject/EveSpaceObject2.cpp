@@ -141,6 +141,7 @@ EveSpaceObject2::EveSpaceObject2( IRoot* lockobj ) :
 	PARENTLOCK( m_effectChildren ),
 	PARENTLOCK( m_lights ),
 	PARENTLOCK( m_externalParameters ),
+	PARENTLOCK( m_customMasks ),
 	m_display( true ),
 	m_update( true ),
 	m_enableShadow( true ),
@@ -353,13 +354,16 @@ void EveSpaceObject2::UpdateAsyncronous( EveUpdateContext& updateContext )
 		m_psData.miscData.y = (float)m_impactOverlay->GetDataTextureOffset();
 	}
 
-	if( m_customMask )
+	for( size_t i = 0; i < EVE_SPACEOBJECT_CUSTOWMASK_MAX; ++i )
 	{
-		m_customMask->FillPerObjectDataPS( &m_vsData, &m_psData );
-	}
-	else
-	{
-		m_psData.customMaskTargets = Vector4( 0.f, 0.f, 0.f, 0.f );
+		if( m_customMasks.size() > i )
+		{
+			m_customMasks[i]->FillPerObjectData( i, &m_vsData, &m_psData );
+		}
+		else
+		{
+			m_psData.customMaskTargets[ i ] = Vector4( 0.f, 0.f, 0.f, 0.f );
+		}
 	}
 
 	if( !m_curveSets.empty() || !m_overlayEffects.empty() )
@@ -424,10 +428,10 @@ void EveSpaceObject2::PrepareShaderData( EveUpdateContext& updateContext )
 void EveSpaceObject2::RenderDebugInfo( Tr2RenderContext& renderContext )
 {
 	// debug info of custom maps stops all other debug info.
-	if( m_customMask )
+	for( auto it = m_customMasks.begin(); it != m_customMasks.end(); ++it )
 	{
 		Matrix customMaskTransform;
-		m_customMask->GetDebugDrawMatrix( &customMaskTransform, GetBoundingSphereRadius() );
+		(*it)->GetDebugDrawMatrix( &customMaskTransform, GetBoundingSphereRadius() );
 		Tr2Renderer::DrawOrientedBox( customMaskTransform, 0xff00ffff );
 	}
 
@@ -1585,11 +1589,11 @@ const LocatorStructureList* EveSpaceObject2::GetLocatorsForSet( const char* setN
 
 // --------------------------------------------------------------------------------
 // Description:
-//   Set a new custom mask/projection patter from the outside
+//   Add a new custom mask/projection patter from the outside
 // --------------------------------------------------------------------------------
-void EveSpaceObject2::SetCustomMask( EveCustomMaskPtr newCustomMask )
+void EveSpaceObject2::AddCustomMask( EveCustomMaskPtr newCustomMask )
 {
-	m_customMask = newCustomMask;
+	m_customMasks.Append( newCustomMask );
 }
 
 

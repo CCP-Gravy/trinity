@@ -971,8 +971,9 @@ public:
 	PEveSOFDataGenericStringVector m_parameters;
 	PEveSOFDataGenericStringVector m_textures;
 
-	// default textures
+	// default textures & parameters
 	PEveSOFDataTextureVector m_defaultTextures;
+	PEveSOFDataParameterVector m_defaultParameters;
 };
 TYPEDEF_BLUECLASS( EveSOFDataGenericShader );
 BLUE_DECLARE_VECTOR( EveSOFDataGenericShader );
