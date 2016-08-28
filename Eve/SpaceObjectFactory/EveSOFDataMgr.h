@@ -341,18 +341,26 @@ public:
 		bool isMirrored;
 	};
 
-	struct PatternData
+	struct PatternLayerData
 	{
+		// texture name
+		BlueSharedString textureName;
+		// texture resfilepath
+		std::string textureResFilePath;
 		// material source
 		uint8_t materialSourceID;
 		// material targets
 		Vector4 materialTargets;
 		// projection type
 		Tr2RenderContextEnum::TextureAddressMode projectionAddressModeU, projectionAddressModeV;
-		// shared data
-		std::map<BlueSharedString, TextureData> patternTextures;
+	};
+
+	struct PatternData
+	{
 		// non-shared data (per hull)
 		std::map<BlueSharedString, std::vector<PatternProjectionData>> projectionData;
+		// non-shared data (per layer)
+		std::vector<PatternLayerData> layerData;
 	};
 
 	// generic data structs

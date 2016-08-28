@@ -1065,16 +1065,6 @@ bool EveSOFDataMgr::LoadMaterialData( EveSOFDataPtr srcData )
 // --------------------------------------------------------------------------------
 void EveSOFDataMgr::GeneratePatternData( PatternData& pd, EveSOFDataPatternPtr srcData ) const
 {
-	// pattern textures
-	for( auto ptit = srcData->m_patternTextures.begin(); ptit != srcData->m_patternTextures.end(); ++ptit )
-	{
-		EveSOFDataTexturePtr tex = ( *ptit );
-
-		TextureData td;
-		td.resFilePath = tex->m_resFilePath;
-		pd.patternTextures[tex->m_name] = td;
-	}
-
 	// pattern projections
 	for( auto ppit = srcData->m_projections.begin(); ppit != srcData->m_projections.end(); ++ppit )
 	{
@@ -1084,26 +1074,30 @@ void EveSOFDataMgr::GeneratePatternData( PatternData& pd, EveSOFDataPatternPtr s
 		if( pattern->m_transformLayer1 )
 		{
 			PatternProjectionData ppd;
-			EveSOFUtils::GeneratePatternProjectionData( ppd, pattern->m_transformLayer1 );
+			EveSOFUtils::GeneratePatternProjectionData( &ppd, pattern->m_transformLayer1 );
 			pd.projectionData[pattern->m_name].push_back( ppd );
 		}
 		if( pattern->m_transformLayer2 )
 		{
 			PatternProjectionData ppd;
-			EveSOFUtils::GeneratePatternProjectionData( ppd, pattern->m_transformLayer2 );
+			EveSOFUtils::GeneratePatternProjectionData( &ppd, pattern->m_transformLayer2 );
 			pd.projectionData[pattern->m_name].push_back( ppd );
 		}
 	}
 
+	// per-layer data
+	pd.layerData.clear();
 	if( srcData->m_layer1 )
 	{
-		// projection types, translate to AL enums right here
-		pd.projectionAddressModeU = EveSOFUtils::GetTextureAddressMode( srcData->m_layer1->m_projectionTypeU );
-		pd.projectionAddressModeV = EveSOFUtils::GetTextureAddressMode( srcData->m_layer1->m_projectionTypeV );
-		// material source id can be directly transltaed from enum
-		pd.materialSourceID = ( uint8_t )srcData->m_layer1->m_materialSource;
-		// material targets are bools, but need to be stored as floats (for shader)
-		pd.materialTargets = Vector4( srcData->m_layer1->m_isTargetMtl1 ? 1.f : 0.f, srcData->m_layer1->m_isTargetMtl2 ? 1.f : 0.f, srcData->m_layer1->m_isTargetMtl3 ? 1.f : 0.f, srcData->m_layer1->m_isTargetMtl4 ? 1.f : 0.f );
+		PatternLayerData pld;
+		EveSOFUtils::GeneratePatternLayerData( &pld, srcData->m_layer1 );
+		pd.layerData.push_back( pld );
+	}
+	if( srcData->m_layer2 )
+	{
+		PatternLayerData pld;
+		EveSOFUtils::GeneratePatternLayerData( &pld, srcData->m_layer2 );
+		pd.layerData.push_back( pld );
 	}
 }
 

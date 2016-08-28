@@ -48,7 +48,8 @@ private:
 class EveSOFUtils
 {
 public:
-	static void GeneratePatternProjectionData( EveSOFDataMgr::PatternProjectionData& ppd, const EveSOFDataPatternTransform* patternTransform );
+	static void GeneratePatternProjectionData( EveSOFDataMgr::PatternProjectionData* ppd, const EveSOFDataPatternTransform* patternTransform );
+	static void GeneratePatternLayerData( EveSOFDataMgr::PatternLayerData* pld, const EveSOFDataPatternLayer* patternLayer );
 	static Tr2RenderContextEnum::TextureAddressMode GetTextureAddressMode( EveSOFDataPatternLayer::ProjectionType projectionType );
 };
 

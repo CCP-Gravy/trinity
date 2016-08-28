@@ -72,13 +72,32 @@ std::string EveSOFUtilsParameterName::ChangeMaterialIdx( const EveSOFDataMgr::Ge
 // Description:
 //   Fill structs from other structs
 // --------------------------------------------------------------------------------
-void EveSOFUtils::GeneratePatternProjectionData( EveSOFDataMgr::PatternProjectionData& ppd, const EveSOFDataPatternTransform* patternTransform )
+void EveSOFUtils::GeneratePatternProjectionData( EveSOFDataMgr::PatternProjectionData* ppd, const EveSOFDataPatternTransform* patternTransform )
 {
-	ppd.enabled = true;
-	ppd.position = patternTransform->m_position;
-	ppd.scaling = patternTransform->m_scaling;
-	ppd.rotation = patternTransform->m_rotation;
-	ppd.isMirrored = patternTransform->m_isMirrored;
+	ppd->enabled = true;
+	ppd->position = patternTransform->m_position;
+	ppd->scaling = patternTransform->m_scaling;
+	ppd->rotation = patternTransform->m_rotation;
+	ppd->isMirrored = patternTransform->m_isMirrored;
+}
+
+// --------------------------------------------------------------------------------
+// Description:
+//   Fill structs from other structs
+// --------------------------------------------------------------------------------
+void EveSOFUtils::GeneratePatternLayerData( EveSOFDataMgr::PatternLayerData* pld, const EveSOFDataPatternLayer* patternLayer )
+{
+	// texture name
+	pld->textureName = patternLayer->m_textureName;
+	// texture res file
+	pld->textureResFilePath = patternLayer->m_textureResFilePath;
+	// projection types, translate to AL enums right here
+	pld->projectionAddressModeU = GetTextureAddressMode( patternLayer->m_projectionTypeU );
+	pld->projectionAddressModeV = GetTextureAddressMode( patternLayer->m_projectionTypeV );
+	// material source id can be directly transltaed from enum
+	pld->materialSourceID = ( uint8_t )patternLayer->m_materialSource;
+	// material targets are bools, but need to be stored as floats (for shader)
+	pld->materialTargets = Vector4( patternLayer->m_isTargetMtl1 ? 1.f : 0.f, patternLayer->m_isTargetMtl2 ? 1.f : 0.f, patternLayer->m_isTargetMtl3 ? 1.f : 0.f, patternLayer->m_isTargetMtl4 ? 1.f : 0.f );
 }
 
 // --------------------------------------------------------------------------------

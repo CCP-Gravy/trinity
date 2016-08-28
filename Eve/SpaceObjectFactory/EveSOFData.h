@@ -844,12 +844,14 @@ public:
 		SOURCE_CUSTOM1,
 	};
 
+	// name of the texture
+	BlueSharedString m_textureName;
+	// res path
+	std::string m_textureResFilePath;
 	// how is the texture projected?
 	ProjectionType m_projectionTypeU, m_projectionTypeV;
-
 	// what is the pattern's material source?
 	MaterialSource m_materialSource;
-
 	// what is the pattern's material target?
 	bool m_isTargetMtl1, m_isTargetMtl2, m_isTargetMtl3, m_isTargetMtl4;
 };
@@ -868,14 +870,9 @@ public:
 
 	// pattern name
 	std::string m_name;
-
 	// pattern layer data
 	EveSOFDataPatternLayerPtr m_layer1;
 	EveSOFDataPatternLayerPtr m_layer2;
-
-	// pattern textures res path
-	PEveSOFDataTextureVector m_patternTextures;
-
 	// pattern placement per hull
 	PEveSOFDataPatternPerHullVector m_projections;
 };

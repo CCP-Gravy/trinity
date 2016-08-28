@@ -420,12 +420,12 @@ void EveSOF::FillMeshAreaVector( std::map<std::string, Tr2LodResourcePtr>& lodRe
 			// pattern textures from optional(!) pattern data
 			if( patternData )
 			{
-				for( auto ptit = patternData->patternTextures.begin(); ptit != patternData->patternTextures.end(); ++ptit )
+				for( auto ptit = patternData->layerData.begin(); ptit != patternData->layerData.end(); ++ptit )
 				{
-					newShader->AddResourceTexture2D( ptit->first, ptit->second.resFilePath.c_str() );
+					newShader->AddResourceTexture2D( ptit->textureName, ptit->textureResFilePath.c_str() );
 
 					// pattern textures almost always require a sampler change: repeat is boring....
-					newShader->AddSamplerOverride( BlueSharedString( std::string( ptit->first.c_str() ) + "Sampler" ), patternData->projectionAddressModeU, patternData->projectionAddressModeV );
+					newShader->AddSamplerOverride( BlueSharedString( std::string( ptit->textureName.c_str() ) + "Sampler" ), ptit->projectionAddressModeU, ptit->projectionAddressModeV );
 				}
 			}
 
@@ -1129,11 +1129,16 @@ void EveSOF::SetupCustomMask( EveSpaceObject2Ptr obj, const EveSOFDNAPtr dna ) c
 	// if we don't have this specific hull in the patter data, we don't need to set it to the spaceobject!
 	if( patternProjectionData && patternData )
 	{
-		EveCustomMaskPtr customMask;
-		customMask.CreateInstance();
-		customMask->Setup( patternProjectionData->position, patternProjectionData->scaling, patternProjectionData->rotation, patternProjectionData->isMirrored, patternData->materialSourceID, patternData->materialTargets );
+		if( patternData->layerData.size() > 0 )
+		{
+			const EveSOFDataMgr::PatternLayerData* patternLayerData = &patternData->layerData[0];
 
-		obj->AddCustomMask( customMask );
+			EveCustomMaskPtr customMask;
+			customMask.CreateInstance();
+			customMask->Setup( patternProjectionData->position, patternProjectionData->scaling, patternProjectionData->rotation, patternProjectionData->isMirrored, patternLayerData->materialSourceID, patternLayerData->materialTargets );
+
+			obj->AddCustomMask( customMask );
+		}
 	}
 }
 
