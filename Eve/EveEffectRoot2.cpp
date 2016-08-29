@@ -216,6 +216,10 @@ void EveEffectRoot2::RegisterWithQuadRenderer( Tr2QuadRenderer& quadRenderer )
 
 void EveEffectRoot2::AddQuadsToQuadRenderer( Tr2QuadRenderer& quadRenderer )
 {
+	if (!m_display )
+	{
+		return;
+	}
 	for( auto it = m_effectChildren.begin(); it != m_effectChildren.end(); ++it )
 	{
 		( *it )->AddQuadsToQuadRenderer( quadRenderer );
