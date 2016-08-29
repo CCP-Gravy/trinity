@@ -43,6 +43,15 @@ const char* BLUEMODULENAME = CCP_STRINGIZE( TRINITYNAME );
 
 const char* g_moduleName = "trinity";
 
+#ifdef _WIN32
+extern "C"
+{
+__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+__declspec(dllexport) uint32_t NvOptimusEnablement = 1;
+}
+#endif
+
+
 // reduce CRT link
 extern "C" void _setargv(){}
 extern "C" void _setenvp(){}
