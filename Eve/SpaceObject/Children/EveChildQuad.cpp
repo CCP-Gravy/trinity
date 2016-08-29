@@ -23,7 +23,7 @@ namespace
 
 			def.Add( def.FLOAT32_3, def.POSITION, 0, 1, 1 );
 			def.Add( def.FLOAT16_4, def.TEXCOORD, 0, 1, 1 );
-			def.Add( def.FLOAT16_4, def.TEXCOORD, 1, 1, 1 );
+			def.Add( def.FLOAT32_4, def.TEXCOORD, 1, 1, 1 );
 		}
 		return def;
 	}
@@ -146,8 +146,8 @@ void EveChildQuad::UpdateAsyncronous( EveUpdateContext& updateContext, IEveSpace
 
 	m_quad.m_position = XMVector3TransformCoord( m_position, m_worldTransform );
 	m_quad.m_rotation = m_rotation;
-	m_quad.m_scale[0] = m_scale.x * scale;
-	m_quad.m_scale[1] = m_scale.y * scale;
+	m_quad.m_scale.x = m_scale.x * scale;
+	m_quad.m_scale.y = m_scale.y * scale;
 	m_quad.m_color[0] = m_color.r;
 	m_quad.m_color[1] = m_color.g;
 	m_quad.m_color[2] = m_color.b;

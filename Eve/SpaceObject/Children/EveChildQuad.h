@@ -56,9 +56,9 @@ private:
 	{
 		Vector3 m_position;
 		D3DXFLOAT16 m_color[4];
-		D3DXFLOAT16 m_scale[2];
-		D3DXFLOAT16 m_rotation;
-		D3DXFLOAT16 m_brightness;
+		Vector2 m_scale;
+		float m_rotation;
+		float m_brightness;
 	};
 
 	Matrix m_worldTransform;
