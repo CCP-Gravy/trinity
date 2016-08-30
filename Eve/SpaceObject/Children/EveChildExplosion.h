@@ -33,6 +33,7 @@ public:
 	void SetLocalExplosionTransforms( const std::vector<Matrix>& transforms );
 
 	void UpdateSyncronous( EveUpdateContext& updateContext, IEveSpaceObject2* spaceObjectParent, IEveSpaceObjectChild* childParent );
+	void RegisterWithQuadRenderer( Tr2QuadRenderer& quadRenderer );
 private:
 	struct Transform
 	{

@@ -159,6 +159,22 @@ void EveChildExplosion::UpdateSyncronous(
 	EveChildContainer::UpdateSyncronous( updateContext, spaceObjectParent, childParent );
 }
 
+void EveChildExplosion::RegisterWithQuadRenderer( Tr2QuadRenderer& quadRenderer )
+{
+	for( auto it = m_localExplosions.begin(); it != m_localExplosions.end(); ++it )
+	{
+		( *it )->RegisterWithQuadRenderer( quadRenderer );
+	}
+	if( m_localExplosionShared )
+	{
+		m_localExplosionShared->RegisterWithQuadRenderer( quadRenderer );
+	}
+	if( m_globalExplosion )
+	{
+		m_globalExplosion->RegisterWithQuadRenderer( quadRenderer );
+	}
+}
+
 // --------------------------------------------------------------------------------------
 // Description:
 //   Searches for all IRoot descendants in m_localExplosionShared and puts them into
