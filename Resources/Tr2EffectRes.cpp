@@ -49,7 +49,7 @@ ITr2ShaderStatePtr Tr2EffectRes::GetShader( const Tr2ShaderOption* options, size
 
 	if( !Tr2Renderer::IsResourceCreationAllowed() )
 	{
-		return false;
+		return nullptr;
 	}
 
 	uint32_t multiplier = 1;
