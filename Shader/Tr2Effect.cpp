@@ -491,6 +491,7 @@ void Tr2Effect::RebuildCachedDataInternal()
 		return;
 	}
 	m_parameterHash = INVALID_PARAMETER_HASH;
+	ITr2ShaderStatePtr bk = m_shader;
 	m_shader = nullptr;
 
 	if( m_effectResource )
