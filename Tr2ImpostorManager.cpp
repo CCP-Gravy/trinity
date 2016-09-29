@@ -107,7 +107,7 @@ Tr2ImpostorManager::Tr2ImpostorManager()
 	m_effect.CreateInstance();
 	m_effect->SetEffectPathName( "res:/graphics/effect/managed/space/system/impostor.fx" );
 
-	m_effectKey = m_effect->GetHashValue() + ( uint64_t( (Tr2Effect*)m_effect ) << 32 );
+	m_effectKey = m_effect->GetHashValue() + ( uint64_t( static_cast<Tr2Effect*>( m_effect ) ) << 32 );
 
 	static Tr2VertexDefinition def;
 	if( def.m_items.empty() )
