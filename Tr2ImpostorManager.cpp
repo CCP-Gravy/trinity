@@ -164,7 +164,7 @@ bool Tr2ImpostorManager::OnPrepareResources()
 {
 	m_rt->Create( m_width, m_height, 1, Tr2RenderContextEnum::PIXEL_FORMAT_B8G8R8A8_UNORM );
 	m_itemRt->Create( m_itemWidth, m_itemHeight, 1, Tr2RenderContextEnum::PIXEL_FORMAT_B8G8R8A8_UNORM );
-	m_ds->Create( m_itemWidth, m_itemHeight, Tr2Renderer::GetShaderModel() >= TR2SM_3_0_DEPTH ? Tr2RenderContextEnum::DSFMT_READABLE : Tr2RenderContextEnum::DSFMT_D16, 1, 0 );
+	m_ds->Create( m_itemWidth, m_itemHeight, Tr2Renderer::GetShaderModel() >= TR2SM_3_0_DEPTH ? Tr2RenderContextEnum::DSFMT_READABLE : Tr2RenderContextEnum::DSFMT_D24S8, 1, 0 );
 	return true;
 }
 
