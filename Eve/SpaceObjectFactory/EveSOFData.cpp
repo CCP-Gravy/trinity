@@ -87,6 +87,7 @@ EveSOFDataGenericHullDamage::EveSOFDataGenericHullDamage( IRoot* lockobj ) :
 	m_hullParticleRate( 0.f ),
 	m_hullParticleInnerAngle( 0.f ),
 	m_hullParticleAngle( 0.f ),
+	m_hullParticleColorMidpoint( 0.5f ),
 	m_hullParticleMinMaxSpeed( 0.f, 0.f ),
 	m_hullParticleMinMaxLifeTime( 0.f, 0.f ),
 	m_hullParticleSizes( 0.f, 0.f, 0.f, 0.f ),
