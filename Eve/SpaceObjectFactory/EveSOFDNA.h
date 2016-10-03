@@ -95,6 +95,7 @@ public:
 	const EveSOFDataMgr::FactionPlaneSetColorData* GetFactionPlaneSetData( int groupIndex ) const;
 	const EveSOFDataMgr::FactionSpotlightSetColorData* GetFactionSpotlightSetData( int groupIndex ) const;
 	const EveSOFDataMgr::FactionSpriteSetColorData* GetFactionSpriteSetData( int groupIndex ) const;
+	const EveSOFDataMgr::FactionChildData* GetFactionChildData( int groupIndex ) const;
 
 	// get pattern data
 	const EveSOFDataMgr::PatternProjectionData* GetPatternProjectionData( const char* hullName, size_t layer ) const;

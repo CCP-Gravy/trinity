@@ -155,6 +155,7 @@ public:
 		Quaternion rotation;
 		Vector3 scaling;
 		int id;
+		int groupIndex;
 	};
 
 	struct HullInstancedMesh
@@ -248,6 +249,11 @@ public:
 		std::map<BlueSharedString, Vector4> parameters;
 	};
 
+	struct FactionChildData
+	{
+		bool isVisible;
+	};
+
 	struct FactionData
 	{
 		// texture insert
@@ -266,6 +272,8 @@ public:
 		std::map<int, FactionPlaneSetColorData> planeSetsColors;
 		// decals
 		std::map<int, FactionDecalData> decalData;
+		// children
+		std::map<int, FactionChildData> childData;
 	};
 
 	// race data structs

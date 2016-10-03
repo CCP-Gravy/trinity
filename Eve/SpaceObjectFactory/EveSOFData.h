@@ -350,6 +350,7 @@ public:
 	Quaternion m_rotation;
 	Vector3 m_scaling;
 	int m_id;
+	int m_groupIndex;
 };
 TYPEDEF_BLUECLASS( EveSOFDataHullChild );
 BLUE_DECLARE_VECTOR( EveSOFDataHullChild );
@@ -584,6 +585,23 @@ TYPEDEF_BLUECLASS( EveSOFDataFactionDecal );
 BLUE_DECLARE_VECTOR( EveSOFDataFactionDecal );
 
 
+BLUE_CLASS( EveSOFDataFactionChild ) :
+	public IRoot
+{
+public:
+	EXPOSE_TO_BLUE();
+	EveSOFDataFactionChild( IRoot* lockobj = NULL );
+	~EveSOFDataFactionChild() {}
+
+	// group
+	int m_groupIndex;
+	bool m_isVisible;
+	std::string m_name;
+};
+TYPEDEF_BLUECLASS( EveSOFDataFactionChild );
+BLUE_DECLARE_VECTOR( EveSOFDataFactionChild );
+
+
 BLUE_CLASS( EveSOFDataFactionHullArea ) :
 	public IRoot
 {
@@ -624,6 +642,7 @@ public:
 	PEveSOFDataFactionSpotlightSetVector m_spotlightSets;
 	PEveSOFDataFactionPlaneSetVector m_planeSets;
 	PEveSOFDataFactionDecalVector m_decals;
+	PEveSOFDataFactionChildVector m_children;
 
 	// material usage
 	int m_materialUsageMtl1;

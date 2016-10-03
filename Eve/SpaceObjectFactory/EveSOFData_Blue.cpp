@@ -420,6 +420,7 @@ const Be::ClassInfo* EveSOFDataHullChild::ExposeToBlue()
 		MAP_ATTRIBUTE( "rotation", m_rotation, "", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "scaling", m_scaling, "", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "id", m_id, "", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "groupIndex", m_groupIndex, "", Be::READWRITE | Be::PERSIST )
     EXPOSURE_END()
 }
 
@@ -564,6 +565,20 @@ const Be::ClassInfo* EveSOFDataFactionDecal::ExposeToBlue()
 
 
 
+BLUE_DEFINE( EveSOFDataFactionChild );
+const Be::ClassInfo* EveSOFDataFactionChild::ExposeToBlue()
+{
+    EXPOSURE_BEGIN( EveSOFDataFactionChild, "" )
+        MAP_INTERFACE( EveSOFDataFactionChild )
+
+		MAP_ATTRIBUTE( "groupIndex", m_groupIndex, "", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "name", m_name, "", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "isVisible", m_isVisible, "", Be::READWRITE | Be::PERSIST )
+    EXPOSURE_END()
+}
+
+
+
 BLUE_DEFINE( EveSOFDataHullDecal );
 
 Be::VarChooser EveSOFDecalUsageChooser[] =
@@ -628,6 +643,7 @@ const Be::ClassInfo* EveSOFDataFaction::ExposeToBlue()
 		MAP_ATTRIBUTE( "spriteSets", m_spriteSets, "All the groups of sprite sets.", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "spotlightSets", m_spotlightSets, "All the groups of spotlight sets.", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "planeSets", m_planeSets, "All the groups of plane sets.", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "children", m_children, "All the groups of children.", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "materialUsageMtl1", m_materialUsageMtl1, "Material usage of Mtl1", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "materialUsageMtl2", m_materialUsageMtl2, "Material usage of Mtl2", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "materialUsageMtl3", m_materialUsageMtl3, "Material usage of Mtl3", Be::READWRITE | Be::PERSIST )

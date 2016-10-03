@@ -718,6 +718,7 @@ void EveSOFDataMgr::GenerateHullData( HullData& hd, EveSOFDataHullPtr srcData ) 
 		hc.rotation = child->m_rotation;
 		hc.scaling = child->m_scaling;
 		hc.id = child->m_id;
+		hc.groupIndex = child->m_groupIndex;
 		hd.children.push_back( hc );
 	}
 
@@ -880,6 +881,17 @@ void EveSOFDataMgr::GenerateFactionData( FactionData& fd, EveSOFDataFactionPtr s
 		}
 
 		fd.decalData[decalData->m_groupIndex] = fdd;
+	}
+
+	// child faction data
+	fd.childData.clear();
+	for( auto ccit = srcData->m_children.begin(); ccit != srcData->m_children.end(); ++ccit )
+	{
+		auto childData = *ccit;
+
+		FactionChildData fcd;
+		fcd.isVisible = childData->m_isVisible;
+		fd.childData[childData->m_groupIndex] = fcd;
 	}
 
 	// area parameters

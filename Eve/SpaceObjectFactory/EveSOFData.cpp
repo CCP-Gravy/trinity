@@ -40,6 +40,12 @@ EveSOFDataFactionDecal::EveSOFDataFactionDecal( IRoot* lockobj ) :
 {}
 
 
+EveSOFDataFactionChild::EveSOFDataFactionChild( IRoot* lockobj ) :
+	m_groupIndex( -1 ),
+	m_isVisible( false )
+{}
+
+
 EveSOFDataTexture::EveSOFDataTexture( IRoot* lockobj )
 {}
 
@@ -118,6 +124,7 @@ EveSOFDataFaction::EveSOFDataFaction( IRoot* lockobj ) :
 	PARENTLOCK( m_spriteSets ),
 	PARENTLOCK( m_spotlightSets ),
 	PARENTLOCK( m_planeSets ),
+	PARENTLOCK( m_children ),
 	m_materialUsageMtl1( 0 ),
 	m_materialUsageMtl2( 1 ),
 	m_materialUsageMtl3( 2 ),
@@ -294,7 +301,8 @@ EveSOFDataHullChild::EveSOFDataHullChild( IRoot* lockobj ) :
 	m_translation( 0.f, 0.f, 0.f ),
 	m_rotation( 0.f, 0.f, 0.f, 1.f ),
 	m_scaling( 1.f, 1.f, 1.f ),
-	m_id( -1 )
+	m_id( -1 ),
+	m_groupIndex( -1 )
 {}
 
 

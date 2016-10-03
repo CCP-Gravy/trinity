@@ -491,6 +491,24 @@ const EveSOFDataMgr::FactionSpriteSetColorData* EveSOFDNA::GetFactionSpriteSetDa
 
 // --------------------------------------------------------------------------------
 // Description:
+//   Return the factional group-child-data by a given groupindex
+// --------------------------------------------------------------------------------
+const EveSOFDataMgr::FactionChildData* EveSOFDNA::GetFactionChildData( int groupIndex ) const
+{
+	// -1 is null
+	if( groupIndex != -1 )
+	{
+		auto finder = m_factionData->childData.find( groupIndex );
+		if( finder != m_factionData->childData.end() )
+		{
+			return &finder->second;
+		}
+	}
+	return nullptr;
+}
+
+// --------------------------------------------------------------------------------
+// Description:
 //   Return an array to all the planesets on this hull
 // --------------------------------------------------------------------------------
 const std::vector<EveSOFDataMgr::HullPlaneSetData>& EveSOFDNA::GetHullPlaneSets() const
