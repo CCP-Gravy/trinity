@@ -179,7 +179,8 @@ void Tr2InteriorSHLightingSolver::Solve( const ITr2InteriorLightVector& visibleL
 
 	if( m_samples.empty() )
 	{
-		Clear();
+		GlobalStore().RegisterVariable( "SHSampleMap", &m_sampleTexture );
+		GlobalStore().RegisterVariable( "SHLightingMap", &m_shTexture.GetTexture() );
 		return;
 	}
 	
