@@ -230,6 +230,7 @@ void EveSOFDNA::Setup( const char* dnaString, EveSOFDataMgrPtr dataMgr )
 
 		// put into map, warning: this might overwrite a similar command!
 		m_commands[commandArgs[0]] = commandList;
+		commandArgs.clear();
 	}
 
 	// the 3 main dna names
