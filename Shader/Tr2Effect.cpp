@@ -639,7 +639,7 @@ bool Tr2Effect::PopulateParameters()
 
 	if (!m_shader)
 	{
-		CCP_LOGERR( "No effect resource loaded." );
+		CCP_LOGERR( "Tr2Effect::PopulateParameters: no effect resource loaded." );
 		return false;
 	}
 
@@ -740,7 +740,7 @@ bool Tr2Effect::PruneParameters()
 
 	if (!m_shader)
 	{
-		CCP_LOGERR( "No effect resource loaded." );
+		CCP_LOGERR( "Tr2Effect::PruneParameters: no effect resource loaded." );
 		return false;
 	}
 
@@ -844,7 +844,7 @@ bool Tr2Effect::IsParameterUsedByTechnique( const std::string& parameterName )
 {
 	if (!GetShaderStateInterface())
 	{
-		CCP_LOGERR( "No effect resource loaded." );
+		CCP_LOGERR( "Tr2Effect::IsParameterUsedByTechnique: no effect resource loaded." );
 		return false;
 	}
 

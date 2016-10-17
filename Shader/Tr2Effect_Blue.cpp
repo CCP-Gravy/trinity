@@ -6,36 +6,6 @@
 BLUE_DEFINE( Tr2Effect );
 
 #if BLUE_WITH_PYTHON
-// ---------------------------------------------------------------
-// PyGetTechniques
-// 
-// Gets a python list of the techniques on the effect
-// (techniquename, isValid, annotationDict). We don't really 
-// support multiple techniques, so this function returns a dummy
-// list with a single tuple.
-// ---------------------------------------------------------------
-static PyObject* PyGetTechniques( PyObject* self, PyObject* args )
-{
-	Tr2Effect* pThis = BluePythonCast<Tr2Effect*>( self );
-
-	if (!pThis->GetShaderStateInterface())
-	{
-		CCP_LOGERR( "No effect resource loaded." );
-		Py_INCREF(Py_None);
-		return Py_None;
-	}
-
-	PyObject* techniqueList = PyList_New(0);
-
-	PyObject* techniqueInfo = PyTuple_New(3);
-	PyTuple_SetItem(techniqueInfo, 0, PyString_FromString("theTechnique"));
-	PyTuple_SetItem(techniqueInfo, 1, PyBool_FromLong( 1 ) );
-	PyTuple_SetItem(techniqueInfo, 2, PyDict_New());
-	PyList_Append( techniqueList, techniqueInfo); 
-	Py_DECREF( techniqueInfo );
-
-	return techniqueList;
-}
 
 // ---------------------------------------------------------------
 // PyGetParameterAnnotations
@@ -54,7 +24,7 @@ static PyObject* PyGetParameterAnnotations( PyObject* self, PyObject* args )
 
 	if (!pThis->GetShaderStateInterface())
 	{
-		CCP_LOGERR( "No effect resource loaded." );
+		CCP_LOGERR( "Tr2Effect::GetParameterAnnotations: no effect resource loaded." );
 		Py_INCREF(Py_None);
 		return Py_None;
 	}
@@ -215,7 +185,6 @@ const Be::ClassInfo* Tr2Effect::ExposeToBlue()
 		MAP_METHOD( "GetParameterAnnotations", PyGetParameterAnnotations, "Gets the annotations on a parameter" )
 		MAP_METHOD_AND_WRAP( "PopulateParameters", PopulateParameters, "Populates the parameter list with the appropriate parameters" )
 		MAP_METHOD_AND_WRAP( "PruneParameters", PruneParameters, "Removes parameters from the parameter list that are not used by the effect" )
-		MAP_METHOD( "GetTechniques", PyGetTechniques, "Gets a list of the techniques available on this effect." )
 		MAP_METHOD_AND_WRAP( "IsParameterUsedByTechnique", IsParameterUsedByTechnique, "Returns True if the parameter name is used by the current technique" )
 		MAP_METHOD_AND_WRAP( "RebuildCachedData", RebuildCachedDataInternal, "Call this after adding/removing parameters/resources" )
 

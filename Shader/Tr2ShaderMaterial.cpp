@@ -461,7 +461,7 @@ bool Tr2ShaderMaterial::PopulateParameters()
 
 	if (!m_lowLevelShader)
 	{
-		CCP_LOGERR( "No effect resource loaded." );
+		CCP_LOGERR( "Tr2ShaderMaterial::PopulateParameters: no effect resource loaded." );
 		return false;
 	}
 
@@ -527,7 +527,7 @@ bool Tr2ShaderMaterial::PruneParameters()
 
 	if( !m_lowLevelShader )
 	{
-		CCP_LOGERR( "No effect resource loaded." );
+		CCP_LOGERR( "Tr2ShaderMaterial::PruneParameters: no effect resource loaded." );
 		return false;
 	}
 
