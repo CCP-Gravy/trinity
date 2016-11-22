@@ -52,6 +52,7 @@ const Be::ClassInfo* EveAnimationSequencer::ExposeToBlue()
 		MAP_ATTRIBUTE( "stateMachines", m_stateMachines, "", Be::READWRITE | Be::PERSIST | Be::NOTIFY )
 
 		MAP_METHOD_AND_WRAP( "GoToState", GoToState, "" )
+		MAP_METHOD_AND_WRAP( "ForceState", ForceState, "Forces the statemachines to go into a specific state" )
 		MAP_METHOD_AND_WRAP( "SetStateParameter", SetStateParameter, "" )
     EXPOSURE_END()
 }

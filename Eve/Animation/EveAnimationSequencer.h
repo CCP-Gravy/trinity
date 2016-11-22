@@ -21,6 +21,7 @@ public:
 	void Clear();
 	void Update( EveSpaceObject2* owner, Be::Time time );
 	void GoToState( EveSpaceObject2* owner, const std::string& name );
+	void ForceState( EveSpaceObject2* owner, const std::string& name );
 	void SetStateParameter( const std::string& stateName, const std::string& parameterName, float parameterValue );
 	void Rebuild();
 
@@ -64,6 +65,7 @@ public:
 	void SetOwner( EveSpaceObject2* owner );
 	void Update( Be::Time time );
 	void GoToState( const std::string& name );
+	void ForceState( const std::string& name );
 	void SetStateParameter( const std::string& stateName, const std::string& parameterName, float parameterValue );
 	
 	/////////////////////////////////////////////////////////////////////////////////////

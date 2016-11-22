@@ -127,6 +127,31 @@ void EveAnimationStateMachine::GoToState( EveSpaceObject2* owner, const std::str
 	}
 }
 
+void EveAnimationStateMachine::ForceState( EveSpaceObject2* owner, const std::string& name )
+{
+	// Stop the current state if there is any
+	if( m_currentState )
+	{
+		m_currentState->Stop( this, owner );
+		m_currentState = nullptr;
+	}
+	// Remove any pending states
+	m_pendingStates.Clear();
+	
+	// if we get a transition state we need to trigger the destination state	
+	for( auto state = m_states.begin(); state != m_states.end(); state++)
+	{
+		const char* transitionEnd = (*state)->GetTransitionEndState( name );
+		if( transitionEnd )
+		{
+			GoToState( owner, transitionEnd );
+			return;
+		}
+	}	
+	
+	GoToState( owner, name );
+}
+
 // --------------------------------------------------------------------------------
 // Description:
 //   Sets state parameters
@@ -282,6 +307,23 @@ void EveAnimationSequencer::GoToState( const std::string& name )
 	for( auto it = m_stateMachines.begin(); it != m_stateMachines.end(); it++ )
 	{
 		(*it)->GoToState( m_owner, name );
+	}
+	owner->Unlock();
+}
+
+void EveAnimationSequencer::ForceState( const std::string& name )
+{
+	if( !m_owner )
+	{
+		return;
+	}
+
+	IRoot* owner = m_owner;
+	owner->Lock();
+
+	for( auto it = m_stateMachines.begin(); it != m_stateMachines.end(); it++ )
+	{
+		(*it)->ForceState( m_owner, name );
 	}
 	owner->Unlock();
 }
