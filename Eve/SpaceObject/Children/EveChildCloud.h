@@ -101,7 +101,7 @@ private:
 
 	uint32_t m_declaration;
 	Tr2VertexBufferAL m_vertexBuffer;
-	Tr2IndexBufferAL m_indexBuffer;
+	TrackableStdVector<Tr2IndexBufferAL*> m_indexBuffers;
 
 	std::string m_name;
 	bool m_display;
@@ -113,6 +113,9 @@ private:
 
 	float m_sortingModifier;
 	float m_minScreenSize;
+
+	float m_cellScreenSize;
+	size_t m_currentIB;
 };
 
 TYPEDEF_BLUECLASS( EveChildCloud );

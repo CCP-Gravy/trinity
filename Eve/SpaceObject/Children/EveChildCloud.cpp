@@ -167,17 +167,24 @@ EveChildCloud::EveChildCloud( IRoot* lockobj )
 	m_rotation( 0.f, 0.f, 0.f, 1.0f ),
 	m_display( true ),
 	m_declaration( Tr2EffectStateManager::UNINITIALIZED_DECLARATION ),
+	m_indexBuffers( "EveChildCloud::m_indexBuffers" ),
 	m_preTesselationLevel( 32 ),
 	m_min( -0.5f, -0.5f, -0.5f ),
 	m_max( 0.5f, 0.5f, 0.5f ),
 	m_sortingModifier( 1.0f ),
-	m_minScreenSize( 0.0f )
+	m_minScreenSize( 0.0f ),
+	m_cellScreenSize( 0.3f ),
+	m_currentIB( 0 )
 {
 	PrepareResources();
 }
 
 EveChildCloud::~EveChildCloud()
 {
+	for( auto it = m_indexBuffers.begin(); it != m_indexBuffers.end(); ++it )
+	{
+		CCP_DELETE *it;
+	}
 }
 
 bool EveChildCloud::Initialize()
@@ -200,6 +207,10 @@ bool EveChildCloud::OnModified( Be::Var* value )
 void EveChildCloud::GetRenderables( const TriFrustum& frustum, std::vector<ITr2Renderable*>& renderables, const Matrix& parentTransform, Tr2Lod parentLod )
 {
 	if( !m_display || !frustum.IsSphereVisible( &m_boundingSphere ) || frustum.GetPixelSizeAccross( &m_boundingSphere ) < m_minScreenSize * g_eveSpaceSceneLODFactor )
+	{
+		return;
+	}
+	if( m_indexBuffers.empty() || m_declaration == Tr2EffectStateManager::UNINITIALIZED_DECLARATION )
 	{
 		return;
 	}
@@ -253,10 +264,11 @@ void EveChildCloud::ReleaseResources( TriStorage s )
 	{
 		m_vertexBuffer.Destroy();
 	}
-	if( m_indexBuffer.IsValid() && m_indexBuffer.GetMemoryClass() & s )
+	for( auto it = m_indexBuffers.begin(); it != m_indexBuffers.end(); ++it )
 	{
-		m_indexBuffer.Destroy();
+		CCP_DELETE *it;
 	}
+	m_indexBuffers.clear();
 }
 
 bool EveChildCloud::OnPrepareResources()
@@ -278,35 +290,46 @@ bool EveChildCloud::OnPrepareResources()
 		CR_RETURN_VAL( m_vertexBuffer.Create( sizeof( Vector2 ) * uint32_t( data.size() ), USAGE_IMMUTABLE, &data.front(), renderContext ), false );
 	}
 
-	if( !m_indexBuffer.IsValid() )
+	if( m_indexBuffers.empty() )
 	{
 		std::vector<uint16_t> data( dimension * dimension * 6 );
-		uint32_t index = 0;
-		for( uint32_t j = 0; j < dimension; ++j )
+		uint32_t factor = 1;
+		for( auto dim = dimension; dim > 16; dim /= 2 )
 		{
-			for( uint32_t i = 0; i < dimension; ++i )
+			uint32_t index = 0;
+			for( uint32_t j = 0; j < dim; ++j )
 			{
-				if( j % 2 )
+				for( uint32_t i = 0; i < dim; ++i )
 				{
-					data[index++] = i + j * ( dimension + 1 );
-					data[index++] = i + 1 + j * ( dimension + 1 );
-					data[index++] = i + 1 + ( j + 1 ) * ( dimension + 1 );
-					data[index++] = i + 1 + ( j + 1 ) * ( dimension + 1 );
-					data[index++] = i + ( j + 1 ) * ( dimension + 1 );
-					data[index++] = i + j * ( dimension + 1 );
-				}
-				else
-				{
-					data[index++] = i + j * ( dimension + 1 );
-					data[index++] = i + 1 + j * ( dimension + 1 );
-					data[index++] = i + ( j + 1 ) * ( dimension + 1 );
-					data[index++] = i + ( j + 1 ) * ( dimension + 1 );
-					data[index++] = i + 1 + j * ( dimension + 1 );
-					data[index++] = i + 1 + ( j + 1 ) * ( dimension + 1 );
+					if( j % 2 )
+					{
+						data[index++] = ( i + j * ( dimension + 1 ) ) * factor;
+						data[index++] = ( i + 1 + j * ( dimension + 1 ) ) * factor;
+						data[index++] = ( i + 1 + ( j + 1 ) * ( dimension + 1 ) ) * factor;
+						data[index++] = ( i + 1 + ( j + 1 ) * ( dimension + 1 ) ) * factor;
+						data[index++] = ( i + ( j + 1 ) * ( dimension + 1 ) ) * factor;
+						data[index++] = ( i + j * ( dimension + 1 ) ) * factor;
+					}
+					else
+					{
+						data[index++] = ( i + j * ( dimension + 1 ) ) * factor;
+						data[index++] = ( i + 1 + j * ( dimension + 1 ) ) * factor;
+						data[index++] = ( i + ( j + 1 ) * ( dimension + 1 ) ) * factor;
+						data[index++] = ( i + ( j + 1 ) * ( dimension + 1 ) ) * factor;
+						data[index++] = ( i + 1 + j * ( dimension + 1 ) ) * factor;
+						data[index++] = ( i + 1 + ( j + 1 ) * ( dimension + 1 ) ) * factor;
+					}
 				}
 			}
+			Tr2IndexBufferAL* ib = CCP_NEW( "EveChildCloud::m_indexBuffers" ) Tr2IndexBufferAL;
+			if( FAILED( ib->Create( index, USAGE_IMMUTABLE, IB_16BIT, &data.front(), renderContext ) ) )
+			{
+				CCP_DELETE ib;
+				return false;
+			}
+			factor *= 2;
+			m_indexBuffers.push_back( ib );
 		}
-		CR_RETURN_VAL( m_indexBuffer.Create( uint32_t( data.size() ), USAGE_IMMUTABLE, IB_16BIT, &data.front(), renderContext ), false );
 	}
 	if( m_declaration == Tr2EffectStateManager::UNINITIALIZED_DECLARATION )
 	{
@@ -369,16 +392,33 @@ Tr2PerObjectData* EveChildCloud::GetPerObjectData( ITriRenderBatchAccumulator* a
 	data->m_data.m_screenSize.z = box.m_max.x;
 	data->m_data.m_screenSize.w = box.m_max.y;
 
+	unsigned w, h;
+	Tr2Renderer::GetBackBufferDimensions( w, h );
+	float x = ( box.m_max.x - box.m_min.x ) * w;
+	float y = ( box.m_max.y - box.m_min.y ) * w;
+	float size = std::max( x, y ) / m_preTesselationLevel;
+	size /= 1 + logf( g_eveSpaceSceneLODFactor );
+
+	m_currentIB = 0;
+	while( size < m_cellScreenSize && m_currentIB + 1 < m_indexBuffers.size() )
+	{
+		size *= 2;
+		m_currentIB += 1;
+	}
+
 	return data;
 }
 
 void EveChildCloud::SubmitGeometry( Tr2RenderContext& renderContext )
 {
 	renderContext.m_esm.ApplyVertexDeclaration( m_declaration );
-	renderContext.m_esm.ApplyIndexBuffer( m_indexBuffer );
+	renderContext.m_esm.ApplyIndexBuffer( *m_indexBuffers[std::min( m_currentIB, m_indexBuffers.size() - 1 )] );
 	renderContext.m_esm.ApplyStreamSource( 0, m_vertexBuffer, 0, sizeof( Vector2 ) );
 	renderContext.SetTopology( TOP_TRIANGLES );
-	renderContext.DrawIndexedPrimitive( m_vertexBuffer.GetTotalSizeInBytes() / sizeof( Vector2 ), 0, m_indexBuffer.GetNumIndices() / 3 );
+	renderContext.DrawIndexedPrimitive( 
+		m_vertexBuffer.GetTotalSizeInBytes() / sizeof( Vector2 ), 
+		0, 
+		m_indexBuffers[std::min( m_currentIB, m_indexBuffers.size() - 1 )]->GetNumIndices() / 3 );
 }
 
 IRoot* EveChildCloud::GetID( uint16_t areaId )

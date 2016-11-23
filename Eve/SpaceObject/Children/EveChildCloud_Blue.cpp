@@ -39,5 +39,8 @@ const Be::ClassInfo* EveChildCloud::ExposeToBlue()
 			m_minScreenSize, 
 			"Minimal size of object on screen, objects smaller than this size are not rendered.\n:jessica-group: LOD", 
 			Be::READWRITE | Be::PERSIST )
-    EXPOSURE_END()
+
+		MAP_ATTRIBUTE( "cellScreenSize", m_cellScreenSize, "Target size of a single cell in a grid on the screen (in pixels)", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "currentLod", m_currentIB, "Current cloud LOD", Be::READ )
+	EXPOSURE_END()
 }
