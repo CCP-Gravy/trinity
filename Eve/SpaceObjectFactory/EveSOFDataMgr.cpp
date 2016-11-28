@@ -1198,6 +1198,7 @@ void EveSOFDataMgr::GenerateGenericData( GenericData& gd, EveSOFDataGenericPtr s
 	gd.shaderPrefixAnimated = srcData->m_shaderPrefixAnimated;
 	gd.areaShaderLocation = srcData->m_areaShaderLocation;
 	gd.decalShaderLocation = srcData->m_decalShaderLocation;
+	gd.whiteTextureResPath = srcData->m_whiteTextureResPath;
 
 	// damage
 	if( srcData->m_damage )

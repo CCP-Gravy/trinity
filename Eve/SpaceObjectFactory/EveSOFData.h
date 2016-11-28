@@ -1061,6 +1061,9 @@ public:
 	std::string m_areaShaderLocation;
 	std::string m_decalShaderLocation;
 
+	// extremely generic textures
+	std::string m_whiteTextureResPath;
+
 	// shader material pre-fixes
 	PEveSOFDataGenericStringVector m_materialPrefixes;
 	PEveSOFDataGenericStringVector m_patternMaterialPrefixes;

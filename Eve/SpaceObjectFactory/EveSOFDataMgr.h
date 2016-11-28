@@ -450,6 +450,8 @@ public:
 		std::string shaderPrefix, shaderPrefixAnimated;
 		std::string areaShaderLocation;
 		std::string decalShaderLocation;
+		// extremely generic textures
+		std::string whiteTextureResPath;
 		// material perfixes
 		std::vector<std::string> materialPrefixes;
 		std::vector<std::string> patternMaterialPrefixes;
