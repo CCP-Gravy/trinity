@@ -675,7 +675,6 @@ void EveSOF::SetupPlaneSets( EveSpaceObject2Ptr obj, const EveSOFDNAPtr dna ) co
 		switch (planeSetData->usage)
 		{
 		case EveSOFDataHullPlaneSet::USAGE_STANDARD:
-		case EveSOFDataHullPlaneSet::USAGE_VIDEO:
 			effectResPath = "res:/graphics/effect/managed/space/spaceobject/fx/planeglow.fx";
 			if( planeSetData->skinned )
 			{
@@ -683,6 +682,7 @@ void EveSOF::SetupPlaneSets( EveSpaceObject2Ptr obj, const EveSOFDNAPtr dna ) co
 			}
 			break;
 		case EveSOFDataHullPlaneSet::USAGE_HOLOGRAM:
+		case EveSOFDataHullPlaneSet::USAGE_VIDEO:
 			effectResPath = "res:/graphics/effect/managed/space/spaceobject/fx/planehologram.fx";
 			if( planeSetData->skinned )
 			{
@@ -711,6 +711,10 @@ void EveSOF::SetupPlaneSets( EveSpaceObject2Ptr obj, const EveSOFDNAPtr dna ) co
 			externalParameter->SetDestinationAttribute( "resourcePath" );
 			externalParameter->Initialize();
 			obj->AddExternalParameter( externalParameter );
+		}
+		else if( planeSetData->usage == EveSOFDataHullPlaneSet::USAGE_VIDEO )
+		{
+			planeEffect->AddResourceTexture2D( BlueSharedString( "ImageMap" ), m_dataMgr.GetGenericData()->whiteTextureResPath.c_str() );
 		}
 				
 		// parameters
