@@ -64,8 +64,8 @@ const Be::ClassInfo* TriStepRenderTexture::ExposeToBlue()
 		MAP_INTERFACE( TriStepRenderTexture )
 
 		MAP_ATTRIBUTE( "texture", m_texture,"TriTextureRes that will be rendered", Be::READWRITE )
-		MAP_ATTRIBUTE( "renderTarget", m_renderTarget,"Tr2RenderTarget that will be rendered", Be::READWRITE )
-		MAP_ATTRIBUTE( "depthStencil", m_depthStencil,"Tr2DepthStencil that will be rendered", Be::READWRITE )
+		MAP_ATTRIBUTE( "renderTarget", m_texture,"Tr2RenderTarget that will be rendered", Be::READWRITE )
+		MAP_ATTRIBUTE( "depthStencil", m_texture,"Tr2DepthStencil that will be rendered", Be::READWRITE )
 		MAP_ATTRIBUTE( "tlTexCoord", m_tlTexCoord, "top left texture coordinate", Be::READWRITE )
 		MAP_ATTRIBUTE( "brTexCoord", m_brTexCoord, "bottom right texture coordinate", Be::READWRITE )
 

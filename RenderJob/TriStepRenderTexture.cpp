@@ -23,9 +23,6 @@ void TriStepRenderTexture::BlankOut()
 {
 	m_texture.Unlock();
 	m_atlasTexture = nullptr;
-	m_renderTarget = nullptr;
-	m_depthStencil = nullptr;
-	m_textureRes   = nullptr;
 }
 
 void TriStepRenderTexture::SetTexture( ITr2TextureProvider* tex )
@@ -34,28 +31,10 @@ void TriStepRenderTexture::SetTexture( ITr2TextureProvider* tex )
 	m_texture = tex;	
 }
 
-void TriStepRenderTexture::SetTexture( TriTextureRes* tex )
-{
-	BlankOut();
-	m_textureRes = tex;
-}
-
 void TriStepRenderTexture::SetTexture( Tr2AtlasTexture* tex )
 {
 	BlankOut();
 	m_atlasTexture = tex;	
-}
-
-void TriStepRenderTexture::SetTexture( Tr2RenderTarget* rt )
-{
-	BlankOut();
-	m_renderTarget = rt;	
-}
-
-void TriStepRenderTexture::SetTexture( Tr2DepthStencil* ds )
-{
-	BlankOut();
-	m_depthStencil = ds;
 }
 
 TriStepResult TriStepRenderTexture::ClearIfFail( bool result, Tr2RenderContext& renderContext )
@@ -69,19 +48,6 @@ TriStepResult TriStepRenderTexture::ClearIfFail( bool result, Tr2RenderContext& 
 
 TriStepResult TriStepRenderTexture::Execute( Be::Time realTime, Be::Time simTime, Tr2RenderContext& renderContext )
 {
-	if( m_renderTarget )
-	{
-		return ClearIfFail( Tr2Renderer::DrawTexture( m_renderTarget->GetRenderTarget().GetTexture(), m_tlTexCoord, m_brTexCoord ), renderContext );		
-	}
-
-	if( m_depthStencil )
-	{
-		return ClearIfFail( Tr2Renderer::DrawTexture( m_depthStencil->m_depthStencil.GetTexture(), m_tlTexCoord, m_brTexCoord ), renderContext );		
-	}
-	if( m_textureRes && m_textureRes->GetTexture() )
-	{
-		return ClearIfFail( Tr2Renderer::DrawTexture( *m_textureRes->GetTexture(), m_tlTexCoord, m_brTexCoord ), renderContext );		
-	}
 	if( m_texture && m_texture->GetTexture() )
 	{
 		return ClearIfFail( Tr2Renderer::DrawTexture( *m_texture->GetTexture(), m_tlTexCoord, m_brTexCoord ), renderContext );		

@@ -24,18 +24,12 @@ public:
 
 	void SetTexture( ITr2TextureProvider* tex );
 	void SetTexture( Tr2AtlasTexture* tex );
-	void SetTexture( Tr2RenderTarget* tex );
-	void SetTexture( Tr2DepthStencil* tex );
-	void SetTexture( TriTextureRes* tex );
 
 private:
 	void BlankOut();
 	TriStepResult ClearIfFail( bool result, Tr2RenderContext& renderContext );
 	ITr2TextureProviderPtr m_texture;
 	Tr2AtlasTexturePtr m_atlasTexture;
-	Tr2RenderTargetPtr	m_renderTarget;
-	Tr2DepthStencilPtr	m_depthStencil;
-	TriTextureResPtr	m_textureRes;
 	Vector2 m_tlTexCoord;
 	Vector2 m_brTexCoord;
 	Vector2 m_textureSize;
