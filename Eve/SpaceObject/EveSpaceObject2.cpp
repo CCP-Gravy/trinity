@@ -2465,7 +2465,7 @@ void EveSpaceObject2::StopCurveSet( const std::string& name )
 	{
 		if( (*it)->GetName() == name )
 		{
-			return (*it)->Stop();
+			(*it)->Stop();
 		}
 	}
 	for( auto childIt = m_children.begin(); childIt != m_children.end(); childIt++ )
