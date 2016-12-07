@@ -101,12 +101,6 @@ static PyObject* PyWrapVariable( TriVariable* variable )
 			variable->GetValue( value );
 			return Py_BuildValue( "(ffff)", value.r, value.g, value.b, value.a );
 		}
-	case TRIVARIABLE_IROOT:
-		{
-			IRoot *value;
-			variable->GetValue( value );
-			return PyOS->WrapBlueObject( value );
-		}
 	default:
 		return NULL;
 	}
@@ -136,7 +130,7 @@ static PyObject* PyRegisterVariable( PyObject* self, PyObject* args )
 	{
 		variable = pThis->RegisterVariable( name, value );
 	}
-	else if( ITriTextureRes* value = BluePythonCast<ITriTextureRes*>( valueArg ) )
+	else if( ITr2GpuBuffer* value = BluePythonCast<ITr2GpuBuffer*>( valueArg ) )
 	{
 		variable = pThis->RegisterVariable( name, value );
 	}
@@ -171,10 +165,6 @@ static PyObject* PyRegisterVariable( PyObject* self, PyObject* args )
 	else if( valueArg == Py_None )
 	{
 		variable = pThis->RegisterVariable( name );
-	}
-	else if( IRoot* valIroot = BluePythonCast<IRoot*>( self ) )
-	{
-		variable = pThis->RegisterVariable( name, valIroot );
 	}
 
 	return PyWrapVariable( variable );

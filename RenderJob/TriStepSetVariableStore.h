@@ -54,6 +54,7 @@ private:
 	TriVariableContentType m_type;
 	IRootPtr m_object;
 	ITr2TextureProviderPtr m_texture;
+	ITr2GpuBufferPtr m_gpuBuffer;
 	char m_data[ sizeof(float) * 16 ];
 };
 

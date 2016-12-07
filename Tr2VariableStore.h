@@ -40,7 +40,6 @@ public:
     TriVariable* RegisterVariable( const char* name, const Vector4& value );
     TriVariable* RegisterVariable( const char* name, const Matrix& value );
     TriVariable* RegisterVariable( const char* name, const Color& value );
-    TriVariable* RegisterVariable( const char* name, const IRoot* value );
 	TriVariable* RegisterVariable( const char* name );
 
 	TriVariable* RegisterVariable( const char* name, ITr2TextureProvider* value );
@@ -56,17 +55,6 @@ public:
 protected:
 	Tr2VariableStore( IRoot* lockobj, int );
 private:
-	struct SetCompare
-	{
-		bool operator()(
-			const TriVariable* const a,
-			const TriVariable* const b ) const
-		{
-			return a->m_name < b->m_name;
-		}
-	};
-    typedef std::set<TriVariable*, SetCompare> VariableMap;
-	
 	std::vector<std::string> GetLocalNames() const;
 
 	TriVariable* RegisterVariableType( const char* name, TriVariableContentType type );
@@ -95,7 +83,8 @@ private:
 	// used to resolve variables
 	Tr2VariableStorePtr m_parentVariableStore;
 	// Map of variables in this store
-	VariableMap m_variableMap;
+
+	TrackableStdUnorderedMap<std::string, TriVariablePtr> m_variableMap;
 };
 
 TYPEDEF_BLUECLASS( Tr2VariableStore );

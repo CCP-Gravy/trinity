@@ -4,11 +4,6 @@
 
 #include "ITr2EffectValue.h"
 
-class TriTextureRes;
-BLUE_DECLARE(TriTextureRes);
-
-BLUE_DECLARE( Tr2DepthStencil );
-BLUE_DECLARE( Tr2RenderTarget );
 BLUE_DECLARE_INTERFACE( ITr2TextureProvider );
 BLUE_DECLARE_INTERFACE( ITr2GpuBuffer );
 
@@ -24,7 +19,6 @@ enum TriVariableContentType
     TRIVARIABLE_FLOAT4,
     TRIVARIABLE_FLOAT4X4,
     TRIVARIABLE_COLOR,
-    TRIVARIABLE_IROOT,
     TRIVARIABLE_GPUBUFFER,
     TRIVARIABLE_COUNT,
 };
@@ -74,11 +68,6 @@ inline TriVariableContentType GetVariableType( const Color& )
     return TRIVARIABLE_COLOR;
 }
 
-inline TriVariableContentType GetVariableType( const IRoot* )
-{
-	return TRIVARIABLE_IROOT;
-}
-
 BLUE_CLASS( TriVariable ) : public ITr2EffectValue
 {
 public:
@@ -100,7 +89,6 @@ public:
             "TRIVARIABLE_FLOAT4",
             "TRIVARIABLE_FLOAT4X4",
             "TRIVARIABLE_COLOR",
-            "TRIVARIABLE_IROOT"
             "TRIVARIABLE_GPUBUFFER"
         };
 
@@ -113,7 +101,7 @@ public:
         {
 			sizeof(float)*16, // INVALID may be converted to another type, must register as largest type
 			sizeof(float)*16, // UNKNOWN_FLOAT may be converted to another type, must register as largest type
-            sizeof(TriTextureRes*),
+			sizeof(ITr2TextureProvider*),
 			sizeof(int),
             sizeof(float),
 			sizeof(float)*2,
@@ -121,7 +109,7 @@ public:
             sizeof(float)*4,
             sizeof(float)*16,
             sizeof(Color),
-            sizeof(IRoot*)
+            sizeof(ITr2GpuBuffer*),
         };
 		
 		return typeSizes[t];
@@ -174,16 +162,16 @@ private:
 	// Variables contain their payload starting at 'value'[0].  No size is
 	// stored since 'type' is enough.
 	TriVariableContentType	m_type;
+	std::string		m_name;
 
 	ITr2TextureProviderPtr m_texture;
 	ITr2GpuBufferPtr m_gpuBuffer;
 
-	std::string		m_name;
-	
 	// This variable must be at the end of the class, due to malloc magic in
 	// Tr2VariableStore::RegisterVariableType
-	uint32_t m_value[1];
+	uint8_t m_value[sizeof( Matrix )];
 
+protected:
 	// We intentionally disallow construction - only Tr2VariableStore can 
 	// create instances!
 	TriVariable()
@@ -213,7 +201,6 @@ public:
 	void GetValue( Color& value ) const					{ GetValue_( value ); }
 	void GetValue( Matrix& value ) const				{ GetValue_( value ); }
 	void GetValue( ITr2TextureProvider*& value ) const	{ GetValueTextureRes( value ); }
-	void GetValue( IRoot*& value ) const				{ GetValue_( value ); }
 	void GetValue( ITr2GpuBuffer*& value ) const		{ GetValueGpuBuffer( value ); }
 
 	/////////////////////////////////////////////
@@ -240,7 +227,6 @@ public:
 	void SetValue( const Matrix& value )				{ SetValue_( value ); }
 	void SetValue( ITr2TextureProvider* value )			{ SetValueTextureRes( value ); }
 	void SetValue( ITr2GpuBuffer* value )				{ SetValueGpuBuffer( value ); }
-	void SetValue( const IRoot* value )					{ SetValue_( value ); }
 
 	// Invalidate the variable
 	void Invalidate();
@@ -250,10 +236,9 @@ public:
 
 
 	friend class Tr2VariableStore;
-	friend class RootQIImpl<TriVariable>;
 };
 
-TYPEDEF_BLUECLASS_NO_WEAKREF( TriVariable );
+TYPEDEF_BLUECLASS( TriVariable );
 
 
 #endif // TRIVARIABLE_H

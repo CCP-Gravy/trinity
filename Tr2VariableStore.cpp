@@ -8,6 +8,7 @@
 #include "Tr2VariableStore.h"
 
 Tr2VariableStore::Tr2VariableStore( IRoot* lockobj )
+	:m_variableMap( "Tr2VariableStore::m_variableMap" )
 {
 	SetParentVariableStore( &GlobalStore() );
 }
@@ -20,18 +21,12 @@ Tr2VariableStore::Tr2VariableStore( IRoot* lockobj )
 //   Tr2GlobalVariableStore
 // -------------------------------------------------------------
 Tr2VariableStore::Tr2VariableStore( IRoot* lockobj, int )
+	:m_variableMap( "Tr2VariableStore::m_variableMap" )
 {
 }
 
 Tr2VariableStore::~Tr2VariableStore()
 {
-    VariableMap::iterator end = m_variableMap.end();
-	for( VariableMap::iterator it = m_variableMap.begin(); it != end; ++it )
-	{
-		TriVariable* var = *it;
-		var->~TriVariable();
-		CCP_FREE( var );
-	}
 }
 
 // -------------------------------------------------------------
@@ -201,24 +196,6 @@ TriVariable* Tr2VariableStore::RegisterVariable( const char* name, const Color& 
 
 // -------------------------------------------------------------
 // Description:
-//   Registers a new variable. If the variable with that name
-//   is already registered in this store then if its type is the
-//   same the variable is reused otherwise the error is logged
-//   and the function returns NULL.
-// Arguments:
-//   name - Name of the new variable
-//   value - Value for the new variable
-// Return Value:
-//   New variable (or old with the same name or NULL if function
-//   fails).
-// -------------------------------------------------------------
-TriVariable* Tr2VariableStore::RegisterVariable( const char* name, const IRoot* value )
-{
-	return RegisterVariableInternal( name, value );
-}
-
-// -------------------------------------------------------------
-// Description:
 //   Registers a placeholder for a variable. 
 // Arguments:
 //   name - Name of the new variable
@@ -276,21 +253,11 @@ bool Tr2VariableStore::UnregisterLocalVariable( const char* name )
 	{
 		return false;
 	}
-	CTriVariable key;
-	key.m_name = name;
-    auto it = m_variableMap.find( &key );
+	auto it = m_variableMap.find( name );
     if( it != m_variableMap.end() )
     {
-		TriVariable* var = *it;
-
+		it->second->Invalidate();
         m_variableMap.erase( it );
-
-		// Wipe value memory area to zero
-		var->Invalidate();
-
-		// We leak these variables on purpose so we can reliably catch when they are
-		// being accessed post unregistration!  This also prevents us from crashing if
-		// somebody has a dangling reference to it.
 		return true;
     }
 	return false;
@@ -335,11 +302,9 @@ TriVariable* Tr2VariableStore::FindLocalVariable( const char* name ) const
 	{
 		return nullptr;
 	}
-	CTriVariable key;
-	key.m_name = name;
-    auto it = m_variableMap.find( &key );
+    auto it = m_variableMap.find( name );
 
-	return it != m_variableMap.end() ? *it : nullptr;
+	return it != m_variableMap.end() ? it->second : nullptr;
 }
 
 // -------------------------------------------------------------
@@ -363,17 +328,12 @@ TriVariable* Tr2VariableStore::GetVariable( const char* name )
 		}
 		store = store->GetParentVariableStore();
 	}
-	
-	void* buffer = CCP_MALLOC( "TriVariable", 
-		sizeof( TriVariable ) 
-		+ TriVariable::GetTypeSize( TRIVARIABLE_FLOAT4X4 ) // Largest variable
-		- sizeof(uint32_t) );
-	// Use placement new to initialize instance into memory area that is potentially
-	// bigger than class size:
-	TriVariable* var = new( buffer ) CTriVariable; 
+
+	TriVariablePtr var;
+	var.CreateInstance();
 	var->m_type = TRIVARIABLE_INVALID;
 	var->m_name = name;
-	m_variableMap.insert( var );
+	m_variableMap[name] = var;
 	return var;
 }
 
@@ -393,24 +353,17 @@ TriVariable* Tr2VariableStore::GetLocalVariable( const char* name )
 	{
 		return nullptr;
 	}
-	CTriVariable key;
-	key.m_name = name;
-    auto it = m_variableMap.find( &key );
+    auto it = m_variableMap.find( name );
     if( it != m_variableMap.end() )
     {
-		return *it;
+		return it->second;
 	}
 	
-	void* buffer = CCP_MALLOC( "TriVariable", 
-		sizeof( TriVariable ) 
-		+ TriVariable::GetTypeSize( TRIVARIABLE_FLOAT4X4 ) // Largest variable
-		- sizeof(uint32_t) );
-	// Use placement new to initialize instance into memory area that is potentially
-	// bigger than class size:
-	TriVariable* var = new( buffer ) CTriVariable; 
+	TriVariablePtr var;
+	var.CreateInstance();
 	var->m_type = TRIVARIABLE_INVALID;
 	var->m_name = name;
-	m_variableMap.insert( var );
+	m_variableMap[name] = var;
 	return var;
 }
 
@@ -456,15 +409,12 @@ TriVariable* Tr2VariableStore::RegisterVariableType( const char* name, TriVariab
 	}
 	else
 	{
-		// Create new variable
-		void* buffer = CCP_MALLOC( "TriVariable", 
-			sizeof( TriVariable ) + TriVariable::GetTypeSize( type ) - sizeof(uint32_t) );
-		// Use placement new to initialize instance into memory area that is potentially
-		// bigger than class size:
-		var = new( buffer ) CTriVariable; 
+		TriVariablePtr variable;
+		variable.CreateInstance();
+		var = variable;
 		var->m_type = type;
 		var->m_name = name;
-		m_variableMap.insert( var );
+		m_variableMap[name] = var;
 	}
 
 	return var;
@@ -475,7 +425,7 @@ std::vector<std::string> Tr2VariableStore::GetLocalNames() const
 	std::vector<std::string> result;
 	for( auto it = m_variableMap.cbegin(); it != m_variableMap.cend(); ++it )
 	{
-		result.push_back( ( *it )->GetName() );
+		result.push_back( it->second->GetName() );
 	}
 	return result;
 }

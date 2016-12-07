@@ -27,6 +27,9 @@ TriStepResult TriStepSetVariableStore::Execute( Be::Time realTime, Be::Time simT
 	case TRIVARIABLE_TEXTURE_RES:
 		GlobalStore().RegisterVariable( m_variableName.c_str(), m_texture );
 		break;
+	case TRIVARIABLE_GPUBUFFER:
+		GlobalStore().RegisterVariable( m_variableName.c_str(), m_gpuBuffer );
+		break;
 	case TRIVARIABLE_INT:
 		GlobalStore().RegisterVariable( m_variableName.c_str(), *reinterpret_cast<int*>( m_data ) );
 		break;
@@ -47,9 +50,6 @@ TriStepResult TriStepSetVariableStore::Execute( Be::Time realTime, Be::Time simT
 		break;
 	case TRIVARIABLE_COLOR:
 		GlobalStore().RegisterVariable( m_variableName.c_str(), *reinterpret_cast<Color*>( m_data ) );
-		break;
-	case TRIVARIABLE_IROOT:
-		GlobalStore().RegisterVariable( m_variableName.c_str(), m_object );
 		break;
 
 	default:

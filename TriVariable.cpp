@@ -30,7 +30,6 @@ void TriVariable::CopyValueToEffect(	Tr2RenderContextEnum::ShaderType inputType,
 	{
 	case TRIVARIABLE_INVALID:
 	case TRIVARIABLE_UNKNOWN_FLOAT:
-	case TRIVARIABLE_IROOT:
 		// Do Nothing
 		break;
 	case TRIVARIABLE_FLOAT4X4:

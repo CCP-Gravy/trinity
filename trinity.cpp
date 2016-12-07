@@ -121,6 +121,10 @@ static void StartDLL()
 	CCP_LOG( "Trinity (%s) module starting", BLUEMODULENAME );
 	BeClasses->RegisterClasses( BlueRegistration::GetClassRegs() );
 
+	GlobalStore().RegisterVariable( "BlitOriginal", static_cast<ITr2TextureProvider*>( nullptr ) );
+	GlobalStore().RegisterVariable( "BlitCurrent", static_cast<ITr2TextureProvider*>( nullptr ) );
+	GlobalStore().RegisterVariable( "g_texelSize", Vector4() );
+
 #if( TRINITY_PLATFORM==TRINITY_DIRECTX9 )
 	g_isR10G10B10FormatInverted = true;
 #else

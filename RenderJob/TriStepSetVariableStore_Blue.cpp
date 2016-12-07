@@ -3,6 +3,7 @@
 #include "Resources/TriTextureRes.h"
 #include "Tr2DepthStencil.h"
 #include "Tr2RenderTarget.h"
+#include "Include/ITr2GpuBuffer.h"
 
 BLUE_DEFINE( TriStepSetVariableStore );
 
@@ -33,13 +34,13 @@ PyObject* TriStepSetVariableStore::GetValue()
 		}
 		return PyOS->WrapBlueObject( m_texture );
 	}
-	else if( m_type == TRIVARIABLE_IROOT )
+	else if( m_type == TRIVARIABLE_GPUBUFFER )
 	{
-		if( !m_object )
+		if( !m_gpuBuffer )
 		{
 			Py_RETURN_NONE;
 		}
-		return PyOS->WrapBlueObject( m_object );
+		return PyOS->WrapBlueObject( m_gpuBuffer );
 	}
 	else
 	{
@@ -53,6 +54,7 @@ void TriStepSetVariableStore::SetValue( PyObject* valueArg )
 	const unsigned valueArgPosition = 0;
 
 	ITr2TextureProvider* valTextureRes; // TRIVARIABLE_TEXTURE_RES,
+	ITr2GpuBuffer* valGpuBuffer; // TRIVARIABLE_TEXTURE_RES,
 	int valInt; // TRIVARIABLE_INT,
 	float valFloat; // TRIVARIABLE_FLOAT,
 	Vector2 valVector2; // TRIVARIABLE_FLOAT2,
@@ -60,12 +62,16 @@ void TriStepSetVariableStore::SetValue( PyObject* valueArg )
 	Vector4 valVector4; // TRIVARIABLE_FLOAT4,
 	Matrix valMatrix; // TRIVARIABLE_FLOAT4X4,
 	Color valColor; // TRIVARIABLE_COLOR,
-	IRoot* valIroot; // TRIVARIABLE_IROOT,
 
 	if( BlueExtractArgument( valueArg, valTextureRes, valueArgPosition ) )
 	{
 		m_type = TRIVARIABLE_TEXTURE_RES;
 		m_texture = valTextureRes;
+	}
+	else if( BlueExtractArgument( valueArg, valGpuBuffer, valueArgPosition ) )
+	{
+		m_type = TRIVARIABLE_GPUBUFFER;
+		m_gpuBuffer = valGpuBuffer;
 	}
 	else if( BlueExtractArgument( valueArg, valInt, valueArgPosition ) )
 	{
@@ -101,11 +107,6 @@ void TriStepSetVariableStore::SetValue( PyObject* valueArg )
 	{
 		m_type = TRIVARIABLE_COLOR;
 		memcpy( m_data, &valColor, sizeof( valColor ) );
-	}
-	else if( BlueExtractArgument( valueArg, valIroot, valueArgPosition ) )
-	{
-		m_type = TRIVARIABLE_IROOT;
-		m_object = valIroot;
 	}
 
 	PyErr_Clear();
