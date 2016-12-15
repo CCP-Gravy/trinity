@@ -44,50 +44,54 @@ void TriVariable::CopyValueToEffect(	Tr2RenderContextEnum::ShaderType inputType,
 		}
 	case TRIVARIABLE_TEXTURE_RES:
 		{
+			uint32_t samplerIx = *destHandle;
+			auto colorSpace = ( size & RESOURCE_FLAG_SRGB ) != 0 ? Tr2RenderContextEnum::COLOR_SPACE_SRGB : Tr2RenderContextEnum::COLOR_SPACE_LINEAR;
+			Tr2TextureAL* tex = nullptr;
 			if( m_texture )
 			{
-				uint32_t samplerIx = *destHandle;
-				auto colorSpace = ( size & RESOURCE_FLAG_SRGB ) != 0 ? Tr2RenderContextEnum::COLOR_SPACE_SRGB : Tr2RenderContextEnum::COLOR_SPACE_LINEAR;
-				if( Tr2TextureAL* tex = m_texture->GetTexture() )
-				{		
-					renderContext.m_esm.ApplyTexture( inputType, samplerIx, *tex, colorSpace );
-				}
-				else
-				{
-					renderContext.m_esm.ApplyTexture( inputType, samplerIx, nullTX, colorSpace );
-				}
+				tex = m_texture->GetTexture();
+			}
+			if( tex )
+			{		
+				renderContext.m_esm.ApplyTexture( inputType, samplerIx, *tex, colorSpace );
+			}
+			else
+			{
+				renderContext.m_esm.ApplyTexture( inputType, samplerIx, nullTX, colorSpace );
 			}
 			break;
 		}
 	case TRIVARIABLE_GPUBUFFER:
 		{
+			uint32_t samplerIx = *destHandle;
+			uint32_t initialCount = reinterpret_cast<uint32_t*>( destHandle )[1];
+			bool isUav = ( size & RESOURCE_FLAG_UAV ) != 0;
+			Tr2GpuBufferAL* buffer = nullptr;
+
 			if( m_gpuBuffer )
 			{
-				uint32_t samplerIx = *destHandle;
-				uint32_t initialCount = reinterpret_cast<uint32_t*>( destHandle )[1];
-				bool isUav = ( size & RESOURCE_FLAG_UAV ) != 0;
-
-				if( Tr2GpuBufferAL* buffer = m_gpuBuffer->GetGpuBuffer( 0 ) )
-				{		
-					if( isUav )
-					{
-						renderContext.SetUav( inputType, samplerIx, *buffer, initialCount );
-					}
-					else
-					{
-						renderContext.m_esm.ApplyShaderBuffer( inputType, samplerIx, *buffer );
-					}
+				buffer = m_gpuBuffer->GetGpuBuffer( 0 );
+			}
+			if( buffer )
+			{		
+				if( isUav )
+				{
+					renderContext.SetUav( inputType, samplerIx, *buffer, initialCount );
 				}
 				else
 				{
-					if( isUav )
-					{
-						renderContext.SetUav( inputType, samplerIx, nullGB );
-					}
-					else
-					{
-						renderContext.m_esm.ApplyShaderBuffer( inputType, samplerIx, nullGB );
-					}
+					renderContext.m_esm.ApplyShaderBuffer( inputType, samplerIx, *buffer );
+				}
+			}
+			else
+			{
+				if( isUav )
+				{
+					renderContext.SetUav( inputType, samplerIx, nullGB );
+				}
+				else
+				{
+					renderContext.m_esm.ApplyShaderBuffer( inputType, samplerIx, nullGB );
 				}
 			}
 			break;
