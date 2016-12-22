@@ -408,9 +408,6 @@
     <ClInclude Include="TriObserverLocal.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="TriPoint.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="TriPoolAllocator.h">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -916,9 +913,6 @@
       <Filter>Source Files\Include</Filter>
     </ClInclude>
     <ClInclude Include="Include\ITriObserverLocal.h">
-      <Filter>Source Files\Include</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\ITriPoint.h">
       <Filter>Source Files\Include</Filter>
     </ClInclude>
     <ClInclude Include="Include\ITriQuaternion.h">
@@ -2017,12 +2011,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TriObserverLocal_Blue.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TriPoint.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TriPoint_Blue.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TriPoolAllocator.cpp">

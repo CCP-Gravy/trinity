@@ -2909,7 +2909,6 @@
     <ClInclude Include="TriFrustumOrtho.h"/>
     <ClInclude Include="TriLineSet.h"/>
     <ClInclude Include="TriObserverLocal.h"/>
-    <ClInclude Include="TriPoint.h"/>
     <ClInclude Include="TriPoolAllocator.h"/>
     <ClInclude Include="TriProjection.h"/>
     <ClInclude Include="TriPythonContext.h"/>
@@ -3079,7 +3078,6 @@
     <ClInclude Include="Include\ITriFunction.h"/>
     <ClInclude Include="Include\ITriMatrix.h"/>
     <ClInclude Include="Include\ITriObserverLocal.h"/>
-    <ClInclude Include="Include\ITriPoint.h"/>
     <ClInclude Include="Include\ITriQuaternion.h"/>
     <ClInclude Include="Include\ITriRect.h"/>
     <ClInclude Include="Include\ITriRenderObject.h"/>
@@ -3450,8 +3448,6 @@
     <ClCompile Include="trinity.cpp"/>
     <ClCompile Include="TriObserverLocal.cpp"/>
     <ClCompile Include="TriObserverLocal_Blue.cpp"/>
-    <ClCompile Include="TriPoint.cpp"/>
-    <ClCompile Include="TriPoint_Blue.cpp"/>
     <ClCompile Include="TriPoolAllocator.cpp"/>
     <ClCompile Include="TriProjection.cpp"/>
     <ClCompile Include="TriProjection_Blue.cpp"/>
