@@ -62,6 +62,7 @@ BLUE_DECLARE( Tr2GpuParticleSystem );
 BLUE_DECLARE( Tr2ExternalParameter );
 BLUE_DECLARE_VECTOR( Tr2ExternalParameter );
 BLUE_DECLARE( Tr2ImpostorManager );
+BLUE_DECLARE( Tr2DebugRenderer );
 
 enum TAASampling { TAA_NONE=0, TAA_RANDOM=1, TAA_2X=2, TAA_3X=3, TAA_4X=4 };
 
@@ -323,7 +324,6 @@ protected:
 	bool m_selfShadowOnly;
 	bool m_displayShadowMap;
 	bool m_backgroundRenderingEnabled;
-	bool m_renderDebugInfo;
 	bool m_debugShowShadowCasters;
 	bool m_enableShadowObb;
 	bool m_enableShadowDistanceTweak;
@@ -350,7 +350,6 @@ protected:
 	PEveTransformVector		m_backgroundObjects;
 	PEvePlanetVector		m_planets;
 	PIEveSpaceObject2Vector m_objects;
-	PIEveSpaceObject2Vector m_debugObjects;
 	IEveSpaceObject2Ptr		m_warpTunnel;
 	PTriCurveSetVector		m_curveSets;
 	PEveLensflareVector		m_lensflares;
@@ -441,6 +440,8 @@ protected:
 	IEveBallparkPtr m_ballpark;
 
 	PTr2ExternalParameterVector m_externalParameters;
+
+	Tr2DebugRendererPtr m_debugRenderer;
 
 	Vector3 PickInfinity( int x, int y, Matrix proj, Matrix view );
 

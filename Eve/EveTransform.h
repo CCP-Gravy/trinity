@@ -9,6 +9,7 @@
 #include "Tr2Renderer.h"
 #include "TriRenderBatch.h"
 #include "TriObserverLocal.h"
+#include "Tr2DebugRenderer.h"
 
 #include "IEveTransform.h"
 #include "IWorldPosition.h"
@@ -32,7 +33,8 @@ BLUE_CLASS( EveTransform ):
 	public IEveSpaceObject2,
 	public ITr2Pickable,
 	public IWorldPosition,
-	public IInitialize
+	public IInitialize,
+	public ITr2DebugRenderable
 {
 public:
     EXPOSE_TO_BLUE();
@@ -48,7 +50,6 @@ public:
 	virtual void Update( EveUpdateContext& updateContext );
 	virtual void UpdateSyncronous( EveUpdateContext& updateContext );
 	virtual void UpdateAsyncronous( EveUpdateContext& updateContext );
-	virtual void RenderDebugInfo( Tr2RenderContext& renderContext );
 	virtual void GetRenderables( const TriFrustum& frustum, std::vector<ITr2Renderable*>& renderables, const Matrix& parentTransform );
 	virtual void GetRenderables( const TriFrustum& frustum, std::vector<ITr2Renderable*>& renderables, Tr2ImpostorManager* impostors, const Matrix& parentTransform );
 	virtual bool GetBoundingSphere( Vector4& sphere, BoundingSphereQuery query=EVE_BOUNDS_NORMAL ) const;
@@ -75,6 +76,11 @@ public:
 	// IInitialize
 	bool Initialize();
 
+	/////////////////////////////////////////////////////////////////////////////////////
+	// ITr2DebugRenderable
+    virtual void GetDebugOptions( Tr2DebugRendererOptions& options );
+    virtual void RenderDebugInfo( Tr2DebugRenderer& renderer );
+
 	// EveTransforms can be under EveTransforms
 	PIEveTransformVector m_children;
 
@@ -95,8 +101,6 @@ public:
 	void SetDisplay( bool value ) { m_display = value; };
 
 protected:
-	bool m_debugShowBoundingBox;
-	bool m_debugRenderDebugInfoForChildren;
 	bool m_isVisible;
 	bool m_useLodLevel;
 	bool m_hideOnLowQuality;

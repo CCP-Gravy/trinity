@@ -135,20 +135,26 @@ bool EveShip2::DisplayBoosters() const
 	return m_boosters && DisplayChildren();
 }
 
+void EveShip2::GetDebugOptions( Tr2DebugRendererOptions& options )
+{
+	EveMobile::GetDebugOptions( options );
+	options.insert( "Boosters" );
+}
+
 // --------------------------------------------------------------------------------
 // Description:
 //   Render some debug info of this space ship: turret sets
 // --------------------------------------------------------------------------------
-void EveShip2::RenderDebugInfo( Tr2RenderContext& renderContext )
+void EveShip2::RenderDebugInfo( Tr2DebugRenderer& renderer )
 {
 	// now the boosters & trails
-	if( m_boosters )
+	if( m_boosters && renderer.HasOption( this, "Boosters" ) )
 	{
-		m_boosters->RenderDebugInfo( renderContext );
+		m_boosters->RenderDebugInfo( renderer );
 	}
 
 	// up
-	EveMobile::RenderDebugInfo( renderContext );
+	EveMobile::RenderDebugInfo( renderer );
 }
 
 void EveShip2::RebuildCachedData( BlueAsyncRes* p )

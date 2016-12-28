@@ -15,6 +15,7 @@
 #include "EveMetaballItem.h"
 #include "Tr2Renderer.h"
 #include "Tr2PersistentPerObjectData.h"
+#include "Tr2DebugRenderer.h"
 
 BLUE_DECLARE( EveTransform );
 BLUE_DECLARE( Tr2RuntimeInstanceData );
@@ -24,7 +25,8 @@ BLUE_DECLARE( Tr2InstancedMesh );
 // Description:
 // --------------------------------------------------------------------------------
 BLUE_CLASS( EveSceneStaticParticles ) :
-	public IInitialize
+	public IInitialize,
+	public ITr2DebugRenderable
 {
 public:
 	EXPOSE_TO_BLUE();
@@ -53,10 +55,14 @@ public:
 	// IInitialize
 	virtual bool Initialize();
 
+	/////////////////////////////////////////////////////////////////////////////////////
+	// ITr2DebugRenderable
+    virtual void GetDebugOptions( Tr2DebugRendererOptions& options );
+    virtual void RenderDebugInfo( Tr2DebugRenderer& renderer );
+
 	// update & render
 	void Update( EveUpdateContext& updateContext );
 	void GetRenderables( const TriFrustum& frustum, std::vector<ITr2Renderable*>& renderables );
-	void RenderDebugInfo( Tr2RenderContext& renderContext );
 
 	// manage clusters
 	void AddCluster( Vector3d position, float radius, Color color1, Color color2, unsigned int randomSeed );

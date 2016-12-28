@@ -159,54 +159,6 @@ const Be::ClassInfo* EveSpaceObject2::ExposeToBlue()
 		)
 
 		MAP_ATTRIBUTE
-		( 
-			"debugShowBoundingBox", 
-			m_debugShowBoundingBox, 
-			"If set, bounding box is shown  (if scene is showing debug info).", 
-			Be::READWRITE | Be::PERSIST 
-		)
-
-		MAP_ATTRIBUTE
-		( 
-			"debugShowMeshAreaBoundingBox",
-			m_debugShowMeshAreaBoundingBox, 
-			"If set, bounding boxes of the mesh areas are shown  (if scene is showing debug info).", 
-			Be::READWRITE
-		)
-
-		MAP_ATTRIBUTE
-		( 
-			"debugRenderDebugInfoForChildren", 
-			m_debugRenderDebugInfoForChildren, 
-			"If set, children are given a chance to render debug info (if scene is showing debug info).", 
-			Be::READWRITE | Be::PERSIST 
-		)
-
-		MAP_ATTRIBUTE
-		( 
-			"debugShowDynamicBounds", 
-			m_debugShowDynamicBounds, 
-			"If set animation based bounding info is drawn(if scene is showing debug info).", 
-			Be::READWRITE | Be::PERSIST 
-		)
-		
-		MAP_ATTRIBUTE
-		( 
-			"debugShowDamageLocators", 
-			m_debugShowDamageLocators, 
-			"If set, damage locator positions are rendered (if scene is showing debug info).", 
-			Be::READWRITE
-		)
-		
-		MAP_ATTRIBUTE
-		( 
-			"debugShowBones", 
-			m_debugShowBones, 
-			"If set, bone names and indices are shown(if scene is showing debug info).", 
-			Be::READWRITE
-		)
-
-		MAP_ATTRIBUTE
 		(
 			"mesh",  
 			m_mesh, 

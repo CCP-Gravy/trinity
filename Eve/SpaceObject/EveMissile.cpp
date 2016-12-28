@@ -259,26 +259,15 @@ void EveMissile::GetRenderables( const TriFrustum& frustum, std::vector<ITr2Rend
 // Arguments:
 //   renderContext - current rendercontext
 // --------------------------------------------------------------------------------
-void EveMissile::RenderDebugInfo( Tr2RenderContext& renderContext )
+void EveMissile::RenderDebugInfo( Tr2DebugRenderer& renderer )
 {
-	EveSpaceObject2::RenderDebugInfo( renderContext );
+	EveSpaceObject2::RenderDebugInfo( renderer );
 
-	if( m_debugShowBoundingBox )
-	{
-		// bounding box
-		Vector4 transformed;
-		if( GetBoundingSphere( transformed ) )
-		{
-			Tr2Renderer::DrawSphere( (const Vector3&)transformed, transformed.w, 10, 0xffffffff );
-		}
-	}
-	
-
-	if( m_debugRenderDebugInfoForChildren )
+	if( renderer.HasOption( GetRawRoot(), "Children" ) )
 	{
 		for( EveMissileWarheadVector::const_iterator it = m_warheads.begin(); it != m_warheads.end(); ++it )
 		{
-			(*it)->RenderDebugInfo( renderContext );
+			(*it)->RenderDebugInfo( renderer );
 		}
 	}
 }

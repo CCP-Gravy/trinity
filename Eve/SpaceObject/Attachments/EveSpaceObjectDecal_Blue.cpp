@@ -15,7 +15,6 @@ const Be::ClassInfo* EveSpaceObjectDecal::ExposeToBlue()
 		MAP_ATTRIBUTE( "name", m_name, "A name for this decal", Be::READWRITE | Be::PERSIST )
 
 		MAP_ATTRIBUTE( "display", m_display, "Toggle visibility", Be::READWRITE )
-		MAP_ATTRIBUTE( "displayBoundingBox", m_displayBoundingBox, "Toggle visibility of bounding box", Be::READWRITE )
 
 		MAP_ATTRIBUTE( "position", m_position, "center of decal", Be::READWRITE | Be::NOTIFY | Be::PERSIST )
 		MAP_ATTRIBUTE( "rotation", m_rotation, "orientation of decal", Be::READWRITE | Be::NOTIFY | Be::PERSIST );

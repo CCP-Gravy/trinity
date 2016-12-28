@@ -12,7 +12,6 @@ class EveUpdateContext;
 BLUE_INTERFACE( IEveTransform ) : public IRoot
 {
 	virtual void Update( EveUpdateContext& updateContext ) = 0;
-	virtual void RenderDebugInfo( Tr2RenderContext& renderContext ) = 0;
 	virtual void GetRenderables( const TriFrustum& frustum, std::vector<ITr2Renderable*>& renderables, const Matrix& parentTransform ) = 0;
 	virtual void UpdateViewDependentData( const Matrix& parentTransform, bool updateChildren=false ) = 0;
 	virtual bool GetBoundingSphere( Vector4& sphere, BoundingSphereQuery query=EVE_BOUNDS_NORMAL ) const = 0;

@@ -170,8 +170,6 @@ EveSwarm::EveSwarm( IRoot* lockobj ) :
 	m_debugSize( 24.f ),
 	m_count( 1 ),
 
-	m_debugShowSwarmBounds( true ),
-	m_debugShowVehicle( true ),
 	m_debugShowForces( false )
 {
 	// Stagger update time a little to avoid all fighters updating at the same time
@@ -526,43 +524,51 @@ void EveSwarm::AddQuadsToQuadRenderer( const TriFrustum& frustum, Tr2QuadRendere
 	}
 }
 
+void EveSwarm::GetDebugOptions( Tr2DebugRendererOptions& options )
+{
+	EveShip2::GetDebugOptions( options );
+	options.insert( "Vehicles" );
+	options.insert( "Forces" );
+	options.insert( "Swarm Bounds" );
+}
+
 // --------------------------------------------------------------------------------
 // Description:
 //   From EveShip2
 // --------------------------------------------------------------------------------
-void EveSwarm::RenderDebugInfo( Tr2RenderContext& renderContext )
+void EveSwarm::RenderDebugInfo( Tr2DebugRenderer& renderer )
 {
-	EveShip2::RenderDebugInfo( renderContext );
+	EveShip2::RenderDebugInfo( renderer );
 
 	for( unsigned i = 0; i < m_vehicles.size(); i++ )
 	{
 		Vector3 pos = m_vehicles[i].position;
-		if( m_debugShowVehicle )
+		if( renderer.HasOption( this, "Vehicles" ) )
 		{
-			Tr2Renderer::DrawSphere( pos, m_debugSize, 4, 0xffff00ff );
-			Tr2Renderer::DrawLine( pos, pos + m_vehicles[i].velocity, 0xffff00ff );
-			Tr2Renderer::DrawLine( pos, pos + m_vehicles[i].acceleration, 0xff0000ff );
+			renderer.DrawSphere( this, pos, m_debugSize, 4, Tr2DebugRenderer::Wireframe, 0xffff00ff );
+			renderer.DrawLine( this, pos, pos + m_vehicles[i].velocity, 0xffff00ff );
+			renderer.DrawLine( this, pos, pos + m_vehicles[i].acceleration, 0xff0000ff );
 		}
 		
-		if( m_debugShowForces && m_debugInfo.size() > i )
+		if( renderer.HasOption( this, "Forces" ) && m_debugInfo.size() > i )
 		{
-			Tr2Renderer::DrawLine( pos, pos + m_debugInfo[i].alignment, 0xff7f7f00 );
-			Tr2Renderer::DrawLine( pos, pos + m_debugInfo[i].anchor, 0xff007f7f );
-			Tr2Renderer::DrawLine( pos, pos + m_debugInfo[i].cohesion, 0xff00007f );
-			Tr2Renderer::DrawLine( pos, pos + m_debugInfo[i].separation, 0xff007f00 );
-			Tr2Renderer::DrawLine( pos, pos + m_debugInfo[i].wander, 0xff7f0000 );
-			Tr2Renderer::DrawLine( pos, pos + m_debugInfo[i].formation, 0xff7f7f7f );
+			renderer.DrawLine( this, pos, pos + m_debugInfo[i].alignment, 0xff7f7f00 );
+			renderer.DrawLine( this, pos, pos + m_debugInfo[i].anchor, 0xff007f7f );
+			renderer.DrawLine( this, pos, pos + m_debugInfo[i].cohesion, 0xff00007f );
+			renderer.DrawLine( this, pos, pos + m_debugInfo[i].separation, 0xff007f00 );
+			renderer.DrawLine( this, pos, pos + m_debugInfo[i].wander, 0xff7f0000 );
+			renderer.DrawLine( this, pos, pos + m_debugInfo[i].formation, 0xff7f7f7f );
 		}
 	}
 
-	if( m_debugShowSwarmBounds )
+	if( renderer.HasOption( this, "Swarm Bounds" ) )
 	{
 		Vector4 bs;
 		Vector3 min, max;
 		GetBoundingSphere( bs );
 		GetLocalBoundingBox( min, max );
-		Tr2Renderer::DrawSphere( bs, 6, 0xffff00ff );
-		Tr2Renderer::DrawBox( min, max, 0xffff00ff );
+		renderer.DrawSphere( this, bs, 6, Tr2DebugRenderer::Wireframe, 0xffff00ff );
+		renderer.DrawBox( this, min, max, Tr2DebugRenderer::Wireframe, 0xffff00ff );
 	}
 }
 

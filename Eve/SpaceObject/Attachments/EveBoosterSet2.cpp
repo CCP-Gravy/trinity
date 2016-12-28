@@ -13,6 +13,7 @@
 #include "Eve/SpaceObject/Attachments/Sets/EveSpriteSet.h"
 #include "EveTrailsSet.h"
 #include "Tr2LightManager.h"
+#include "Tr2DebugRenderer.h"
 
 using namespace Tr2RenderContextEnum;
 
@@ -606,7 +607,6 @@ EveBoosterSet2::EveBoosterSet2( IRoot* lockobj ) :
 	m_physicsUpdate( true ),
 	m_destinyUpdate( true ),
 	m_alwaysOn( false ),
-	m_drawDebugInfo( false ),
 	m_alwaysOnIntensity( 1.f ),
 	m_vertexDeclHandle( Tr2EffectStateManager::UNINITIALIZED_DECLARATION ),
 	m_maxVel( 250.f ),
@@ -1142,20 +1142,26 @@ float EveBoosterSet2::GetBoosterIntensity( int index ) const
 // Description:
 //   Render debug info of this turret set: bounding sphere
 // --------------------------------------------------------------------------------
-void EveBoosterSet2::RenderDebugInfo( Tr2RenderContext& renderContext )
+void EveBoosterSet2::RenderDebugInfo( Tr2DebugRenderer& renderer )
 {
-	if( m_drawDebugInfo )
+	for( auto it = m_boosterRenderables.begin(); it != m_boosterRenderables.end(); it++ )
 	{
-		for( auto it = m_boosterRenderables.begin(); it != m_boosterRenderables.end(); it++ )
+		for( uint32_t j = 0; j < m_singleBoosters.size(); ++j )
 		{
-			// booster sphere
-			Vector4 transformedBoundingSphere;
-			(*it)->GetBoundingSphere( transformedBoundingSphere );
-			Tr2Renderer::DrawSphere( transformedBoundingSphere, 10, 0xff00ffff );
-
-			// trails box
-			Tr2Renderer::DrawBox( (*it)->m_trailsBoundsMin, (*it)->m_trailsBoundsMax, 0xff00ffff );
+			Matrix transform = m_singleBoosters[j].transform * ( *it )->m_parentTransform;
+			renderer.DrawCylinder( 
+				Tr2DebugObjectReference( this, j ), 
+				transform, 
+				Vector3( 0, 0, 0 ), 
+				Vector3( 0, 0, -1 ), 
+				1.0f, 
+				8, 
+				Tr2DebugRenderer::Lit, 
+				Tr2DebugColor( 0x88ffff00, 0x22ffff00 ) );
 		}
+
+		// trails box
+		renderer.DrawBox( this, (*it)->m_trailsBoundsMin, (*it)->m_trailsBoundsMax, Tr2DebugRenderer::Wireframe, 0xff00ffff );
 	}
 }
 

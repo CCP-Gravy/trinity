@@ -124,16 +124,24 @@ void EveSceneStaticParticles::GetRenderables( const TriFrustum& frustum, std::ve
 	m_transform->GetRenderables( frustum, renderables, nullptr, m_worldMatrix );
 }
 
+void EveSceneStaticParticles::GetDebugOptions( Tr2DebugRendererOptions& options )
+{
+	options.insert( "Bounding Sphere" );
+}
+
 // --------------------------------------------------------------------------------
 // Description:
 //   Render debug info of this static particle system: bounding sphere
 // --------------------------------------------------------------------------------
-void EveSceneStaticParticles::RenderDebugInfo( Tr2RenderContext& renderContext )
+void EveSceneStaticParticles::RenderDebugInfo( Tr2DebugRenderer& renderer )
 {
-	// draw bounding sphere
-	Vector3 center;
-	D3DXVec3TransformCoord( &center, (Vector3*)&m_boundingSphere, &m_worldMatrix );
-	Tr2Renderer::DrawSphere( center, m_boundingSphere.w, 10, 0xffffff00 );
+	if( renderer.HasOption( this, "Bounding Sphere" ) )
+	{
+		// draw bounding sphere
+		Vector3 center;
+		D3DXVec3TransformCoord( &center, (Vector3*)&m_boundingSphere, &m_worldMatrix );
+		renderer.DrawSphere( this, center, m_boundingSphere.w, 10, Tr2DebugRenderer::Wireframe, 0xffffff00 );
+	}
 }
 
 // --------------------------------------------------------------------------------

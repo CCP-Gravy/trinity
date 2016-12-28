@@ -117,10 +117,6 @@ void EveLineSet::Update( EveUpdateContext& updateContext )
 	UpdateSyncronous( updateContext );
 }
 
-void EveLineSet::RenderDebugInfo( Tr2RenderContext& renderContext )
-{
-}
-
 // --------------------------------------------------------------------------------
 // Description:
 //   Updates all the view dependent data, needed for multi-screen rendering

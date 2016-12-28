@@ -17,22 +17,6 @@ const Be::ClassInfo* EveTransform::ExposeToBlue()
 
 		MAP_ATTRIBUTE
 		( 
-			"debugShowBoundingBox", 
-			m_debugShowBoundingBox, 
-			"If set, bounding box is shown if scene is showing debug info.", 
-			Be::READWRITE | Be::PERSIST
-		)
-
-		MAP_ATTRIBUTE
-		( 
-			"debugRenderDebugInfoForChildren", 
-			m_debugRenderDebugInfoForChildren, 
-			"If set, children are given a chance to render debug info (if scene is showing debug info).", 
-			Be::READWRITE | Be::PERSIST 
-		)
-
-		MAP_ATTRIBUTE
-		( 
 			"hideOnLowQuality", 
 			m_hideOnLowQuality,
 			"Disables this whole transform and all of it's children when low quaility is selected.", 

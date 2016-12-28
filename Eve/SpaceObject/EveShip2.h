@@ -27,7 +27,6 @@ public:
 	virtual void UpdateSyncronous( EveUpdateContext& updateContext );
 	virtual void UpdateAsyncronous( EveUpdateContext& updateContext );
 	virtual void GetRenderables( const TriFrustum& frustum, std::vector<ITr2Renderable*>& renderables, Tr2ImpostorManager* impostors, const Matrix& parentTransform );
-	virtual void RenderDebugInfo( Tr2RenderContext& renderContext );
 	virtual void RegisterWithQuadRenderer( Tr2QuadRenderer& quadRenderer );
 	virtual void AddQuadsToQuadRenderer( const TriFrustum& frustum, Tr2QuadRenderer& quadRenderer );
 	virtual void GetLights( Tr2LightManager& lightManager ) const;
@@ -47,6 +46,11 @@ public:
 	/////////////////////////////////////////////////////////////////////////////////////
 	// Overrides of decal data
 	virtual void FillDecalParentData( EveSpaceObjectDecal::ParentData* pd ) const;
+
+	/////////////////////////////////////////////////////////////////////////////////////
+	// ITr2DebugRenderable
+    virtual void GetDebugOptions( Tr2DebugRendererOptions& options );
+    virtual void RenderDebugInfo( Tr2DebugRenderer& renderer );
 
 	// boosters
 	void SetBoosterSet( EveBoosterSet2Ptr set );

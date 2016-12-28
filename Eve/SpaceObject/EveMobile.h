@@ -43,7 +43,6 @@ public:
 	virtual void UpdateAsyncronous( EveUpdateContext& updateContext );
 	virtual void PrepareShaderData( EveUpdateContext& updateContext );
 	virtual void GetRenderables( const TriFrustum& frustum, std::vector<ITr2Renderable*>& renderables, Tr2ImpostorManager* impostors, const Matrix& parentTransform );
-	virtual void RenderDebugInfo( Tr2RenderContext& renderContext );
 
 	//////////////////////////////////////////////////////////////////////////////////////
 	// IEveShadowCaster - overriding EveSpaceObject2 implementations
@@ -52,6 +51,10 @@ public:
 	/////////////////////////////////////////////////////////////////////////////////////
 	// IListNotify
 	void OnListModified( long event, ssize_t key, ssize_t key2, IRoot* value, const IList* theList );
+
+	/////////////////////////////////////////////////////////////////////////////////////
+	// ITr2DebugRenderable
+    virtual void RenderDebugInfo( Tr2DebugRenderer& renderer );
 
 	/////////////////////////////////////////////////////////////////////////////////////
 	// Overrides of animation controller

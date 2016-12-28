@@ -22,8 +22,6 @@ public:
 	EveCurveLineSet(IRoot* lockobj = NULL);
 	~EveCurveLineSet();
 	
-	void RenderDebugInfo( Tr2RenderContext& renderContext );
-
 	Tr2PerObjectData* GetPerObjectData( ITriRenderBatchAccumulator* accumulator );
 
 	//////////////////////////////////////////////////////////////////////////////////////

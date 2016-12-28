@@ -244,14 +244,17 @@ bool EveMobile::GetRenderablesCastingShadow( bool isSelf, const TriFrustumOrtho&
 //   Override base ::RenderDebugInfo() function, so we can draw debuginfo of
 //   the turrets etc.
 // --------------------------------------------------------------------------------
-void EveMobile::RenderDebugInfo( Tr2RenderContext& renderContext )
+void EveMobile::RenderDebugInfo( Tr2DebugRenderer& renderer )
 {
-	EveSpaceObject2::RenderDebugInfo( renderContext );
+	EveSpaceObject2::RenderDebugInfo( renderer );
 
-	// let the turrets render some debug info
-	for( EveTurretSetVector::iterator it = m_turretSets.begin(); it != m_turretSets.end(); ++it )
+	if( renderer.HasOption( this, "Children" ) )
 	{
-		(*it)->RenderDebugInfo( renderContext );
+		// let the turrets render some debug info
+		for( EveTurretSetVector::iterator it = m_turretSets.begin(); it != m_turretSets.end(); ++it )
+		{
+			(*it)->RenderDebugInfo( renderer );
+		}
 	}
 }
 

@@ -27,6 +27,7 @@ BLUE_DECLARE( Tr2Effect );
 BLUE_DECLARE( TriGeometryRes );
 BLUE_DECLARE( EveTurretFiringFX );
 BLUE_DECLARE( EveTurretTarget );
+BLUE_DECLARE( Tr2DebugRenderer );
 
 // constants
 // maximum number of single turrets per turret set
@@ -148,7 +149,7 @@ public:
 	void GetRenderables( const TriFrustum& frustum, std::vector<ITr2Renderable*>& renderables, const Vector4* shLighting );
 	void GetRenderablesCastingShadow( const TriFrustumOrtho& frustum, std::vector<ITr2Renderable*>& renderables );
 	// just debug info
-	void RenderDebugInfo( Tr2RenderContext& renderContext );
+	void RenderDebugInfo( Tr2DebugRenderer& renderer );
 	// rebuild the bounding sphere size
 	void RebuildBoundingSphere();
 	// disable LODing

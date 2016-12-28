@@ -32,6 +32,7 @@
 #include "Particle/Tr2GpuParticleSystem.h"
 #include "Resources/TriTextureRes.h"
 #include "Tr2ImpostorManager.h"
+#include "Tr2DebugRenderer.h"
 
 using namespace Tr2RenderContextEnum;
 
@@ -122,7 +123,6 @@ EveSpaceScene::EveSpaceScene( IRoot* lockobj ) :
 	PARENTLOCK( m_backgroundObjects ),
 	PARENTLOCK( m_planets ),
 	PARENTLOCK( m_objects ),
-	PARENTLOCK( m_debugObjects ),
 	PARENTLOCK( m_curveSets ),
 	PARENTLOCK( m_lensflares ),
 	PARENTLOCK( m_distanceFields ),
@@ -143,7 +143,6 @@ EveSpaceScene::EveSpaceScene( IRoot* lockobj ) :
 	m_pickBuffer( NULL,  Tr2RenderContextEnum::PIXEL_FORMAT_B8G8R8A8_UNORM, 1 ),
 	m_envMapRotation( 0.0f, 0.0f, 0.0f, 1.0f ),
 	m_backgroundRenderingEnabled( false ),
-	m_renderDebugInfo( false ),
 	m_debugShowShadowCasters( false ),
 	m_enableShadowObb( true ),
 	m_enableShadowDistanceTweak( true ),
@@ -506,7 +505,7 @@ void EveSpaceScene::GetShadowCasterRenderables(
 			{
 				if( obj->GetRenderablesCastingShadow( false, shadowFrustum, shadowRenderables ) )
 				{
-					if( m_renderDebugInfo && m_debugShowShadowCasters )
+					if( m_debugShowShadowCasters )
 					{
 						debugShadowCasters.push_back( obj );
 					}
@@ -577,13 +576,13 @@ void EveSpaceScene::PrepareShadowMap(
 		return;
 	}
 
-	if( m_renderDebugInfo && m_debugShowShadowCasters )
+	if( m_debugShowShadowCasters )
 	{
 		// Draw a yellow line from the light view position to the receiver position
 		Tr2Renderer::DrawLine( lightViewPosition, BoundingSphereGetCenter( boundingSphere ), 0xffffff00 );
 	}
 
-	if( m_renderDebugInfo && m_debugShowShadowCasters )
+	if( m_debugShowShadowCasters )
 	{
 		Vector3 objectOfInterestPosition;
 		objectOfInterest->GetModelCenterWorldPosition( objectOfInterestPosition );
@@ -1890,29 +1889,7 @@ void EveSpaceScene::EndRender( Tr2RenderContext& renderContext )
 		}
 	}
 
-	// finally: debug output
-	if( m_renderDebugInfo )
-	{
-		RenderDebugInfo( renderContext );
-		if( m_debugShowShadowCasters && m_shadowMap )
-		{
-			m_shadowMap->DrawDebugInfo();
-		}
-	}
-	else if( m_debugObjects.size() > 0 )
-	{
-		auto bkProjection = Tr2Renderer::GetProjectionRawTransform();
-		Tr2Renderer::SetProjectionTransform( Tr2Renderer::GetReversedDepthProjectionTransform() );
-		ON_BLOCK_EXIT( [&] { Tr2Renderer::SetProjectionTransform( bkProjection ); } );
-
-		for( IEveSpaceObject2Vector::iterator it = m_debugObjects.begin(); it != m_debugObjects.end(); ++it )
-		{
-			IEveSpaceObject2* obj = *it;
-			obj->RenderDebugInfo( renderContext );
-		}
-
-		Tr2Renderer::RenderDebugInfo( renderContext );
-	}
+	RenderDebugInfo( renderContext );
 
 	renderContext.m_esm.EndManagedRendering();
 
@@ -2403,6 +2380,14 @@ IRoot* EveSpaceScene::PickObjectAndArea( int x, int y, TriProjection* proj, TriV
 	// Render for picking, limit our view to the pick ray
 	SetupTransformsForPicking( fx, fy, proj, view, viewport, renderContext );
 
+
+	Tr2DebugObjectReference gizmo = nullptr;
+	float gizmoDepth = 0;
+	if( m_debugRenderer )
+	{
+		gizmo = m_debugRenderer->Pick( gizmoDepth, renderContext );
+	}
+
 	// Find objects inside our 1-by-1 pick frustum
 	std::vector<std::pair<ITr2Pickable*, ITr2Renderable*>> collisionSet;
 	std::vector<ITr2Renderable*> visibleObjects;
@@ -2436,7 +2421,7 @@ IRoot* EveSpaceScene::PickObjectAndArea( int x, int y, TriProjection* proj, TriV
 		unsigned short objId = 0xffff;
 		unsigned short aId = 0xffff;
 
-		if ( m_pickBuffer.BeginRendering( 1 - initialDepth, renderContext ) )
+		if ( m_pickBuffer.BeginRendering( std::max( gizmoDepth, 1 - initialDepth ), renderContext ) )
 		{
 			for ( unsigned int i = 0; i < collisionSet.size(); i++ )
 			{
@@ -2504,6 +2489,11 @@ IRoot* EveSpaceScene::PickObjectAndArea( int x, int y, TriProjection* proj, TriV
 		{
 			result = collisionSet[objId].first->GetID( aId );
 			areaID = aId;
+		}
+		else if( gizmo )
+		{
+			result = gizmo.m_object;
+			areaID = gizmo.m_area;
 		}
 	}
 
@@ -2706,22 +2696,30 @@ bool EveSpaceScene::IsMeshUnloadingEnabled()
 
 void EveSpaceScene::RenderDebugInfo( Tr2RenderContext& renderContext )
 {
-	auto bkProjection = Tr2Renderer::GetProjectionRawTransform();
-	Tr2Renderer::SetProjectionTransform( Tr2Renderer::GetReversedDepthProjectionTransform() );
-	ON_BLOCK_EXIT( [&] { Tr2Renderer::SetProjectionTransform( bkProjection ); } );
-
-	for( IEveSpaceObject2Vector::iterator it = m_objects.begin(); it != m_objects.end(); ++it )
+	if( m_debugRenderer )
 	{
-		IEveSpaceObject2* obj = *it;
-		obj->RenderDebugInfo( renderContext );
-	}
+		m_debugRenderer->BeginRender();
+		auto bkProjection = Tr2Renderer::GetProjectionRawTransform();
+		Tr2Renderer::SetProjectionTransform( Tr2Renderer::GetReversedDepthProjectionTransform() );
+		ON_BLOCK_EXIT( [&] { Tr2Renderer::SetProjectionTransform( bkProjection ); } );
+
+		for( auto it = m_objects.begin(); it != m_objects.end(); ++it )
+		{
+			if( auto renderable = dynamic_cast<ITr2DebugRenderable*>( *it ) )
+			{
+				renderable->RenderDebugInfo( *m_debugRenderer );
+			}
+		}
 		
-	for( auto it = m_staticParticles.begin(); it != m_staticParticles.end(); ++it )
-	{
-		(*it)->RenderDebugInfo( renderContext );
-	}
+		for( auto it = m_staticParticles.begin(); it != m_staticParticles.end(); ++it )
+		{
+			(*it)->RenderDebugInfo( *m_debugRenderer );
+		}
 
-	Tr2Renderer::RenderDebugInfo( renderContext );
+		m_debugRenderer->EndRender( renderContext );
+
+		Tr2Renderer::RenderDebugInfo( renderContext );
+	}
 }
 
 Vector3 EveSpaceScene::PickInfinity( int x, int y, Matrix proj, Matrix view )

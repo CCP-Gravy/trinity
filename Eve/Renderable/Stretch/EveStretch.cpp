@@ -137,11 +137,6 @@ void EveStretch::UpdateCurves( EveUpdateContext& updateContext )
 	}
 }
 
-void EveStretch::RenderDebugInfo( Tr2RenderContext& renderContext )
-{
-
-}
-
 void EveStretch::GetRenderables( const TriFrustum& frustum, std::vector<ITr2Renderable*>& renderables, const Matrix& parentTransform )
 {
 	GetRenderables( frustum, renderables, nullptr, parentTransform );

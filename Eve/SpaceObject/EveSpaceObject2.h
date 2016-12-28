@@ -24,6 +24,7 @@
 #include "Eve/SpaceObject/Children/IEveSpaceObjectChild.h"
 #include "Eve/SpaceObject/Utils/EveLocatorSets.h"
 #include "Tr2ImpostorManager.h"
+#include "Tr2DebugRenderer.h"
 
 // consts
 #define EVE_SPACEOBJECT_DIRT_LEVEL_DEFAULT (0.f)
@@ -154,7 +155,8 @@ BLUE_CLASS( EveSpaceObject2 ):
 	public ITr2ShLightingReceiver,
 	public INotify,
 	public ITr2SecondaryLightSource,
-	public ITr2ImpostorSource
+	public ITr2ImpostorSource,
+	public ITr2DebugRenderable
 {
 public:
 	EXPOSE_TO_BLUE();
@@ -199,7 +201,6 @@ public:
 	virtual void UpdateSyncronous( EveUpdateContext& updateContext );
 	virtual void UpdateAsyncronous( EveUpdateContext& updateContext );
 	virtual void PrepareShaderData( EveUpdateContext& updateContext );
-	virtual void RenderDebugInfo( Tr2RenderContext& renderContext );
 	virtual void GetRenderables( const TriFrustum& frustum, std::vector<ITr2Renderable*>& renderables, Tr2ImpostorManager* impostors, const Matrix& parentTransform );
 	virtual bool GetBoundingSphere( Vector4& sphere, BoundingSphereQuery query=EVE_BOUNDS_NORMAL ) const;
 	virtual void UpdateModelCenterWorldPosition( Vector3 &position, Be::Time t );
@@ -284,6 +285,11 @@ public:
 	virtual void GetImpostorBatches( const TriFrustum& frustum, std::map<TriBatchType, ITriRenderBatchAccumulator*>& batches );
 	virtual float GetRenderPriority( const ImpostorHash& oldHash, const ImpostorHash& newHash ) const;
 	virtual bool GetImpostorBoundingSphere( Vector4& sphere ) const;
+
+	/////////////////////////////////////////////////////////////////////////////////////
+	// ITr2DebugRenderable
+    virtual void GetDebugOptions( Tr2DebugRendererOptions& options );
+    virtual void RenderDebugInfo( Tr2DebugRenderer& renderer );
 
 	// For stateful GPU particles
 	ITriVectorFunctionPtr GetPositionFunction();
@@ -386,12 +392,6 @@ protected:
 
 	bool m_update;
 	bool m_display;
-	bool m_debugShowBoundingBox;
-	bool m_debugShowMeshAreaBoundingBox;
-	bool m_debugRenderDebugInfoForChildren;
-	bool m_debugShowDynamicBounds;
-	bool m_debugShowDamageLocators;
-	bool m_debugShowBones;
 	bool m_allowLodSelection;
 
 	Matrix m_worldTransform;

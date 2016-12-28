@@ -14,6 +14,7 @@ BLUE_DECLARE( Tr2Effect );
 BLUE_DECLARE( Tr2Mesh );
 BLUE_DECLARE( TriVariable );
 BLUE_DECLARE( TriFrustum );
+BLUE_DECLARE( Tr2DebugRenderer );
 
 typedef uint32_t EveSpaceObjectDecalIndex;
 BLUE_DECLARE_STRUCTURE_LIST( EveSpaceObjectDecalIndex );
@@ -122,7 +123,7 @@ public:
 	void SetIndices( const uint32_t* indices, size_t count );
 
 	// edit helper
-	void RenderDebugInfo( const Matrix* worldMatrix ) const;
+	void RenderDebugInfo( Tr2DebugRenderer& renderer, const Matrix& worldMatrix ) const;
 
 	// set things from the parent, the spaceobject
 	void SetBoneMatrix( const granny_matrix_3x4* bonesMatrices, int bonesMatricesCount );
@@ -140,7 +141,6 @@ private:
 	std::string m_name;
 	// display
 	bool m_display;
-	bool m_displayBoundingBox;
 
 	// parent ship data
 	ParentData m_parentData;

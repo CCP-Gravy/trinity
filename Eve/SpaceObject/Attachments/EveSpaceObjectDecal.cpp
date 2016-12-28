@@ -5,6 +5,7 @@
 #include "TriPoolAllocator.h"
 #include "Shader/Tr2Effect.h"
 #include "Tr2Mesh.h"
+#include "Tr2DebugRenderer.h"
 #include "Resources/TriGeometryRes.h"
 #include "Utilities/BoundingBox.h"
 #include "Utilities/MatrixUtils.h"
@@ -22,7 +23,6 @@ static BlueStructureDefinition s_eveSpaceObjectDecalIndexDef[] =
 // ------------------------------------------------------------------------------------------------------
 EveSpaceObjectDecal::EveSpaceObjectDecal( IRoot* lockobj ) :
 	m_display( true ),
-	m_displayBoundingBox( false ),
 	m_position( 0.f, 0.f, 0.f ),
 	m_rotation( 0.f, 0.f, 0.f, 1.f ),
 	m_scaling( 1.f, 1.f, 1.f ),
@@ -310,16 +310,14 @@ void EveSpaceObjectDecal::SubmitGeometry( Tr2RenderContext& renderContext )
 }
 
 // ------------------------------------------------------------------------------------------------------
-void EveSpaceObjectDecal::RenderDebugInfo( const Matrix* worldMatrix ) const
+void EveSpaceObjectDecal::RenderDebugInfo( Tr2DebugRenderer& renderer, const Matrix& worldMatrix ) const
 {
-	if( m_displayBoundingBox )
-	{
-		Matrix worldDecalMatrix;
+	Matrix worldDecalMatrix;
 
-		D3DXMatrixMultiply( &worldDecalMatrix, &m_parentBoneMatrix, worldMatrix );
-		D3DXMatrixMultiply( &worldDecalMatrix, &m_decalMatrix, &worldDecalMatrix );
-		Tr2Renderer::DrawOrientedBox( worldDecalMatrix, 0xff00ffff );
-	}
+	D3DXMatrixMultiply( &worldDecalMatrix, &m_parentBoneMatrix, &worldMatrix );
+	D3DXMatrixMultiply( &worldDecalMatrix, &m_decalMatrix, &worldDecalMatrix );
+	renderer.DrawBox( this, worldDecalMatrix, Vector3( -1, -1, -1 ), Vector3( 1, 1, 1 ), Tr2DebugRenderer::Wireframe, Tr2DebugColor( 0xff00ffff, 0x2200ffff ) );
+	renderer.DrawBox( this, worldDecalMatrix, Vector3( -1, -1, -1 ), Vector3( 1, 1, 1 ), Tr2DebugRenderer::Solid, 0 );
 }
 
 // --------------------------------------------------------------------------------------

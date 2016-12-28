@@ -239,11 +239,6 @@ void EveSpherePin::Update( EveUpdateContext& updateContext )
 }
 
 // ------------------------------------------------------------------------------------------------------
-void EveSpherePin::RenderDebugInfo( Tr2RenderContext& renderContext )
-{
-}
-
-// ------------------------------------------------------------------------------------------------------
 void EveSpherePin::UpdateViewDependentData( const Matrix& parentTransform, bool children )
 {
 	// local transform

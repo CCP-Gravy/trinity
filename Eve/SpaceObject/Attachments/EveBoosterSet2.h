@@ -23,6 +23,7 @@ BLUE_DECLARE( EveTrailsSet );
 BLUE_DECLARE( TriColor );
 BLUE_DECLARE_INTERFACE( ITriVectorFunction );
 BLUE_DECLARE_INTERFACE( ITriQuaternionFunction );
+BLUE_DECLARE( Tr2DebugRenderer );
 
 // constants
 // maximum number of spline control points per trail
@@ -243,7 +244,7 @@ public:
 	float GetBoosterIntensity() const;
 	float GetBoosterIntensity( int index ) const;
 	// just debug info
-	void RenderDebugInfo( Tr2RenderContext& renderContext );
+	void RenderDebugInfo( Tr2DebugRenderer& renderer );
 	// get the transformed bounding sphere, ready for use
 	void GetBoundingSphere( Vector4& boundingSphere ) const;
 
@@ -261,8 +262,6 @@ private:
 	// show them always on strength 1.0 (for jessica editing)
 	bool m_alwaysOn;
 	float m_alwaysOnIntensity;
-	// toggle debug drawing
-	bool m_drawDebugInfo;
 
 	// bounding info (is setup dynamically)
 	Vector4 m_boosterBoundingSphere;

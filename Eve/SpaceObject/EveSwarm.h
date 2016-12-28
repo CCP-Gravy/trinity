@@ -188,7 +188,6 @@ public:
 	// EveShip2 overrides
 	void UpdateSyncronous( EveUpdateContext& updateContext );
 	void UpdateAsyncronous( EveUpdateContext& updateContext );
-	void RenderDebugInfo( Tr2RenderContext& renderContext );
 	bool GetBoundingSphere( Vector4& sphere, BoundingSphereQuery query=EVE_BOUNDS_NORMAL ) const;
 	void PushRenderables( const TriFrustum& frustum, std::vector<ITr2Renderable*>& renderables );
 	void RebuildCachedData( BlueAsyncRes* p );
@@ -206,6 +205,11 @@ public:
 	/////////////////////////////////////////////////////////////////////////////////////
 	// INotify
 	bool OnModified( Be::Var* val );
+
+	/////////////////////////////////////////////////////////////////////////////////////
+	// ITr2DebugRenderable
+    virtual void GetDebugOptions( Tr2DebugRendererOptions& options );
+    virtual void RenderDebugInfo( Tr2DebugRenderer& renderer );
 
 protected:
 	/////////////////////////////////////////////////////////////////////////////////////
@@ -261,8 +265,6 @@ private:
 	Vector3 Calculate_Wander( SwarmVehicle& s, float wanderDistance, float radius, float fluctuation, float t );
 	void UpdateOrientation( SwarmVehicle* s, float t );
 	
-	bool m_debugShowSwarmBounds;
-	bool m_debugShowVehicle;
 	bool m_debugShowForces;
 	void EnableSwarmForceDebug( bool enable );
 };

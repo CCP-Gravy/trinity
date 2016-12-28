@@ -160,12 +160,6 @@ EveSpaceObject2::EveSpaceObject2( IRoot* lockobj ) :
 	m_worldRotation( 0.f, 0.f, 0.f, 1.f ),
 	m_lodLevel( TR2_LOD_UNSPECIFIED ),
 	m_lodLevelWithChildren( TR2_LOD_UNSPECIFIED ),
-	m_debugShowBoundingBox( true ),
-	m_debugShowMeshAreaBoundingBox( false ),
-	m_debugRenderDebugInfoForChildren( true ),
-	m_debugShowDynamicBounds( true ),
-	m_debugShowDamageLocators( false ),
-	m_debugShowBones( false ),
 	m_isVisible( false ),
 	m_isMeshVisible( false ),
 	m_localAabbMin( 0.f, 0.f, 0.f ),
@@ -425,17 +419,33 @@ void EveSpaceObject2::PrepareShaderData( EveUpdateContext& updateContext )
 	m_spaceObjectShipData.z = m_dirtLevel;
 }
 
-void EveSpaceObject2::RenderDebugInfo( Tr2RenderContext& renderContext )
+void EveSpaceObject2::GetDebugOptions( Tr2DebugRendererOptions& options )
 {
-	// debug info of custom maps stops all other debug info.
-	for( auto it = m_customMasks.begin(); it != m_customMasks.end(); ++it )
+	options.insert( "Projections" );
+	options.insert( "Bounding Box" );
+	options.insert( "Bounding Sphere" );
+	options.insert( "Mesh Area Bounding Boxes" );
+	options.insert( "Dynamic Bounds" );
+	options.insert( "Bones" );
+	options.insert( "Names" );
+	options.insert( "Children" );
+	options.insert( "Decals" );
+	options.insert( "Damage Locators" );
+}
+
+void EveSpaceObject2::RenderDebugInfo( Tr2DebugRenderer& renderer )
+{
+	if( renderer.HasOption( GetRawRoot(), "Projections" ) )
 	{
-		Matrix customMaskTransform;
-		(*it)->GetDebugDrawMatrix( &customMaskTransform, GetBoundingSphereRadius() );
-		Tr2Renderer::DrawOrientedBox( customMaskTransform, 0xff00ffff );
+		for( auto it = m_customMasks.begin(); it != m_customMasks.end(); ++it )
+		{
+			Matrix customMaskTransform;
+			(*it)->GetDebugDrawMatrix( &customMaskTransform, GetBoundingSphereRadius() );
+			renderer.DrawBox( this, customMaskTransform, Vector3( -1, -1, -1 ), Vector3( 1, 1, 1 ), Tr2DebugRenderer::Wireframe, 0xff00ffff );
+		}
 	}
 
-	if( m_debugShowBoundingBox )
+	if( renderer.HasOption( GetRawRoot(), "Bounding Box" ) )
 	{
 		Vector3 minBounds( -0.5f, -0.5f, -0.5f );
 		Vector3 maxBounds( 0.5f, 0.5f, 0.5f );
@@ -449,15 +459,17 @@ void EveSpaceObject2::RenderDebugInfo( Tr2RenderContext& renderContext )
 			}
 		}
 
-		BoundingBoxTransform( minBounds, maxBounds, m_worldTransform );
-		Tr2Renderer::DrawBox( minBounds, maxBounds, color );
-
-		Vector3 center;
-		D3DXVec3TransformCoord( &center, &m_boundingSphereCenter, &m_worldTransform );
-		Tr2Renderer::DrawSphere( center, m_boundingSphereRadius, 8, 0xffff00ff );
+		renderer.DrawBox( this, m_worldTransform, minBounds, maxBounds, Tr2DebugRenderer::Wireframe, color );
 	}
 
-	if( m_debugShowMeshAreaBoundingBox )
+	if( renderer.HasOption( GetRawRoot(), "Bounding Sphere" ) )
+	{
+		Vector3 center;
+		D3DXVec3TransformCoord( &center, &m_boundingSphereCenter, &m_worldTransform );
+		renderer.DrawSphere( this, m_boundingSphereCenter, m_boundingSphereRadius, 8, Tr2DebugRenderer::Wireframe, 0xffff00ff );
+	}
+
+	if( renderer.HasOption( GetRawRoot(), "Mesh Area Bounding Boxes" ) )
 	{
 		if( m_geometryResFromMesh )
 		{
@@ -466,51 +478,56 @@ void EveSpaceObject2::RenderDebugInfo( Tr2RenderContext& renderContext )
 				Vector3 minBounds, maxBounds;
 				if( m_mesh->GetAreaBoundingBox( a, minBounds, maxBounds ) )
 				{
-					BoundingBoxTransform( minBounds, maxBounds, m_worldTransform );
-					Tr2Renderer::DrawBox( minBounds, maxBounds, 0xff00ffff );
+					renderer.DrawBox( this, m_worldTransform, minBounds, maxBounds, Tr2DebugRenderer::Wireframe, 0xff00ffff );
 				}
 			}
 		}
 	}
-	if( m_animationUpdater && m_debugShowDynamicBounds && m_dynamicBoundingSphereEnabled )
+	if( m_animationUpdater && m_dynamicBoundingSphereEnabled && renderer.HasOption( GetRawRoot(), "Dynamic Bounds" ) )
 	{
 		m_animationUpdater->RenderDynamicBounds( m_worldTransform );
 	}
-	if( m_animationUpdater && m_debugShowBones )
+	if( m_animationUpdater && renderer.HasOption( GetRawRoot(), "Bones" ) )
 	{
 		m_animationUpdater->RenderBones( m_worldTransform );
 	}
-	Tr2Renderer::Printf( TRI_DBG_FONT_SMALL, m_worldTransform.GetTranslation(), 0xffffffff, m_name.c_str() );
-
-	if( m_debugRenderDebugInfoForChildren )
+	if( renderer.HasOption( GetRawRoot(), "Names" ) )
 	{
+		renderer.DrawText( TRI_DBG_FONT_SMALL, m_worldTransform.GetTranslation(), 0xffffffff, m_name.c_str() );
+	}
+
+	if( renderer.HasOption( GetRawRoot(), "Children" ) )
+	{
+		USE_MAIN_THREAD_RENDER_CONTEXT();
 		for( IEveTransformVector::const_iterator it = m_children.begin(); it != m_children.end(); ++it )
 		{
-			(*it)->RenderDebugInfo( renderContext );
+			if( auto renderable = dynamic_cast<ITr2DebugRenderable*>( *it ) )
+			{
+				renderable->RenderDebugInfo( renderer );
+			}
 		}
-
+	}
+	if( renderer.HasOption( GetRawRoot(), "Decals" ) )
+	{
 		// are decals visible?
 		if( DisplayDecals() )
 		{
 			for( EveSpaceObjectDecalVector::iterator it = m_decals.begin(); it != m_decals.end(); ++it )
 			{
-				(*it)->RenderDebugInfo( &m_worldTransform );
+				(*it)->RenderDebugInfo( renderer, m_worldTransform );
 			}
 		}
 	}
 
-	if( m_debugShowDamageLocators )
+	if( renderer.HasOption( GetRawRoot(), "Damage Locators" ) )
 	{
 		for( unsigned i = 0; i < m_persistedDamageLocators.size(); i++ )
 		{
 			Vector3 pos;
 			GetDamageLocatorPosition( &pos, i, true );
-			Tr2Renderer::DrawSphere( pos, m_boundingSphereRadius / 50.f, 4, 0xffff00ff );
 			Vector3 dir;
-			if( GetDamageLocatorDirection( &dir, i, true ) )
-			{
-				Tr2Renderer::DrawLine( pos, pos + (dir * m_boundingSphereRadius / 20.f), 0xffff00ff );
-			}
+			GetDamageLocatorDirection( &dir, i, true );
+			renderer.DrawSphereArrow( Tr2DebugObjectReference( &m_persistedDamageLocators, i ), pos, dir, m_boundingSphereRadius / 50.f, 8, Tr2DebugRenderer::Lit, 0xffff0088 );
 		}
 	}
 }

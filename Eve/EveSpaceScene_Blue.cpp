@@ -180,13 +180,6 @@ const Be::ClassInfo* EveSpaceScene::ExposeToBlue()
 		)
 		MAP_ATTRIBUTE
 		( 
-			"renderDebugInfo", 
-			m_renderDebugInfo, 
-			"If true, objects are given a chance to render debugging info.", 
-			Be::READWRITE
-		)
-		MAP_ATTRIBUTE
-		( 
 			"debugShowShadowCasters", 
 			m_debugShowShadowCasters, 
 			"If set, shadow casters and shadowing light direction is identified (if scene is showing debug info).\n"
@@ -297,9 +290,9 @@ const Be::ClassInfo* EveSpaceScene::ExposeToBlue()
 
 		MAP_ATTRIBUTE
 		( 
-			"debugObjects", 
-			m_debugObjects, 
-			"Objects in space", 
+			"debugRenderer", 
+			m_debugRenderer, 
+			"Object used for rendering debug information", 
 			Be::READWRITE
 		)
 

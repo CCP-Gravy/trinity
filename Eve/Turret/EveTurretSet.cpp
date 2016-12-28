@@ -11,6 +11,7 @@
 #include "Utilities/BoundingSphere.h"
 #include "TriFrustumOrtho.h"
 #include "TriRenderBatch.h"
+#include "Tr2DebugRenderer.h"
 
 #include "Eve/EveUpdateContext.h"
 #include "Eve/Turret/EveTurretTarget.h"
@@ -1075,7 +1076,7 @@ const int EveTurretSet::GetSlotNumber() const
 // Description:
 //   Render debug info of this turret set: bounding sphere
 // --------------------------------------------------------------------------------
-void EveTurretSet::RenderDebugInfo( Tr2RenderContext& renderContext )
+void EveTurretSet::RenderDebugInfo( Tr2DebugRenderer& renderer )
 {
 	// draw bounding sphere for every turret in this set
 	for( std::vector<SingleTurretData>::const_iterator it = m_singleTurrets.begin(); it != m_singleTurrets.end(); ++it )
@@ -1084,7 +1085,7 @@ void EveTurretSet::RenderDebugInfo( Tr2RenderContext& renderContext )
 		{
 			Vector3 center;
 			D3DXVec3TransformCoord( &center, (Vector3*)&m_boundingSphere, &it->worldMatrix );
-			Tr2Renderer::DrawSphere( center, m_boundingSphere.w, 10, 0xffffff00 );
+			renderer.DrawSphere( this, center, m_boundingSphere.w, 10, Tr2DebugRenderer::Wireframe, 0xffffff00 );
 		}
 	}
 }

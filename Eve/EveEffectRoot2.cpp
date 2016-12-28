@@ -75,12 +75,6 @@ void EveEffectRoot2::UpdateAsyncronous( EveUpdateContext& updateContext )
 	}
 }
 
-void EveEffectRoot2::RenderDebugInfo( Tr2RenderContext& renderContext ) 
-{
-
-}
-
-
 void EveEffectRoot2::GetRenderables( const TriFrustum& frustum, std::vector<ITr2Renderable*>& renderables, Tr2ImpostorManager* impostors, const Matrix& parentTransform ) 
 {
 	if( !m_display )

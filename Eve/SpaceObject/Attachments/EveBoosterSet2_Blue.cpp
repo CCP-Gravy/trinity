@@ -41,7 +41,6 @@ const Be::ClassInfo* EveBoosterSet2::ExposeToBlue()
 		MAP_ATTRIBUTE( "instances", m_boosterRenderables, "Instances of this booster set.", Be::READ )
 		MAP_ATTRIBUTE( "physicsUpdate", m_physicsUpdate, "This enables updating of the boosters trails based on physics sim", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "destinyUpdate", m_destinyUpdate, "This enables updating speed etc. from destiny simulation", Be::READWRITE | Be::PERSIST )
-		MAP_ATTRIBUTE( "drawDebugInfo", m_drawDebugInfo, "Enable debug drawing", Be::READWRITE )
 		MAP_ATTRIBUTE
 		(
 			"effect",  

@@ -55,8 +55,6 @@ const Be::ClassInfo* EveSwarm::ExposeToBlue()
 		MAP_ATTRIBUTE( "wanderDistance", m_behavior.m_wanderDistance, ":jessica-group: Behavior", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "wanderRadius", m_behavior.m_wanderRadius, ":jessica-group: Behavior", Be::READWRITE | Be::PERSIST )
 		
-		MAP_ATTRIBUTE( "debugShowVehicle", m_debugShowVehicle, ":jessica-group: Debug", Be::READWRITE | Be::PERSIST )
-		MAP_ATTRIBUTE( "debugShowSwarmBounds", m_debugShowSwarmBounds, ":jessica-group: Debug", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "debugShowForces", m_debugShowForces, ":jessica-group: Debug", Be::READWRITE | Be::PERSIST | Be::NOTIFY )
 
 		MAP_METHOD_AND_WRAP( "AddSwarmer", AddSwarmer, "" )

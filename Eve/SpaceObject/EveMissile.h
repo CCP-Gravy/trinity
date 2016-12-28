@@ -41,7 +41,6 @@ public:
 	// Overrides of EveSpaceObject2 implementations
 	virtual void UpdateSyncronous( EveUpdateContext& updateContext );
 	virtual void GetRenderables( const TriFrustum& frustum, std::vector<ITr2Renderable*>& renderables, Tr2ImpostorManager* impostors, const Matrix& parentTransform );
-	virtual void RenderDebugInfo( Tr2RenderContext& renderContext );
 	virtual bool GetBoundingSphere( Vector4& sphere, BoundingSphereQuery query=EVE_BOUNDS_NORMAL ) const;
 	virtual void RegisterWithQuadRenderer( Tr2QuadRenderer& quadRenderer );
 	virtual void AddQuadsToQuadRenderer( const TriFrustum& frustum, Tr2QuadRenderer& quadRenderer );
@@ -55,6 +54,10 @@ public:
 	// IBlueAsyncResNotifyTarget - overriding EveSpaceObject2 implementations
 	virtual void RebuildCachedData( BlueAsyncRes* p );
 
+
+	/////////////////////////////////////////////////////////////////////////////////////
+	// ITr2DebugRenderable
+	virtual void RenderDebugInfo( Tr2DebugRenderer& renderer );
 
 	// start this whole MIRV
 	void Start( const Vector3& shipVelocity, float estimatedFlyingTime );

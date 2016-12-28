@@ -23,8 +23,6 @@ EveTransform::EveTransform( IRoot* lockobj ) :
 	PARENTLOCK( m_observers ),
 	PARENTLOCK( m_particleEmitters ),
 	PARENTLOCK( m_particleSystems ),
-	m_debugShowBoundingBox( true ),
-	m_debugRenderDebugInfoForChildren( true ),
 	m_isVisible( true ),
 	m_hideOnLowQuality( false ),
 	m_visibilityThreshold( 2.0f ),
@@ -169,7 +167,14 @@ void EveTransform::UpdateViewDependentData( const Matrix& parentTransform, bool 
 	}
 }
 
-void EveTransform::RenderDebugInfo( Tr2RenderContext& renderContext )
+void EveTransform::GetDebugOptions( Tr2DebugRendererOptions& options )
+{
+	options.insert( "Bounding Box" );
+	options.insert( "Bounding Sphere" );
+	options.insert( "Names" );
+}
+
+void EveTransform::RenderDebugInfo( Tr2DebugRenderer& renderer )
 {
 	// is this one here enabled?
 	if( m_hideOnLowQuality && Tr2Renderer::IsLowQuality() )
@@ -182,7 +187,7 @@ void EveTransform::RenderDebugInfo( Tr2RenderContext& renderContext )
 		return;
 	}
 
-	if( m_debugShowBoundingBox )
+	if( renderer.HasOption( this, "Bounding Box" ) || renderer.HasOption( this, "Bounding Sphere" ) || renderer.HasOption( this, "Names" ) )
 	{
 		Vector3 minBounds( -0.5f, -0.5f, -0.5f );
 		Vector3 maxBounds( 0.5f, 0.5f, 0.5f );
@@ -195,27 +200,35 @@ void EveTransform::RenderDebugInfo( Tr2RenderContext& renderContext )
 				color = 0xffffffff;
 			}
 
-			Vector4 boundingSphere;
-			if( m_mesh->GetBoundingSphere( boundingSphere ) )
+			if( renderer.HasOption( this, "Bounding Sphere" ) )
 			{
-				BoundingSphereTransform( m_worldTransform, boundingSphere );
+				Vector4 boundingSphere;
+				if( m_mesh->GetBoundingSphere( boundingSphere ) )
+				{
+					BoundingSphereTransform( m_worldTransform, boundingSphere );
 
-				Tr2Renderer::DrawSphere( BoundingSphereGetCenter( boundingSphere ), boundingSphere.w, 0xff808000 );
+					Tr2Renderer::DrawSphere( BoundingSphereGetCenter( boundingSphere ), boundingSphere.w, 0xff808000 );
+				}
 			}
-
 		}
 
-		BoundingBoxTransform( minBounds, maxBounds, m_worldTransform );
-		Tr2Renderer::DrawBox( minBounds, maxBounds, color );
+		if( renderer.HasOption( this, "Bounding Box" ) )
+		{
+			renderer.DrawBox( this, m_worldTransform, minBounds, maxBounds, Tr2DebugRenderer::Wireframe, color );
+		}
 
-		Tr2Renderer::Printf( TRI_DBG_FONT_SMALL, maxBounds, 0xffffffff, m_name.c_str() );
+		if( renderer.HasOption( this, "Names" ) )
+		{
+			renderer.DrawText( TRI_DBG_FONT_SMALL, maxBounds, 0xffffffff, m_name.c_str() );
+		}
 	}
 
-	if( m_debugRenderDebugInfoForChildren )
+
+	for( IEveTransformVector::const_iterator it = m_children.begin(); it != m_children.end(); ++it )
 	{
-		for( IEveTransformVector::const_iterator it = m_children.begin(); it != m_children.end(); ++it )
+		if( auto renderable = dynamic_cast<ITr2DebugRenderable*>( *it ) )
 		{
-			(*it)->RenderDebugInfo( renderContext );
+			renderable->RenderDebugInfo( renderer );
 		}
 	}
 }
