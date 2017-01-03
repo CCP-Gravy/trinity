@@ -488,7 +488,8 @@ void App::Maximize( Be::OptionalWithDefaultValue<bool, true> maximize )
 #else
 	if( maximize )
 	{
-		glfwMaximizeWindow( reinterpret_cast<GLFWwindow*>( mHwnd ) );
+		// needs upgrading to GLFW 3.2
+		// glfwMaximizeWindow( reinterpret_cast<GLFWwindow*>( mHwnd ) );
 	}
 	else
 	{
