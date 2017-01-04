@@ -51,6 +51,7 @@ EveSpriteSet::EveSpriteSet( IRoot* lockobj ) :
 	m_useQuadRenderer( false ),
 	m_skinned( false ),
 	m_effectHash( 0 ),
+	m_intensity( 1.f ),
 	m_buffer( "EveSpriteSet::m_buffer" ),
 	m_spriteData( "EveSpriteSet::m_spriteData" )
 {
@@ -310,7 +311,7 @@ void EveSpriteSet::AddToQuadRenderer( Tr2QuadRenderer& quadRenderer, const Matri
 			}
 		}
 	}
-	D3DXFLOAT16 activation16 = activation;
+	D3DXFLOAT16 activation16 = activation * m_intensity;
 	for( size_t i = 0; i < n; ++i )
 	{
 		m_buffer[i].activation = activation16;

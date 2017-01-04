@@ -38,6 +38,13 @@ const Be::ClassInfo* EveSpriteSet::ExposeToBlue()
 			"Specifies whether to render the object or not", 
 			Be::READWRITE | Be::PERSIST 
 		)
+		MAP_ATTRIBUTE
+		( 
+			"intensity", 
+			m_intensity, 
+			"Overall sprite intensity", 
+			Be::READWRITE | Be::PERSIST 
+		)
 
 		MAP_METHOD_AND_WRAP( "Rebuild", Rebuild, "Rebuild resources after adding/removing/changing individual sprites" )
 

@@ -102,6 +102,7 @@ private:
 	bool m_skinned;
 	std::string m_name;
 	unsigned m_effectHash;
+	float m_intensity;
 
 	PEveSpriteSetItemVector m_sprites;
 	Tr2EffectPtr m_effect;
