@@ -25,6 +25,15 @@ void EveFiringEffectElementContainer::UpdateSyncronous( EveUpdateContext& update
 {
 	if( m_element )
 	{
+		if( m_useSourceTransform )
+		{
+			m_element->SetFiringTransform( m_source, m_destination );
+		}
+		else
+		{
+			m_element->SetFiringTransform( m_source.GetTranslation(), m_destination );
+		}
+		m_element->DisplayEndPoints( m_displaySource, m_displayDestination );
 		if( m_isActive )
 		{
 			m_element->Update( updateContext );

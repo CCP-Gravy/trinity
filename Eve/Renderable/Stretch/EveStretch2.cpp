@@ -261,8 +261,8 @@ bool EveStretch2::OnPrepareResources()
 		{
 			for( uint32_t j = 0; j < 4; ++j )
 			{
-				data[i].quadIndex = float( i );
-				data[i].cornerIndex = float( j );
+				data[i * 4 + j].quadIndex = float( i );
+				data[i * 4 + j].cornerIndex = float( j );
 			}
 		}
 		m_vb.Create( m_quadCount * 4 * sizeof( Vertex ), Tr2RenderContextEnum::USAGE_IMMUTABLE, &data[0], renderContext );
