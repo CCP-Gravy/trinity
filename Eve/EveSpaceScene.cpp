@@ -1237,6 +1237,7 @@ void EveSpaceScene::GatherBatches( Tr2RenderContext& renderContext )
 	{
 		CCP_STATS_ZONE( "UpdateVisibility" );
 		Tr2ParallelDo( m_objects.begin(), m_objects.end(), [&]( IEveSpaceObject2* obj ) { obj->UpdateVisibility( frustum, identity ); } );
+		Tr2ParallelDo( m_planets.begin(), m_planets.end(), [&]( EvePlanet* obj ) { obj->UpdateZOnlyVisibility( frustum ); } );
 	}
 	// Separate objects that will receive shadows from others. Shadowed objects will be rendered object by object,
 	// with a shadow map generated for each object. Remaining objects will be batched up.

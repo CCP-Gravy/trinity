@@ -30,6 +30,7 @@ public:
 
 	void Update( EveUpdateContext& updateContext );
 	void UpdateVisibility( const TriFrustum& frustum, const Matrix& parentTransform );
+	void UpdateZOnlyVisibility( const TriFrustum& frustum );
 	void GetRenderables( std::vector<ITr2Renderable*>& renderables );
 	void GetZOnlyRenderables( std::vector<ITr2Renderable*>& renderables );
 	void SetRenderScale( float value );

@@ -159,7 +159,6 @@ void EvePlanet::Update( EveUpdateContext& updateContext )
 
 void EvePlanet::UpdateVisibility( const TriFrustum& frustum, const Matrix& parentTransform )
 {
-	
 	Matrix planetScaleTransform;
 	D3DXMatrixScaling( &planetScaleTransform, 1.f / m_renderScale, 1.f / m_renderScale, 1.f / m_renderScale );
 
@@ -175,6 +174,11 @@ void EvePlanet::UpdateVisibility( const TriFrustum& frustum, const Matrix& paren
 	{
 		m_highDetail->UpdateVisibility( frustum, scaledTransform );
 	}
+}
+
+
+void EvePlanet::UpdateZOnlyVisibility( const TriFrustum& frustum )
+{
 	if( m_zOnlyModel )
 	{
 		m_zOnlyModel->UpdateVisibility( frustum, m_worldTransform );
