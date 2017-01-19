@@ -16,6 +16,7 @@ BLUE_DECLARE_INTERFACE( ITr2ParticleForce );
 BLUE_DECLARE_IVECTOR( ITr2ParticleForce );
 BLUE_DECLARE_INTERFACE( ITr2GenericParticleConstraint );
 BLUE_DECLARE_IVECTOR( ITr2GenericParticleConstraint );
+class TriFrustum;
 
 // --------------------------------------------------------------------------------------
 // Description:
@@ -84,7 +85,7 @@ public:
 	// ITr2GpuBuffer
 	Tr2GpuBufferAL* GetGpuBuffer( unsigned index );
 
-	void UpdateViewDependentData( const Matrix& worldTransform );
+	void UpdateViewDependentData( const TriFrustum* frustum, const Matrix& worldTransform );
 	void UpdateTransform( const Matrix& worldTransform );
 
 	void UpdateElementDeclaration();

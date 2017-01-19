@@ -120,10 +120,8 @@ void EveLineSet::Update( EveUpdateContext& updateContext )
 // --------------------------------------------------------------------------------
 // Description:
 //   Updates all the view dependent data, needed for multi-screen rendering
-// Arguments:
-//   parentTransform - we have transform hierarchy
 // --------------------------------------------------------------------------------
-void EveLineSet::UpdateViewDependentData( const Matrix& parentTransform )
+void EveLineSet::UpdateViewDependentData( const TriFrustum& frustum, const Matrix& parentTransform )
 {
 }
 

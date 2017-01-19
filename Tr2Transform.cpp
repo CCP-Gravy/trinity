@@ -34,7 +34,7 @@ void Tr2Transform::Update( Be::Time time )
 	}
 }
 
-void Tr2Transform::UpdateViewDependentData( const Matrix& parentTransform )
+void Tr2Transform::UpdateViewDependentData( const TriFrustum& frustum, const Matrix& parentTransform )
 {
 	Vector3 finalScale;
 	if( m_useDistanceBasedScale )

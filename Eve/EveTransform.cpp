@@ -136,13 +136,13 @@ void EveTransform::UpdateAsyncronous( EveUpdateContext& updateContext )
 	m_isVisible = false;
 }
 
-void EveTransform::UpdateViewDependentData( const Matrix& parentTransform )
+void EveTransform::UpdateViewDependentData( const TriFrustum& frustum, const Matrix& parentTransform )
 {
-	Tr2Transform::UpdateViewDependentData( parentTransform );
+	Tr2Transform::UpdateViewDependentData( frustum, parentTransform );
 
 	for( auto it = m_particleSystems.begin(); it != m_particleSystems.end(); ++it )
 	{
-		(*it)->UpdateViewDependentData( m_worldTransform );
+		(*it)->UpdateViewDependentData( &frustum, m_worldTransform );
 	}
 
 	TriObserverLocalVector::iterator observersEnd = m_observers.end();
@@ -276,7 +276,7 @@ void EveTransform::UpdateVisibility( const TriFrustum& frustum, const Matrix& pa
 		return;
 	}
 
-	UpdateViewDependentData( parentTransform );
+	UpdateViewDependentData( frustum, parentTransform );
 	
 	if( m_mesh )
 	{

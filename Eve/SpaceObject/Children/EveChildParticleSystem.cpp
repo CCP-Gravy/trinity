@@ -69,7 +69,7 @@ void EveChildParticleSystem::UpdateVisibility( const TriFrustum& frustum, const 
 	{
 		for( auto it = m_particleSystems.begin(); it != m_particleSystems.end(); ++it )
 		{
-			(*it)->UpdateViewDependentData( m_worldTransform );
+			(*it)->UpdateViewDependentData( &frustum, m_worldTransform );
 		}
 	}
 }

@@ -43,7 +43,7 @@ public:
 
     EveTransform( IRoot* lockobj = NULL );
 
-    virtual void UpdateViewDependentData( const Matrix& parentTransform );
+    virtual void UpdateViewDependentData( const TriFrustum& frustum, const Matrix& parentTransform );
 
 	/////////////////////////////////////////////////////////////////////////////////////
 	// IEveSpaceObject2	

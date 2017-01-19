@@ -239,7 +239,7 @@ void EveSpherePin::Update( EveUpdateContext& updateContext )
 }
 
 // ------------------------------------------------------------------------------------------------------
-void EveSpherePin::UpdateViewDependentData( const Matrix& parentTransform )
+void EveSpherePin::UpdateViewDependentData( const TriFrustum& frustum, const Matrix& parentTransform )
 {
 	// local transform
 	Matrix localTransform;
@@ -257,7 +257,7 @@ void EveSpherePin::UpdateVisibility( const TriFrustum& frustum, const Matrix& pa
 	}
 
 	// position the lines with parent transform
-	UpdateViewDependentData( parentTransform );
+	UpdateViewDependentData( frustum, parentTransform );
 	Vector4 boundingSphere = m_boundingSphere;
 	BoundingSphereTransform( m_worldTransform, boundingSphere );
 }

@@ -11,6 +11,7 @@ BLUE_DECLARE_VECTOR( Tr2Transform );
 BLUE_DECLARE( Tr2MeshBase );
 BLUE_DECLARE( TriCurveSet );
 BLUE_DECLARE_VECTOR( TriCurveSet );
+class TriFrustum;
 
 
 enum Tr2TransformModifier
@@ -64,7 +65,7 @@ protected:
 	// multiple camera's looking at the same scene.
 	// For now, this is called from any code that has a Tr2Transform, from inside GetRenderables; this way things
 	// such as a view dependent m_worldTransform are set up properly for GetSortValue and GetPerObjectData to work right.	
-	virtual void UpdateViewDependentData( const Matrix& parentTransform );
+	virtual void UpdateViewDependentData( const TriFrustum& frustum, const Matrix& parentTransform );
 
 protected:
 	std::string m_name;

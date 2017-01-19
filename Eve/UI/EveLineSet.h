@@ -56,7 +56,7 @@ public:
 	/////////////////////////////////////////////////////////////////////////////////////
 	// IEveTransform
 	virtual void Update( EveUpdateContext& updateContext );
-	virtual void UpdateViewDependentData( const Matrix& parentTransform );
+	virtual void UpdateViewDependentData( const TriFrustum& frustum, const Matrix& parentTransform );
 
 	// No sensible implementation?
 	virtual void UpdateModelCenterWorldPosition( Vector3 &position, Be::Time t ) {}

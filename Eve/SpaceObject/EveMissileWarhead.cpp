@@ -126,7 +126,7 @@ void EveMissileWarhead::UpdateVisibility( const TriFrustum& frustum, const Matri
 		return;
 	}
 	
-	UpdateViewDependentData( parentTransform );
+	UpdateViewDependentData( frustum, parentTransform );
 	
 	if( m_mesh )
 	{

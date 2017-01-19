@@ -29,7 +29,6 @@
 #include "include/ITriDevice.h"
 #include "TriViewport.h"
 #include "TriDirect3D.h"
-#include "TriFrustum.h"
 
 BLUE_DECLARE_INTERFACE( ITr2Scene );
 BLUE_DECLARE_INTERFACE( ITr2Updateable );
@@ -64,11 +63,6 @@ public:
     ITr2ScenePtr m_scene;
 
 	Tr2WindowHandle mHwnd;	
-
-	TriFrustum& GetFrustum()
-	{
-		return m_frustum;
-	}
 
 	long mWidth;
 	long mHeight;
@@ -332,8 +326,6 @@ private:
 
 	unsigned int m_mipLevelMaxChainLength;
 	unsigned int m_mipLevelSkipCount;
-
-	TriFrustum m_frustum;
 
 	//////////////////////////////////////////////////////////////////////////
 	// Curve sets

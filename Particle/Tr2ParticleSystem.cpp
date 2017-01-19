@@ -13,7 +13,7 @@
 #include "TbbStub.h"
 #include "TriSettingsRegistrar.h"
 #include "Tr2VertexDefinitionUtilities.h"
-
+#include "TriFrustum.h"
 
 using namespace Tr2RenderContextEnum;
 
@@ -1011,10 +1011,8 @@ void Tr2ParticleSystem::ShiftOffsets( Tr2ParticleElementData::BufferType bufferT
 // Description:
 //   Called before particle system is used for rendering. Optionally sorts particles
 //   and updates vertex buffer if needed.
-// Arguments:
-//   worldTransform - Local to world space transform (used for sorting)
 // --------------------------------------------------------------------------------------
-void Tr2ParticleSystem::UpdateViewDependentData( const Matrix& worldTransform )
+void Tr2ParticleSystem::UpdateViewDependentData( const TriFrustum* frustum, const Matrix& worldTransform )
 {
 	CCP_STATS_ZONE( __FUNCTION__ );
 
@@ -1033,30 +1031,36 @@ void Tr2ParticleSystem::UpdateViewDependentData( const Matrix& worldTransform )
 	}
 	
 	m_shouldSortVisible = true;
-	const TriFrustum& frustum = gTriDev->GetFrustum();
-	Vector3 minB, maxB;
-	//If we were about to sort, first check that this system is visible and large enough to warrant sorting
-	if( GetBoundingBox( minB, maxB ) ) 
+	if( frustum )
 	{
-		const Vector3 centre( (maxB + minB) * 0.5f );
-		const Vector3 extent( (maxB - minB) * 0.5f );
+		Vector3 minB, maxB;
+		//If we were about to sort, first check that this system is visible and large enough to warrant sorting
+		if( GetBoundingBox( minB, maxB ) )
+		{
+			const Vector3 centre( ( maxB + minB ) * 0.5f );
+			const Vector3 extent( ( maxB - minB ) * 0.5f );
 
-		//use the contained sphere rather than circumscribing sphere, just to be a little conservative
-		const float radius = std::max( std::abs( extent.x ), std::max( std::abs( extent.y ), std::abs( extent.z ) ) );
-		const Vector4 boundingSphere = Vector4( centre.x, centre.y, centre.z, radius );
-		
-		if( frustum.IsSphereVisible( &boundingSphere ) ) 
-		{
-			const float estimatedSize = frustum.GetPixelSizeAccross( &boundingSphere );
-			//for testing, just using a constant here
-			m_shouldSortVisible = estimatedSize > 128.f;
-			m_updatePeriod = m_shouldSortVisible ? 1 : 2;
+			//use the contained sphere rather than circumscribing sphere, just to be a little conservative
+			const float radius = std::max( std::abs( extent.x ), std::max( std::abs( extent.y ), std::abs( extent.z ) ) );
+			const Vector4 boundingSphere = Vector4( centre.x, centre.y, centre.z, radius );
+
+			if( frustum->IsSphereVisible( &boundingSphere ) )
+			{
+				const float estimatedSize = frustum->GetPixelSizeAccross( &boundingSphere );
+				//for testing, just using a constant here
+				m_shouldSortVisible = estimatedSize > 128.f;
+				m_updatePeriod = m_shouldSortVisible ? 1 : 2;
+			}
+			else
+			{
+				m_shouldSortVisible = false;
+				m_updatePeriod = 4;
+			}
 		}
-		else
-		{
-			m_shouldSortVisible = false;
-			m_updatePeriod = 4;
-		}
+	}
+	else
+	{
+		m_updatePeriod = 1;
 	}
 }
 
