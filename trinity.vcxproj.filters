@@ -186,9 +186,6 @@
     <ClInclude Include="Tr2GRNMemoryPersist.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="Tr2HideableMixin.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="Tr2HighLevelShader.h">
       <Filter>Source Files</Filter>
     </ClInclude>

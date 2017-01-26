@@ -2835,7 +2835,6 @@
     <ClInclude Include="Tr2GrannyAnimationLayer.h"/>
     <ClInclude Include="Tr2GrannyPrimitiveSet.h"/>
     <ClInclude Include="Tr2GRNMemoryPersist.h"/>
-    <ClInclude Include="Tr2HideableMixin.h"/>
     <ClInclude Include="Tr2HighLevelShader.h"/>
     <ClInclude Include="Tr2HostBitmap.h"/>
     <ClInclude Include="Tr2ImageIOHelpers.h"/>
