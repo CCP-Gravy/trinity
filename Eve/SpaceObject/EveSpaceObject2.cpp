@@ -476,9 +476,7 @@ void EveSpaceObject2::RenderDebugInfo( Tr2DebugRenderer& renderer )
 
 	if( renderer.HasOption( GetRawRoot(), "Bounding Sphere" ) )
 	{
-		Vector3 center;
-		D3DXVec3TransformCoord( &center, &m_boundingSphereCenter, &m_worldTransform );
-		renderer.DrawSphere( this, m_boundingSphereCenter, m_boundingSphereRadius, 8, Tr2DebugRenderer::Wireframe, 0xffff00ff );
+		renderer.DrawSphere( this, m_boundingSphereWorldCenter, m_boundingSphereWorldRadius, 8, Tr2DebugRenderer::Wireframe, 0xffff00ff );
 	}
 
 	if( renderer.HasOption( GetRawRoot(), "Mesh Area Bounding Boxes" ) )
