@@ -68,7 +68,6 @@ private:
 class Tr2PerObjectDataPSBuffer : public Tr2PerObjectData
 {
 public:
-	// cppcheck-suppress uninitMemberVar
 	Tr2PerObjectDataPSBuffer()
 		: m_pixelShaderFloatBufferSize( 0 )
 	{
@@ -88,6 +87,7 @@ public:
 	}
 
 protected:
+	// cppcheck-suppress uninitMemberVar
 	float m_pixelShaderFloatConstantBuffer[80*4];
 	unsigned int m_pixelShaderFloatBufferSize;
 };

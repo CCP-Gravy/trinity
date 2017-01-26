@@ -61,7 +61,7 @@ public:
 //   plane), clips edges with near plane and computes AABB clipped to [-1, 1] range. 
 //   Function assumes non-orthographic projection.
 // --------------------------------------------------------------------------------------
-void GetProjectedCubeBounds(  AxisAlignedBoundingBox& box, const Matrix& worldView, const Matrix& proj, float nearPlane, const Vector3 min, const Vector3 max  )
+void GetProjectedCubeBounds(  AxisAlignedBoundingBox& box, const Matrix& worldView, const Matrix& proj, float nearPlane, const Vector3& min, const Vector3& max )
 {
 	Vector3 sides[6][4] = {
 		{
