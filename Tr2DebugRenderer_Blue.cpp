@@ -36,7 +36,7 @@ const Be::ClassInfo* Tr2DebugRenderer::ExposeToBlue()
 			"SetSelectedObjects", 
 			SetSelectedObjects, 
 			"Assign a set of selected objects. Object may render differently in selected mode\n"
-			":param objects: selected objects\n" 
+			":param objects: selected objects, as a list of tuples (object, sub-object id)\n" 
 		)
 		MAP_METHOD_AND_WRAP( 
 			"GetOptions", 

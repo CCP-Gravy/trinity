@@ -59,31 +59,56 @@ TriDebugTextRenderer& GetDebugTextRenderer()
 	return renderer;
 }
 
+uint32_t GetAutoSelectedColor( uint32_t color )
+{
+	auto c = Color( color );
+	c.r = std::min( 1.f, c.r + 0.7f );
+	c.g = std::min( 1.f, c.g + 0.7f );
+	c.b = std::min( 1.f, c.b + 0.7f );
+	return c;
+}
+
 }
 
 
 
 Tr2DebugColor::Tr2DebugColor( uint32_t color )
 	:m_color( color ),
-	m_zFailColor( 0u )
+	m_zFailColor( 0u ),
+	m_colorSelected( GetAutoSelectedColor( color ) ),
+	m_zFailColorSelected( 0u )
 {
 }
 
 Tr2DebugColor::Tr2DebugColor( const Color& color )
 	:m_color( color ),
-	m_zFailColor( 0u )
+	m_zFailColor( 0u ),
+	m_colorSelected( GetAutoSelectedColor( color ) ),
+	m_zFailColorSelected( 0u )
 {
 }
 
 Tr2DebugColor::Tr2DebugColor( uint32_t color, uint32_t zFailColor )
 	:m_color( color ),
-	m_zFailColor( zFailColor )
+	m_zFailColor( zFailColor ),
+	m_colorSelected( GetAutoSelectedColor( color ) ),
+	m_zFailColorSelected( GetAutoSelectedColor( zFailColor ) )
 {
 }
 
 Tr2DebugColor::Tr2DebugColor( const Color& color, const Color& zFailColor )
 	:m_color( color ),
-	m_zFailColor( zFailColor )
+	m_zFailColor( zFailColor ),
+	m_colorSelected( GetAutoSelectedColor( color ) ),
+	m_zFailColorSelected( GetAutoSelectedColor( zFailColor ) )
+{
+}
+
+Tr2DebugColor::Tr2DebugColor( const Color& color, const Color& zFailColor, const Color& selectedColor, const Color& zFailSelectedColor )
+	:m_color( color ),
+	m_zFailColor( zFailColor ),
+	m_colorSelected( selectedColor ),
+	m_zFailColorSelected( zFailSelectedColor )
 {
 }
 
@@ -105,6 +130,19 @@ Tr2DebugObjectReference::operator bool() const
 	return m_object != nullptr;
 }
 
+bool Tr2DebugObjectReference::operator<( const Tr2DebugObjectReference& other ) const
+{
+	if( m_object < other.m_object )
+	{
+		return true;
+	}
+	if( m_object > other.m_object )
+	{
+		return false;
+	}
+	return m_area < other.m_area;
+}
+
 bool Tr2DebugObjectReference::operator==( const Tr2DebugObjectReference& other ) const
 {
 	return m_object == other.m_object && m_area == other.m_area;
@@ -121,21 +159,21 @@ Tr2DebugRenderer::Vertex::Vertex()
 {
 }
 
-Tr2DebugRenderer::Vertex::Vertex( const Vector3& position, Tr2DebugColor color, size_t objectIndex )
+Tr2DebugRenderer::Vertex::Vertex( const Vector3& position, Tr2DebugColor color, bool selected, size_t objectIndex )
 	:m_position( position ),
 	m_normal( 0, 0, 0 ),
-	m_color( color.m_color ),
-	m_zFailColor( color.m_zFailColor ),
+	m_color( selected ? color.m_colorSelected : color.m_color ),
+	m_zFailColor( selected ? color.m_zFailColorSelected : color.m_zFailColor ),
 	m_line( 1.f )
 {
 	m_object = float( objectIndex + 1 );
 }
 
-Tr2DebugRenderer::Vertex::Vertex( const Vector3& position, const Vector3& normal, Tr2DebugColor color, size_t objectIndex )
+Tr2DebugRenderer::Vertex::Vertex( const Vector3& position, const Vector3& normal, Tr2DebugColor color, bool selected, size_t objectIndex )
 	:m_position( position ),
 	m_normal( XMVector3Normalize( normal ) ),
-	m_color( color.m_color ),
-	m_zFailColor( color.m_zFailColor ),
+	m_color( selected ? color.m_colorSelected : color.m_color ),
+	m_zFailColor( selected ? color.m_zFailColorSelected : color.m_zFailColor ),
 	m_line( 0 )
 {
 	m_object = float( objectIndex + 1 );
@@ -169,14 +207,19 @@ bool Tr2DebugRenderer::IsSelected( IRoot* owner ) const
 	return m_selectedObjects.find( owner ) != m_selectedObjects.end();
 }
 
+bool Tr2DebugRenderer::IsSelected( Tr2DebugObjectReference owner ) const
+{
+	return m_selectedObjects.find( owner ) != m_selectedObjects.end();
+}
+
 void Tr2DebugRenderer::DrawLine( Tr2DebugObjectReference owner, const Vector3& from, const Vector3& to, Tr2DebugColor color )
 {
 	if( m_objectLineOffsets.empty() || m_objectLineOffsets.back().first != owner )
 	{
 		m_objectLineOffsets.push_back( std::make_pair( owner, m_lines.size() ) );
 	}
-	m_lines.push_back( Vertex( from, color, m_objectLineOffsets.size() - 1 ) );
-	m_lines.push_back( Vertex( to, color, m_objectLineOffsets.size() - 1 ) );
+	m_lines.push_back( Vertex( from, color, IsSelected( owner ), m_objectLineOffsets.size() - 1 ) );
+	m_lines.push_back( Vertex( to, color, IsSelected( owner ), m_objectLineOffsets.size() - 1 ) );
 }
 
 void Tr2DebugRenderer::DrawTriangle( 
@@ -193,9 +236,9 @@ void Tr2DebugRenderer::DrawTriangle(
 	{
 		m_objectTriangleOffsets.push_back( std::make_pair( owner, m_triangles.size() ) );
 	}
-	m_triangles.push_back( Vertex( vertex1, normal1, color, m_objectTriangleOffsets.size() - 1 ) );
-	m_triangles.push_back( Vertex( vertex2, normal2, color, m_objectTriangleOffsets.size() - 1 ) );
-	m_triangles.push_back( Vertex( vertex3, normal3, color, m_objectTriangleOffsets.size() - 1 ) );
+	m_triangles.push_back( Vertex( vertex1, normal1, color, IsSelected( owner ), m_objectTriangleOffsets.size() - 1 ) );
+	m_triangles.push_back( Vertex( vertex2, normal2, color, IsSelected( owner ), m_objectTriangleOffsets.size() - 1 ) );
+	m_triangles.push_back( Vertex( vertex3, normal3, color, IsSelected( owner ), m_objectTriangleOffsets.size() - 1 ) );
 }
 
 void Tr2DebugRenderer::DrawTriangle( 
@@ -848,10 +891,13 @@ void Tr2DebugRenderer::EndRender( Tr2RenderContext& renderContext )
 }
 
 
-void Tr2DebugRenderer::SetSelectedObjects( const std::vector<IRoot*>& objects )
+void Tr2DebugRenderer::SetSelectedObjects( const std::vector<std::pair<IRoot*, uint32_t>>& objects )
 {
 	m_selectedObjects.clear();
-	m_selectedObjects.insert( objects.begin(), objects.end() );
+	for( auto it = objects.begin(); it != objects.end(); ++it )
+	{
+		m_selectedObjects.insert( Tr2DebugObjectReference( it->first, it->second ) );
+	}
 }
 
 void Tr2DebugRenderer::SetOptions( IRoot* owner, std::vector<Tr2DebugRendererOption>& options )

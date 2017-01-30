@@ -29,10 +29,16 @@ struct Tr2DebugColor
 	// color for things behind other geometry
 	uint32_t m_zFailColor;
 
+	// front color when object is selected
+	uint32_t m_colorSelected;
+	// color for things behind other geometry when object is selected
+	uint32_t m_zFailColorSelected;
+
 	Tr2DebugColor( uint32_t color );
 	Tr2DebugColor( const Color& color );
 	Tr2DebugColor( uint32_t color, uint32_t zFailColor );
 	Tr2DebugColor( const Color& color, const Color& zFailColor );
+	Tr2DebugColor( const Color& color, const Color& zFailColor, const Color& selectedColor, const Color& zFailSelectedColor );
 };
 
 struct Tr2DebugObjectReference
@@ -58,6 +64,7 @@ struct Tr2DebugObjectReference
 	Tr2DebugObjectReference( IRoot* object, uint32_t area );
 
 	operator bool() const;
+	bool operator<( const Tr2DebugObjectReference& other ) const;
 	bool operator==( const Tr2DebugObjectReference& other ) const;
 	bool operator!=( const Tr2DebugObjectReference& other ) const;
 };
@@ -83,8 +90,9 @@ public:
 	}
 
     bool HasOption( IRoot* owner, const char* option ) const;
-    bool IsSelected( IRoot* owner ) const;
-    
+	bool IsSelected( IRoot* owner ) const;
+	bool IsSelected( Tr2DebugObjectReference owner ) const;
+
     void DrawLine( Tr2DebugObjectReference owner, const Vector3& from, const Vector3& to, Tr2DebugColor color );
 	void DrawTriangle( 
 		Tr2DebugObjectReference owner, 
@@ -140,7 +148,7 @@ public:
     
     Tr2DebugObjectReference Pick( float& depth, Tr2RenderContext& renderContext );
     
-    void SetSelectedObjects( const std::vector<IRoot*>& objects );
+    void SetSelectedObjects( const std::vector<std::pair<IRoot*, uint32_t>>& objects );
     void SetOptions( IRoot* owner, std::vector<Tr2DebugRendererOption>& options );
 	std::vector<Tr2DebugRendererOption> GetOptions( IRoot* owner ) const;
     void SetDefaultOptions( const std::vector<Tr2DebugRendererOption>& options );
@@ -156,8 +164,8 @@ private:
 		uint32_t m_zFailColor;
 
 		Vertex();
-		Vertex( const Vector3& position, Tr2DebugColor color, size_t objectIndex );
-		Vertex( const Vector3& position, const Vector3& normal, Tr2DebugColor color, size_t objectIndex );
+		Vertex( const Vector3& position, Tr2DebugColor color, bool selected, size_t objectIndex );
+		Vertex( const Vector3& position, const Vector3& normal, Tr2DebugColor color, bool selected, size_t objectIndex );
 	};
 
 	Tr2PickBuffer m_pickBuffer;
@@ -172,7 +180,7 @@ private:
 
 	Tr2DebugRendererOptions m_defaultOptions;
 	std::map<IRootPtr, Tr2DebugRendererOptions> m_options;
-	std::set<IRootPtr> m_selectedObjects;
+	std::set<Tr2DebugObjectReference> m_selectedObjects;
 };
 
 TYPEDEF_BLUECLASS( Tr2DebugRenderer );
