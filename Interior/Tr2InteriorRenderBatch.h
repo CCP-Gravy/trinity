@@ -26,6 +26,7 @@ public:
 	// cppcheck-suppress uninitMemberVar
 	Tr2InteriorClippingBatch()
 	{
+		memset( &m_psData, 0, sizeof( m_psData ) );
 	}
 
 	virtual ~Tr2InteriorClippingBatch() {}
