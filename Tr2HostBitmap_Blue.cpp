@@ -610,7 +610,8 @@ const Be::ClassInfo* Tr2HostBitmap::ExposeToBlue()
 		MAP_ATTRIBUTE( "width" ,				m_width,	"", Be::READ );
 		MAP_ATTRIBUTE( "height",				m_height,	"", Be::READ );
 		MAP_ATTRIBUTE( "mipCount",				m_mipCount,	"", Be::READ );
-		
+		MAP_ATTRIBUTE( "imageType", m_type, "", Be::READ );
+
 		MAP_ATTRIBUTE_WITH_CHOOSER( "format",	m_format,	"", Be::READ, Tr2RenderContextEnum_PixelFormat_Chooser );
 
 		MAP_PROPERTY_READONLY( "isValid",		IsValid,	"IsValid" );
