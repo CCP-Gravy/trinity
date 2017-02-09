@@ -1962,7 +1962,10 @@ void EveSpaceScene::Render3DUI( Tr2RenderContext& renderContext )
 
 	TriFrustum& frustum = m_frameData.frustum;
 	frustum.DeriveFrustum( &Tr2Renderer::GetViewTransform(), &Tr2Renderer::GetViewPosition(), &Tr2Renderer::GetProjectionTransform(), Tr2Renderer::GetViewport() );
-
+	
+	renderContext.m_esm.BeginManagedRendering();
+	renderContext.m_esm.ApplyStandardStates( Tr2EffectStateManager::RM_OPAQUE );
+	
 	PopulatePerFramePSData( m_perFramePS );
 	PopulatePerFrameVSData( m_perFrameVS );
 	
@@ -1982,8 +1985,7 @@ void EveSpaceScene::Render3DUI( Tr2RenderContext& renderContext )
 	Tr2QuadRenderer::Instance()->GetBatches( TRIBATCHTYPE_ADDITIVE, m_secondaryBatches[TRIBATCHTYPE_ADDITIVE] );
 	
 	FinalizeBatches( m_secondaryBatches );
-
-	renderContext.m_esm.BeginManagedRendering();
+	UpdateVariableStore();
 
 	SetNoShadow();
 	ApplyPerFrameData( renderContext );
@@ -2000,6 +2002,7 @@ void EveSpaceScene::Render3DUI( Tr2RenderContext& renderContext )
 	Tr2QuadRenderer::Instance()->DoneRendering( renderContext );
 
 	renderContext.m_esm.EndManagedRendering();
+	renderContext.m_esm.ApplyStandardStates( Tr2EffectStateManager::RM_OPAQUE );
 
 	ClearBatches( m_secondaryBatches );
 
