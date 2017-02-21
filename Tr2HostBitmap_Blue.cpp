@@ -661,6 +661,13 @@ const Be::ClassInfo* Tr2HostBitmap::ExposeToBlue()
 			":param value: Value to count for masked pixels"
 		)
 
+		MAP_METHOD_AND_WRAP
+		(
+			"IsMonochrome",
+			IsMonochrome,
+			"Return boolean value representing whether image contains same values in R, G, B channels for all pixels.\n"
+		)
+
 		MAP_METHOD_AS_METHOD
 		(
 			"CreateFromFile",

@@ -524,7 +524,7 @@ uint32_t Tr2HostBitmap::CountPixelsOfValue( const std::string& channels, uint32_
 		for( uint32_t y = 0; y < m_height; y++ )
 		{
 			uint32_t pixval;
-			if( GetPixel(x, y, &pixval) )
+			if( GetPixel( x, y, &pixval ) )
 			{
 				bool matches = true;
 				if( chan_selected( channels, 'a' ) )
@@ -556,6 +556,34 @@ uint32_t Tr2HostBitmap::CountPixelsOfValue( const std::string& channels, uint32_
 	}
 
 	return numpix;
+}
+
+bool Tr2HostBitmap::IsMonochrome() const
+{
+	if( !IsValid() || GetBytesPerPixel( m_format ) != 4 || IsCompressed() )
+	{
+		return false;
+	}
+
+	for( uint32_t x = 0; x < m_width; x++ )
+	{
+		for( uint32_t y = 0; y < m_height; y++ )
+		{
+			uint32_t pixval;
+			if( GetPixel( x, y, &pixval ) )
+			{
+				bool matches = true;
+				uint32_t red_val = ( pixval & 0x00FF0000 ) >> 16;
+				matches &= check_chan_value( 0x0000FF00, 8, pixval, red_val );
+				matches &= check_chan_value( 0x000000FF, 0, pixval, red_val );
+				if( !matches )
+				{
+					return false;
+				}
+			}
+		}
+	}
+	return true;
 }
 
 bool Tr2HostBitmap::SetPixel( int x, int y, const void *data )

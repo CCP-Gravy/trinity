@@ -38,6 +38,7 @@ public:
 	bool Compress( unsigned compressionFormat, unsigned qualityLevel, TriTextureRes* output );
 
 	uint32_t CountPixelsOfValue( const std::string& channels, uint32_t value ) const;
+	bool IsMonochrome() const;
 
 	// Ugly methods to support old code that does ugly things.
 	bool SetPixel( int width, int height,  const void* val );
