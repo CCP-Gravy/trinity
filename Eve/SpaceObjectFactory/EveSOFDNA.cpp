@@ -927,7 +927,11 @@ const Vector4* EveSOFDNA::GetMeshAreaParameter( EveSOFDataArea::AreaType areaTyp
 	if( areaType == EveSOFDataArea::TYPE_WRECK )
 	{
 		EveSOFUtilsParameterName param( m_genericData->materialPrefixes, parameterName.c_str() );
-		return EveSOFUtils::SearchForParameterData( m_dataMgr, &m_genericData->genericWreckMaterialData, areaType, &param );
+		const Vector4* res = EveSOFUtils::SearchForParameterData( m_dataMgr, &m_genericData->genericWreckMaterialData, areaType, &param );
+		if( res )
+		{
+			return res;
+		}
 	}
 
 	// do we have it in the race data?
