@@ -30,7 +30,9 @@ EveTransform::EveTransform( IRoot* lockobj ) :
 	m_lastDeltaTime(0.f),
 	m_lastCurveUpdateDelta( g_eveSpaceSceneLowUpdateRate ),
 	m_useLodLevel( true ),
-	m_lodLevel( TR2_LOD_LOW )
+	m_lodLevel( TR2_LOD_LOW ),
+	m_overrideBoundsMin( 0, 0, 0 ),
+	m_overrideBoundsMax( 0, 0, 0 )
 {
 }
 
@@ -172,40 +174,41 @@ void EveTransform::RenderDebugInfo( Tr2DebugRenderer& renderer )
 		return;
 	}
 
-	if( renderer.HasOption( this, "Bounding Box" ) || renderer.HasOption( this, "Bounding Sphere" ) || renderer.HasOption( this, "Names" ) )
+	if( renderer.HasOption( this, "Bounding Box" ) )
 	{
 		Vector3 minBounds( -0.5f, -0.5f, -0.5f );
 		Vector3 maxBounds( 0.5f, 0.5f, 0.5f );
 		uint32_t color = 0xff0000ff;
+		if( m_overrideBoundsMax.x != m_overrideBoundsMin.x || m_overrideBoundsMax.y != m_overrideBoundsMin.y || m_overrideBoundsMax.z != m_overrideBoundsMin.z )
+		{
+			minBounds = m_overrideBoundsMin;
+			maxBounds = m_overrideBoundsMax;
+			color = 0xffffffff;
+		}
+		else if( m_mesh && m_mesh->GetBoundingBox( minBounds, maxBounds ) )
+		{
+			color = 0xffffffff;
+		}
+		renderer.DrawBox( this, m_worldTransform, minBounds, maxBounds, Tr2DebugRenderer::Wireframe, color );
+	}
+	if( renderer.HasOption( this, "Bounding Sphere" ) )
+	{
+		Vector4 sphere;
+		if( GetBoundingSphere( sphere ) )
+		{
+			renderer.DrawSphere( this, m_worldTransform, Vector3( sphere.x, sphere.x, sphere.x ), sphere.w, 10, Tr2DebugRenderer::Wireframe, 0xff808000 );
+		}
+	}
 
+	if( renderer.HasOption( this, "Names" ) )
+	{
+		Vector3 minBounds( -0.5f, -0.5f, -0.5f );
+		Vector3 maxBounds( 0.5f, 0.5f, 0.5f );
 		if( m_mesh )
 		{
-			if( m_mesh->GetBoundingBox( minBounds, maxBounds ) )
-			{
-				color = 0xffffffff;
-			}
-
-			if( renderer.HasOption( this, "Bounding Sphere" ) )
-			{
-				Vector4 boundingSphere;
-				if( m_mesh->GetBoundingSphere( boundingSphere ) )
-				{
-					BoundingSphereTransform( m_worldTransform, boundingSphere );
-
-					Tr2Renderer::DrawSphere( BoundingSphereGetCenter( boundingSphere ), boundingSphere.w, 0xff808000 );
-				}
-			}
+			m_mesh->GetBoundingBox( minBounds, maxBounds );
 		}
-
-		if( renderer.HasOption( this, "Bounding Box" ) )
-		{
-			renderer.DrawBox( this, m_worldTransform, minBounds, maxBounds, Tr2DebugRenderer::Wireframe, color );
-		}
-
-		if( renderer.HasOption( this, "Names" ) )
-		{
-			renderer.DrawText( TRI_DBG_FONT_SMALL, maxBounds, 0xffffffff, m_name.c_str() );
-		}
+		renderer.DrawText( TRI_DBG_FONT_SMALL, maxBounds, 0xffffffff, m_name.c_str() );
 	}
 
 
@@ -335,7 +338,14 @@ bool EveTransform::GetBoundingSphere( Vector4& sphere, BoundingSphereQuery query
 {
 	bool valid = false;
 	Vector3 minBounds, maxBounds;
-	if( m_mesh && m_mesh->GetBoundingBox( minBounds, maxBounds ) )
+	if( m_overrideBoundsMax.x != m_overrideBoundsMin.x || m_overrideBoundsMax.y != m_overrideBoundsMin.y || m_overrideBoundsMax.z != m_overrideBoundsMin.z )
+	{
+		minBounds = m_overrideBoundsMin;
+		maxBounds = m_overrideBoundsMax;
+		BoundingSphereFromBox( sphere, minBounds, maxBounds, &m_worldTransform );
+		valid = true;
+	}
+	else if( m_mesh && m_mesh->GetBoundingBox( minBounds, maxBounds ) )
 	{
 		BoundingSphereFromBox( sphere, minBounds, maxBounds, &m_worldTransform );
 		valid = true;

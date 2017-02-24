@@ -112,7 +112,10 @@ protected:
 	Vector3 m_lastRelativePosition;
 	float m_lastDeltaTime;
 	float m_lastCurveUpdateDelta;
-	
+
+	Vector3 m_overrideBoundsMin;
+	Vector3 m_overrideBoundsMax;
+
 	Tr2MeshLodPtr m_meshLod;
 };
 

@@ -88,5 +88,21 @@ const Be::ClassInfo* EveTransform::ExposeToBlue()
 			Be::READWRITE | Be::PERSIST
 		)
 
+		MAP_ATTRIBUTE
+		(
+			"overrideBoundsMin",
+			m_overrideBoundsMin,
+			"",
+			Be::READWRITE | Be::PERSIST
+		)
+
+		MAP_ATTRIBUTE
+		(
+			"overrideBoundsMax",
+			m_overrideBoundsMax,
+			"",
+			Be::READWRITE | Be::PERSIST
+		)
+
     EXPOSURE_CHAINTO( Tr2Transform )
 }
