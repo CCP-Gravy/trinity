@@ -41,9 +41,9 @@ void Tr2ScalingTool::Move( int mouseX, int mouseY, int mouseXDelta, int mouseYDe
 	
 	if( m_initialLength < 0.0 )
 	{
-                Vector3 vecResult;
-        	Vector3 vecCenterOfMass = ((Tr2SolidSet*)m_xBox)->GetCenterOfMass();
-         	float tmpInitialLength = D3DXVec3Length( D3DXVec3Subtract( &vecResult, &pos, &vecCenterOfMass ));
+        Vector3 vecResult;
+        Vector3 vecCenterOfMass = m_xBox->GetCenterOfMass();
+        float tmpInitialLength = D3DXVec3Length( D3DXVec3Subtract( &vecResult, &pos, &vecCenterOfMass ));
 		// the initiallength could not have been set up...
 		m_initialLength = tmpInitialLength;
 	}

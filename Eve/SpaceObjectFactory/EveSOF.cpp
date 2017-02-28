@@ -1119,7 +1119,7 @@ void EveSOF::SetupInstancedMeshes( EveSpaceObject2Ptr newObj, const EveSOFDNAPtr
 		childMesh.CreateInstance();
 		childMesh->SetMesh( mesh );
 		childMesh->Setup( nullptr, nullptr, nullptr, him->lowestLodVisible );
-		newObj->AddToEffectChildrenList( (IEveSpaceObjectChild*)childMesh );
+		newObj->AddToEffectChildrenList( static_cast<IEveSpaceObjectChild*>( childMesh ) );
 	}
 }
 
