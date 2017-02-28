@@ -396,6 +396,7 @@ TriTextureRes* EveCloudEditableVolume::GetTexture() const
 
 
 EveCloudVolumeTextureParameter::EveCloudVolumeTextureParameter( IRoot* lockobj )
+	:m_isUsedByEffect( false )
 {
 }
 

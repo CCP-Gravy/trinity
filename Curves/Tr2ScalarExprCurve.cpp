@@ -18,20 +18,19 @@ static float frandom( float a, float b )
 }
 
 Tr2ScalarExprCurve::Tr2ScalarExprCurve( IRoot* lockobj ):
-	Tr2ScalarCurve( lockobj )
+	Tr2ScalarCurve( lockobj ),
+	m_updateDistance( false ),
+	m_sourcePositionA( 0.0f, 0.0f, 0.0f ),
+	m_sourcePositionB( 0.0f, 0.0f, 0.0f ),
+	m_scalarValue( 0.0f ),
+	m_inputVar1( 0.0f ),
+	m_inputVar2( 0.0f ),
+	m_inputVar3( 0.0f ),
+	m_inputVar4( 0.0f ),
+	m_sourceDistance( 0.0f ),
+	m_randomMin( 0.0f ),
+	m_randomMax( 1.0f )
 {
-	m_expression = "";
-	m_updateDistance = false;
-	m_sourcePositionA = Vector3(0.0f, 0.0f, 0.0f);
-	m_sourcePositionB = Vector3(0.0f, 0.0f, 0.0f);
-	m_scalarValue = 0.0f;
-	m_inputVar1 = 0.0f;
-	m_inputVar2 = 0.0f;
-	m_inputVar3 = 0.0f;
-	m_inputVar4 = 0.0f;
-	m_sourceDistance = 0.0f;
-	m_randomMin = 0.0f;
-	m_randomMax = 1.0f;
 	m_expressionParser.DefineFun( "perlin_simple", perlin_wrap_simple, false );
 	m_expressionParser.DefineFun( "perlin", perlin_wrap, false );
 	m_expressionParser.DefineFun( "random", frandom, false );

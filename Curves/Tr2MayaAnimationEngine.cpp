@@ -314,7 +314,9 @@ static BlueStructureDefinition CurveStructureDef[] =
 
 // info objects
 Tr2MayaAnimationCurveInfo::Tr2MayaAnimationCurveInfo( IRoot* lockobj ):
-	m_index( -1 )
+	m_index( -1 ),
+	m_isStatic( false ),
+	m_staticValue( 0 )
 {
 }
 
@@ -328,7 +330,8 @@ Tr2MayaAnimationEngine::Tr2MayaAnimationEngine( IRoot* lockobj ):
 	PARENTLOCK( m_curves ),
 	PARENTLOCK( m_bezierSegments ),
 	PARENTLOCK( m_hermiteSegments ),
-	m_evalCache( NULL )
+	m_evalCache( NULL ),
+	m_currentCurveIndex( 0 )
 {
 	m_curves.SetStructureDefinition( CurveStructureDef );
 	m_hermiteSegments.SetStructureDefinition( HermiteSegmentStructureDef );

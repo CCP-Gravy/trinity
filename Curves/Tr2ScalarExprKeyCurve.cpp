@@ -250,6 +250,8 @@ Tr2ScalarExprKeyCurve::Tr2ScalarExprKeyCurve( IRoot* lockobj )
 	m_timeOffset( 0.f ),
 	m_timeScale( 1.f ),
 	m_interpolation( LINEAR ),
+	m_startTangent( 0 ),
+	m_endTangent( 0 ),
 	PARENTLOCK( m_keys )
 {
 }

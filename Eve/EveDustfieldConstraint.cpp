@@ -27,7 +27,11 @@ EveDustfieldConstraint::EveDustfieldConstraint( IRoot* lockobj )
 	m_maxStretch( 15.0f ),
 	m_movementScale( 1.f ),
 	m_maxSpeed( 0.f ),
-	m_originShift( 0.f, 0.f, 0.f )
+	m_originShift( 0.f, 0.f, 0.f ),
+	m_positionElement(),
+	m_velocityElement(),
+	m_lifetimeElement(),
+	m_velocityStretch( 0 )
 {
 }
 

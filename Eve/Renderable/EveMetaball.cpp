@@ -36,7 +36,10 @@ EveMetaball::EveMetaball( IRoot* lockobj ) :
 	m_triangleCount( 0 ),
 	m_isoValue( 1.0 ),
 	m_gooValue( 1.0 ),
-	m_cellCounter( 0 )
+	m_cellCounter( 0 ),
+	m_gridSizeX( 0 ),
+	m_gridSizeY( 0 ),
+	m_gridSizeZ( 0 )
 {
 	// 0
 	D3DXMatrixIdentity( &m_worldTransform );
@@ -247,7 +250,7 @@ void EveMetaball::March()
 	{
 		return;
 	}
-	EveMetaballItem* firstBall = (EveMetaballItem*)m_sourceItems.GetAt( 0 );
+	EveMetaballItem* firstBall = static_cast<EveMetaballItem*>( m_sourceItems.GetAt( 0 ) );
 
 	Vector3 startPosition = firstBall->GetPosition() - m_minBounds;
 	D3DXVec3Scale( &startPosition, &startPosition, 1.0f / m_boxSize );

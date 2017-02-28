@@ -175,7 +175,10 @@ protected:
 	// We intentionally disallow construction - only Tr2VariableStore can 
 	// create instances!
 	TriVariable()
-	{}
+		:m_type( TRIVARIABLE_INVALID )
+	{
+		m_value[0] = 0;
+	}
 
 public:
 	TriVariableContentType GetType() const

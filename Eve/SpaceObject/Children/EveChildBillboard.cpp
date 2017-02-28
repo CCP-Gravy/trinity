@@ -24,7 +24,8 @@ EveChildBillboard::EveChildBillboard( IRoot* lockobj ):
 	PARENTLOCK( m_lights ),
 	m_boundingSphere( 0.0, 0.0, 0.0, -1.0),
 	m_minScreenSize( 0.f ),
-	m_display( true )
+	m_display( true ),
+	m_isVisible( false )
 {
 }
 

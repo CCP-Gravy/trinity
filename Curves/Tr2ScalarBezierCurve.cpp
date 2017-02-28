@@ -336,11 +336,11 @@ static bool CompareKeys( IRoot* context, Tr2ScalarBezierKey* a, Tr2ScalarBezierK
 //   Default constructor.
 // --------------------------------------------------------------------------------------
 Tr2ScalarBezierKey::Tr2ScalarBezierKey( IRoot* lockobj ) 
+	:m_leftControlPoint( 0.0f, 0.0f ),
+	m_rightControlPoint( 0.0f, 0.0f )
 {
 	m_value = 0.0f;
 	m_time = 0.0f;
-	m_leftControlPoint = Vector2( 0.0f, 0.0f );
-	m_rightControlPoint = Vector2( 0.0f, 0.0f );
 	m_interpolation = LINEAR;
 }
 
@@ -349,13 +349,13 @@ Tr2ScalarBezierKey::Tr2ScalarBezierKey( IRoot* lockobj )
 //   Default constructor.
 // --------------------------------------------------------------------------------------
 Tr2ScalarBezierCurve::Tr2ScalarBezierCurve( IRoot* lockobj ) :
-	Tr2Curve<Tr2ScalarBezierKey, PTr2ScalarBezierKeyVector, float>( lockobj )
+	Tr2Curve<Tr2ScalarBezierKey, PTr2ScalarBezierKeyVector, float>( lockobj ),
+	m_controlPointA( 0.0f, 0.0f ),
+	m_controlPointB( 0.0f, 0.0f )
 {
 	m_startValue = 0.0f;
 	m_endValue = 0.0f;
 	m_currentValue = 0.0f;
-	m_controlPointA = Vector2( 0.0f, 0.0f );
-	m_controlPointB = Vector2( 0.0f, 0.0f );
 }
 
 	// --------------------------------------------------------------------------------------

@@ -10,9 +10,9 @@ Tr2GrannyVector3Curve::Tr2GrannyVector3Curve( IRoot* lockobj ):
 	m_grannyCurve(NULL),
 	m_duration(0.0f),
 	m_timeOffset(0.0f),
-	m_cycle(false)
+	m_cycle(false),
+	m_value( 0.0f, 0.0f, 0.0f )
 {
-	m_value = Vector3(0.0f, 0.0f, 0.0f);
 }
 
 // --------------------------------------------------------------------------------------

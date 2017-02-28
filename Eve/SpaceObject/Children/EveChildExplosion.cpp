@@ -28,9 +28,9 @@ EveChildExplosion::EveChildExplosion( IRoot* lockobj )
 	m_globalExplosionTime( 0.f ),
 	m_countdownToGlobalExplosionStart( 0.f ),
 	m_nextLocalExplosion( 0 ),
-	m_isPlaying( false )
+	m_isPlaying( false ),
+	m_globalExplosionScaling( 1.0f, 1.0f, 1.0f )
 {
-	m_globalExplosionScaling = Vector3( 1.0f, 1.0f, 1.0f );
 }
 
 EveChildExplosion::~EveChildExplosion()

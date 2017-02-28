@@ -10,11 +10,11 @@ Tr2GrannyTransformTrack::Tr2GrannyTransformTrack( IRoot* lockobj ):
 	m_positionCurve( NULL ),
 	m_orientationCurve( NULL ),
 	m_scaleCurve( NULL ),
-	m_compressCurves( false )
+	m_compressCurves( false ),
+	m_translation( 0.0f, 0.0f, 0.0f ),
+	m_rotation( 0.0f, 0.0f, 0.0f, 1.0f ),
+	m_scale( 0.0f, 0.0f, 0.0f )
 {
-	m_translation = Vector3(0.0f, 0.0f, 0.0f);
-	m_rotation = Quaternion(0.0f, 0.0f, 0.0f, 1.0f);
-	m_scale = Vector3(0.0f, 0.0f, 0.0f);
 }
 
 bool Tr2GrannyTransformTrack::TracksReady( void )
