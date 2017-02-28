@@ -49,14 +49,12 @@ T* begin( Tr2AddSafeGrowableBuffer<T>& buffer )
 template <typename T>
 const T* end( const Tr2AddSafeGrowableBuffer<T>& buffer )
 {
-	// cppcheck-suppress arithOperationsOnVoidPointer
 	return buffer.GetData() + buffer.GetCount();
 }
 
 template <typename T>
 T* end( Tr2AddSafeGrowableBuffer<T>& buffer )
 {
-	// cppcheck-suppress arithOperationsOnVoidPointer
 	return buffer.GetData() + buffer.GetCount();
 }
 
@@ -119,37 +117,37 @@ T* Tr2AddSafeGrowableBuffer<T>::GetData()
 template<typename T>
 const T& Tr2AddSafeGrowableBuffer<T>::operator[]( size_t index ) const
 {
-	return GetData()[index];
+	return this->GetData()[index];
 }
 
 template<typename T>
 T& Tr2AddSafeGrowableBuffer<T>::operator[]( size_t index )
 {
-	return GetData()[index];
+	return this->GetData()[index];
 }
 
 template<typename T>
 const T* Tr2AddSafeGrowableBuffer<T>::begin() const
 {
-	return GetData();
+	return this->GetData();
 }
 
 template<typename T>
 T* Tr2AddSafeGrowableBuffer<T>::begin()
 {
-	return GetData();
+	return this->GetData();
 }
 
 template<typename T>
 const T* Tr2AddSafeGrowableBuffer<T>::end() const
 {
-	return GetData() + GetCount();
+	return this->GetData() + this->GetCount();
 }
 
 template<typename T>
 T* Tr2AddSafeGrowableBuffer<T>::end()
 {
-	return GetData() + GetCount();
+	return this->GetData() + this->GetCount();
 }
 
 #endif
