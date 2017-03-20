@@ -65,31 +65,31 @@ public:
 	const EveSOFDataMgr::RaceDamageData* GetRaceDamageData() const;
 
 	// get hull data
-	const char* GetHullName() const;
+	size_t GetMultiHullCount() const;
 	EveSOFDataHull::BuildClass GetBuildClass() const;
-	const Vector4* GetHullBoundingSphere() const;
-	const Vector3* GetHullShapeEllipsoidCenter() const;
-	const Vector3* GetHullShapeEllipsoidRadius() const;
+	const Vector4* GetHullBoundingSphere( size_t n = 0 ) const;
+	const Vector3* GetHullShapeEllipsoidCenter( size_t n = 0 ) const;
+	const Vector3* GetHullShapeEllipsoidRadius( size_t n = 0 ) const;
 	bool IsHullAnimated() const;
 	bool DynamicBoundingSphereEnabled() const;
-	const EveSOFDataMgr::HullBoosterData* GetHullBoosterData() const;
-	const Vector3* GetHullAudioPosition() const;
+	const EveSOFDataMgr::HullBoosterData* GetHullBoosterData( size_t n = 0 ) const;
+	const Vector3* GetHullAudioPosition( size_t n = 0 ) const;
 	const char* GetHullGeometryResPath() const;
 	const char* GetModelRotationCurvePath() const;
 	const char* GetModelTranslationCurvePath() const;
 	EveSOFDataHull::ImpactEffectType GetImpactEffectType() const;
-	const std::vector<EveSOFDataMgr::HullAreas>* GetHullMeshAreas( TriBatchType type ) const;
-	const std::vector<EveSOFDataMgr::HullChild>& GetHullChildren() const;
-	const std::vector<EveSOFDataMgr::HullInstancedMesh>& GetHullInstancedMeshes() const;
-	const std::vector<EveSOFDataMgr::HullAnimation>& GetHullAnimations() const;
-	const std::vector<EveSOFDataMgr::HullDecalData>& GetHullDecals() const;
-	const std::vector<EveSOFDataMgr::HullPlaneSetData>& GetHullPlaneSets() const;
-	const std::vector<EveSOFDataMgr::HullSpotlightSetData>& GetHullSpotlightSets() const;
-	const std::vector<EveSOFDataMgr::HullSpriteSetData>& GetHullSpriteSets() const;
-	const std::vector<EveSOFDataMgr::HullSpriteLineSetData>& GetHullSpriteLineSets() const;
-	const std::vector<EveSOFDataMgr::LocatorData>& GetHullTurretLocators() const;
-	const std::vector<EveSOFDataMgr::LocatorDirectionData>* GetHullLocators( const char* setName ) const;
-	const std::vector<BlueSharedString> GetHullLocatorSetNames() const;
+	const std::vector<EveSOFDataMgr::HullAreas>* GetHullMeshAreas( TriBatchType type, size_t n = 0 ) const;
+	const std::vector<EveSOFDataMgr::HullChild>& GetHullChildren( size_t n = 0 ) const;
+	const std::vector<EveSOFDataMgr::HullInstancedMesh>& GetHullInstancedMeshes( size_t n = 0 ) const;
+	const std::vector<EveSOFDataMgr::HullAnimation>& GetHullAnimations( size_t n = 0 ) const;
+	const std::vector<EveSOFDataMgr::HullDecalData>& GetHullDecals( size_t n = 0 ) const;
+	const std::vector<EveSOFDataMgr::HullPlaneSetData>& GetHullPlaneSets( size_t n ) const;
+	const std::vector<EveSOFDataMgr::HullSpotlightSetData>& GetHullSpotlightSets( size_t n ) const;
+	const std::vector<EveSOFDataMgr::HullSpriteSetData>& GetHullSpriteSets( size_t n ) const;
+	const std::vector<EveSOFDataMgr::HullSpriteLineSetData>& GetHullSpriteLineSets( size_t n ) const;
+	const std::vector<EveSOFDataMgr::LocatorData>& GetHullTurretLocators( size_t n = 0 ) const;
+	const std::vector<EveSOFDataMgr::LocatorDirectionData>* GetHullLocators( const char* setName, size_t n = 0 ) const;
+	const std::vector<BlueSharedString> GetHullLocatorSetNames( size_t n = 0 ) const;
 
 	// get faction data
 	void ModifyTextureResPath( std::string& resPath, const char* resName ) const;
@@ -109,7 +109,7 @@ public:
 	const char* GetDnaString() const;
 	const Vector4* GetMeshAreaParameter( EveSOFDataArea::AreaType areaType, const BlueSharedString& parameterName, const std::map<BlueSharedString, Vector4>* hullParameters = nullptr, unsigned int blockededMaterials = 0 ) const;
 	const char* GetImpactShieldShader() const;
-	unsigned int GetHighestMeshAreaIndex( TriBatchType areaType ) const;
+	unsigned int GetHighestMeshAreaIndex( TriBatchType areaType, size_t n = 0 ) const;
 
 
 private:
@@ -125,7 +125,7 @@ private:
 	// a temporary pointer to the BIG data
 	EveSOFDataMgrPtr m_dataMgr;
 	// pointers to the specific data inside the BIG data or a custom data block
-	const EveSOFDataMgr::HullData* m_hullData;
+	std::vector<const EveSOFDataMgr::HullData*> m_hullDatas;
 	const EveSOFDataMgr::FactionData* m_factionData;
 	const EveSOFDataMgr::RaceData* m_raceData;
 	const EveSOFDataMgr::GenericData* m_genericData;
@@ -135,7 +135,7 @@ private:
 	EveSOFDataMgr::HullData m_customHullData;
 
 	// decoded data
-	std::string m_hullName;
+	std::vector<std::string> m_hullNames;
 	std::string m_factionName;
 	std::string m_raceName;
 	std::map<std::string, std::vector<std::string>> m_commands;

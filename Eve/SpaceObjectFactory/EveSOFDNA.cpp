@@ -47,7 +47,6 @@ static_assert( sizeof( s_dnaClasses ) / sizeof( s_dnaClasses[0] ) == EveSOFDataH
 //   Initialize data members
 // --------------------------------------------------------------------------------
 EveSOFDNA::EveSOFDNA( IRoot* lockobj ) :
-	m_hullData( nullptr ),
 	m_factionData( nullptr ),
 	m_raceData( nullptr ),
 	m_patternData( nullptr ),
@@ -70,8 +69,8 @@ EveSOFDNA::~EveSOFDNA()
 // --------------------------------------------------------------------------------
 bool EveSOFDNA::IsValid() const
 {
-	// need all three basic parts
-	if( !m_hullData || !m_factionData || !m_raceData )
+	// need all three basic parts: multi-hull list, faction data pointer and race data pointer
+	if( m_hullDatas.empty() || !m_factionData || !m_raceData )
 	{
 		return false;
 	}
@@ -235,18 +234,31 @@ void EveSOFDNA::Setup( const char* dnaString, EveSOFDataMgrPtr dataMgr )
 		commandArgs.clear();
 	}
 
-	// the 3 main dna names
-	m_hullName = dnaParts[0];
+	// the main dna hull can be a list (multi-hulls)
+	StringSplit( m_hullNames, dnaParts[0].c_str(), s_dnaSeperatorList );
+	if( m_hullNames.empty() )
+	{
+		CCP_LOGERR( "Couldn't find at least one hull name: %s", dnaString );
+		return;
+	}
+
+	// part 2 and 3 is faction and race
 	m_factionName = dnaParts[1];
 	m_raceName = dnaParts[2];
 
-	// make sure we find this hull
-	m_hullData = m_dataMgr->GetHullData( m_hullName.c_str() );
-	if( m_hullData == nullptr )
+	// make sure we find this hull(s)
+	m_hullDatas.clear();
+	for( auto it = m_hullNames.begin(); it != m_hullNames.end(); ++it )
 	{
-		CCP_LOGERR( "Couldn't find the requested hull: %s", dnaString );
-		return;
+		const EveSOFDataMgr::HullData* h = m_dataMgr->GetHullData( it->c_str() );
+		if( h == nullptr )
+		{
+			CCP_LOGERR( "Couldn't find the requested hull: %s", it->c_str() );
+			return;
+		}
+		m_hullDatas.push_back( h );
 	}
+
 	// make sure we find this faction
 	m_factionData = m_dataMgr->GetFactionData( m_factionName.c_str() );
 	if( m_factionData == nullptr )
@@ -285,14 +297,14 @@ void EveSOFDNA::Setup( const char* dnaString, EveSOFDataMgrPtr dataMgr )
 void EveSOFDNA::SetupCustomData()
 {
 	// ok we need custom hull data, but set up basic stuff here
-	m_customHullData.buildClass = m_hullData->buildClass;
-	m_customHullData.geometryResFilePath = m_hullData->geometryResFilePath;
-	m_customHullData.boundingSphere = m_hullData->boundingSphere;
-	m_customHullData.shapeEllipsoidCenter = m_hullData->shapeEllipsoidCenter;
-	m_customHullData.shapeEllipsoidRadius = m_hullData->shapeEllipsoidRadius;
-	m_customHullData.isSkinned = m_hullData->isSkinned;
-	m_customHullData.enableDynamicBoundingSphere = m_hullData->enableDynamicBoundingSphere;
-	m_customHullData.audioPosition = m_hullData->audioPosition;
+	m_customHullData.buildClass = m_hullDatas[0]->buildClass;
+	m_customHullData.geometryResFilePath = m_hullDatas[0]->geometryResFilePath;
+	m_customHullData.boundingSphere = m_hullDatas[0]->boundingSphere;
+	m_customHullData.shapeEllipsoidCenter = m_hullDatas[0]->shapeEllipsoidCenter;
+	m_customHullData.shapeEllipsoidRadius = m_hullDatas[0]->shapeEllipsoidRadius;
+	m_customHullData.isSkinned = m_hullDatas[0]->isSkinned;
+	m_customHullData.enableDynamicBoundingSphere = m_hullDatas[0]->enableDynamicBoundingSphere;
+	m_customHullData.audioPosition = m_hullDatas[0]->audioPosition;
 
 	// do we have a dna variant command for this?
 	std::vector<std::string> variantCommandArgs;
@@ -309,7 +321,7 @@ void EveSOFDNA::SetupCustomData()
 				targetArea = &m_customHullData.transparentAreas;
 			}
 			// for now only use a single additive area
-			for( auto it = m_hullData->opaqueAreas.begin(); it != m_hullData->opaqueAreas.end(); ++it )
+			for( auto it = m_hullDatas[0]->opaqueAreas.begin(); it != m_hullDatas[0]->opaqueAreas.end(); ++it )
 			{
 				targetArea->push_back( finder->second.hullAreaData );
 				targetArea->back().index = it->index;
@@ -319,7 +331,7 @@ void EveSOFDNA::SetupCustomData()
 	}
 
 	// adjust pointer
-	m_hullData = &m_customHullData;
+	m_hullDatas[0] = &m_customHullData;
 }
 
 // --------------------------------------------------------------------------------
@@ -522,56 +534,56 @@ const EveSOFDataMgr::FactionChildData* EveSOFDNA::GetFactionChildData( int group
 // Description:
 //   Return an array to all the planesets on this hull
 // --------------------------------------------------------------------------------
-const std::vector<EveSOFDataMgr::HullPlaneSetData>& EveSOFDNA::GetHullPlaneSets() const
+const std::vector<EveSOFDataMgr::HullPlaneSetData>& EveSOFDNA::GetHullPlaneSets( size_t n ) const
 {
-	return m_hullData->planeSets;
+	return m_hullDatas[n]->planeSets;
 }
 
 // --------------------------------------------------------------------------------
 // Description:
 //   Return an array to all the spotlightsets on this hull
 // --------------------------------------------------------------------------------
-const std::vector<EveSOFDataMgr::HullSpotlightSetData>& EveSOFDNA::GetHullSpotlightSets() const
+const std::vector<EveSOFDataMgr::HullSpotlightSetData>& EveSOFDNA::GetHullSpotlightSets( size_t n ) const
 {
-	return m_hullData->spotlightSets;
+	return m_hullDatas[n]->spotlightSets;
 }
 
 // --------------------------------------------------------------------------------
 // Description:
 //   Return an array to all the spritesets on this hull
 // --------------------------------------------------------------------------------
-const std::vector<EveSOFDataMgr::HullSpriteSetData>& EveSOFDNA::GetHullSpriteSets() const
+const std::vector<EveSOFDataMgr::HullSpriteSetData>& EveSOFDNA::GetHullSpriteSets( size_t n ) const
 {
-	return m_hullData->spriteSets;
+	return m_hullDatas[n]->spriteSets;
 }
 
 // --------------------------------------------------------------------------------
 // Description:
 //   Return an array to all the spritelinesets on this hull
 // --------------------------------------------------------------------------------
-const std::vector<EveSOFDataMgr::HullSpriteLineSetData>& EveSOFDNA::GetHullSpriteLineSets() const
+const std::vector<EveSOFDataMgr::HullSpriteLineSetData>& EveSOFDNA::GetHullSpriteLineSets( size_t n ) const
 {
-	return m_hullData->spriteLineSets;
+	return m_hullDatas[n]->spriteLineSets;
 }
 
 // --------------------------------------------------------------------------------
 // Description:
 //   Return an array to all the turret locators on this hull
 // --------------------------------------------------------------------------------
-const std::vector<EveSOFDataMgr::LocatorData>& EveSOFDNA::GetHullTurretLocators() const
+const std::vector<EveSOFDataMgr::LocatorData>& EveSOFDNA::GetHullTurretLocators( size_t n ) const
 {
-	return m_hullData->locatorTurrets;
+	return m_hullDatas[n]->locatorTurrets;
 }
 
 // --------------------------------------------------------------------------------
 // Description:
 //   Return an array to all the damage locators on this hull
 // --------------------------------------------------------------------------------
-const std::vector<BlueSharedString> EveSOFDNA::GetHullLocatorSetNames() const
+const std::vector<BlueSharedString> EveSOFDNA::GetHullLocatorSetNames( size_t n ) const
 {
 	std::vector<BlueSharedString> locatorNames;
 
-	for( auto locatorSet = m_hullData->locatorSets.begin(); locatorSet != m_hullData->locatorSets.end(); ++locatorSet )
+	for( auto locatorSet = m_hullDatas[n]->locatorSets.begin(); locatorSet != m_hullDatas[n]->locatorSets.end(); ++locatorSet )
 	{
 		locatorNames.push_back( locatorSet->first );
 	}
@@ -583,10 +595,10 @@ const std::vector<BlueSharedString> EveSOFDNA::GetHullLocatorSetNames() const
 // Description:
 //   Return an array to all the damage locators on this hull
 // --------------------------------------------------------------------------------
-const std::vector<EveSOFDataMgr::LocatorDirectionData>* EveSOFDNA::GetHullLocators( const char* setName ) const
+const std::vector<EveSOFDataMgr::LocatorDirectionData>* EveSOFDNA::GetHullLocators( const char* setName, size_t n ) const
 {
-	auto locatorSet = m_hullData->locatorSets.find( BlueSharedString( setName ) );
-	if( locatorSet == m_hullData->locatorSets.end() )
+	auto locatorSet = m_hullDatas[n]->locatorSets.find( BlueSharedString( setName ) );
+	if( locatorSet == m_hullDatas[n]->locatorSets.end() )
 	{
 		return nullptr;
 	}
@@ -597,36 +609,36 @@ const std::vector<EveSOFDataMgr::LocatorDirectionData>* EveSOFDNA::GetHullLocato
 // Description:
 //   Return an array to all the children of this hull
 // --------------------------------------------------------------------------------
-const std::vector<EveSOFDataMgr::HullChild>& EveSOFDNA::GetHullChildren() const
+const std::vector<EveSOFDataMgr::HullChild>& EveSOFDNA::GetHullChildren( size_t n ) const
 {
-	return m_hullData->children;
+	return m_hullDatas[n]->children;
 }
 
 // --------------------------------------------------------------------------------
 // Description:
 //   Return an array to all the instanced meshes of this hull
 // --------------------------------------------------------------------------------
-const std::vector<EveSOFDataMgr::HullInstancedMesh>& EveSOFDNA::GetHullInstancedMeshes() const
+const std::vector<EveSOFDataMgr::HullInstancedMesh>& EveSOFDNA::GetHullInstancedMeshes( size_t n ) const
 {
-	return m_hullData->instancedMeshes;
+	return m_hullDatas[n]->instancedMeshes;
 }
 
 // --------------------------------------------------------------------------------
 // Description:
 //   Return an array of all the animations for children
 // --------------------------------------------------------------------------------
-const std::vector<EveSOFDataMgr::HullAnimation>& EveSOFDNA::GetHullAnimations() const
+const std::vector<EveSOFDataMgr::HullAnimation>& EveSOFDNA::GetHullAnimations( size_t n ) const
 {
-	return m_hullData->animations;
+	return m_hullDatas[n]->animations;
 }
 
 // --------------------------------------------------------------------------------
 // Description:
 //   Return an array of all the decals of this hull
 // --------------------------------------------------------------------------------
-const std::vector<EveSOFDataMgr::HullDecalData>& EveSOFDNA::GetHullDecals() const
+const std::vector<EveSOFDataMgr::HullDecalData>& EveSOFDNA::GetHullDecals( size_t n ) const
 {
-	return m_hullData->hullDecals;
+	return m_hullDatas[n]->hullDecals;
 }
 
 // --------------------------------------------------------------------------------
@@ -694,7 +706,7 @@ void EveSOFDNA::ModifyTextureResPath( std::string& resPath, const char* resName 
 // --------------------------------------------------------------------------------
 const char* EveSOFDNA::GetHullGeometryResPath() const
 {
-	return m_hullData->geometryResFilePath.c_str();
+	return m_hullDatas[0]->geometryResFilePath.c_str();
 }
 
 // --------------------------------------------------------------------------------
@@ -703,11 +715,11 @@ const char* EveSOFDNA::GetHullGeometryResPath() const
 // --------------------------------------------------------------------------------
 const char* EveSOFDNA::GetModelRotationCurvePath() const
 {
-	if( m_hullData->modelRotationCurvePath.empty() )
+	if( m_hullDatas[0]->modelRotationCurvePath.empty() )
 	{
 		return nullptr;
 	}
-	return m_hullData->modelRotationCurvePath.c_str();
+	return m_hullDatas[0]->modelRotationCurvePath.c_str();
 }
 
 // --------------------------------------------------------------------------------
@@ -716,20 +728,20 @@ const char* EveSOFDNA::GetModelRotationCurvePath() const
 // --------------------------------------------------------------------------------
 const char* EveSOFDNA::GetModelTranslationCurvePath() const
 {
-	if( m_hullData->modelTranslationCurvePath.empty() )
+	if( m_hullDatas[0]->modelTranslationCurvePath.empty() )
 	{
 		return nullptr;
 	}
-	return m_hullData->modelTranslationCurvePath.c_str();
+	return m_hullDatas[0]->modelTranslationCurvePath.c_str();
 }
 
 // --------------------------------------------------------------------------------
 // Description:
-//   Return the exact hull name from the object's dna
+//   How many multi-hulls are in this DNS string
 // --------------------------------------------------------------------------------
-const char* EveSOFDNA::GetHullName() const
+size_t EveSOFDNA::GetMultiHullCount() const
 {
-	return m_hullName.c_str();
+	return m_hullDatas.size();
 }
 
 // --------------------------------------------------------------------------------
@@ -747,43 +759,43 @@ EveSOFDataHull::BuildClass EveSOFDNA::GetBuildClass() const
 			return EveSOFDataHull::BuildClass( found - std::begin( s_dnaClasses ) );
 		}
 	}
-	return m_hullData->buildClass;
+	return m_hullDatas[0]->buildClass;
 }
 
 // --------------------------------------------------------------------------------
 // Description:
 //   Return a pointer to the bounding sphere info of this hull
 // --------------------------------------------------------------------------------
-const Vector4* EveSOFDNA::GetHullBoundingSphere() const
+const Vector4* EveSOFDNA::GetHullBoundingSphere( size_t n ) const
 {
-	return &m_hullData->boundingSphere;
+	return &m_hullDatas[n]->boundingSphere;
 }
 
 // --------------------------------------------------------------------------------
 // Description:
 //   Return a pointer to the center of this hull's shape ellipsoid
 // --------------------------------------------------------------------------------
-const Vector3* EveSOFDNA::GetHullShapeEllipsoidCenter() const
+const Vector3* EveSOFDNA::GetHullShapeEllipsoidCenter( size_t n ) const
 {
-	return &m_hullData->shapeEllipsoidCenter;
+	return &m_hullDatas[n]->shapeEllipsoidCenter;
 }
 
 // --------------------------------------------------------------------------------
 // Description:
 //   Return a pointer to the radiuses of this hull's shape ellipsoid
 // --------------------------------------------------------------------------------
-const Vector3* EveSOFDNA::GetHullShapeEllipsoidRadius() const
+const Vector3* EveSOFDNA::GetHullShapeEllipsoidRadius( size_t n ) const
 {
-	return &m_hullData->shapeEllipsoidRadius;
+	return &m_hullDatas[n]->shapeEllipsoidRadius;
 }
 
 // --------------------------------------------------------------------------------
 // Description:
 //   Return a pointer to the audio position of this hull
 // --------------------------------------------------------------------------------
-const Vector3* EveSOFDNA::GetHullAudioPosition() const
+const Vector3* EveSOFDNA::GetHullAudioPosition( size_t n ) const
 {
-	return &m_hullData->audioPosition;
+	return &m_hullDatas[n]->audioPosition;
 }
 
 // --------------------------------------------------------------------------------
@@ -792,7 +804,7 @@ const Vector3* EveSOFDNA::GetHullAudioPosition() const
 // --------------------------------------------------------------------------------
 bool EveSOFDNA::IsHullAnimated() const
 {
-	return m_hullData->isSkinned;
+	return m_hullDatas[0]->isSkinned;
 }
 
 // --------------------------------------------------------------------------------
@@ -801,29 +813,29 @@ bool EveSOFDNA::IsHullAnimated() const
 // --------------------------------------------------------------------------------
 bool EveSOFDNA::DynamicBoundingSphereEnabled() const
 {
-	return m_hullData->enableDynamicBoundingSphere;
+	return m_hullDatas[0]->enableDynamicBoundingSphere;
 }
 
 // --------------------------------------------------------------------------------
 // Description:
 //   Get a list of all the hull's meshareas given the type
 // --------------------------------------------------------------------------------
-const std::vector<EveSOFDataMgr::HullAreas>* EveSOFDNA::GetHullMeshAreas( TriBatchType type ) const
+const std::vector<EveSOFDataMgr::HullAreas>* EveSOFDNA::GetHullMeshAreas( TriBatchType type, size_t n ) const
 {
 	switch( type )
 	{
 	case TRIBATCHTYPE_OPAQUE:
-		return &m_hullData->opaqueAreas;
+		return &m_hullDatas[n]->opaqueAreas;
 	case TRIBATCHTYPE_DECAL:
-		return &m_hullData->decalAreas;
+		return &m_hullDatas[n]->decalAreas;
 	case TRIBATCHTYPE_TRANSPARENT:
-		return &m_hullData->transparentAreas;
+		return &m_hullDatas[n]->transparentAreas;
 	case TRIBATCHTYPE_ADDITIVE:
-		return &m_hullData->additiveAreas;
+		return &m_hullDatas[n]->additiveAreas;
 	case TRIBATCHTYPE_DEPTH:
-		return &m_hullData->depthAreas;
+		return &m_hullDatas[n]->depthAreas;
 	case TRIBATCHTYPE_DISTORTION:
-		return &m_hullData->distortionAreas;
+		return &m_hullDatas[n]->distortionAreas;
 	default:
 		return nullptr;
 	}
@@ -978,7 +990,7 @@ const EveSOFDataMgr::RaceDamageData* EveSOFDNA::GetRaceDamageData() const
 // --------------------------------------------------------------------------------
 EveSOFDataHull::ImpactEffectType EveSOFDNA::GetImpactEffectType() const
 {
-	return m_hullData->impactEffectType;
+	return m_hullDatas[0]->impactEffectType;
 }
 
 // --------------------------------------------------------------------------------
@@ -990,7 +1002,7 @@ const char* EveSOFDNA::GetImpactShieldShader() const
 	const EveSOFDataMgr::GenericDamageData* data = GetGenericDamageData();
 	if( data )
 	{
-		switch( m_hullData->impactEffectType )
+		switch( m_hullDatas[0]->impactEffectType )
 		{
 		case EveSOFDataHull::IMPACTEFFECT_NONE:
 			return nullptr;
@@ -1007,9 +1019,9 @@ const char* EveSOFDNA::GetImpactShieldShader() const
 // Description:
 //   Return a pointer to the hull part of booster data
 // --------------------------------------------------------------------------------
-const EveSOFDataMgr::HullBoosterData* EveSOFDNA::GetHullBoosterData() const
+const EveSOFDataMgr::HullBoosterData* EveSOFDNA::GetHullBoosterData( size_t n ) const
 {
-	return &m_hullData->boosters;
+	return &m_hullDatas[n]->boosters;
 }
 
 // --------------------------------------------------------------------------------
@@ -1024,7 +1036,7 @@ size_t EveSOFDNA::GetPatternLayerCount() const
 		return m_patternData->layerData.size();
 	}
 	// there should be a default pattern!
-	if( m_hullData->defaultPattern.enabled )
+	if( m_hullDatas[0]->defaultPattern.enabled )
 	{
 		return 1;
 	}
@@ -1040,9 +1052,9 @@ const EveSOFDataMgr::PatternProjectionData* EveSOFDNA::GetPatternProjectionData(
 	if( !HasDnaCommand( CMD_PATTERN ) )
 	{
 		// ok no DNA command for a pattern, so we use the default from the hull
-		return &m_hullData->defaultPattern;
+		return &m_hullDatas[0]->defaultPattern;
 	}
-	auto finder = m_patternData->projectionData.find( BlueSharedString( m_hullName ) );
+	auto finder = m_patternData->projectionData.find( BlueSharedString( m_hullNames[0] ) );
 	if( finder == m_patternData->projectionData.end() )
 	{
 		return nullptr;
@@ -1076,12 +1088,12 @@ const EveSOFDataMgr::PatternLayerData* EveSOFDNA::GetPatternLayerData( size_t la
 // Description:
 //   Sometimes it is good to know how high an ID of a mesharea can go!
 // --------------------------------------------------------------------------------
-unsigned int EveSOFDNA::GetHighestMeshAreaIndex( TriBatchType areaType ) const
+unsigned int EveSOFDNA::GetHighestMeshAreaIndex( TriBatchType areaType, size_t n ) const
 {
 	unsigned int cntr = 0;
 	if( areaType == TRIBATCHTYPE_OPAQUE )
 	{
-		for( auto it = m_hullData->opaqueAreas.cbegin(); it != m_hullData->opaqueAreas.cend(); ++it )
+		for( auto it = m_hullDatas[n]->opaqueAreas.cbegin(); it != m_hullDatas[n]->opaqueAreas.cend(); ++it )
 		{
 			if( it->index > cntr )
 			{
