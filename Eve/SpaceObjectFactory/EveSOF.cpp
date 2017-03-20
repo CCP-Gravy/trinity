@@ -478,54 +478,58 @@ void EveSOF::SetupSpriteSets( EveSpaceObject2Ptr obj, const EveSOFDNAPtr dna ) c
 {
 	CCP_STATS_ZONE( __FUNCTION__ );
 
-	// cycle over all spritesets of this hull
-	const std::vector<EveSOFDataMgr::HullSpriteSetData>& hullSpriteSets = dna->GetHullSpriteSets();
-	for( auto ssit = hullSpriteSets.begin(); ssit != hullSpriteSets.end(); ++ssit )
+	// cycle over all hulls in the multi-hull list
+	for( size_t hullIdx = 0; hullIdx < dna->GetMultiHullCount(); ++hullIdx )
 	{
-		const EveSOFDataMgr::HullSpriteSetData* spriteSetData = &(*ssit);
-
-		// create a spriteset for this ship
-		EveSpriteSetPtr spriteSet;
-		spriteSet.CreateInstance();
-		// set skinned or unskinned shader
-		spriteSet->SetEffect( m_spriteSetEffect );
-		spriteSet->SetSkinned( spriteSetData->skinned );
-		// add all the individual items
-		for( auto ssiit = spriteSetData->items.begin(); ssiit != spriteSetData->items.end(); ++ssiit )
+		// cycle over all spritesets of this hull
+		const std::vector<EveSOFDataMgr::HullSpriteSetData>& hullSpriteSets = dna->GetHullSpriteSets( hullIdx );
+		for( auto ssit = hullSpriteSets.begin(); ssit != hullSpriteSets.end(); ++ssit )
 		{
-			const EveSOFDataMgr::HullSpriteSetItemData* itemData = &(*ssiit);
+			const EveSOFDataMgr::HullSpriteSetData* spriteSetData = &( *ssit );
 
-			// faction data?
-			const EveSOFDataMgr::FactionSpriteSetColorData* factionSpriteData = dna->GetFactionSpriteSetData( itemData->groupIndex );
-			if( !factionSpriteData )
+			// create a spriteset for this ship
+			EveSpriteSetPtr spriteSet;
+			spriteSet.CreateInstance();
+			// set skinned or unskinned shader
+			spriteSet->SetEffect( m_spriteSetEffect );
+			spriteSet->SetSkinned( spriteSetData->skinned );
+			// add all the individual items
+			for( auto ssiit = spriteSetData->items.begin(); ssiit != spriteSetData->items.end(); ++ssiit )
 			{
-				// This spriteset item is not used for this faction.
-				continue;
+				const EveSOFDataMgr::HullSpriteSetItemData* itemData = &( *ssiit );
+
+				// faction data?
+				const EveSOFDataMgr::FactionSpriteSetColorData* factionSpriteData = dna->GetFactionSpriteSetData( itemData->groupIndex );
+				if( !factionSpriteData )
+				{
+					// This spriteset item is not used for this faction.
+					continue;
+				}
+
+				// create spriteset items
+				EveSpriteSetItemPtr spriteSetItem;
+				spriteSetItem.CreateInstance();
+
+				// set it up the per-faction data
+				spriteSetItem->m_color = factionSpriteData->color;
+
+				// set it up the per-hull data
+				spriteSetItem->m_blinkPhase = itemData->blinkPhase;
+				spriteSetItem->m_blinkRate = itemData->blinkRate;
+				spriteSetItem->m_boneIndex = itemData->boneIndex;
+				spriteSetItem->m_falloff = itemData->falloff;
+				spriteSetItem->m_maxScale = itemData->maxScale;
+				spriteSetItem->m_minScale = itemData->minScale;
+				spriteSetItem->m_position = itemData->position;
+
+				// put it into spriteset
+				spriteSet->Add( spriteSetItem );
 			}
-
-			// create spriteset items
-			EveSpriteSetItemPtr spriteSetItem;
-			spriteSetItem.CreateInstance();
-
-			// set it up the per-faction data
-			spriteSetItem->m_color = factionSpriteData->color;
-
-			// set it up the per-hull data
-			spriteSetItem->m_blinkPhase = itemData->blinkPhase;
-			spriteSetItem->m_blinkRate = itemData->blinkRate;
-			spriteSetItem->m_boneIndex = itemData->boneIndex;
-			spriteSetItem->m_falloff = itemData->falloff;
-			spriteSetItem->m_maxScale = itemData->maxScale;
-			spriteSetItem->m_minScale = itemData->minScale;
-			spriteSetItem->m_position = itemData->position;
-
-			// put it into spriteset
-			spriteSet->Add( spriteSetItem );
+			// spriteset needs internal rebuild
+			spriteSet->Rebuild();
+			// put set onto ship
+			obj->AddSpriteSet( spriteSet );
 		}
-		// spriteset needs internal rebuild
-		spriteSet->Rebuild();
-		// put set onto ship
-		obj->AddSpriteSet( spriteSet );
 	}
 }
 
@@ -537,77 +541,81 @@ void EveSOF::SetupSpotlightSets( EveSpaceObject2Ptr obj, const EveSOFDNAPtr dna 
 {
 	CCP_STATS_ZONE( __FUNCTION__ );
 
-	// cycle over all spritesets of this hull
-	const std::vector<EveSOFDataMgr::HullSpotlightSetData>& hullSpotlightSets = dna->GetHullSpotlightSets();
-	for( auto ssit = hullSpotlightSets.begin(); ssit != hullSpotlightSets.end(); ++ssit )
+	// cycle over all hulls in the multi-hull list
+	for( size_t hullIdx = 0; hullIdx < dna->GetMultiHullCount(); ++hullIdx )
 	{
-		const EveSOFDataMgr::HullSpotlightSetData* spotlightSetData = &(*ssit);
-
-		// create a spriteset for this ship
-		EveSpotlightSetPtr spotlightSet;
-		spotlightSet.CreateInstance();
-
-		// create shaders
-		Tr2EffectPtr coneEffect;
-		coneEffect.CreateInstance();
-		coneEffect->StartUpdate();
-		Tr2EffectPtr glowEffect;
-		glowEffect.CreateInstance();
-		glowEffect->StartUpdate();
-
-		coneEffect->SetEffectPathName( "res:/graphics/effect/managed/space/spaceobject/fx/spotlightconepool.fx" );
-		glowEffect->SetEffectPathName( "res:/graphics/effect/managed/space/spaceobject/fx/spotlightglowpool.fx" );
-
-		// textures
-		BlueSharedString textureMap("TextureMap");
-		glowEffect->AddResourceTexture2D( textureMap, spotlightSetData->glowTextureResPath.c_str() );
-		coneEffect->AddResourceTexture2D( textureMap, spotlightSetData->coneTextureResPath.c_str() );
-
-		// parameters
-		coneEffect->AddParameterFloat( BlueSharedString( "zOffset" ), spotlightSetData->zOffset );
-
-		// that's it for setting up these shaders, must rebuild cache on it!
-		coneEffect->EndUpdate();
-		glowEffect->EndUpdate();
-
-		// set to set
-		spotlightSet->SetConeEffect( coneEffect );
-		spotlightSet->SetGlowEffect( glowEffect );
-		spotlightSet->SetSkinned( spotlightSetData->skinned );
-
-		// add all individual items
-		for( auto ssiit = spotlightSetData->items.begin(); ssiit != spotlightSetData->items.end(); ++ssiit )
+		// cycle over all spritesets of this hull
+		const std::vector<EveSOFDataMgr::HullSpotlightSetData>& hullSpotlightSets = dna->GetHullSpotlightSets( hullIdx );
+		for( auto ssit = hullSpotlightSets.begin(); ssit != hullSpotlightSets.end(); ++ssit )
 		{
-			// faction data?
-			const EveSOFDataMgr::FactionSpotlightSetColorData* factionSpotlightData = dna->GetFactionSpotlightSetData( ssiit->groupIndex );
-			if( !factionSpotlightData )
+			const EveSOFDataMgr::HullSpotlightSetData* spotlightSetData = &( *ssit );
+
+			// create a spriteset for this ship
+			EveSpotlightSetPtr spotlightSet;
+			spotlightSet.CreateInstance();
+
+			// create shaders
+			Tr2EffectPtr coneEffect;
+			coneEffect.CreateInstance();
+			coneEffect->StartUpdate();
+			Tr2EffectPtr glowEffect;
+			glowEffect.CreateInstance();
+			glowEffect->StartUpdate();
+
+			coneEffect->SetEffectPathName( "res:/graphics/effect/managed/space/spaceobject/fx/spotlightconepool.fx" );
+			glowEffect->SetEffectPathName( "res:/graphics/effect/managed/space/spaceobject/fx/spotlightglowpool.fx" );
+
+			// textures
+			BlueSharedString textureMap( "TextureMap" );
+			glowEffect->AddResourceTexture2D( textureMap, spotlightSetData->glowTextureResPath.c_str() );
+			coneEffect->AddResourceTexture2D( textureMap, spotlightSetData->coneTextureResPath.c_str() );
+
+			// parameters
+			coneEffect->AddParameterFloat( BlueSharedString( "zOffset" ), spotlightSetData->zOffset );
+
+			// that's it for setting up these shaders, must rebuild cache on it!
+			coneEffect->EndUpdate();
+			glowEffect->EndUpdate();
+
+			// set to set
+			spotlightSet->SetConeEffect( coneEffect );
+			spotlightSet->SetGlowEffect( glowEffect );
+			spotlightSet->SetSkinned( spotlightSetData->skinned );
+
+			// add all individual items
+			for( auto ssiit = spotlightSetData->items.begin(); ssiit != spotlightSetData->items.end(); ++ssiit )
 			{
-				// This spotlight item is not used for this faction.
-				continue;
+				// faction data?
+				const EveSOFDataMgr::FactionSpotlightSetColorData* factionSpotlightData = dna->GetFactionSpotlightSetData( ssiit->groupIndex );
+				if( !factionSpotlightData )
+				{
+					// This spotlight item is not used for this faction.
+					continue;
+				}
+
+				// create it
+				EveSpotlightSetItemPtr spotlightSetItem;
+				spotlightSetItem.CreateInstance();
+
+				// set it up the per-faction data
+				spotlightSetItem->m_coneColor = ssiit->coneIntensity * factionSpotlightData->coneColor;
+				spotlightSetItem->m_flareColor = ssiit->flareIntensity * factionSpotlightData->flareColor;
+				spotlightSetItem->m_spriteColor = ssiit->spriteIntensity * factionSpotlightData->spriteColor;
+
+				// set it up the per-hull data
+				spotlightSetItem->m_boneIndex = ssiit->boneIndex;
+				spotlightSetItem->m_boosterGainInfluence = ssiit->boosterGainInfluence;
+				spotlightSetItem->m_spriteScale = ssiit->spriteScale;
+				spotlightSetItem->m_transform = ssiit->transform;
+
+				// add it
+				spotlightSet->AddSpotlightItem( spotlightSetItem );
 			}
-
-			// create it
-			EveSpotlightSetItemPtr spotlightSetItem;
-			spotlightSetItem.CreateInstance();
-
-			// set it up the per-faction data
-			spotlightSetItem->m_coneColor = ssiit->coneIntensity * factionSpotlightData->coneColor;
-			spotlightSetItem->m_flareColor = ssiit->flareIntensity * factionSpotlightData->flareColor;
-			spotlightSetItem->m_spriteColor = ssiit->spriteIntensity * factionSpotlightData->spriteColor;
-
-			// set it up the per-hull data
-			spotlightSetItem->m_boneIndex = ssiit->boneIndex;
-			spotlightSetItem->m_boosterGainInfluence = ssiit->boosterGainInfluence;
-			spotlightSetItem->m_spriteScale = ssiit->spriteScale;
-			spotlightSetItem->m_transform = ssiit->transform;
-
-			// add it
-			spotlightSet->AddSpotlightItem( spotlightSetItem );
+			// spotlightset needs internal rebuild
+			spotlightSet->Rebuild();
+			// add to ship
+			obj->AddSpotlightSet( spotlightSet );
 		}
-		// spotlightset needs internal rebuild
-		spotlightSet->Rebuild();
-		// add to ship
-		obj->AddSpotlightSet( spotlightSet );
 	}
 }
 
@@ -619,115 +627,118 @@ void EveSOF::SetupPlaneSets( EveSpaceObject2Ptr obj, const EveSOFDNAPtr dna ) co
 {
 	CCP_STATS_ZONE( __FUNCTION__ );
 
-	// cycle over all spritesets of this hull
-	const std::vector<EveSOFDataMgr::HullPlaneSetData>& hullPlaneSets = dna->GetHullPlaneSets();
-	for( auto psit = hullPlaneSets.begin(); psit != hullPlaneSets.end(); ++psit )
+	// cycle over all hulls in the multi-hull list
+	for( size_t hullIdx = 0; hullIdx < dna->GetMultiHullCount(); ++hullIdx )
 	{
-		const EveSOFDataMgr::HullPlaneSetData* planeSetData = &(*psit);
-
-		// create a planeset for this ship
-		EvePlaneSetPtr planeSet;
-		planeSet.CreateInstance();
-
-		// create shader
-		Tr2EffectPtr planeEffect;
-		planeEffect.CreateInstance();
-		planeEffect->StartUpdate();
-
-		// Select the planeset's data based on the usage
-		std::string effectResPath, imageMapResPath, externalParamName;
-		switch (planeSetData->usage)
+		// cycle over all spritesets of this hull
+		const std::vector<EveSOFDataMgr::HullPlaneSetData>& hullPlaneSets = dna->GetHullPlaneSets( hullIdx );
+		for( auto psit = hullPlaneSets.begin(); psit != hullPlaneSets.end(); ++psit )
 		{
-		case EveSOFDataHullPlaneSet::USAGE_STANDARD:
-			effectResPath = planeSetData->skinned ? "res:/graphics/effect/managed/space/spaceobject/fx/skinned_planeglow.fx" : "res:/graphics/effect/managed/space/spaceobject/fx/planeglow.fx";
-			break;
-		case EveSOFDataHullPlaneSet::USAGE_VIDEO:
-			effectResPath = planeSetData->skinned ? "res:/graphics/effect/managed/space/spaceobject/fx/skinned_planehologram.fx" : "res:/graphics/effect/managed/space/spaceobject/fx/planehologram.fx";
-			imageMapResPath = "dynamic:/hangarvideos";
-			break;
-		case EveSOFDataHullPlaneSet::USAGE_ALLIANCE_LOGO:
-			effectResPath = planeSetData->skinned ? "res:/graphics/effect/managed/space/spaceobject/fx/skinned_planehologram.fx" : "res:/graphics/effect/managed/space/spaceobject/fx/planehologram.fx";
-			externalParamName = "AllianceLogoResPath";
-			imageMapResPath = m_dataMgr.GetGenericData()->resPathDefaultAlliance;
-			break;
-		case EveSOFDataHullPlaneSet::USAGE_CORP_LOGO:
-			effectResPath = planeSetData->skinned ? "res:/graphics/effect/managed/space/spaceobject/fx/skinned_planehologram.fx" : "res:/graphics/effect/managed/space/spaceobject/fx/planehologram.fx";
-			externalParamName = "CorpLogoResPath";
-			imageMapResPath = m_dataMgr.GetGenericData()->resPathDefaultCorp;
-			break;
-		case EveSOFDataHullPlaneSet::USAGE_CEO_PORTRAIT:
-			effectResPath = planeSetData->skinned ? "res:/graphics/effect/managed/space/spaceobject/fx/skinned_planehologram.fx" : "res:/graphics/effect/managed/space/spaceobject/fx/planehologram.fx";
-			externalParamName = "CeoPortraitResPath";
-			imageMapResPath = m_dataMgr.GetGenericData()->resPathDefaultCeo;
-			break;
-		}
+			const EveSOFDataMgr::HullPlaneSetData* planeSetData = &( *psit );
 
-		planeEffect->SetEffectPathName( effectResPath.c_str() );
+			// create a planeset for this ship
+			EvePlaneSetPtr planeSet;
+			planeSet.CreateInstance();
 
-		// textures
-		planeEffect->AddResourceTexture2D( BlueSharedString("Layer1Map"), planeSetData->layer1MapResPath.c_str() );
-		planeEffect->AddResourceTexture2D( BlueSharedString("Layer2Map"), planeSetData->layer2MapResPath.c_str() );
-		planeEffect->AddResourceTexture2D( BlueSharedString("MaskMap"), planeSetData->maskMapResPath.c_str() );
-		
-		// Imagemap texture?
-		if( !imageMapResPath.empty() || !externalParamName.empty() )
-		{
-			planeEffect->AddResourceTexture2D( BlueSharedString("ImageMap"), imageMapResPath.c_str() );
+			// create shader
+			Tr2EffectPtr planeEffect;
+			planeEffect.CreateInstance();
+			planeEffect->StartUpdate();
 
-			if( !externalParamName.empty() )
+			// Select the planeset's data based on the usage
+			std::string effectResPath, imageMapResPath, externalParamName;
+			switch( planeSetData->usage )
 			{
-				ITriEffectParameter* imageMapParameter = planeEffect->GetParameterByName( "ImageMap" );
-				Tr2ExternalParameterPtr externalParameter;
-				externalParameter.CreateInstance();
-				externalParameter->SetName( externalParamName );
-				externalParameter->SetDestinationObject( imageMapParameter );
-				externalParameter->SetDestinationAttribute( "resourcePath" );
-				externalParameter->Initialize();
-				obj->AddExternalParameter( externalParameter );
-			}
-		}
-				
-		// parameters
-		planeEffect->AddParameterVector4( BlueSharedString("PlaneData"), &planeSetData->planeData );
-
-		// finish up shader and set it
-		planeEffect->EndUpdate();
-		planeSet->SetEffect( planeEffect );
-
-		// add all individual items
-		for( auto psiit = planeSetData->items.begin(); psiit != planeSetData->items.end(); ++psiit )
-		{
-			// create it
-			EvePlaneSetItemPtr planeSetItem;
-			planeSetItem.CreateInstance();
-			// fill it up
-			planeSetItem->m_position = psiit->position;
-			planeSetItem->m_rotation = psiit->rotation;
-			planeSetItem->m_scaling = psiit->scaling;
-			planeSetItem->m_color = psiit->color;
-			planeSetItem->m_layer1Transform = psiit->layer1Transform;
-			planeSetItem->m_layer1Scroll = psiit->layer1Scroll;
-			planeSetItem->m_layer2Transform = psiit->layer2Transform;
-			planeSetItem->m_layer2Scroll = psiit->layer2Scroll;
-			planeSetItem->m_boneIndex = psiit->boneIndex;
-			planeSetItem->m_maskAtlasID = psiit->maskMapAtlasIndex;
-
-			// groupindex allows to overwrite color
-			const EveSOFDataMgr::FactionPlaneSetColorData* factionalData = dna->GetFactionPlaneSetData( psiit->groupIndex );
-			if( factionalData )
-			{
-				planeSetItem->m_color = factionalData->color;
+			case EveSOFDataHullPlaneSet::USAGE_STANDARD:
+				effectResPath = planeSetData->skinned ? "res:/graphics/effect/managed/space/spaceobject/fx/skinned_planeglow.fx" : "res:/graphics/effect/managed/space/spaceobject/fx/planeglow.fx";
+				break;
+			case EveSOFDataHullPlaneSet::USAGE_VIDEO:
+				effectResPath = planeSetData->skinned ? "res:/graphics/effect/managed/space/spaceobject/fx/skinned_planehologram.fx" : "res:/graphics/effect/managed/space/spaceobject/fx/planehologram.fx";
+				imageMapResPath = "dynamic:/hangarvideos";
+				break;
+			case EveSOFDataHullPlaneSet::USAGE_ALLIANCE_LOGO:
+				effectResPath = planeSetData->skinned ? "res:/graphics/effect/managed/space/spaceobject/fx/skinned_planehologram.fx" : "res:/graphics/effect/managed/space/spaceobject/fx/planehologram.fx";
+				externalParamName = "AllianceLogoResPath";
+				imageMapResPath = m_dataMgr.GetGenericData()->resPathDefaultAlliance;
+				break;
+			case EveSOFDataHullPlaneSet::USAGE_CORP_LOGO:
+				effectResPath = planeSetData->skinned ? "res:/graphics/effect/managed/space/spaceobject/fx/skinned_planehologram.fx" : "res:/graphics/effect/managed/space/spaceobject/fx/planehologram.fx";
+				externalParamName = "CorpLogoResPath";
+				imageMapResPath = m_dataMgr.GetGenericData()->resPathDefaultCorp;
+				break;
+			case EveSOFDataHullPlaneSet::USAGE_CEO_PORTRAIT:
+				effectResPath = planeSetData->skinned ? "res:/graphics/effect/managed/space/spaceobject/fx/skinned_planehologram.fx" : "res:/graphics/effect/managed/space/spaceobject/fx/planehologram.fx";
+				externalParamName = "CeoPortraitResPath";
+				imageMapResPath = m_dataMgr.GetGenericData()->resPathDefaultCeo;
+				break;
 			}
 
-			// add it
-			planeSet->AddPlaneItem( planeSetItem );
+			planeEffect->SetEffectPathName( effectResPath.c_str() );
+
+			// textures
+			planeEffect->AddResourceTexture2D( BlueSharedString( "Layer1Map" ), planeSetData->layer1MapResPath.c_str() );
+			planeEffect->AddResourceTexture2D( BlueSharedString( "Layer2Map" ), planeSetData->layer2MapResPath.c_str() );
+			planeEffect->AddResourceTexture2D( BlueSharedString( "MaskMap" ), planeSetData->maskMapResPath.c_str() );
+
+			// Imagemap texture?
+			if( !imageMapResPath.empty() || !externalParamName.empty() )
+			{
+				planeEffect->AddResourceTexture2D( BlueSharedString( "ImageMap" ), imageMapResPath.c_str() );
+
+				if( !externalParamName.empty() )
+				{
+					ITriEffectParameter* imageMapParameter = planeEffect->GetParameterByName( "ImageMap" );
+					Tr2ExternalParameterPtr externalParameter;
+					externalParameter.CreateInstance();
+					externalParameter->SetName( externalParamName );
+					externalParameter->SetDestinationObject( imageMapParameter );
+					externalParameter->SetDestinationAttribute( "resourcePath" );
+					externalParameter->Initialize();
+					obj->AddExternalParameter( externalParameter );
+				}
+			}
+
+			// parameters
+			planeEffect->AddParameterVector4( BlueSharedString( "PlaneData" ), &planeSetData->planeData );
+
+			// finish up shader and set it
+			planeEffect->EndUpdate();
+			planeSet->SetEffect( planeEffect );
+
+			// add all individual items
+			for( auto psiit = planeSetData->items.begin(); psiit != planeSetData->items.end(); ++psiit )
+			{
+				// create it
+				EvePlaneSetItemPtr planeSetItem;
+				planeSetItem.CreateInstance();
+				// fill it up
+				planeSetItem->m_position = psiit->position;
+				planeSetItem->m_rotation = psiit->rotation;
+				planeSetItem->m_scaling = psiit->scaling;
+				planeSetItem->m_color = psiit->color;
+				planeSetItem->m_layer1Transform = psiit->layer1Transform;
+				planeSetItem->m_layer1Scroll = psiit->layer1Scroll;
+				planeSetItem->m_layer2Transform = psiit->layer2Transform;
+				planeSetItem->m_layer2Scroll = psiit->layer2Scroll;
+				planeSetItem->m_boneIndex = psiit->boneIndex;
+				planeSetItem->m_maskAtlasID = psiit->maskMapAtlasIndex;
+
+				// groupindex allows to overwrite color
+				const EveSOFDataMgr::FactionPlaneSetColorData* factionalData = dna->GetFactionPlaneSetData( psiit->groupIndex );
+				if( factionalData )
+				{
+					planeSetItem->m_color = factionalData->color;
+				}
+
+				// add it
+				planeSet->AddPlaneItem( planeSetItem );
+			}
+			// rebuild it internally
+			planeSet->Rebuild();
+			// add to ship
+			obj->AddPlaneSet( planeSet );
 		}
-		// rebuild it internally
-		planeSet->Rebuild();
-		// add to ship
-		obj->AddPlaneSet( planeSet );
 	}
-
 }
 
 // --------------------------------------------------------------------------------
@@ -738,58 +749,62 @@ void EveSOF::SetupSpriteLineSets( EveSpaceObject2Ptr obj, const EveSOFDNAPtr dna
 {
 	CCP_STATS_ZONE( __FUNCTION__ );
 
-	// cycle over all spritelinesets of this hull
-	const std::vector<EveSOFDataMgr::HullSpriteLineSetData>& hullSpriteLineSets = dna->GetHullSpriteLineSets();
-	for( auto slsit = hullSpriteLineSets.begin(); slsit != hullSpriteLineSets.end(); ++slsit )
+	// cycle over all hulls in the multi-hull list
+	for( size_t hullIdx = 0; hullIdx < dna->GetMultiHullCount(); ++hullIdx )
 	{
-		const EveSOFDataMgr::HullSpriteLineSetData* spriteLineSetData = &( *slsit );
-
-		// create a spriteset for this ship
-		EveSpriteLineSetPtr spriteLineSet;
-		spriteLineSet.CreateInstance();
-		// set shader
-		spriteLineSet->Setup( m_spriteSetEffect, spriteLineSetData->skinned );
-		// add all the individual items
-		for( auto slsiit = spriteLineSetData->items.begin(); slsiit != spriteLineSetData->items.end(); ++slsiit )
+		// cycle over all spritelinesets of this hull
+		const std::vector<EveSOFDataMgr::HullSpriteLineSetData>& hullSpriteLineSets = dna->GetHullSpriteLineSets( hullIdx );
+		for( auto slsit = hullSpriteLineSets.begin(); slsit != hullSpriteLineSets.end(); ++slsit )
 		{
-			const EveSOFDataMgr::HullSpriteLineSetItemData* itemData = &( *slsiit );
+			const EveSOFDataMgr::HullSpriteLineSetData* spriteLineSetData = &( *slsit );
 
-			// faction data?
-			const EveSOFDataMgr::FactionSpriteSetColorData* factionSpriteData = dna->GetFactionSpriteSetData( itemData->groupIndex );
-			if( !factionSpriteData )
+			// create a spriteset for this ship
+			EveSpriteLineSetPtr spriteLineSet;
+			spriteLineSet.CreateInstance();
+			// set shader
+			spriteLineSet->Setup( m_spriteSetEffect, spriteLineSetData->skinned );
+			// add all the individual items
+			for( auto slsiit = spriteLineSetData->items.begin(); slsiit != spriteLineSetData->items.end(); ++slsiit )
 			{
-				// This spritelineset item is not used for this faction.
-				continue;
+				const EveSOFDataMgr::HullSpriteLineSetItemData* itemData = &( *slsiit );
+
+				// faction data?
+				const EveSOFDataMgr::FactionSpriteSetColorData* factionSpriteData = dna->GetFactionSpriteSetData( itemData->groupIndex );
+				if( !factionSpriteData )
+				{
+					// This spritelineset item is not used for this faction.
+					continue;
+				}
+
+				// create spritelineset items
+				EveSpriteLineSetItemPtr spriteLineSetItem;
+				spriteLineSetItem.CreateInstance();
+
+				// set it up the per-faction data
+				spriteLineSetItem->m_color = factionSpriteData->color;
+
+				// set it up the per-hull data
+				spriteLineSetItem->m_blinkPhaseShift = itemData->blinkPhaseShift;
+				spriteLineSetItem->m_blinkPhase = itemData->blinkPhase;
+				spriteLineSetItem->m_blinkRate = itemData->blinkRate;
+				spriteLineSetItem->m_boneIndex = itemData->boneIndex;
+				spriteLineSetItem->m_falloff = itemData->falloff;
+				spriteLineSetItem->m_maxScale = itemData->maxScale;
+				spriteLineSetItem->m_minScale = itemData->minScale;
+				spriteLineSetItem->m_position = itemData->position;
+				spriteLineSetItem->m_rotation = itemData->rotation;
+				spriteLineSetItem->m_scaling = itemData->scaling;
+				spriteLineSetItem->m_spacing = itemData->spacing;
+				spriteLineSetItem->m_isCircle = itemData->isCircle;
+
+				// put it into spriteset
+				spriteLineSet->Add( spriteLineSetItem );
 			}
-
-			// create spritelineset items
-			EveSpriteLineSetItemPtr spriteLineSetItem;
-			spriteLineSetItem.CreateInstance();
-
-			// set it up the per-faction data
-			spriteLineSetItem->m_color = factionSpriteData->color;
-
-			// set it up the per-hull data
-			spriteLineSetItem->m_blinkPhaseShift = itemData->blinkPhaseShift;
-			spriteLineSetItem->m_blinkPhase = itemData->blinkPhase;
-			spriteLineSetItem->m_blinkRate = itemData->blinkRate;
-			spriteLineSetItem->m_boneIndex = itemData->boneIndex;
-			spriteLineSetItem->m_falloff = itemData->falloff;
-			spriteLineSetItem->m_maxScale = itemData->maxScale;
-			spriteLineSetItem->m_minScale = itemData->minScale;
-			spriteLineSetItem->m_position = itemData->position;
-			spriteLineSetItem->m_rotation = itemData->rotation;
-			spriteLineSetItem->m_scaling = itemData->scaling;
-			spriteLineSetItem->m_spacing = itemData->spacing;
-			spriteLineSetItem->m_isCircle = itemData->isCircle;
-
-			// put it into spriteset
-			spriteLineSet->Add( spriteLineSetItem );
+			// spriteset needs internal rebuild
+			spriteLineSet->Rebuild();
+			// put set onto ship
+			obj->AddSpriteLineSet( spriteLineSet );
 		}
-		// spriteset needs internal rebuild
-		spriteLineSet->Rebuild();
-		// put set onto ship
-		obj->AddSpriteLineSet( spriteLineSet );
 	}
 }
 
