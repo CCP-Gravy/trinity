@@ -13,6 +13,10 @@ const Be::ClassInfo* EveDistanceField::ExposeToBlue()
 		MAP_ATTRIBUTE( "objects", m_objects, "na", Be::READWRITE )
 		MAP_ATTRIBUTE( "curveSet", m_curveSet, "na", Be::READWRITE )
 		MAP_ATTRIBUTE( "distance", m_distance, "na", Be::READWRITE )
+		MAP_ATTRIBUTE( "maxDimension", m_maxDimension, "na", Be::READ )
+		MAP_ATTRIBUTE( "maxDistance", m_maxDistance, "na", Be::READ )
+
+		
 		MAP_ATTRIBUTE( "timeAdjustmentSecondsOut", 
 						m_timeAdjustmentSecondsOut, 
 						"Adjust how long it takes to settle on a new value when zooming out", 
@@ -28,6 +32,14 @@ const Be::ClassInfo* EveDistanceField::ExposeToBlue()
 		MAP_ATTRIBUTE( "maxXZRatio", m_maxXZRatio, "", Be::READWRITE );
 		MAP_ATTRIBUTE( "minYRatio", m_minYRatio, "", Be::READWRITE );
 		
+		MAP_METHOD_AND_WRAP(
+			"SetMaxDistance",
+			SetMaxDistance,
+			"Sets the maximum distance of the distance field and updates the distancecurve\n"
+			":param maxDistance: the new maximum distance\n"
+			)
+		
+
 		MAP_METHOD_AND_WRAP( 
 			"SetupDynamicDistanceField", 
 			SetupDynamicDistanceField, 

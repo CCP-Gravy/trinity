@@ -32,18 +32,24 @@ public:
 	void OnListModified( long event, ssize_t key, ssize_t key2, IRoot* value, const IList* theList );
 
 	void Update( const EveUpdateContext& updateContext );
+	
 	void SetupStaticDistanceField( Vector3 dimensions, Vector3 position, float distanceThreshold, float timeAdjustmentSecondsOut, float timeAdjustemntSecondsIn );
 	void SetupDynamicDistanceField( float distanceThreshold, float timeAdjustmentSecondsOut, float timeAdjustemntSecondsIn );
+	void SetMaxDistance( float maxDistnace );
 private:
 	void CreateCurveSet();
+	void UpdateDistanceCurveSize();
 
 	PITriVectorFunctionVector m_objects;
 
 	TriCurveSetPtr m_curveSet;
+	Tr2ScalarCurvePtr m_distanceCurve;
 
 	TriViewPtr m_cameraView;
 
-    // distance value used by curve set
+	float m_maxDimension;
+	float m_maxDistance;
+	// distance value used by curve set
 	float m_distance;
 	// Adjust how long it takes to settle on a new value when zooming out
 	float m_timeAdjustmentSecondsOut;
@@ -61,6 +67,9 @@ private:
 	// indicate if bounds must be re-evaluated
 	bool m_dirty;
 
+	// indicate if distance curve needs to be updated
+	bool m_updateDistanceCurve;
+
 	// indicate that the distance field is dynamic and therefore should be rebuilt when balls are added
 	bool m_isDynamic;
 
@@ -68,7 +77,6 @@ private:
 	Vector3 m_middle;
 	// dimensions of the field/volume
 	Vector3 m_dimensions;
-	
 	void SetNeutralValues();
 	void CalculateFieldCoverage( Be::Time t );
 };
