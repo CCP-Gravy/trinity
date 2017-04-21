@@ -83,6 +83,7 @@ EveSOFDataGenericString::EveSOFDataGenericString( IRoot* lockobj )
 
 
 EveSOFDataGenericShader::EveSOFDataGenericShader( IRoot* lockobj ) :
+	m_doGenerateDepthArea( true ),
 	PARENTLOCK( m_parameters ),
 	PARENTLOCK( m_defaultTextures ),
 	PARENTLOCK( m_defaultParameters )

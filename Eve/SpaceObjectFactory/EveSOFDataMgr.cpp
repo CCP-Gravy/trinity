@@ -1316,6 +1316,7 @@ void EveSOFDataMgr::GenerateGenericData( GenericData& gd, EveSOFDataGenericPtr s
 		}
 
 		gsd.transparencyTextureName = shaderData->m_transparencyTextureName;
+		gsd.doGenerateDepthArea = shaderData->m_doGenerateDepthArea;
 
 		gd.areaShaderData[ shaderData->m_shader ] = gsd;
 	}

@@ -1074,6 +1074,7 @@ public:
 
 	// decal/alpha/transparency texture
 	BlueSharedString m_transparencyTextureName;
+	bool m_doGenerateDepthArea;
 
 	// complete list of parameters
 	PEveSOFDataGenericStringVector m_parameters;

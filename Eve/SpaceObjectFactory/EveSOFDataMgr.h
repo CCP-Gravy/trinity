@@ -439,6 +439,8 @@ public:
 		std::vector<BlueSharedString> parameters;
 		// one transparency map (if shader has it)
 		BlueSharedString transparencyTextureName;
+		// does SOF need to genrate a depth area for this shader?
+		bool doGenerateDepthArea;
 		// global textures for this shader
 		std::map<BlueSharedString, TextureData> defaultTextures;
 		// global parameters for this shader
