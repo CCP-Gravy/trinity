@@ -415,6 +415,7 @@ void EveSpaceObject2::PrepareShaderData( EveUpdateContext& updateContext )
 void EveSpaceObject2::GetDebugOptions( Tr2DebugRendererOptions& options )
 {
 	options.insert( "Projections" );
+	options.insert( "Local Bounding Box" );
 	options.insert( "Bounding Box" );
 	options.insert( "Bounding Sphere" );
 	options.insert( "Mesh Area Bounding Boxes" );
@@ -446,6 +447,18 @@ void EveSpaceObject2::RenderDebugInfo( Tr2DebugRenderer& renderer )
 			Matrix customMaskTransform;
 			(*it)->GetDebugDrawMatrix( &customMaskTransform, GetBoundingSphereRadius() );
 			renderer.DrawBox( this, customMaskTransform, Vector3( -1, -1, -1 ), Vector3( 1, 1, 1 ), Tr2DebugRenderer::Wireframe, 0xff00ffff );
+		}
+	}
+
+	if( renderer.HasOption( GetRawRoot(), "Local Bounding Box" ) )
+	{
+		Vector3 minBounds( -0.5f, -0.5f, -0.5f );
+		Vector3 maxBounds( 0.5f, 0.5f, 0.5f );
+		uint32_t color = 0xff0000ff;
+
+		if( GetLocalBoundingBox( minBounds, maxBounds ) )
+		{
+			renderer.DrawBox( this, m_worldTransform, minBounds, maxBounds, Tr2DebugRenderer::Wireframe, color );
 		}
 	}
 

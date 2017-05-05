@@ -177,6 +177,8 @@ public:
 	const int GetSlotNumber() const;
 	const unsigned int GetSwarmID() const { return m_swarmID; }
 
+	bool GetLocalBoundingBox( Vector3& aabbMin, Vector3& aabbMax );
+
 	// get worldmatrix of the currently firing bone
 	Matrix GetFiringBoneWorldTransform( unsigned int muzzle ) const;
 	Matrix GetEffectBoneWorldTransform() const;

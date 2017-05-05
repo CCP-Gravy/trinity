@@ -13,6 +13,7 @@
 #include "Eve/Turret/EveTurretSet.h"
 #include "Eve/SpaceObject/Utils/EveLocator2.h"
 #include "Eve/EveUpdateContext.h"
+#include "Utilities/BoundingBox.h"
 
 // --------------------------------------------------------------------------------
 // Description:
@@ -367,6 +368,26 @@ unsigned int EveMobile::GetTurretLocatorCount()
 	}
 
 	return tlc;
+}
+
+// --------------------------------------------------------------------------------
+bool EveMobile::GetLocalBoundingBox( Vector3 &min, Vector3 &max )
+{
+	bool res = EveSpaceObject2::GetLocalBoundingBox( min, max );
+	if( !res )
+	{
+		return false;
+	}
+
+	Vector3 minBounds, maxBounds;
+	for( auto it = m_turretSets.begin(); it != m_turretSets.end(); it++ )
+	{
+		if( (*it)->GetLocalBoundingBox( minBounds, maxBounds ) )
+		{
+			BoundingBoxUpdate( min, max, minBounds, maxBounds );
+		}
+	}
+	return true;
 }
 
 // --------------------------------------------------------------------------------

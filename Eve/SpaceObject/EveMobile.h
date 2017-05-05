@@ -44,6 +44,7 @@ public:
 	virtual void PrepareShaderData( EveUpdateContext& updateContext );
 	virtual void UpdateVisibility( const TriFrustum& frustum, const Matrix& parentTransform );
 	virtual void GetRenderables( std::vector<ITr2Renderable*>& renderables, Tr2ImpostorManager* impostors );
+	virtual bool GetLocalBoundingBox( Vector3 &min, Vector3 &max );
 
 	//////////////////////////////////////////////////////////////////////////////////////
 	// IEveShadowCaster - overriding EveSpaceObject2 implementations

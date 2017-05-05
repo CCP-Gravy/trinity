@@ -1331,6 +1331,32 @@ const int EveTurretSet::GetSlotNumber() const
 }
 
 // --------------------------------------------------------------------------------
+bool EveTurretSet::GetLocalBoundingBox( Vector3& aabbMin, Vector3& aabbMax )
+{	
+	// Currently only really need this in the case where we have unusual bounds(moon drill)
+	// In most cases the bounds fall within the bounding box of the parent so we ignore this.
+	if( !m_useDynamicBounds )
+	{
+		return false;
+	}
+
+	BoundingBoxInitialize( aabbMin, aabbMax );
+	Vector3 minBounds, maxBounds;
+	bool valid = false;
+	for( std::vector<SingleTurretData>::const_iterator it = m_singleTurrets.begin(); it != m_singleTurrets.end(); ++it )
+	{
+		if( it->valid )
+		{
+			GetDynamicBounds( *it, nullptr, &minBounds, &maxBounds);
+			BoundingBoxUpdate( aabbMin, aabbMax, minBounds, maxBounds );
+			valid = true;
+		}
+	}
+
+	return valid;
+}
+
+// --------------------------------------------------------------------------------
 // Description:
 //   Render debug info of this turret set: bounding sphere
 // --------------------------------------------------------------------------------
