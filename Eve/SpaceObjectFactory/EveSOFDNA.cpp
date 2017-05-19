@@ -267,6 +267,13 @@ void EveSOFDNA::Setup( const char* dnaString, EveSOFDataMgrPtr dataMgr )
 		m_hullDatas.push_back( h );
 	}
 
+	// just to be absolutley sure...
+	if( m_hullNames.size() != m_hullDatas.size() )
+	{
+		CCP_LOGERR( "Missmatching sizes of found data and hullnames: %s", dnaString );
+		return;
+	}
+
 	// make sure we find this faction
 	m_factionData = m_dataMgr->GetFactionData( m_factionName.c_str() );
 	if( m_factionData == nullptr )
@@ -725,13 +732,37 @@ void EveSOFDNA::ModifyTextureResPath( std::string& resPath, const char* resName 
 // --------------------------------------------------------------------------------
 std::string EveSOFDNA::GetHullGeometryResPath() const
 {
-	std::vector<std::string> commandArgs;
-	if( GetDnaCommandArgs( CMD_MESH, commandArgs ) && !commandArgs.empty() )
+	// multi-hull geometry is different and needs some string mangeling
+	if( m_hullDatas.size() == 1)
 	{
-		// need to put the res: hard-coded
-		return "res:" + commandArgs[0];
+		return m_hullDatas[0]->geometryResFilePath;
 	}
-	return m_hullDatas[0]->geometryResFilePath;
+
+	std::string modifiedResPath = m_hullDatas[0]->geometryResFilePath;
+
+	// collect gr2 string insert based on variant numbers
+	std::string variantNumber;
+	for( auto it = m_hullNames.cbegin(); it != m_hullNames.cend(); ++it )
+	{
+		variantNumber += it->back();
+	}
+
+	// build a path to the shared folder
+	std::vector<std::string> nameParts;
+	StringSplit( nameParts, m_hullNames[0].c_str(), '_' );
+	if( !nameParts.empty() )
+	{
+		// .../asc1/asc1_T3_s4v1/asc1_T3_s4v1.gr2 -> /asc1/asc1_T3_s4v1/asc1_T3_1232.gr2
+		std::string oldGeo = nameParts.back() + ".gr2";
+		std::string newGeo = variantNumber + ".gr2";
+		StringReplace( modifiedResPath, oldGeo.c_str(), newGeo.c_str() );
+		// .../asc1/asc1_T3_s4v1/asc1_T3_1232.gr2 -> /asc1/asc1_T3_all/asc1_T3_1232.gr2
+		std::string oldFolder = nameParts.back() + "/";
+		std::string newFolder = "all/";
+		StringReplace( modifiedResPath, oldFolder.c_str(), newFolder.c_str() );
+	}
+
+	return modifiedResPath;
 }
 
 // --------------------------------------------------------------------------------

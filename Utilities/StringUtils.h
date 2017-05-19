@@ -104,6 +104,23 @@ inline bool StringFind( const char* baseString, const char* searchString )
 	return ( b.find( searchString ) != std::string::npos );
 }
 
+// --------------------------------------------------------------------------------
+// Description:
+//   Replace substring
+//   Similar to Python's replace()
+// --------------------------------------------------------------------------------
+inline bool StringReplace( std::string& baseString, const char* oldString, const char* newString )
+{
+	// find what to replace
+	size_t replaceStart = baseString.find( oldString );
+	if( replaceStart != std::string::npos )
+	{
+		baseString.replace( replaceStart, strlen( oldString ), std::string( newString ) );
+		return true;
+	}
+	return false;
+}
+
 
 
 
