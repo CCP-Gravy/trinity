@@ -132,7 +132,6 @@ void Tr2FloatParameter::RegisterBinding( TriValueBinding* vb )
 void Tr2FloatParameter::UnregisterBinding( TriValueBinding* vb )
 {
 	auto found = std::find( m_bindings.begin(), m_bindings.end(), vb );
-	CCP_ASSERT( found != m_bindings.end() );
 	if( found != m_bindings.end() )
 	{
 		m_bindings.erase( found );
