@@ -342,10 +342,18 @@ float Tr2CurveScalar::GetSegmentValue( float time, const Tr2CurveScalarKey& k0, 
 	case Tr2CurveInterpolation::CONSTANT:
 		return time == k1.m_time ? k1.m_value : k0.m_value;
 	case Tr2CurveInterpolation::LINEAR:
+		if( k1.m_time == k0.m_time )
+		{
+			return k1.m_value;
+		}
 		return k0.m_value + ( k1.m_value - k0.m_value ) * ( time - k0.m_time ) / ( k1.m_time - k0.m_time );
 	case Tr2CurveInterpolation::HERMITE:
 	{
 		float length = k1.m_time - k0.m_time;
+		if( length == 0 )
+		{
+			return k1.m_value;
+		}
 		float inTangent = k0.m_rightTangent * length;
 		float outTangent = k1.m_leftTangent * length;
 
