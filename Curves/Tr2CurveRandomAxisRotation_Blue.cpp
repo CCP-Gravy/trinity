@@ -29,6 +29,18 @@ const Be::ClassInfo* Tr2CurveRandomAxisRotation::ExposeToBlue()
 			Be::READWRITE | Be::PERSIST )
 
 		MAP_ATTRIBUTE(
+			"seed",
+			m_seed,
+			"Random seed number",
+			Be::PERSISTONLY )
+
+		MAP_PROPERTY(
+			"seed",
+			GetSeed,
+			SetSeed,
+			"Random seed number" )
+
+		MAP_ATTRIBUTE(
 			"currentValue",
 			m_currentValue,
 			"Curve value after the last update",

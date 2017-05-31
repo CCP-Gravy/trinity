@@ -6,21 +6,22 @@
 
 #include "StdAfx.h"
 #include "Tr2CurveRandomAxisRotation.h"
+#include <random>
 
 namespace
 {
-	float RandAngle()
+	float RandAngle( std::default_random_engine& engine )
 	{
-		return float( rand() ) / RAND_MAX * XM_PI * 2;
+		return float( engine() - engine.min() ) / ( engine.max() - engine.min() ) * XM_PI * 2;
 	}
 }
 
 // --------------------------------------------------------------------------------
 Tr2CurveRandomAxisRotation::Tr2CurveRandomAxisRotation( IRoot* lockobj )
-	:m_preRotation( XMQuaternionRotationRollPitchYaw( RandAngle(), RandAngle(), RandAngle() ) ),
-	m_postRotation( XMQuaternionRotationRollPitchYaw( RandAngle(), RandAngle(), RandAngle() ) ),
+	:m_seed( 0 ),
 	m_period( 1.f )
 {
+	SeedChanged();
 	m_currentValue = GetValue( 0 );
 }
 
@@ -96,4 +97,43 @@ Quaternion Tr2CurveRandomAxisRotation::GetValue( double time ) const
 	}
 	result *= m_preRotation;
 	return result;
+}
+
+// --------------------------------------------------------------------------------
+bool Tr2CurveRandomAxisRotation::Initialize()
+{
+	if( m_seed != 0 )
+	{
+		SeedChanged();
+	}
+	return true;
+}
+
+// --------------------------------------------------------------------------------
+uint32_t Tr2CurveRandomAxisRotation::GetSeed() const
+{
+	return m_seed;
+}
+
+// --------------------------------------------------------------------------------
+void Tr2CurveRandomAxisRotation::SetSeed( uint32_t seed )
+{
+	m_seed = seed;
+	SeedChanged();
+}
+
+// --------------------------------------------------------------------------------
+void Tr2CurveRandomAxisRotation::SeedChanged()
+{
+	auto engine = std::default_random_engine();
+	if( m_seed != 0 )
+	{
+		engine.seed( std::default_random_engine::result_type( m_seed ) );
+	}
+	else
+	{
+		engine.seed( std::default_random_engine::result_type( BeOS->GetActualTime() ) );
+	}
+	m_preRotation = XMQuaternionRotationRollPitchYaw( RandAngle( engine ), RandAngle( engine ), RandAngle( engine ) );
+	m_postRotation = XMQuaternionRotationRollPitchYaw( RandAngle( engine ), RandAngle( engine ), RandAngle( engine ) );
 }
