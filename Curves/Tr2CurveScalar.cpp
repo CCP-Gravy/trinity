@@ -145,6 +145,16 @@ float Tr2CurveScalar::GetValue( double time ) const
 		return m_keys[0].m_value;
 	}
 
+	if( m_extrapolationBefore == Tr2CurveExtrapolation::CLAMP && float( time ) <= m_keys[0].m_time )
+	{
+		return m_keys[0].m_value;
+	}
+
+	if( m_extrapolationAfter == Tr2CurveExtrapolation::CLAMP && float( time ) >= m_keys[m_keys.size() - 1].m_time )
+	{
+		return m_keys[m_keys.size() - 1].m_value;
+	}
+
 	float t = GetLocalTime( time );
 
 	if( m_lastSegment + 1 < count )
@@ -291,10 +301,6 @@ float Tr2CurveScalar::GetLocalTime( double time ) const
 	double length = last - first;
 	if( time < first )
 	{
-		if( m_extrapolationBefore == Tr2CurveExtrapolation::CLAMP )
-		{
-			return float( first );
-		}
 		double intPart;
 		double fracPart = modf( -( time - first ) / length, &intPart );
 
@@ -314,11 +320,6 @@ float Tr2CurveScalar::GetLocalTime( double time ) const
 	if( time < last )
 	{
 		return float( time );
-	}
-
-	if( m_extrapolationAfter == Tr2CurveExtrapolation::CLAMP )
-	{
-		return float( last );
 	}
 
 	double intPart;
