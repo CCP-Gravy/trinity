@@ -29,16 +29,16 @@ const Be::ClassInfo* Tr2CurveConstant::ExposeToBlue()
 			Be::READWRITE | Be::PERSIST )
 
 		MAP_ATTRIBUTE(
-			"value",
-			m_value,
-			"",
-			Be::READWRITE | Be::PERSIST )
-
-		MAP_ATTRIBUTE(
 			"currentValue",
 			m_value,
 			"Curve value after the last update",
 			Be::READ )
+
+		MAP_ATTRIBUTE(
+			"value",
+			m_value,
+			"",
+			Be::READWRITE | Be::PERSIST )
 
 	EXPOSURE_END()
 }
