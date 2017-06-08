@@ -873,7 +873,12 @@ const Vector3* EveSOFDNA::GetHullShapeEllipsoidRadius() const
 // --------------------------------------------------------------------------------
 const Vector3* EveSOFDNA::GetHullAudioPosition( size_t n ) const
 {
-	return &m_hullDatas[n]->audioPosition;
+	// to simplify things only take the audiolocation from the last hull, which should be hold the engine
+	if( n + 1 == GetMultiHullCount() )
+	{
+		return &m_hullDatas[n]->audioPosition;
+	}
+	return nullptr;
 }
 
 // --------------------------------------------------------------------------------
