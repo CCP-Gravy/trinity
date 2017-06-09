@@ -24,11 +24,20 @@ public:
 	virtual Quaternion* GetValueDotAt( Quaternion* in, double time );
 	virtual Quaternion* GetValueDoubleDotAt( Quaternion* in, Be::Time time );
 	virtual Quaternion* GetValueDoubleDotAt( Quaternion* in, double time );
+
+	void RandomizeStart( float range );
+	void ScaleTime( float scale );
 private:
+	double GetLocalTime( double time ) const;
+	double GetLocalTime( Be::Time time ) const;
+
 	Be::Time m_start;
+	Be::Time m_offset;
 	ITriQuaternionFunctionPtr m_curve;
 	Quaternion m_value;
 	Quaternion m_currentValue;
+
+	float m_timeScale;
 };
 
 TYPEDEF_BLUECLASS( Tr2RotationAdapter );

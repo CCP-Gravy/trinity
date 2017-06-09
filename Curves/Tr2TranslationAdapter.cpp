@@ -12,8 +12,10 @@
 // --------------------------------------------------------------------------------
 Tr2TranslationAdapter::Tr2TranslationAdapter( IRoot* )
 	:m_start( 0 ),
+	m_offset( 0 ),
 	m_value( 0, 0, 0 ),
-	m_currentValue( 0, 0, 0 )
+	m_currentValue( 0, 0, 0 ),
+	m_timeScale( 1 )
 {
 
 }
@@ -23,7 +25,7 @@ void Tr2TranslationAdapter::UpdateValue( double time )
 {
 	if( m_curve )
 	{
-		m_curve->Update( &m_currentValue, time );
+		m_curve->Update( &m_currentValue, GetLocalTime( time ) );
 	}
 }
 
@@ -36,7 +38,7 @@ Vector3* Tr2TranslationAdapter::Update( Vector3* in, Be::Time time )
 	}
 	if( m_curve )
 	{
-		m_curve->Update( &m_currentValue, TimeAsDouble( time - m_start ) );
+		m_curve->Update( &m_currentValue, GetLocalTime( time ) );
 	}
 	else
 	{
@@ -51,7 +53,7 @@ Vector3* Tr2TranslationAdapter::Update( Vector3* in, double time )
 {
 	if( m_curve )
 	{
-		m_curve->Update( &m_currentValue, TimeFromDouble( time ) - m_start );
+		m_curve->Update( &m_currentValue, GetLocalTime( time ) );
 	}
 	else
 	{
@@ -70,7 +72,7 @@ Vector3* Tr2TranslationAdapter::GetValueAt( Vector3* in, Be::Time time )
 	}
 	if( m_curve )
 	{
-		m_curve->GetValueAt( in, TimeAsDouble( time - m_start ) );
+		m_curve->GetValueAt( in, GetLocalTime( time ) );
 	}
 	else
 	{
@@ -84,7 +86,7 @@ Vector3* Tr2TranslationAdapter::GetValueAt( Vector3* in, double time )
 {
 	if( m_curve )
 	{
-		m_curve->GetValueAt( in, time );
+		m_curve->GetValueAt( in, GetLocalTime( time ) );
 	}
 	else
 	{
@@ -104,8 +106,8 @@ Vector3* Tr2TranslationAdapter::GetValueDotAt( Vector3* in, Be::Time time )
 	if( m_curve )
 	{
 		Vector3 v0, v1;
-		m_curve->GetValueAt( &v0, TimeAsDouble( time - m_start ) );
-		m_curve->GetValueAt( &v1, TimeAsDouble( time - m_start ) - 0.1 );
+		m_curve->GetValueAt( &v0, GetLocalTime( time ) );
+		m_curve->GetValueAt( &v1, GetLocalTime( time ) - 0.1 );
 		*in = Vector3( ( v1 - v0 ) / 0.1f );
 	}
 	else
@@ -121,8 +123,8 @@ Vector3* Tr2TranslationAdapter::GetValueDotAt( Vector3* in, double time )
 	if( m_curve )
 	{
 		Vector3 v0, v1;
-		m_curve->GetValueAt( &v0, time );
-		m_curve->GetValueAt( &v1, time - 0.1 );
+		m_curve->GetValueAt( &v0, GetLocalTime( time ) );
+		m_curve->GetValueAt( &v1, GetLocalTime( time ) - 0.1 );
 		*in = Vector3( ( v1 - v0 ) / 0.1f );
 	}
 	else
@@ -153,4 +155,33 @@ Vector3d* Tr2TranslationAdapter::InterpolatedPosition( Vector3d* out, Be::Time )
 	out->y = m_currentValue.y;
 	out->z = m_currentValue.z;
 	return out;
+}
+
+// --------------------------------------------------------------------------------
+void Tr2TranslationAdapter::RandomizeStart( float range )
+{
+	if( !range )
+	{
+		range = 60.f;
+	}
+	Be::Time trange = TimeFromDouble( range );
+	m_offset = rand() % int( trange * 2 ) - trange;
+}
+
+// --------------------------------------------------------------------------------
+void Tr2TranslationAdapter::ScaleTime( float scale )
+{
+	m_timeScale = scale;
+}
+
+// --------------------------------------------------------------------------------
+double Tr2TranslationAdapter::GetLocalTime( double time ) const
+{
+	return time / m_timeScale;
+}
+
+// --------------------------------------------------------------------------------
+double Tr2TranslationAdapter::GetLocalTime( Be::Time time ) const
+{
+	return TimeAsDouble( time - m_start + m_offset ) / m_timeScale;
 }

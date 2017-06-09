@@ -33,5 +33,18 @@ const Be::ClassInfo* Tr2TranslationAdapter::ExposeToBlue()
 			"Curve value after the last update",
 			Be::READ )
 
+		MAP_METHOD_AND_WRAP_OPTIONAL_ARGS(
+			"RandomizeStart",
+			RandomizeStart,
+			1,
+			"Shits curve starting time by a random number in a specified range (-rng, +rng)\n"
+			":param rng: radius of the random range in seconds (default is 60 sec)" )
+
+		MAP_METHOD_AND_WRAP(
+			"ScaleTime",
+			ScaleTime,
+			"Scales curve time\n"
+			":param scale: new time scaling factor" )
+	
 	EXPOSURE_END()
 }
