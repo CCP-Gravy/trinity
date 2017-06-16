@@ -74,12 +74,15 @@ private:
 	Tr2PointLightPtr m_sourceLight;
 	Tr2PointLightPtr m_destinationLight;
 
+	Be::Time m_startTime;
+
 	std::string m_name;
 
 	Vector3 m_source;
 	float m_currentDestinationScale;
 	Vector3 m_destination;
 	float m_destinationScale;
+	Vector4 m_effectData;
 
 	uint32_t m_quadCount;
 	Tr2VertexBufferAL m_vb;

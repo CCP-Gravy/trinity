@@ -22,12 +22,19 @@ namespace
 	public:
 		virtual void SetPerObjectDataToDevice( Tr2ConstantBufferAL** buffers, unsigned constantTypeMask, Tr2RenderContext& renderContext ) const
 		{
-			FillAndSetConstants( 
-				*buffers[Tr2RenderContextEnum::VERTEX_SHADER], 
-				m_data, 
-				m_size, 
-				Tr2RenderContextEnum::VERTEX_SHADER, 
-				Tr2Renderer::GetPerObjectVSStartRegister(), 
+			FillAndSetConstants(
+				*buffers[Tr2RenderContextEnum::VERTEX_SHADER],
+				m_data,
+				m_size,
+				Tr2RenderContextEnum::VERTEX_SHADER,
+				Tr2Renderer::GetPerObjectVSStartRegister(),
+				renderContext );
+			FillAndSetConstants(
+				*buffers[Tr2RenderContextEnum::PIXEL_SHADER],
+				m_data,
+				m_size,
+				Tr2RenderContextEnum::PIXEL_SHADER,
+				Tr2Renderer::GetPerObjectPSStartRegister(),
 				renderContext );
 		}
 
@@ -51,7 +58,9 @@ EveStretch2::EveStretch2( IRoot* lockObj )
 	m_destinationScale( 1.f ),
 	m_visible( true ),
 	m_quadCount( 0 ),
-	m_vertexDeclHandle( Tr2EffectStateManager::UNINITIALIZED_DECLARATION )
+	m_vertexDeclHandle( Tr2EffectStateManager::UNINITIALIZED_DECLARATION ),
+	m_startTime( 0 ),
+	m_effectData( 0, 0, 0, float( rand() ) / RAND_MAX )
 {
 
 }
@@ -98,6 +107,7 @@ float EveStretch2::GetCurveDuration()
 
 void EveStretch2::StartFiring( float delay )
 {
+	m_effectData.w = float( rand() ) / RAND_MAX;
 	if( m_start )
 	{
 		m_start->PlayFrom( -delay );
@@ -145,37 +155,53 @@ void EveStretch2::DisplayEndPoints( bool displaySource, bool displayDest )
 	m_currentDestinationScale = displayDest ? m_destinationScale : 0;
 }
 
-void EveStretch2::Update( EveUpdateContext& updateContext )
+void EveStretch2::Update(EveUpdateContext& updateContext)
 {
 	Be::Time time = updateContext.GetTime();
+	if( m_startTime == 0 )
+	{
+		m_startTime = time;
+	}
+	m_effectData.x = m_effectData.y = m_effectData.z = 0;
 	if( m_start )
 	{
-		m_start->Update( TimeAsDouble( time ) );
+		m_start->Update( TimeAsDouble( time - m_startTime ) );
+		m_effectData.x = float( m_start->GetScaledTime() );
 	}
 	if( m_loop )
 	{
-		m_loop->Update( TimeAsDouble( time ) );
+		m_loop->Update( TimeAsDouble( time - m_startTime ) );
+		m_effectData.y = float( m_loop->GetScaledTime() );
 	}
 	if( m_end )
 	{
-		m_end->Update( TimeAsDouble( time ) );
+		m_end->Update( TimeAsDouble( time - m_startTime ) );
+		m_effectData.z = float( m_end->GetScaledTime() );
 	}
 }
 
 void EveStretch2::UpdateInactive( EveUpdateContext& updateContext )
 {
 	Be::Time time = updateContext.GetTime();
+	if( m_startTime == 0 )
+	{
+		m_startTime = time;
+	}
+	m_effectData.x = m_effectData.y = m_effectData.z = 0;
 	if( m_start )
 	{
-		m_start->Update( TimeAsDouble( time ) );
+		m_start->Update( TimeAsDouble( time - m_startTime ) );
+		m_effectData.x = float( m_start->GetScaledTime() );
 	}
 	if( m_loop )
 	{
-		m_loop->Update( TimeAsDouble( time ) );
+		m_loop->Update( TimeAsDouble( time - m_startTime ) );
+		m_effectData.y = float( m_loop->GetScaledTime() );
 	}
 	if( m_end )
 	{
-		m_end->Update( TimeAsDouble( time ) );
+		m_end->Update( TimeAsDouble( time - m_startTime ) );
+		m_effectData.z = float( m_end->GetScaledTime() );
 	}
 }
 
@@ -198,7 +224,7 @@ Tr2PerObjectData* EveStretch2::GetPerObjectData( ITriRenderBatchAccumulator* acc
 	if( data )
 	{
 		data->m_data = &m_source;
-		data->m_size = 2 * sizeof( Vector4 );
+		data->m_size = 3 * sizeof( Vector4 );
 	}
 	return data;
 }
