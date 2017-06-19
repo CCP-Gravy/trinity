@@ -6,6 +6,7 @@
 #include "Tr2DeviceResource.h"
 #include "IWorldPosition.h"
 #include "include/ITriFunction.h"
+#include "include/ITriTargetable.h"
 #include "TriObserverLocal.h"
 #include "Tr2ShLightingManager.h"
 
@@ -21,7 +22,8 @@ struct ViewDistanceInfo;
 BLUE_CLASS( EvePlanet ):
 	public IWorldPosition,
 	public ITr2SecondaryLightSource,
-	public Tr2DeviceResource
+	public Tr2DeviceResource,
+	public ITriTargetable
 {
 public:
     EXPOSE_TO_BLUE();
@@ -53,6 +55,20 @@ public:
 	// ITr2SecondaryLightSource
 	virtual void RegisterSecondaryLightSource( Tr2ShLightingManager& );
 	virtual void UnregisterSecondaryLightSource( Tr2ShLightingManager& );
+
+	/////////////////////////////////////////////////////////////////////////////////////
+	// ITriTargetable
+	unsigned int GetDamageLocatorCount() const;
+	int GetClosestDamageLocatorIndex( const Vector3* position );
+	bool GetDamageLocatorPosition( Vector3* out, int index, bool inWorldSpace );
+	bool GetDamageLocatorDirection( Vector3* out, int index, bool inWorldSpace );
+	void GetMissPosition( const Vector3* hit, const Vector3* source, Vector3* out );
+	int GetGoodDamageLocatorIndex( const Vector3& position );
+	float GetRadius() const;
+	int CreateImpact( int damageLocatorIndex, const Vector3& direction, float lifeTime, float size );
+	bool UpdateImpact( Vector3& out, const Vector3& direction, int impactIndex );
+	void GetImpactPosition( Vector3& out, int damageLocatorIndex, const Vector3& direction );
+	bool HasImpactConfigurationShield() const;
 
 private:
 	bool OnPrepareResources();

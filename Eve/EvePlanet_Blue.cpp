@@ -10,6 +10,7 @@ const Be::ClassInfo* EvePlanet::ExposeToBlue()
         MAP_INTERFACE( EvePlanet )
 		MAP_INTERFACE( IWorldPosition )
 		MAP_INTERFACE( ITr2SecondaryLightSource )
+		MAP_INTERFACE( ITriTargetable )
 
 		MAP_ATTRIBUTE
 		(

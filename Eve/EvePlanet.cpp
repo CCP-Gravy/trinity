@@ -398,3 +398,71 @@ void EvePlanet::SetRenderScale( float value )
 {
 	m_renderScale = value;
 }
+
+// --------------------------------------------------------------------------------
+unsigned int EvePlanet::GetDamageLocatorCount() const
+{
+	return 1;
+}
+
+// --------------------------------------------------------------------------------
+int EvePlanet::GetClosestDamageLocatorIndex( const Vector3* position )
+{
+	return 0;
+}
+// --------------------------------------------------------------------------------
+bool EvePlanet::GetDamageLocatorPosition( Vector3* out, int index, bool inWorldSpace )
+{
+	*out = inWorldSpace ? m_worldTransform.GetTranslation() : Vector3( 0.f, 0.f, 0.f );
+	return true;
+}
+
+// --------------------------------------------------------------------------------
+bool EvePlanet::GetDamageLocatorDirection( Vector3* out, int index, bool inWorldSpace )
+{
+	*out = Vector3( 0.f, 1.f, 0.f );
+	return true;
+}
+
+// --------------------------------------------------------------------------------
+void EvePlanet::GetMissPosition( const Vector3* hit, const Vector3* source, Vector3* out )
+{
+	*out = m_worldTransform.GetTranslation();
+}
+
+// --------------------------------------------------------------------------------
+int EvePlanet::GetGoodDamageLocatorIndex( const Vector3& position )
+{
+	return 0;
+}
+// --------------------------------------------------------------------------------
+float EvePlanet::GetRadius() const
+{
+	return m_radius;
+}
+
+// --------------------------------------------------------------------------------
+int EvePlanet::CreateImpact( int damageLocatorIndex, const Vector3& direction, float lifeTime, float size )
+{
+	return 0;
+}
+
+// --------------------------------------------------------------------------------
+bool EvePlanet::UpdateImpact( Vector3& out, const Vector3& direction, int impactIndex )
+{
+	return false;
+}
+
+// --------------------------------------------------------------------------------
+void EvePlanet::GetImpactPosition( Vector3& out, int damageLocatorIndex, const Vector3& direction )
+{
+}
+
+// --------------------------------------------------------------------------------
+bool EvePlanet::HasImpactConfigurationShield() const
+{
+	return false;
+}
+
+
+
