@@ -1,4 +1,4 @@
-::Notify////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
 //
 //    Created:   July 2011
 //    Copyright: CCP 2011
@@ -173,6 +173,8 @@ void EveTurretFiringFX::PrepareFiringEffectMoveObjects()
 	{
 		m_stretch[i]->StartMoving();
 	}
+	// we are firing
+	m_isFiring = true;
 }
 
 // --------------------------------------------------------------------------------
