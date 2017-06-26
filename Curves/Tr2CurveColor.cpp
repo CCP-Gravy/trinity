@@ -53,7 +53,7 @@ Color Tr2CurveColor::GetValue( double time ) const
 		color.r = std::max( color.r, 0.f );
 		color.g = std::max( color.g, 0.f );
 		color.b = std::max( color.b, 0.f );
-		color.r = std::max( color.r, 0.f );
+		color.a = std::max( color.a, 0.f );
 		color = TriLinearToGamma( color );
 	}
 	return color;
