@@ -563,7 +563,6 @@ const Be::ClassInfo* Tr2InteriorScene::ExposeToBlue()
 		)
 #endif
 		MAP_ATTRIBUTE( "visibilityResults", m_visibilityResults, "Results of the visibility query", Be::READ )
-		MAP_ATTRIBUTE( "enableSHSolver", m_enableSHSolver, "Enable/disable solving for SH coefficients", Be::READWRITE | Be::PERSIST )
 
 		MAP_METHOD_AND_WRAP( "ReorderDynamic", ReorderDynamic,
 			"\nMoves the dynamic object in the dynamics list. This affects the order of updates.\n"

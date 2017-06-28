@@ -9,7 +9,6 @@
 #include "Utilities/BoundingBox.h"
 
 class TriGeometryRes;
-class Tr2InteriorMirror;
 class Tr2PerObjectData;
 
 BLUE_DECLARE( Tr2Mesh );

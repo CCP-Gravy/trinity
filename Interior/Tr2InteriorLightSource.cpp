@@ -184,14 +184,9 @@ Tr2InteriorLightSource::Tr2InteriorLightSource( IRoot* lockobj ) :
 	D3DXMatrixIdentity( &m_unitToWorldTransform );
 	m_worldBoundingBox = AxisAlignedBoundingBox( Vector3( -1.f, -1.f, -1.f ), Vector3( 1.f, 1.f, 1.f ) );
 
-	m_material.CreateInstance();
-	m_shMaterial.CreateInstance();
-
 	m_kelvinColor.CreateInstance();
 	m_useKelvinColor = false;
 
-	m_material->SetHighLevelShaderName( "PointLight" );
-	m_shMaterial->SetHighLevelShaderName( "PointLight" );
 	PrepareResources();
 }
 
@@ -220,8 +215,6 @@ bool Tr2InteriorLightSource::Initialize()
 {
 	RebuildVolume();
 	
-	UpdateInternalMaterials();
-	ChooseLightEffect();
 	PrepareResources();
 
 	RecalculateUnitToWorldMatrix();
@@ -287,7 +280,6 @@ bool Tr2InteriorLightSource::OnModified( Be::Var* value )
 		}
 
 		RebuildGeometry();
-		ChooseLightEffect();
 		PrepareResources();
 	}
 	else if( IsMatch( value, m_shadowImportance ) )
@@ -322,10 +314,6 @@ bool Tr2InteriorLightSource::OnModified( Be::Var* value )
 		{
 			m_projectedTextureRes->AddNotifyTarget( this );
 		}
-		else
-		{
-			ChooseLightEffect();
-		}
 	}
 	else if( IsMatch( value, m_shadowCasterTypes ) )
 	{
@@ -335,25 +323,6 @@ bool Tr2InteriorLightSource::OnModified( Be::Var* value )
 			m_dirtySpotLightShadow[i] = true;
 		}
 		PrepareResources();
-	}
-	else if( IsMatch( value, m_customMaterial ) )
-	{
-		if( m_customMaterial )
-		{
-			m_material = m_customMaterial;
-			UpdateInternalMaterials();
-		}
-		else
-		{
-			m_material = NULL;
-			m_shMaterial = NULL;
-
-			m_material.CreateInstance();
-			m_shMaterial.CreateInstance();
-
-			ChooseLightEffect();
-		}
-		RebuildGeometry();
 	}
 
 	return true;
@@ -368,26 +337,6 @@ bool Tr2InteriorLightSource::OnModified( Be::Var* value )
 // --------------------------------------------------------------------------------------
 void Tr2InteriorLightSource::RebuildCachedData( BlueAsyncRes* p )
 {
-	if( p == m_projectedTextureRes )
-	{
-		ChooseLightEffect();
-	}
-}
-
-// --------------------------------------------------------------------------------------
-// Description:
-//   Updates internal shader materials (for SH lighting and lightmap generation) after
-//   custom material was changed.
-// --------------------------------------------------------------------------------------
-void Tr2InteriorLightSource::UpdateInternalMaterials()
-{
-	if( m_customMaterial )
-	{
-		m_shMaterial = NULL;
-
-		BeClasses->CloneTo( m_customMaterial->GetRawRoot(), (IRoot**)&m_shMaterial );
-		ChooseLightEffect();
-	}
 }
 
 // --------------------------------------------------------------------------------------
@@ -696,117 +645,6 @@ class Tr2InteriorLightSource::PerLightData : public Tr2ShadowPerLightData<Tr2Pro
 // --------------------------------------------------------------------------------------
 void Tr2InteriorLightSource::GetBatches( ITriRenderBatchAccumulator* batches, const Matrix& mirrorToWorldMatrix )
 {
-	PerLightData* data = batches->Allocate<PerLightData>(); 
-
-	if( !data )
-	{
-		return;
-	}
-
-	data->SetShadowTexture( m_shadowAtlasTexture, 6 );
-
-	data->SetProjectedTexture( m_projectedTextureRes );
-
-	Tr2InteriorPerLightPSData perObjectPSBuffer;
-
-	PopulateLightData( &perObjectPSBuffer.lightData, mirrorToWorldMatrix );
-	perObjectPSBuffer.lightData.shadow0Influence = 0.0f;
-	perObjectPSBuffer.additionalParameters.x = m_specularIntensity;
-	perObjectPSBuffer.mirrorToWorldMatrix = mirrorToWorldMatrix;
-
-	const XMMATRIX texAdjust = XMMatrixSet(
-		0.5f, 0.0f, 0.0f, 0.0f,
-		0.0f, -0.5f, 0.0f, 0.0f,
-		0.0f, 0.0f, 1.0f, 0.0f,
-		0.5f, 0.5f, 0.0f, 1.0f );
-	const int nShadowMatrices = IsSpotLight() ? 1 : 6;
-	for( int i = 0; i < nShadowMatrices; ++i )
-	{
-		perObjectPSBuffer.shadowMatrix[i] = XMMatrixTranspose( XMMatrixMultiply(
-			XMMatrixMultiply( XMMatrixTranspose( mirrorToWorldMatrix ), GetViewMatrix( i ) ),
-			XMMatrixMultiply( m_projectionMatrix, texAdjust ) ) );
-	}
-
-	for( int i = 0; i < 6; ++i )
-	{
-		if( m_shadowAtlasTexture[i] )
-		{
-			perObjectPSBuffer.shadowRect[i].x = float( m_shadowAtlasTexture[i]->GetX() + 0.5f ) / 
-				m_shadowAtlasTexture[i]->GetTextureWidth();
-			perObjectPSBuffer.shadowRect[i].y = float( m_shadowAtlasTexture[i]->GetY() + 0.5f ) / 
-				m_shadowAtlasTexture[i]->GetTextureHeight();
-			perObjectPSBuffer.shadowRect[i].z = float( m_shadowAtlasTexture[i]->GetWidth() - 1.0f ) / 
-				m_shadowAtlasTexture[i]->GetTextureWidth();
-			perObjectPSBuffer.shadowRect[i].w = float( m_shadowAtlasTexture[i]->GetHeight() - 1.0f ) / 
-				m_shadowAtlasTexture[i]->GetTextureHeight();
-			perObjectPSBuffer.shadowInfluence[i] = Vector4( 1.0f, 0.0f, 0.0f, 0.0f );
-		}
-		else
-		{
-			perObjectPSBuffer.shadowRect[i] = Vector4( 0.0f, 0.0f, 1.0f, 1.0f );
-			perObjectPSBuffer.shadowInfluence[i] = Vector4( 0.0f, 0.0f, 0.0f, 0.0f );
-		}
-	}
-
-	// Do the copy
-	data->CopyToPSFloatBuffer( perObjectPSBuffer );
-
-	XMVECTOR det;
-	Matrix mirrorMatrix( XMMatrixInverse( &det, XMMatrixTranspose( mirrorToWorldMatrix ) ) );
-
-	const Vector4* vertexes;
-	unsigned vertexCount;
-	Matrix worldView, worldViewTranspose, worldViewProj;
-	Tr2VertexBufferAL* vb;
-	Tr2IndexBufferAL* ib;
-
-	if( IsSpotLight() )
-	{
-		vertexes = unitConeVertices;
-		vertexCount = unitConeVertexCount;
-	}
-	else
-	{
-		vertexes = unitIcosahedronVertices;
-		vertexCount = unitIcosahedronVertexCount;
-	}
-	vb = m_sharedVB;
-	ib = m_sharedIB;
-	worldView = m_unitToWorldTransform * mirrorMatrix * Tr2Renderer::GetViewTransform();
-
-	worldViewProj = worldView * Tr2Renderer::GetProjectionTransform();
-	D3DXMatrixTranspose( &worldViewProj, &worldViewProj );
-	data->CopyToVSFloatBuffer( worldViewProj );
-
-	bool isInside = false;
-	if( XMVectorGetX( det ) < 0 )
-	{
-		isInside = true;
-	}
-	else
-	{
-		XMVECTOR nearPlane = Vector4( 0, 0, -1, -Tr2Renderer::GetFrontClip() );
-		D3DXMatrixTranspose(&worldViewTranspose, &worldView);
-		nearPlane = XMPlaneTransform( nearPlane, worldViewTranspose );
-
-		for( unsigned i = 0; i < vertexCount; ++i )
-		{
-			if( XMVectorGetX( XMPlaneDot( nearPlane, vertexes[i] ) ) <= 0 )
-			{
-				isInside = true;
-				break;
-			}
-		}
-	}
-
-	Tr2InteriorLightGeometryRenderBatch* batch = batches->Allocate<Tr2InteriorLightGeometryRenderBatch>();
-	if( batch )
-	{
-		batch->Initialize( vb, ib, m_lightVertexDecl, isInside );
-		batch->SetShaderMaterial( m_material );
-		batch->SetPerObjectData( data );
-		batches->Commit( batch );
-	}
 }
 
 
@@ -1046,14 +884,7 @@ Tr2AtlasTexture* Tr2InteriorLightSource::GetShadowAtlasTexture( unsigned int ind
 // -------------------------------------------------------------
 void Tr2InteriorLightSource::SetShadowAtlasTexture( unsigned int index, Tr2AtlasTexture* texture )
 {
-	bool rebind = ( m_shadowAtlasTexture[index] == NULL ) != ( texture == NULL );
-
 	m_shadowAtlasTexture[index] = texture;
-
-	if( rebind )
-	{
-		ChooseLightEffect();
-	}
 }
 
 // --------------------------------------------------------------------------------------
@@ -1280,60 +1111,6 @@ void Tr2InteriorLightSource::RebuildVolume( void )
 
 // --------------------------------------------------------------------------------------
 // Description:
-//   Chooses an appropriate effect for light rendering during light accumulation pass.
-//   Accounts for if the light is a spot light or not and if there is an assigned shadow
-//   map.
-// --------------------------------------------------------------------------------------
-void Tr2InteriorLightSource::ChooseLightEffect()
-{
-	Tr2ShaderSituation situation;
-
-
-	if( IsSpotLight() )
-	{
-		if( m_customMaterial )
-		{
-			situation.AddSituationString( "SpotLight" );
-		}
-		else
-		{
-			m_material->SetHighLevelShaderName( "SpotLight" );
-			m_shMaterial->SetHighLevelShaderName( "SpotLight" );
-		}
-		if( m_shadowAtlasTexture[0] )
-		{
-			situation.AddSituationString( "Shadow" );
-		}
-	}
-	else
-	{
-		if( !m_customMaterial )
-		{
-			m_material->SetHighLevelShaderName( "PointLight" );
-			m_shMaterial->SetHighLevelShaderName( "PointLight" );
-		}
-		for( int i = 0; i < 6; ++i )
-		{
-			if( m_shadowAtlasTexture[i] )
-			{
-				situation.AddSituationString( "Shadow" );
-				break;
-			}
-		}
-	}
-	if( m_projectedTextureRes && m_projectedTextureRes->IsGood() )
-	{
-		situation.AddSituationString( "ProjectedTexture" );
-	}
-
-	m_material->BindLowLevelShader( situation );
-	
-	situation.AddSituationString( "GenerateSHCoefficients" );
-	m_shMaterial->BindLowLevelShader( situation );
-}
-
-// --------------------------------------------------------------------------------------
-// Description:
 //   Releases shadow texture or marks shadow as dirty/invalid.
 // --------------------------------------------------------------------------------------
 void Tr2InteriorLightSource::CreateShadowMap()
@@ -1355,87 +1132,6 @@ void Tr2InteriorLightSource::CreateShadowMap()
 		{
 			m_shadowAtlasTexture[i] = NULL;
 		}
-	}
-	ChooseLightEffect();
-}
-
-// -------------------------------------------------------------
-// Description:
-//   Get batches for a light to use during SH lighting step.
-// Arguments:
-//   batches - Batch accumulator to add batches to.
-// -------------------------------------------------------------
-void Tr2InteriorLightSource::GetSHBatches( ITriRenderBatchAccumulator* batches ) const
-{
-	if( !m_primaryLighting )
-	{
-		return;
-	}
-
-	PerLightData* data = batches->Allocate<PerLightData>();
-
-	if( !data )
-	{
-		return;
-	}
-
-	data->SetShadowTexture( m_shadowAtlasTexture, 6 );
-	data->SetProjectedTexture( m_projectedTextureRes );
-
-	Tr2InteriorPerLightPSData perObjectPSBuffer;
-
-	PopulateLightData( &perObjectPSBuffer.lightData, Tr2Renderer::GetIdentityTransform() );
-
-	perObjectPSBuffer.lightData.shadow0Influence = 0.0f;
-	perObjectPSBuffer.additionalParameters.x = m_specularIntensity;
-	D3DXMatrixIdentity( &perObjectPSBuffer.mirrorToWorldMatrix );
-
-	for( int i = 0; i < 6; ++i )
-	{
-		Matrix texAdjust( 0.5f, 0.0f, 0.0f, 0.0f,
-						  0.0f, -0.5f, 0.0f, 0.0f,
-						  0.0f, 0.0f, 1.0f, 0.0f,
-						  0.5f, 0.5f, 0.0f, 1.0f );
-		perObjectPSBuffer.shadowMatrix[i] = GetViewMatrix( i ) * m_projectionMatrix * texAdjust;
-		D3DXMatrixTranspose( &perObjectPSBuffer.shadowMatrix[i], &perObjectPSBuffer.shadowMatrix[i] );
-		if( IsSpotLight() )
-		{
-			break;
-		}
-	}
-
-	for( int i = 0; i < 6; ++i )
-	{
-		if( m_shadowAtlasTexture[i] )
-		{
-			perObjectPSBuffer.shadowRect[i].x = float( m_shadowAtlasTexture[i]->GetX() + 0.5f ) / 
-				m_shadowAtlasTexture[i]->GetTextureWidth();
-			perObjectPSBuffer.shadowRect[i].y = float( m_shadowAtlasTexture[i]->GetY() + 0.5f ) / 
-				m_shadowAtlasTexture[i]->GetTextureHeight();
-			perObjectPSBuffer.shadowRect[i].z = float( m_shadowAtlasTexture[i]->GetWidth() - 1.0f ) / 
-				m_shadowAtlasTexture[i]->GetTextureWidth();
-			perObjectPSBuffer.shadowRect[i].w = float( m_shadowAtlasTexture[i]->GetHeight() - 1.0f ) / 
-				m_shadowAtlasTexture[i]->GetTextureHeight();
-			perObjectPSBuffer.shadowInfluence[i] = Vector4( 1, 0, 0, 0 ); 
-		}
-		else
-		{
-			perObjectPSBuffer.shadowRect[i] = Vector4( 0.0f, 0.0f, 1.0f, 1.0f );
-			perObjectPSBuffer.shadowInfluence[i] = Vector4( 0, 0, 0, 0 ); 
-		}
-	}
-
-	// Do the copy
-	data->CopyToPSFloatBuffer( perObjectPSBuffer );
-
-	Tr2InteriorFullScreenLightBatch* batch = batches->Allocate<Tr2InteriorFullScreenLightBatch>();
-	if( batch )
-	{
-		batch->SetVertexDeclaration( m_lightVertexDecl );
-		batch->SetShaderMaterial( m_shMaterial );
-		batch->SetPerObjectData( data );
-
-		batches->Commit( batch );
 	}
 }
 

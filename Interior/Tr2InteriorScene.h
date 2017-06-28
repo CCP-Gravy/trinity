@@ -9,10 +9,10 @@
 #include "Tr2InteriorVisualization.h"
 #include "include/ITr2MultiPassScene.h"
 #include "ITr2VisualizationModeRenderer.h"
-#include "Tr2InteriorSHLightingSolver.h"
 #include "Tr2InteriorLightSet.h"
 #include "Include/ITr2Scene.h"
 #include "Tr2InteriorRenderBatch.h"
+#include "Include/ITr2Interior.h"
 
 // Forward declarations
 struct Tr2VisibilityEvent;
@@ -118,8 +118,6 @@ protected:
 	void OnQueryBegin( void );
 	void OnQueryEnd( void );
 	void OnInstanceVisible( ITr2InteriorCullable* cullable, const Matrix& );
-	void OnPortalEnter( const Tr2InteriorMirror*, const Matrix&, bool isMirrored, const Vector4& clipPlane );
-	void OnPortalExit( const Tr2InteriorMirror*, const Matrix&, bool isMirrored, const Vector4& clipPlane );
 
 	//////////////////////////////////////////////////////////////////////////
 	// Visibility event handlers
@@ -138,20 +136,12 @@ protected:
 	void DoQueryBegin( const Tr2VisibilityEvent& event, BatchGatherType gatherType );
 	// Handle Tr2VisibilityEvent::QUERY_END
 	void DoQueryEnd( const Tr2VisibilityEvent& event, BatchGatherType gatherType );
-	// Handle Tr2VisibilityEvent::PORTAL_ENTER
-	void DoPortalEnter( const Tr2VisibilityEvent& event, BatchGatherType gatherType );
-	// Handle Tr2VisibilityEvent::PORTAL_EXIT
-	void DoPortalExit( const Tr2VisibilityEvent& event, BatchGatherType gatherType );
-	// Handle Tr2VisibilityEvent::PORTAL_PRE_EXIT
-	void DoPortalPreExit( const Tr2VisibilityEvent& event, BatchGatherType gatherType );
 	// Handle Tr2VisibilityEvent::VIEW_PARAMETERS_CHANGED
 	void DoViewParametersChanged( const Tr2VisibilityEvent& event, 
 		BatchGatherType gatherType, Tr2InteriorBatchGroup batchGroup );
 	// Handle Tr2VisibilityEvent::INSTANCE_VISIBLE
 	void DoInstanceVisible( const Tr2VisibilityEvent& event, 
 		BatchGatherType gatherType );
-	// Handle Tr2VisibilityEvent::STENCIL_MASK
-	void DoStencilMask( const Tr2VisibilityEvent& event, BatchGatherType gatherType );
 
 	// Gather batches for pre-pass (ignoring transparency)
 	void GatherPrePassBatches( Tr2VisibilityResults* results );
@@ -167,7 +157,6 @@ protected:
 private:
 	void ResolveVisibility( const Matrix& view, const Matrix& projection, size_t maxDepth );
 	void DoVisibilityQuery( const TriFrustum&, const Matrix& view, size_t depth, size_t maxDepth, const Matrix& mirrorMatrix );
-	void FollowMirror( const Tr2InteriorMirror* mirror, const Matrix& objectToWorld, const TriFrustum&, const Matrix& view, size_t depth, size_t maxDepth );
 	// Update lights, adding to cells as needed
 	void UpdateLights( void );
 	// Update dynamics, adding to cells as needed
@@ -405,10 +394,6 @@ private:
 	Color m_fogColor;
 
 	PTr2TextureAtlasVector m_shadowAtlases;
-	// SH lighting solver
-	Tr2InteriorSHLightingSolver m_shSolver;
-	// Enable/disable solving for SH coefficients
-	bool m_enableSHSolver;
 
 	// --------------------------------------------------------------------------------------
 	// Description:

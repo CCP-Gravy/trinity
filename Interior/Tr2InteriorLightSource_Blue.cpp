@@ -114,8 +114,6 @@ const Be::ClassInfo* Tr2InteriorLightSource::ExposeToBlue()
 			":param dirty: dirty flag"
 			)
 
-		MAP_ATTRIBUTE( "customMaterial", m_customMaterial, "Custom shader material for light source", Be::READWRITE | Be::NOTIFY | Be::PERSIST )
-		MAP_METHOD_AND_WRAP( "UpdateInternalMaterials", UpdateInternalMaterials, "Updates internal materials after customMaterial is changed")
 	EXPOSURE_END()
 }
 

@@ -12,7 +12,6 @@
 BLUE_DECLARE( Tr2InteriorCell );
 BLUE_DECLARE_VECTOR( Tr2InteriorCell );
 BLUE_DECLARE( Tr2InteriorLightSource );
-BLUE_DECLARE( Tr2ShaderMaterial );
 BLUE_DECLARE( TriTextureRes );
 BLUE_DECLARE( Tr2KelvinColor );
 BLUE_DECLARE_INTERFACE( ITr2InteriorDynamic );
@@ -111,8 +110,6 @@ public:
 
 	// Get batches for an instanced light
 	void GetBatches( ITriRenderBatchAccumulator* batches, const Matrix& mirrorToWorldMatrix );
-	// Get batches for a light to use during SH lighting step
-	void GetSHBatches( ITriRenderBatchAccumulator* batches ) const;
 
 	// Returns the number of frames since the shadow was updated for spot lights
 	unsigned int GetFramesSinceShadowUpdate( unsigned int shadowMapIndex ) const;
@@ -151,7 +148,6 @@ public:
 
 	void Update( Be::Time time );
 
-	void UpdateInternalMaterials();
 protected:
 	// Rebuild bounding volume
 	void RebuildVolume( void );
@@ -160,8 +156,6 @@ protected:
 	bool IsSpotLight()					const { return ( m_coneAlphaOuter < 89.f ); }
 protected:
 	void RecalculateUnitToWorldMatrix();
-	// Chooses an appropriate effect for light rendering
-	void ChooseLightEffect();
 	// Re-creates shadow map if light source owns a shadow map
 	void CreateShadowMap();
 	// Updates shadow map frustum
@@ -220,18 +214,6 @@ protected:
 
 	// Vertex declaration for light geometry (for light accumulation pass)
 	unsigned int m_lightVertexDecl;
-	//// Shadow intensity from 0 to 1
-	//float m_shadowIntensity;
-	//// Shadow texture
-	//TriTextureResPtr m_shadow;
-
-	// Shader material for various light types
-	Tr2ShaderMaterialPtr m_material;
-	// Shader material for SH lighting pass
-	Tr2ShaderMaterialPtr m_shMaterial;
-
-	// Custom light material provided by user
-	Tr2ShaderMaterialPtr m_customMaterial;
 
 	// Cached unit to world light geometry transform for light accumulation pass
 	Matrix m_unitToWorldTransform;

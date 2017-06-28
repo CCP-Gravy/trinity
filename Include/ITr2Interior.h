@@ -18,7 +18,6 @@ struct Tr2PerFrameShadowPSData;
 struct ITr2InteriorLight;
 struct ITr2InteriorSHLightingSolver;
 class Tr2RenderContext;
-class Tr2InteriorMirror;
 struct AxisAlignedBoundingBox;
 
 enum CullResult
@@ -33,8 +32,6 @@ BLUE_DECLARE( Tr2ApexScene );
 BLUE_INTERFACE( ITr2InteriorCullable ) : public IRoot
 {
 	virtual bool IsInFrustum( const TriFrustum& frustum, Matrix& objectToWorld ) const = 0;
-	virtual size_t GetMirrorCount() const { return 0; }
-	virtual Tr2InteriorMirror* GetMirror( size_t index ) const { return nullptr; }
 };
 
 BLUE_INTERFACE( ITr2Interior ) : public ITr2InteriorCullable
@@ -407,14 +404,6 @@ BLUE_INTERFACE( ITr2InteriorLight ) : public ITr2InteriorCullable
 	//   Types of objects that cast shadows from this light
 	// -------------------------------------------------------------
 	virtual ShadowCasterTypes GetShadowCasterTypes() const = 0;
-
-	// -------------------------------------------------------------
-	// Description:
-	//   Get batches for a light to use during SH lighting step.
-	// Arguments:
-	//   batches - Batch accumulator to add batches to.
-	// -------------------------------------------------------------
-	virtual void GetSHBatches( ITriRenderBatchAccumulator* batches ) const = 0;
 
 	// -------------------------------------------------------------
 	// Description:

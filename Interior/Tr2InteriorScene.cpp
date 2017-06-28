@@ -11,11 +11,9 @@
 #include "Apex/Tr2ApexScene.h"
 #endif
 #include "Tr2VisibilityResults.h"
-#include "Tr2InteriorMirror.h"
 #include "Shader/Tr2ShaderMaterial.h"
 #include "Tr2LitPerObjectData.h"
 #include "Tr2AtlasTexture.h"
-#include "Tr2InteriorParticleObject.h"
 #include "Tr2PushPopDS.h"
 #include "Tr2PushPopRT.h"
 
@@ -154,7 +152,6 @@ Tr2InteriorScene::Tr2InteriorScene( IRoot* lockobj /*= NULL */ ):
 	m_renderBackgroundCubeMap( true ),
 	PARENTLOCK( m_shadowAtlases ),
 	m_debugInsideSetLOD( false ),
-	m_enableSHSolver( true ),
 	m_enableROIs( true ),
 	m_numSLIGroups( 1 )
 	, m_sunDiffuseColorVar( "Sun.WodDiffuseColor", m_sunDiffuseColor )
@@ -701,42 +698,6 @@ void Tr2InteriorScene::SetVisibilityResults( Tr2VisibilityResults* visibilityRes
 	m_visibilityResults = visibilityResults;
 }
 
-namespace
-{
-
-XMVECTOR GetMirrorClipPlane( const Tr2InteriorMirror* mirror, const Matrix& view, const Matrix& projection )
-{
-	auto& m = mirror->GetWarpMatrixFront();
-	XMVECTOR det;
-	XMVECTOR clipPlane = XMVectorSet( -m.GetZ().x, -m.GetZ().y, -m.GetZ().z, D3DXVec3Dot( &m.GetTranslation(), &m.GetZ() ) );
-	return XMPlaneTransform( 
-		clipPlane, 
-		XMMatrixTranspose( XMMatrixInverse( &det, mirror->GetTransformMatrix() * view * projection ) ) );
-}
-
-}
-
-void Tr2InteriorScene::FollowMirror( const Tr2InteriorMirror* mirror, const Matrix& objectToWorld, const TriFrustum& frustum, const Matrix& view, size_t depth, size_t maxDepth )
-{
-	XMVECTOR det;
-	Matrix mirrorMatrix2(
-		XMMatrixMultiply(
-			XMMatrixInverse( &det, XMMatrixMultiply( mirror->GetWarpMatrixBack(), mirror->GetTransformMatrix() ) ),
-			XMMatrixMultiply( mirror->GetWarpMatrixFront(), mirror->GetTransformMatrix() ) ) );
-
-	Matrix newView( XMMatrixInverse( &det, XMMatrixMultiply( XMMatrixInverse( &det, view ), mirrorMatrix2 ) ) );
-	TriFrustum newFrustum;
-	Vector3 camPos( XMVector3Transform( frustum.m_viewPos, mirrorMatrix2 ) );
-	CTriViewport vp;
-	newFrustum.DeriveFrustum( &newView, &camPos, &frustum.m_projectionMatrix, vp );
-
-	Vector4 clipPlane( GetMirrorClipPlane( mirror, view, Tr2Renderer::GetProjectionRawTransform() ) );
-
-	OnPortalEnter( mirror, objectToWorld, true, clipPlane );
-	DoVisibilityQuery( newFrustum, newView, depth + 1, maxDepth, mirrorMatrix2 );
-	OnPortalExit( mirror, objectToWorld, false, clipPlane );
-}
-
 void Tr2InteriorScene::DoVisibilityQuery( const TriFrustum& frustum, const Matrix& view, size_t depth, size_t maxDepth, const Matrix& mirrorMatrix )
 {
 	if( depth == 0 )
@@ -758,12 +719,6 @@ void Tr2InteriorScene::DoVisibilityQuery( const TriFrustum& frustum, const Matri
 			}
 		}
 	}
-	struct Mirror
-	{
-		Tr2InteriorMirror* mirror;
-		Matrix objectToWorld;
-	};
-	std::vector<Mirror> mirrors;
 
 	for( auto it = m_dynamics.begin(); it != m_dynamics.end(); ++it )
 	{
@@ -775,16 +730,6 @@ void Tr2InteriorScene::DoVisibilityQuery( const TriFrustum& frustum, const Matri
 				objectToWorld = objectToWorld * mirrorMatrix;
 			}
 			OnInstanceVisible( *it, objectToWorld );
-			if( depth < maxDepth )
-			{
-				for( size_t i = 0; i < ( *it )->GetMirrorCount(); ++i )
-				{
-					Mirror mirror;
-					mirror.mirror = ( *it )->GetMirror( i );
-					mirror.objectToWorld = objectToWorld;
-					mirrors.push_back( mirror );
-				}
-			}
 		}
 	}
 	for( auto it = m_lights.begin(); it != m_lights.end(); ++it )
@@ -798,10 +743,6 @@ void Tr2InteriorScene::DoVisibilityQuery( const TriFrustum& frustum, const Matri
 			}
 			OnInstanceVisible( *it, objectToWorld );
 		}
-	}
-	for( auto it = mirrors.begin(); it != mirrors.end(); ++it )
-	{
-		FollowMirror( it->mirror, it->objectToWorld, frustum, view, depth, maxDepth );
 	}
 	if( depth == 0 )
 	{
@@ -969,12 +910,7 @@ void Tr2InteriorScene::RenderGatherPass( Tr2RenderContext& renderContext )
 	m_activePrimaryRenderBatches = m_primaryRenderBatches;
 	m_activeTransparentBatchStore = m_transparentBatchStore;
 
-	m_shSolver.Clear();
 	GatherPrepassForwardBatches( m_visibilityResults );
-	if( m_enableSHSolver )
-	{
-		m_shSolver.Solve( m_lights, renderContext );
-	}
 
 	// Render geometry
 	renderContext.SetReadOnlyDepth( true );
@@ -985,9 +921,6 @@ void Tr2InteriorScene::RenderGatherPass( Tr2RenderContext& renderContext )
 	// Clear batches
 	m_primaryRenderBatches->Clear();
 	m_transparentBatchStore->Clear();
-
-	// Clear the SH and unset the variables
-	m_shSolver.Clear();
 
 	// debug info
 	RenderDebugInfo( renderContext );
@@ -1062,9 +995,6 @@ void Tr2InteriorScene::RenderFullForward( Tr2RenderContext& renderContext )
 
 	D3DPERF_EVENT( L"Tr2InteriorScene::RenderFullForward" );
 
-	// Clear the SH and unset the variables
-	m_shSolver.Clear();
-
 	// Update variable store
 	m_backgroundCubeMapVar = m_backgroundCubeMapRes;
 	
@@ -1083,20 +1013,12 @@ void Tr2InteriorScene::RenderFullForward( Tr2RenderContext& renderContext )
 	m_activeTransparentBatchStore = m_transparentBatchStore;
 	GatherFullForwardBatches( m_visibilityResults );
 
-	if( m_enableSHSolver )
-	{
-		m_shSolver.Solve( m_lights, renderContext );
-	}
-
 	// Render geometry
 	RenderGeometry( nullptr, renderContext );
 
 	// Clear batches
 	m_primaryRenderBatches->Clear();
 	m_transparentBatchStore->Clear();
-
-	// Clear the SH and unset the variables
-	m_shSolver.Clear();
 }
 
 // --------------------------------------------------------------------------------------
@@ -1371,14 +1293,6 @@ void Tr2InteriorScene::RenderDebugInfo( Tr2RenderContext& renderContext )
 		for( PTr2InteriorCellVector::const_iterator it = m_cells.begin(); it != m_cells.end(); ++it )
 		{
 			( *it )->RenderDebugInfo( m_debugLines );
-		}
-
-		for( PITr2InteriorDynamicVector::const_iterator it = m_dynamics.begin(); it != m_dynamics.end(); ++it )
-		{
-			if( const Tr2InteriorParticleObject* particle = dynamic_cast<const Tr2InteriorParticleObject*>( *it ) )
-			{
-				particle->RenderDebugInfo( m_debugLines );
-			}
 		}
 
 		m_debugLines->Render( renderContext );
@@ -2446,65 +2360,6 @@ void Tr2InteriorScene::OnInstanceVisible( ITr2InteriorCullable* cullable, const 
 	}
 }
 
-void Tr2InteriorScene::OnPortalEnter( const Tr2InteriorMirror* mirror, const Matrix& objectToWorld, bool isMirrored, const Vector4& clipPlane )
-{
-	Tr2VisibilityEvent event;
-	event.m_eventType = Tr2VisibilityEvent::PORTAL_ENTER;
-	event.m_userData = mirror->GetPlaceable()->GetRawRoot();
-	event.m_mirrorIndex = mirror->GetMirrorIndex();
-	event.m_objectToWorldMatrix = objectToWorld;
-
-	event.m_stencilTest = 0;
-	event.m_stencilWrite = 1;
-
-	event.m_isMirroredInLeftHandedSpace = !isMirrored;
-
-	int left = 0, top = 0, right = Tr2Renderer::GetViewport().width, bottom = Tr2Renderer::GetViewport().height;
-	event.m_scissorRect.left = left;
-	event.m_scissorRect.top = top;
-	event.m_scissorRect.right = right;
-	event.m_scissorRect.bottom = bottom;
-	event.m_useClipPlane = false;
-	if( isMirrored )
-	{
-		event.m_clipPlane = clipPlane;
-		event.m_useClipPlane = true;
-	}
-
-	if( m_visibilityQueryType == PRIMARY_QUERY )
-	{
-		m_visibilityResults->AddVisibilityEvent( event );
-	}
-}
-
-void Tr2InteriorScene::OnPortalExit( const Tr2InteriorMirror* mirror, const Matrix& objectToWorld, bool isMirrored, const Vector4& clipPlane )
-{
-	Tr2VisibilityEvent event;
-	event.m_eventType = Tr2VisibilityEvent::PORTAL_EXIT;
-	event.m_userData = mirror->GetPlaceable()->GetRawRoot();
-	event.m_mirrorIndex = mirror->GetMirrorIndex();
-	event.m_objectToWorldMatrix = objectToWorld;
-
-	event.m_isMirroredInLeftHandedSpace = !isMirrored;
-
-	int left = 0, top = 0, right = Tr2Renderer::GetViewport().width, bottom = Tr2Renderer::GetViewport().height;
-	event.m_scissorRect.left = left;
-	event.m_scissorRect.top = top;
-	event.m_scissorRect.right = right;
-	event.m_scissorRect.bottom = bottom;
-	event.m_useClipPlane = false;
-	if( isMirrored )
-	{
-		event.m_clipPlane = clipPlane;
-		event.m_useClipPlane = true;
-	}
-
-	if( m_visibilityQueryType == PRIMARY_QUERY )
-	{
-		m_visibilityResults->AddVisibilityEvent( event );
-	}
-}
-
 // --------------------------------------------------------------------------------------
 // Description
 //   This function executes a query begin event in a prepass batch gathering operation.
@@ -2627,230 +2482,6 @@ void Tr2InteriorScene::DoQueryEnd( const Tr2VisibilityEvent& event,
 				}
 			}
 		}
-	}
-}
-
-// --------------------------------------------------------------------------------------
-// Description
-//   This function executes a portal enter event in a normal batch gathering operation.
-//   It increments the object group and sets the portal enter flag.  If there is an
-//   active transparent batch store, it pushes the transparency stack.  Finally, if the
-//   event user data is a mirror, it computes the new mirrorToWorld matrix and adds it
-//   to the stack.
-// Arguments:
-//   event		- The portal enter event to execute.
-//   gatherType - The type of batches to gather.
-// See Also:
-//   OnPortalEnter, DoPortalEnterPrePass
-// --------------------------------------------------------------------------------------
-void Tr2InteriorScene::DoPortalEnter( const Tr2VisibilityEvent& event,
-									  BatchGatherType gatherType )
-{
-	CCP_ASSERT( event.m_eventType == Tr2VisibilityEvent::PORTAL_ENTER );
-
-	// Increment the object group id & flag that we're entering a portal
-	++m_currentObjectGroup;
-
-	// Push the transparency stack
-	// Note that the top of the stack is the active transparent batch range,
-	// so any batches added in the cell we're entering will increment the
-	// end of the range (second value in the pair)
-	if( m_activeTransparentBatchStore )
-	{
-		// Get the current transparent batch count
-		int startBatch = (int)m_activeTransparentBatchStore->GetBatchCount();
-		// Note that the start & end batches are the same at this point, as we haven't
-		// accumulated any transparent batches for the new cell on the other side of
-		// the portal
-		m_transparencyStack.push_back( std::make_pair( startBatch, startBatch ) );
-	}
-
-	Tr2InteriorMirror* mirror = dynamic_cast<ITr2Interior*>( event.m_userData.p )->GetMirror( event.m_mirrorIndex );
-
-	// Get the inverse transform and warp matrices from the mirror
-	XMVECTOR det;
-	Matrix transformBack(
-		XMMatrixInverse( &det, mirror->GetTransformMatrix() ) );
-	Matrix warpMatrixBack(
-		XMMatrixInverse( &det, mirror->GetWarpMatrixBack() ) );
-
-	// Compute the mirror matrix
-	Matrix mirrorMatrix(
-		XMMatrixMultiply(
-			XMMatrixMultiply( transformBack, warpMatrixBack ),
-			XMMatrixMultiply( mirror->GetWarpMatrixFront(), mirror->GetTransformMatrix() ) ) );
-
-	// Need the inverse-transpose for fixing up vectors in mirror space
-	mirrorMatrix = XMMatrixTranspose(
-		XMMatrixInverse( &det, mirrorMatrix ) );
-
-	// Store the current transform in the stack
-	m_mirrorToWorldMatrixStack.push_back( mirrorMatrix );
-
-	// Update the accumulated mirror-to-world matrix
-	m_mirrorToWorldMatrix = Tr2Renderer::GetIdentityTransform();
-	for( std::vector<Matrix>::iterator it = m_mirrorToWorldMatrixStack.begin();
-		it != m_mirrorToWorldMatrixStack.end(); ++it )
-	{
-		m_mirrorToWorldMatrix *= ( *it );
-	}
-
-	DoStencilMask( event, gatherType );
-	DoViewParametersChanged( event, gatherType, WODINTBATCHGROUP_BEGIN );
-}
-
-// --------------------------------------------------------------------------------------
-// Description
-//   This function executes a portal exit event in a normal batch gathering operation.
-//   It increments the object group.  If the event user data is a mirror, it pops the
-//   mirrorToWorld matrix stack and queues up a stencil mask batch to decrement the
-//   stencil buffer and restore depth to the plane of the mirror.
-// Arguments:
-//   event		- The portal exit event to execute.
-//   gatherType - The type of batches to gather
-// See Also:
-//   OnPortalExit, DoPortalExit
-// --------------------------------------------------------------------------------------
-void Tr2InteriorScene::DoPortalExit( const Tr2VisibilityEvent& event,
-									 BatchGatherType gatherType )
-{
-	CCP_ASSERT( event.m_eventType == Tr2VisibilityEvent::PORTAL_EXIT );
-
-	DoPortalPreExit( event, gatherType );
-	DoViewParametersChanged( event, gatherType, WODINTBATCHGROUP_END );
-
-	// Early exit if there are no active primary batches
-	if( !m_activePrimaryRenderBatches )
-	{
-		return;
-	}
-
-	Tr2InteriorPlaceable* placeable = dynamic_cast<Tr2InteriorPlaceable*>( event.m_userData.p );
-	Tr2InteriorMirror* mirror = placeable->GetMirror( event.m_mirrorIndex );
-
-	m_mirrorToWorldMatrixStack.pop_back();
-
-	// Update the accumulated mirror-to-world matrix
-	m_mirrorToWorldMatrix = Tr2Renderer::GetIdentityTransform();
-	for( std::vector<Matrix>::iterator it = m_mirrorToWorldMatrixStack.begin();
-		it != m_mirrorToWorldMatrixStack.end(); ++it )
-	{
-		m_mirrorToWorldMatrix *= ( *it );
-	}
-
-	if( gatherType == PREPASS_FORWARD_GATHER || gatherType == FULL_FORWARD_GATHER )
-	{
-		// Get the per-object data for the opaque batches
-		Tr2PerObjectData* perObjectOpaque =
-			placeable->GetPerObjectDataWithPerInstanceLighting(
-				m_activePrimaryRenderBatches,
-				&m_activeLightSet,
-				event.m_objectToWorldMatrix,
-				m_mirrorToWorldMatrix
-			);
-
-		m_activePrimaryRenderBatches->SetRenderingMode(
-			Tr2EffectStateManager::RM_ANY );
-		m_activePrimaryRenderBatches->SetUserData(
-			ConstructKey( m_currentObjectGroup, WODINTBATCHGROUP_END ) );
-
-		// Setup stencil batch parameters
-		WodStencilBatchParams params =
-		{
-			mirror->GetMeshIndex(),
-			mirror->GetAreaIndex(),
-			m_stencilStack.back().second,
-			m_stencilStack.back().first,
-			STENCILOP_DECR,
-			false, // This flag indicates that we're coming out of a mirror,
-			// so we don't need to clear depth
-			true // We do render mirror material on forward pass
-		};
-
-		// Set the stencil parameters
-		placeable->SetStencilParameters( params );
-
-		m_activePrimaryRenderBatches->SetRenderingMode( Tr2EffectStateManager::RM_ALPHA );
-		// Get the stencil batches
-		placeable->GetBatches( m_activePrimaryRenderBatches,
-						        TRIBATCHTYPE_MIRROR,
-								perObjectOpaque );
-
-		// Pop the stencil stack
-		m_stencilStack.pop_back();
-	}
-	else if( gatherType == LIGHT_GATHER || gatherType == PREPASS_GATHER )
-	{
-		Tr2InteriorStencilMaskBatch* stencilBatch =
-			m_activePrimaryRenderBatches->Allocate<Tr2InteriorStencilMaskBatch>();
-
-		if( stencilBatch )
-		{
-			stencilBatch->SetShaderMaterial( NULL );
-			stencilBatch->SetPerObjectData( NULL );
-			stencilBatch->SetGeometryResource( NULL );
-			stencilBatch->SetMeshParameters( 0, 0, 0 );
-
-			// This flag disables the stencil test
-			stencilBatch->SetDisableStencil( false );
-			stencilBatch->SetStencilTest( m_stencilStack.back().second );
-
-			stencilBatch->SetRenderingMode( Tr2EffectStateManager::RM_ANY );
-			m_activePrimaryRenderBatches->SetUserData(
-				ConstructKey( m_currentObjectGroup, WODINTBATCHGROUP_END ) );
-
-			m_activePrimaryRenderBatches->Commit( stencilBatch );
-
-			// Pop the stencil stack
-			m_stencilStack.pop_back();
-		}
-	}
-
-	// Increment the current object group
-	++m_currentObjectGroup;
-}
-
-// --------------------------------------------------------------------------------------
-// Description
-//   This function executes a portal pre-exit event in a normal batch gathering operation.
-//   It queues up any outstanding transparent batches for the cell it is exiting and pops
-//   the transparency stack.
-// Arguments:
-//   event		- The portal pre-exit event to execute.
-//   gatherType - The type of batches to gather
-// See Also:
-//   OnPortalPreExit, DoPortalPreExitPrePass
-// --------------------------------------------------------------------------------------
-void Tr2InteriorScene::DoPortalPreExit( const Tr2VisibilityEvent& event,
-									    BatchGatherType gatherType )
-{
-	// Skip transparency gather during prepass
-	if( gatherType != PREPASS_GATHER && m_activeTransparentBatchStore && m_activePrimaryRenderBatches)
-	{
-		// Coming out of a portal, accumulate transparent batches
-		std::pair<int, int> batchRange = m_transparencyStack.back();
-		if( batchRange.first < batchRange.second )
-		{
-			for( int i = batchRange.second - 1; i >= batchRange.first; --i )
-			{
-				// Get the correct rendering mode
-				Tr2EffectStateManager::RenderingMode mode = gatherType == LIGHT_GATHER ?
-					Tr2EffectStateManager::RM_LIGHT : Tr2EffectStateManager::RM_ALPHA;
-
-				// Set the rendering mode
-				m_activePrimaryRenderBatches->SetRenderingMode( mode );
-
-				// Construct the sort key
-				m_activePrimaryRenderBatches->SetUserData(
-					ConstructKey( m_currentObjectGroup, WODINTBATCHGROUP_BLEND ) );
-				// Transfer the transparent batch to the primary batch accumulator
-				m_activeTransparentBatchStore->TransferBatchToOtherAccumulator(
-					m_activePrimaryRenderBatches, i );
-			}
-		}
-
-		// Pop the transparency stack
-		m_transparencyStack.pop_back();
 	}
 }
 
@@ -3004,14 +2635,7 @@ void Tr2InteriorScene::DoInstanceVisible( const Tr2VisibilityEvent& event,
 				}
 			}
 
-			if( m_enableSHSolver )
-			{
-				interior->SetSHLightingSolver( &m_shSolver );
-			}
-			else
-			{
-				interior->SetSHLightingSolver( NULL );
-			}
+			interior->SetSHLightingSolver( NULL );
 
 			// Get the per-object data for opaque batches
 			Tr2PerObjectData* perObjectOpaque =
@@ -3075,101 +2699,6 @@ void Tr2InteriorScene::DoInstanceVisible( const Tr2VisibilityEvent& event,
 
 // --------------------------------------------------------------------------------------
 // Description
-//   This function executes a stencil mask event in a normal batch gathering operation.
-//   If the visibility query is entering a mirror, it queues up a stencil mask batch
-//   to wipe the depth and increment the stencil buffer for the mirrored pixels.  If the
-//   query is exiting a mirror, it does not queue up a batch (because this is handled in
-//   the DoPortalExit function).  Also, on mirror entry, this function queues up a
-//   background cubemap batch to draw the background in a mirror.
-// Arguments:
-//   event - The stencil mask event to execute.
-//   gatherType - The type of batches to gather.
-// See Also:
-//   OnStencilMask, DoPortalExit
-// --------------------------------------------------------------------------------------
-void Tr2InteriorScene::DoStencilMask( const Tr2VisibilityEvent& event,
-									  BatchGatherType gatherType )
-{
-	Tr2InteriorPlaceable* placeable = dynamic_cast<Tr2InteriorPlaceable*>( event.m_userData.p );
-
-	Tr2InteriorMirror* mirror = placeable->GetMirror( event.m_mirrorIndex );
-	m_stencilStack.push_back( std::make_pair( event.m_stencilWrite,
-		event.m_stencilTest ) );
-
-	if( gatherType == PREPASS_GATHER || gatherType == FULL_FORWARD_GATHER )
-	{
-		// Get the per-object data for the opaque batches
-		Tr2PerObjectData* perObjectOpaque =
-			placeable->GetPerObjectDataWithPerInstanceLighting(
-				m_activePrimaryRenderBatches,
-				&m_activeLightSet,
-				event.m_objectToWorldMatrix,
-				m_mirrorToWorldMatrix
-			);
-
-		m_activePrimaryRenderBatches->SetRenderingMode(
-			Tr2EffectStateManager::RM_ANY );
-		m_activePrimaryRenderBatches->SetUserData(
-			ConstructKey( m_currentObjectGroup, WODINTBATCHGROUP_BEGIN ) );
-
-		// Setup stencil batch parameters
-		WodStencilBatchParams params =
-		{
-			mirror->GetMeshIndex(),
-			mirror->GetAreaIndex(),
-			event.m_stencilWrite,
-			event.m_stencilTest,
-			STENCILOP_INCR,
-			true, // This flag indicates that we're going into a mirror,
-					// so we need to clear depth
-			gatherType == FULL_FORWARD_GATHER // We render mirror material if in forward pass
-		};
-
-		// Set the stencil parameters on the placeable
-		placeable->SetStencilParameters( params );
-		if( gatherType == FULL_FORWARD_GATHER )
-		{
-			m_activePrimaryRenderBatches->SetRenderingMode( Tr2EffectStateManager::RM_ALPHA );
-		}
-		// Get the mirror batches
-		placeable->GetBatches( m_activePrimaryRenderBatches,
-							    TRIBATCHTYPE_MIRROR,
-								perObjectOpaque );
-	}
-	else if( gatherType == LIGHT_GATHER || gatherType == PREPASS_FORWARD_GATHER  )
-	{
-		Tr2InteriorStencilMaskBatch* stencilBatch =
-			m_activePrimaryRenderBatches->Allocate<Tr2InteriorStencilMaskBatch>();
-
-		if( stencilBatch )
-		{
-			stencilBatch->SetShaderMaterial( NULL );
-			stencilBatch->SetPerObjectData( NULL );
-			stencilBatch->SetGeometryResource( NULL );
-			stencilBatch->SetMeshParameters( 0, 0, 0 );
-
-			// This flag disables the stencil test
-			stencilBatch->SetDisableStencil( false );
-			stencilBatch->SetStencilTest( event.m_stencilWrite );
-
-			stencilBatch->SetRenderingMode( Tr2EffectStateManager::RM_ANY );
-			m_activePrimaryRenderBatches->SetUserData(
-				ConstructKey( m_currentObjectGroup, WODINTBATCHGROUP_BEGIN ) );
-
-			m_activePrimaryRenderBatches->Commit( stencilBatch );
-		}
-	}
-
-	// If we're gathering batches for the forward pass, get a cubemap
-	// batch for the background
-	if( gatherType == PREPASS_FORWARD_GATHER || gatherType == FULL_FORWARD_GATHER )
-	{
-		PrepareBackgroundCubemapBatch( m_activePrimaryRenderBatches );
-	}
-}
-
-// --------------------------------------------------------------------------------------
-// Description
 //   This function gathers pre-pass batches.  It ignores lights, and in some cases calls
 //   special pre-pass event handlers to process events while ignoring transparency.
 // Arguments:
@@ -3192,12 +2721,6 @@ void Tr2InteriorScene::GatherPrePassBatches( Tr2VisibilityResults* results )
 			{
 			case Tr2VisibilityEvent::QUERY_BEGIN:
 				DoQueryBegin( event, PREPASS_GATHER );
-				break;
-			case Tr2VisibilityEvent::PORTAL_ENTER:
-				DoPortalEnter( event, PREPASS_GATHER );
-				break;
-			case Tr2VisibilityEvent::PORTAL_EXIT:
-				DoPortalExit( event, PREPASS_GATHER );
 				break;
 			case Tr2VisibilityEvent::INSTANCE_VISIBLE:
 				DoInstanceVisible( event, PREPASS_GATHER );
@@ -3237,12 +2760,6 @@ void Tr2InteriorScene::GatherLightBatches( Tr2VisibilityResults* results )
 			case Tr2VisibilityEvent::QUERY_END:
 				DoQueryEnd( event, LIGHT_GATHER );
 				break;
-			case Tr2VisibilityEvent::PORTAL_ENTER:
-				DoPortalEnter( event, LIGHT_GATHER );
-				break;
-			case Tr2VisibilityEvent::PORTAL_EXIT:
-				DoPortalExit( event, LIGHT_GATHER );
-				break;
 			case Tr2VisibilityEvent::INSTANCE_VISIBLE:
 				DoInstanceVisible( event, LIGHT_GATHER );
 				break;
@@ -3280,12 +2797,6 @@ void Tr2InteriorScene::GatherPrepassForwardBatches( Tr2VisibilityResults* result
 				break;
 			case Tr2VisibilityEvent::QUERY_END:
 				DoQueryEnd( event, PREPASS_FORWARD_GATHER );
-				break;
-			case Tr2VisibilityEvent::PORTAL_ENTER:
-				DoPortalEnter( event, PREPASS_FORWARD_GATHER );
-				break;
-			case Tr2VisibilityEvent::PORTAL_EXIT:
-				DoPortalExit( event, PREPASS_FORWARD_GATHER );
 				break;
 			case Tr2VisibilityEvent::INSTANCE_VISIBLE:
 				DoInstanceVisible( event, PREPASS_FORWARD_GATHER );
@@ -3326,12 +2837,6 @@ void Tr2InteriorScene::GatherFullForwardBatches( Tr2VisibilityResults* results )
 			case Tr2VisibilityEvent::QUERY_END:
 				DoQueryEnd( event, FULL_FORWARD_GATHER );
 				break;
-			case Tr2VisibilityEvent::PORTAL_ENTER:
-				DoPortalEnter( event, FULL_FORWARD_GATHER );
-				break;
-			case Tr2VisibilityEvent::PORTAL_EXIT:
-				DoPortalExit( event, FULL_FORWARD_GATHER );
-				break;
 			case Tr2VisibilityEvent::INSTANCE_VISIBLE:
 				DoInstanceVisible( event, FULL_FORWARD_GATHER );
 				break;
@@ -3370,12 +2875,6 @@ void Tr2InteriorScene::GatherFlareBatches( Tr2VisibilityResults* results )
 				break;
 			case Tr2VisibilityEvent::QUERY_END:
 				DoQueryEnd( event, FLARE_GATHER );
-				break;
-			case Tr2VisibilityEvent::PORTAL_ENTER:
-				DoPortalEnter( event, FLARE_GATHER );
-				break;
-			case Tr2VisibilityEvent::PORTAL_EXIT:
-				DoPortalExit( event, FLARE_GATHER );
 				break;
 			case Tr2VisibilityEvent::INSTANCE_VISIBLE:
 				DoInstanceVisible( event, FLARE_GATHER );

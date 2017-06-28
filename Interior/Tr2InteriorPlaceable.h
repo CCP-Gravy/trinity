@@ -13,7 +13,6 @@
 // Forward declarations
 //
 class TriFrustum;
-class Tr2InteriorMirror;
 class Tr2LitPerObjectData;
 
 //--------------------------------------------------------------------------------------------------
@@ -122,10 +121,6 @@ public:
 		m_stencilParams = params;
 	}
 
-	size_t GetMirrorCount() const { return m_mirrors.size(); }
-	// Get mirror by index
-	Tr2InteriorMirror* GetMirror( size_t index ) const;
-
 	//////////////////////////////////////////////////////////////////////////
 	// ITr2Pickable
 	virtual IRoot* GetID( uint16_t ) { return this->GetRawRoot(); }
@@ -166,8 +161,6 @@ private:
 
 	// Calculate bounding box
 	void CalculateBoundingBox( Vector3& min, Vector3& max );
-
-	void CreateMirrors();
 
 	void AddReflectionMap( TriTextureRes* texture );
 	void RemoveReflectionMap( TriTextureRes* texture );
@@ -220,9 +213,6 @@ private:
 
 	// Bounding sphere
 	Vector4 m_boundingSphere;
-
-	// Mirrors
-	std::vector<Tr2InteriorMirror*> m_mirrors;
 
 	// SH lighting solver for transparent rendering
 	ITr2InteriorSHLightingSolver *m_shSolver;

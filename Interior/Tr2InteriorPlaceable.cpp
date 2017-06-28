@@ -8,7 +8,6 @@
 #include "Utilities/BoundingSphere.h"
 #include "Tr2LitPerObjectData.h"
 #include "Tr2InteriorCell.h"
-#include "Tr2InteriorMirror.h"
 #include "Wod/WodPlaceableRes.h"
 #include "TriLineSet.h"
 #include "Tr2Mesh.h"
@@ -75,7 +74,6 @@ bool Tr2InteriorPlaceable::AddToScene( Tr2ApexScene *apexScene )
 	}
 
 	RebuildVolume();
-	CreateMirrors();
 	
 	m_isDirty = true;
 
@@ -627,12 +625,6 @@ void Tr2InteriorPlaceable::SetPosition( const Vector3& pos )
 		m_transform._42 = pos.y;
 		m_transform._43 = pos.z;
 
-		for( std::vector<Tr2InteriorMirror*>::iterator mirrorIt = m_mirrors.begin(); 
-			 mirrorIt != m_mirrors.end(); ++mirrorIt )
-		{
-			( *mirrorIt )->SetTransformMatrix( m_transform );
-		}
-
 		m_isDirty = true;
 	}
 }
@@ -662,12 +654,6 @@ void Tr2InteriorPlaceable::SetRotation( const Quaternion& rotQuat )
 		D3DXMatrixDecompose( &tmpScale, &tmpRotation, &tmpTranslation, &m_transform );
 		D3DXMatrixTransformation( &m_transform, NULL, NULL, &tmpScale, NULL, &rotQuat, &tmpTranslation );
 
-		for( std::vector<Tr2InteriorMirror*>::iterator mirrorIt = m_mirrors.begin(); 
-			 mirrorIt != m_mirrors.end(); ++mirrorIt )
-		{
-			( *mirrorIt )->SetTransformMatrix( m_transform );
-		}
-
 		m_isDirty = true;
 	}
 }
@@ -696,11 +682,6 @@ void Tr2InteriorPlaceable::SetScaling( const Vector3& scaleVec )
 
 		D3DXMatrixDecompose( &tmpScale, &tmpRotation, &tmpTranslation, &m_transform );
 		D3DXMatrixTransformation( &m_transform, NULL, NULL, &scaleVec, NULL, &tmpRotation, &tmpTranslation );
-
-		for( std::vector<Tr2InteriorMirror*>::iterator mirrorIt = m_mirrors.begin(); mirrorIt != m_mirrors.end(); ++mirrorIt )
-		{
-			( *mirrorIt )->SetTransformMatrix( m_transform );
-		}
 
 		m_isDirty = true;
 	}
@@ -750,100 +731,6 @@ void Tr2InteriorPlaceable::RebuildVolume( void )
 	{
 		CalculateBoundingBox( minBounds, maxBounds );
 	}
-}
-
-void Tr2InteriorPlaceable::CreateMirrors()
-{
-	for( auto it = m_mirrors.begin(); it != m_mirrors.end(); ++it )
-	{
-		Tr2InteriorMirror* mirror = *it;
-		CCP_DELETE( mirror );
-	}
-	m_mirrors.clear();
-
-	if( !m_placeableRes )
-	{
-		return;
-	}
-
-	Vector3 minBounds, maxBounds;
-
-	Tr2ModelPtr model = m_placeableRes->GetVisualModel();
-
-	for( unsigned int meshIx = 0; meshIx < model->GetNumOfMeshes(); ++meshIx )
-	{
-		Tr2Mesh* mesh = model->GetMesh( meshIx );
-		if( !mesh )
-			continue;
-
-		Tr2MeshAreaVector* mirrorAreas = mesh->GetAreas( TRIBATCHTYPE_MIRROR );
-		for( PTr2MeshAreaVector::iterator it = mirrorAreas->begin(); it != mirrorAreas->end(); ++it )
-		{
-			if( !mesh->GetAreaBoundingBox( ( *it )->GetIndex(), minBounds, maxBounds ) )
-				continue;
-
-			Tr2InteriorMirror* mirror = CCP_NEW("Tr2InteriorMirror" ) Tr2InteriorMirror();
-
-			if( !mirror )
-			{
-				continue;
-			}
-
-			m_mirrors.push_back( mirror );
-
-			// Set mirror bounding box
-			mirror->SetBoundingBox( minBounds, maxBounds );
-
-			// Set mesh and area indices
-			mirror->SetMeshIndex( mesh->GetMeshIndex() );
-			mirror->SetAreaIndex( ( *it )->GetIndex() );
-
-			// Set placeable
-			mirror->SetPlaceable( this );
-
-			// Set index
-			mirror->SetMirrorIndex( (unsigned int)m_mirrors.size() - 1 );
-
-			// Compute warp matrices
-			Matrix warpMatrixFront( XMMatrixIdentity() );
-			Matrix warpMatrixBack( XMMatrixIdentity() );
-			
-			Vector3 edge1, edge2, pointOnTriangle;
-			if( !mesh->GetAreaBasis( ( *it )->GetIndex(), pointOnTriangle, edge1, edge2 ) )
-			{
-				m_isDirty = true;
-				return;
-			}
-			edge1 = XMVector3Normalize( edge1 );
-			edge2 = XMVector3Normalize( edge2 );
-			Vector3 normal( XMVector3Normalize( XMVector3Cross( edge1, edge2 ) ) );
-			warpMatrixFront.GetX() = edge1;
-			warpMatrixFront.GetY() = edge2;
-			warpMatrixFront.GetZ() = normal;
-			warpMatrixFront.GetTranslation() = pointOnTriangle;
-
-			warpMatrixBack.GetX() = edge1;
-			warpMatrixBack.GetY() = edge2;
-			warpMatrixBack.GetZ() = -normal;
-			warpMatrixBack.GetTranslation() = pointOnTriangle;
-
-			mirror->SetWarpMatrixFront( warpMatrixFront );
-			mirror->SetWarpMatrixBack( warpMatrixBack );
-
-			// Set transformation
-			mirror->SetTransformMatrix( m_transform );
-		}
-	}
-}
-
-Tr2InteriorMirror* Tr2InteriorPlaceable::GetMirror( size_t index ) const
-{
-	if( index < m_mirrors.size() )
-	{
-		return m_mirrors[index];
-	}
-
-	return NULL;
 }
 
 // --------------------------------------------------------------------------------------
@@ -948,7 +835,6 @@ void Tr2InteriorPlaceable::LoadPlaceableRes()
 
 	m_placeableRes = BlueCastPtr( p );
 	BindLowLevelShaders();
-	CreateMirrors();
 }
 
 bool Tr2InteriorPlaceable::IsStatic( void ) const
