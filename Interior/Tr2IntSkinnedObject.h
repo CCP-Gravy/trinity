@@ -54,8 +54,7 @@ public:
 	virtual Tr2PerObjectData* GetPerObjectDataWithPerInstanceLighting( 
 		ITriRenderBatchAccumulator* accumulator,
 		Tr2InteriorLightSet* lightSet,
-		const Matrix& objectToWorldMatrix, 
-		const Matrix& mirrorToWorldMatrix 
+		const Matrix& objectToWorldMatrix 
 		);
 
 	virtual void SetPosition(const Vector3 &pos);
@@ -83,11 +82,6 @@ public:
 	//////////////////////////////////////////////////////////////////////////
 	// ITr2InteriorDynamic
 	
-	virtual bool TestCellIntersectionAndAdd( Tr2InteriorCell* cell );
-	virtual bool IsDirty( void ) const { return m_isDirty; }
-	void SetDirtyFlag( bool isDirty ) { m_isDirty = isDirty; }
-	virtual bool IsShadowCaster( void ) const { return true; }
-
 	virtual void SetLOD( const TriFrustum* frustum );
 
 	// sizes
@@ -105,8 +99,6 @@ public:
 	void BindLowLevelShaders();
 
 protected:
-	virtual void ExplicitBoundsChanged();
-
 	void AddReflectionMap( TriTextureRes* texture );
 	void RemoveReflectionMap( TriTextureRes* texture );
 protected:
@@ -117,8 +109,6 @@ protected:
 
 	// lightsources on this avatar
 	Tr2InteriorLightSet m_lightSet;
-
-	bool m_isDirty;
 
 	Vector3 m_currentPosition;
 	Vector3 m_currentScaling;
@@ -134,13 +124,11 @@ protected:
 	Tr2PerObjectData* GetPerObjectDataCpuSkinning( 
 		ITriRenderBatchAccumulator* accumulator,
 		Tr2InteriorLightSet* lightSet, 
-		const Matrix& objectToWorldMatrix, 
-		const Matrix& mirrorToWorldMatrix );
+		const Matrix& objectToWorldMatrix );
 	Tr2PerObjectData* GetPerObjectDataGpuSkinning( 
 		ITriRenderBatchAccumulator* accumulator,
 		Tr2InteriorLightSet* lightSet, 
-		const Matrix& objectToWorldMatrix, 
-		const Matrix& mirrorToWorldMatrix );
+		const Matrix& objectToWorldMatrix );
 
 	// Per-cell reflection maps
 	TriTextureResPtr m_cellReflectionMaps[2];
@@ -154,9 +142,6 @@ protected:
 
 	// Depth offset for transparency sorting
 	float m_depthOffset;
-
-	// Cached mirror-to-world matrix from last GetPerObjectData call
-	Matrix m_mirrorToWorldMatrix;
 };
 
 TYPEDEF_BLUECLASS( Tr2IntSkinnedObject );

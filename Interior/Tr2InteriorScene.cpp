@@ -19,10 +19,8 @@
 
 #include "TriLineSet.h"
 #include "Tr2InteriorPlaceable.h"
-#include "Tr2InteriorStatic.h"
 #include "ITr2PhysicsUpdater.h"
 #include "Curves/TriCurveSet.h"
-#include "Tr2InteriorCell.h"
 #include "Tr2TextureAtlas.h"
 #include "Shader/Tr2Effect.h"
 #include "TriFrustum.h"
@@ -127,7 +125,6 @@ namespace
 }
 
 Tr2InteriorScene::Tr2InteriorScene( IRoot* lockobj /*= NULL */ ):
-	PARENTLOCK( m_cells ),
 	PARENTLOCK( m_lights ),
 	PARENTLOCK( m_dynamics ),
 	PARENTLOCK( m_dynamicsPendingLoad ),
@@ -193,7 +190,6 @@ Tr2InteriorScene::Tr2InteriorScene( IRoot* lockobj /*= NULL */ ):
 	// List notify
 	m_lights.SetNotify( this );
 	m_dynamics.SetNotify( this );
-	m_cells.SetNotify( this );
 
 	PrepareResources();
 
@@ -241,14 +237,7 @@ bool Tr2InteriorScene::Initialize()
 
 bool Tr2InteriorScene::OnModified( Be::Var* value )
 {
-    if( IsMatch( value, m_visualizeMethod ) )
-    {
-		for( auto it = m_cells.begin(); it != m_cells.end(); ++it )
-		{
-			( *it )->SetVisualizeMethod( m_visualizeMethod );
-		}
-    }
-    else if( IsMatch( value, m_backgroundCubeMapPath ) )
+    if( IsMatch( value, m_backgroundCubeMapPath ) )
 	{
 		SetBackgroundCubemapResPath();
 	}
@@ -261,27 +250,10 @@ void Tr2InteriorScene::OnListModified( long event, ssize_t key, ssize_t key2, IR
 {
 	if( theList == &m_lights )
 	{
-		OnLightsListModified( event, key, key2, currvalue );
 	}
 	else if( theList == &m_dynamics )
 	{
 		OnDynamicsListModified( event, key, key2, currvalue );
-	}
-	else if( theList == &m_cells )
-	{
-		// Set the dirty flags on all the lights
-		for( PITr2InteriorLightVector::iterator it = m_lights.begin();
-			it != m_lights.end(); ++it )
-		{
-			( *it )->SetDirtyFlag( true );
-		}
-
-		// Set the dirty flags on all the dynamics
-		for( PITr2InteriorDynamicVector::iterator it = m_dynamics.begin();
-			it != m_dynamics.end(); ++it )
-		{
-			( *it )->SetDirtyFlag( true );
-		}
 	}
 }
 
@@ -296,8 +268,6 @@ void Tr2InteriorScene::ReleaseResources( TriStorage s )
 
 bool Tr2InteriorScene::OnPrepareResources()
 {
-	USE_MAIN_THREAD_RENDER_CONTEXT();
-
 	return true;
 }
 
@@ -355,15 +325,6 @@ void Tr2InteriorScene::Update( Be::Time realTime, Be::Time simTime )
 	}
 
 	{
-		CCP_STATS_ZONE( "UpdateBoundingBoxes" );
-		// Update cell bounding boxes (so lights and dynamics can add on the first Update call)
-		for( PTr2InteriorCellVector::iterator it = m_cells.begin(); it != m_cells.end(); ++it )
-		{
-			( *it )->UpdateBoundingBox();
-		}
-	}
-
-	{
 		CCP_STATS_ZONE( "PendingLoads" );
 		// Add any dynamics that have finished loading
 		std::vector<ITr2InteriorDynamic*> dynamicsToRemove;
@@ -383,19 +344,6 @@ void Tr2InteriorScene::Update( Be::Time realTime, Be::Time simTime )
 			{
 				m_dynamicsPendingLoad.Remove( index );
 			}
-		}
-	}
-
-	UpdateLights();
-	UpdateDynamics();
-	UpdateCells();
-
-	{
-		CCP_STATS_ZONE( "CellUpdate" );
-		// since everything in the scene is in a cell, this ::Update spreads to all renderables
-		for( Tr2InteriorCellVector::iterator it = m_cells.begin(); it != m_cells.end(); ++it )
-		{
-			( *it )->Update( simTime );
 		}
 	}
 
@@ -439,28 +387,6 @@ void Tr2InteriorScene::Update( Be::Time realTime, Be::Time simTime )
 		m_apexScene->PostUpdate( simTime, m_apexLODResourceBudget, m_apexLODResourceBudgetConsumed );
 	}
 #endif
-}
-
-
-namespace
-{
-float GetCellDistance( Tr2InteriorCell* cell, const Vector3& point )
-{
-	Vector3 minBounds, maxBounds;
-	if( !cell->GetBoundingBox( minBounds, maxBounds ) )
-	{
-		return 0;
-	}
-
-	float distance;
-	distance = point.x - minBounds.x;
-	distance = std::min( distance, point.y - minBounds.y );
-	distance = std::min( distance, point.z - minBounds.z );
-	distance = std::min( distance, maxBounds.x - point.x );
-	distance = std::min( distance, maxBounds.y - point.y );
-	distance = std::min( distance, maxBounds.z - point.z );
-	return std::max( distance, 0.0f );
-}
 }
 
 void Tr2InteriorScene::Render( Tr2RenderContext& renderContext )
@@ -521,12 +447,6 @@ void Tr2InteriorScene::VisibilityQuery( Tr2VisibilityResults* results )
 	m_visibilityResults = results;
 	m_visibilityResults->Clear();
 
-	// something there to render?
-	if( !m_cells.size() )
-	{
-		return;
-	}
-
 	// Choose LOD for dynamics
 	TriFrustum frustum;
 	frustum.DeriveFrustum(
@@ -579,22 +499,6 @@ void Tr2InteriorScene::DoVisibilityQuery( const TriFrustum& frustum, const Matri
 	{
 		OnQueryBegin();
 	}
-	for( auto ct = m_cells.begin(); ct != m_cells.end(); ++ct )
-	{
-		for( auto it = ( *ct )->m_statics.begin(); it != ( *ct )->m_statics.end(); ++it )
-		{
-			Matrix objectToWorld;
-			if( ( *it )->IsInFrustum( frustum, objectToWorld ) )
-			{
-				if( depth )
-				{
-					objectToWorld = objectToWorld * mirrorMatrix;
-				}
-				OnInstanceVisible( *it, objectToWorld );
-			}
-		}
-	}
-
 	for( auto it = m_dynamics.begin(); it != m_dynamics.end(); ++it )
 	{
 		Matrix objectToWorld;
@@ -923,7 +827,7 @@ void Tr2InteriorScene::PrepareBackgroundCubemapBatch( ITriRenderBatchAccumulator
 			Tr2InteriorPerObjectPSData perObjectPSBuffer;
 			memset( &perObjectPSBuffer, 0, sizeof( perObjectPSBuffer ) );
 			// Set the mirror-to-world matrix
-			perObjectPSBuffer.mirrorToWorldMatrix = m_mirrorToWorldMatrix;
+			perObjectPSBuffer.mirrorToWorldMatrix = Tr2Renderer::GetIdentityTransform();
 
 			// Copy buffer into the per-object data
 			perObjectData->CopyToPSFloatBuffer( perObjectPSBuffer );
@@ -981,204 +885,8 @@ void Tr2InteriorScene::RenderGeometry( ITr2ShaderMaterial* overrideEffect, Tr2Re
 	renderContext.m_esm.EndManagedRendering();
 }
 
-// -------------------------------------------------------------
-// Description:
-//   Helper function to render parts of a given box faces that
-//   are inside another box.
-// Arguments:
-//   minBounds1 - Min bounds of box which faces we need to render
-//   maxBounds1 - Max bounds of box which faces we need to render
-//   minBounds2 - Min bounds of box to test intersection with
-//   minBounds3 - Max bounds of box to test intersection with
-//   transform - Transform matrix from 2nd box coordinate system
-//               to 1st box CS
-// -------------------------------------------------------------
-static void RenderBoxInsideBox( const Vector3& minBounds1, const Vector3& maxBounds1,
-								const Vector3& minBounds2, const Vector3& maxBounds2, const Matrix &transform )
-{
-	USE_MAIN_THREAD_RENDER_CONTEXT();
-	static const unsigned int color = 0x44ff3333;
-
-	const Vector3 sides[6][4] = {
-		{
-			Vector3( minBounds1.x, minBounds1.y, minBounds1.z ),
-			Vector3( minBounds1.x, maxBounds1.y, minBounds1.z ),
-			Vector3( minBounds1.x, maxBounds1.y, maxBounds1.z ),
-			Vector3( minBounds1.x, minBounds1.y, maxBounds1.z ),
-		},
-		{
-			Vector3( maxBounds1.x, minBounds1.y, minBounds1.z ),
-			Vector3( maxBounds1.x, minBounds1.y, maxBounds1.z ),
-			Vector3( maxBounds1.x, maxBounds1.y, maxBounds1.z ),
-			Vector3( maxBounds1.x, maxBounds1.y, minBounds1.z ),
-		},
-		{
-			Vector3( minBounds1.x, minBounds1.y, minBounds1.z ),
-			Vector3( maxBounds1.x, minBounds1.y, minBounds1.z ),
-			Vector3( maxBounds1.x, minBounds1.y, maxBounds1.z ),
-			Vector3( minBounds1.x, minBounds1.y, maxBounds1.z ),
-		},
-		{
-			Vector3( minBounds1.x, maxBounds1.y, minBounds1.z ),
-			Vector3( minBounds1.x, maxBounds1.y, maxBounds1.z ),
-			Vector3( maxBounds1.x, maxBounds1.y, maxBounds1.z ),
-			Vector3( maxBounds1.x, maxBounds1.y, minBounds1.z ),
-		},
-		{
-			Vector3( minBounds1.x, minBounds1.y, minBounds1.z ),
-			Vector3( maxBounds1.x, minBounds1.y, minBounds1.z ),
-			Vector3( maxBounds1.x, maxBounds1.y, minBounds1.z ),
-			Vector3( minBounds1.x, maxBounds1.y, minBounds1.z ),
-		},
-		{
-			Vector3( minBounds1.x, minBounds1.y, maxBounds1.z ),
-			Vector3( minBounds1.x, maxBounds1.y, maxBounds1.z ),
-			Vector3( maxBounds1.x, maxBounds1.y, maxBounds1.z ),
-			Vector3( maxBounds1.x, minBounds1.y, maxBounds1.z ),
-		},
-	};
-
-	D3DXPLANE planes[6] = {
-		D3DXPLANE( -1, 0, 0, minBounds2.x ),
-		D3DXPLANE( 1, 0, 0, -maxBounds2.x ),
-		D3DXPLANE( 0, -1, 0, minBounds2.y ),
-		D3DXPLANE( 0, 1, 0, -maxBounds2.y ),
-		D3DXPLANE( 0, 0, -1, minBounds2.z ),
-		D3DXPLANE( 0, 0, 1, -maxBounds2.z ),
-	};
-
-	Matrix planeTransform;
-	D3DXMatrixInverse( &planeTransform, NULL, &transform );
-	D3DXMatrixTranspose( &planeTransform, &planeTransform );
-	D3DXPlaneTransformArray( planes, sizeof( D3DXPLANE ), planes, sizeof( D3DXPLANE ), &planeTransform, 6 );
-
-	for( int side = 0; side < 6; ++side )
-	{
-  		TriDebugResourceHelper::VertexPosColor polygon1[12];
-		TriDebugResourceHelper::VertexPosColor polygon2[12];
-		TriDebugResourceHelper::VertexPosColor *inPolygon = polygon1;
-		TriDebugResourceHelper::VertexPosColor *outPolygon = polygon2;
-		for( int i = 0; i < 4; ++i )
-		{
-			inPolygon[i].m_pos = sides[side][i];
-			inPolygon[i].m_color = color;
-		}
-		int inCount = 4;
-		int outCount = 0;
-
-		for( int plane = 0; plane < 6; ++plane )
-		{
-			for( int edge = 0; edge < inCount; ++edge )
-			{
-				const Vector3& vertex1 = inPolygon[edge].m_pos;
-				const Vector3& vertex2 = inPolygon[( edge + 1 ) % inCount].m_pos;
-				float v0 = D3DXPlaneDotCoord( &planes[plane], &vertex1 );
-				float v1 = D3DXPlaneDotCoord( &planes[plane], &vertex2 );
-				if( v0 <= 0 )
-				{
-					outPolygon[outCount++] = inPolygon[edge];
-					CCP_ASSERT( outCount < 12 );
-				}
-				if( v0 * v1 < 0 )
-				{
-					Vector3 result;
-					D3DXPlaneIntersectLine( &result, &planes[plane], &vertex1, &vertex2 );
-					outPolygon[outCount].m_pos = result;
-					outPolygon[outCount++].m_color = inPolygon[edge].m_color;
-					CCP_ASSERT( outCount < 12 );
-				}
-			}
-			std::swap( inPolygon, outPolygon );
-			std::swap( inCount, outCount );
-			outCount = 0;
-		}
-
-		if( inCount > 2 )
-		{
-			struct EffectCallback: public IRenderCallback
-			{
-				TriDebugResourceHelper::VertexPosColor *polygon;
-				unsigned int count;
-
-				void SubmitGeometry( Tr2RenderContext& renderContext )
-				{
-					uint32_t stride = sizeof( TriDebugResourceHelper::VertexPosColor );
-
-					renderContext.SetTopology( TOP_TRIANGLE_FAN );	//note doesn't exist anymore in DX11... only for debug rendering so can live with it for now.
-					renderContext.DrawPrimitiveUP( count - 2, polygon, stride );
-				}
-			} callback;
-
-			callback.polygon = inPolygon;
-			callback.count = unsigned( inCount );
-
-			g_debugResourceHelper.GetEffect()->Render( &callback, renderContext );
-		}
-	}
-}
-
-// -------------------------------------------------------------
-// Description:
-//   Helper function to render volume of intersection of two
-//   boxes. Used for debug rendering of cell intersection.
-// Arguments:
-//   minBounds1 - Min bounds of box which faces we need to render
-//   maxBounds1 - Max bounds of box which faces we need to render
-//   transform1 - Transform matrix from 1st box CS to world CS
-//   minBounds2 - Min bounds of box to test intersection with
-//   minBounds3 - Max bounds of box to test intersection with
-//   transform2 - Transform matrix from 2nd box CS to world CS
-// -------------------------------------------------------------
-static void RenderBoxIntersection( const Vector3& minBounds1, const Vector3& maxBounds1, const Matrix &transform1,
-								   const Vector3& minBounds2, const Vector3& maxBounds2, const Matrix &transform2 )
-{
-	Matrix toBox1, toBox2;
-	D3DXMatrixInverse( &toBox1, NULL, &transform1 );
-	toBox1 = transform2 * toBox1;
-	D3DXMatrixInverse( &toBox2, NULL, &transform2 );
-	toBox2 = transform1 * toBox2;
-
-	USE_MAIN_THREAD_RENDER_CONTEXT();
-
-	renderContext.m_esm.ApplyVertexDeclaration( g_debugResourceHelper.GetVertexPosColorDecl() );
-	renderContext.m_esm.ApplyStandardStates( Tr2EffectStateManager::RM_ALPHA );
-
-	Tr2Renderer::SetWorldTransform( transform1 );
-	RenderBoxInsideBox( minBounds1, maxBounds1, minBounds2, maxBounds2, toBox1 );
-
-	Tr2Renderer::SetWorldTransform( transform2 );
-	RenderBoxInsideBox( minBounds2, maxBounds2, minBounds1, maxBounds1, toBox2 );
-}
-
 void Tr2InteriorScene::RenderDebugInfo( Tr2RenderContext& renderContext )
 {
-	// lines
-	if( m_renderDebugInfo && m_debugLines )
-	{
-		// cells
-		for( PTr2InteriorCellVector::const_iterator it = m_cells.begin(); it != m_cells.end(); ++it )
-		{
-			( *it )->RenderDebugInfo( m_debugLines );
-		}
-
-		m_debugLines->Render( renderContext );
-		m_debugLines->Clear();
-
-		// Render cell intersections
-		for( PTr2InteriorCellVector::const_iterator it = m_cells.begin(); it != m_cells.end(); ++it )
-		{
-			Vector3 minBounds1, maxBounds1;
-			( *it )->GetBoundingBox( minBounds1, maxBounds1 );
-			for( PTr2InteriorCellVector::const_iterator jt = it + 1; jt != m_cells.end(); ++jt )
-			{
-				Vector3 minBounds2, maxBounds2;
-				( *jt )->GetBoundingBox( minBounds2, maxBounds2 );
-
-				RenderBoxIntersection( minBounds1, maxBounds1, Tr2Renderer::GetIdentityTransform(),
-									   minBounds2, maxBounds2, Tr2Renderer::GetIdentityTransform() );
-			}
-		}
-	}
 #if APEX_ENABLED
 	if( m_apexScene )
 	{
@@ -1215,8 +923,6 @@ void Tr2InteriorScene::AddLightSource( ITr2InteriorLight* lightSource )
 	if( pos == -1 )
 	{
 		m_lights.Insert( -1, lightSource );
-
-		lightSource->AddToScene();
 	}
 }
 
@@ -1244,14 +950,6 @@ void Tr2InteriorScene::RemoveLightSource( ITr2InteriorLight* lightSource )
 		CCP_LOGERR("Tr2InteriorScenel::RemoveLightSource() - interiorLightSource not found in the scene!" );
 		return;
 	}
-
-	// Remove this light source from the cells
-	for( PTr2InteriorCellVector::iterator it = m_cells.begin(); it != m_cells.end(); ++it )
-	{
-		( *it )->RemoveLight( lightSource );
-	}
-
-	lightSource->RemoveFromScene();
 
 	m_lights.Remove( pos );
 }
@@ -1308,12 +1006,6 @@ void Tr2InteriorScene::RemoveDynamic( ITr2InteriorDynamic* dynamic )
 
 	dynamic->RemoveFromScene();
 
-	// Remove the dynamic from all the cells
-	for( PTr2InteriorCellVector::iterator it = m_cells.begin(); it != m_cells.end(); ++it )
-	{
-		( *it )->RemoveDynamic( dynamic );
-	}
-
 	m_dynamics.Remove( pos );
 
 	// See if this dynamic is in the pending load list
@@ -1321,43 +1013,6 @@ void Tr2InteriorScene::RemoveDynamic( ITr2InteriorDynamic* dynamic )
 	if( pos != -1 )
 	{
 		m_dynamicsPendingLoad.Remove( pos );
-	}
-}
-
-// ------------------------------------------------------------------------------------------------------
-// Description
-//   This function updates lights, dynamics and portals for dirty cells (cells that has been moved).
-// ------------------------------------------------------------------------------------------------------
-void Tr2InteriorScene::UpdateCells()
-{
-	CCP_STATS_ZONE( __FUNCTION__ );
-	for( PTr2InteriorCellVector::iterator cellIt = m_cells.begin(); cellIt != m_cells.end(); ++cellIt )
-	{
-		Tr2InteriorCell* cell = *cellIt;
-
-		// Rebuild cell bounding box and mark root portals for rebuild
-		bool isCellDirty = cell->IsDirty();
-		if( isCellDirty )
-		{
-			cell->RebuildBoundingBox();
-		}
-
-		if( isCellDirty && ( cell->IsUnbounded() || cell->IsBoundingBoxReady() ) )
-		{
-			for( PITr2InteriorLightVector::iterator lit = m_lights.begin(); lit != m_lights.end(); ++lit )
-			{
-				( *lit )->TestCellIntersectionAndAdd( cell );
-			}
-			for( PITr2InteriorDynamicVector::iterator dit = m_dynamics.begin(); dit != m_dynamics.end(); ++dit )
-			{
-				if( ( *dit )->IsBoundingBoxReady() )
-				{
-					( *dit )->TestCellIntersectionAndAdd( cell );
-				}
-			}
-			cell->ResetDirtyFlag();
-		}
-		cell->MarkShadowsDirtyForSkinnedObjects();
 	}
 }
 
@@ -1440,11 +1095,6 @@ void Tr2InteriorScene::DoQueryBegin( const Tr2VisibilityEvent& event,
 									 BatchGatherType gatherType )
 {
 	CCP_ASSERT( event.m_eventType == Tr2VisibilityEvent::QUERY_BEGIN );
-
-	// Clear mirror matrix
-	m_mirrorToWorldMatrix = Tr2Renderer::GetIdentityTransform();
-	m_mirrorToWorldMatrixStack.clear();
-	m_mirrorToWorldMatrixStack.push_back( m_mirrorToWorldMatrix );
 
 	// Clear lights
 	m_activeLightSet.Clear();
@@ -1632,7 +1282,7 @@ void Tr2InteriorScene::DoInstanceVisible( const Tr2VisibilityEvent& event,
 	{
 		opaqueOnly = true;
 	}
-	if( gatherType == FLARE_GATHER && ( opaqueOnly || m_mirrorToWorldMatrixStack.size() > 1 ) )
+	if( gatherType == FLARE_GATHER && opaqueOnly )
 	{
 		return;
 	}
@@ -1666,9 +1316,7 @@ void Tr2InteriorScene::DoInstanceVisible( const Tr2VisibilityEvent& event,
 					m_activePrimaryRenderBatches ?
 						m_activePrimaryRenderBatches : m_activeTransparentBatchStore,
 					gatherType == FULL_FORWARD_GATHER ? &m_activeLightSet : nullptr,
-					event.m_objectToWorldMatrix,
-					m_mirrorToWorldMatrix
-				);
+					event.m_objectToWorldMatrix );
 
 			if( m_activePrimaryRenderBatches )
 			{
@@ -1903,142 +1551,6 @@ void Tr2InteriorScene::GatherFlareBatches( Tr2VisibilityResults* results )
 }
 
 // ------------------------------------------------------------------------------------------------------
-void Tr2InteriorScene::UpdateLights( void )
-{
-	CCP_STATS_ZONE( __FUNCTION__ );
-	// Visit each light
-	for( PITr2InteriorLightVector::iterator lit = m_lights.begin(); lit != m_lights.end(); ++lit )
-	{
-		// Check the dirty flag & update
-		if( ( *lit )->IsDirty() )
-		{
-			// Are the cells fully loaded yet?
-			bool cellsReady = true;
-			// Test intersection with each cell
-			for( Tr2InteriorCellVector::iterator cit = m_cells.begin(); cit != m_cells.end(); ++cit )
-			{
-				// If the bounding box is ready, do the intersection test
-				if( ( *cit )->IsUnbounded() || ( *cit )->IsBoundingBoxReady() )
-				{
-					( *lit )->TestCellIntersectionAndAdd( *cit );
-				}
-				// Otherwise bail out
-				else
-				{
-					cellsReady = false;
-					break;
-				}
-			}
-
-			// Clear the dirty flag on the light
-			if( cellsReady )
-			{
-				( *lit )->SetDirtyFlag( false );
-			}
-		}
-	}
-}
-
-// ------------------------------------------------------------------------------------------------------
-void Tr2InteriorScene::UpdateDynamics( void )
-{
-	CCP_STATS_ZONE( __FUNCTION__ );
-
-	for( PITr2InteriorDynamicVector::iterator dit = m_dynamics.begin(); dit != m_dynamics.end(); ++dit )
-	{
-		if( ( *dit )->IsDirty() && ( *dit )->IsBoundingBoxReady() )
-		{
-			bool cellsReady = true;
-			// Test intersection with each cell
-			for( Tr2InteriorCellVector::iterator cit = m_cells.begin(); cit != m_cells.end(); ++cit )
-			{
-				// If the bounding box is ready, do the intersection test
-				if( ( *cit )->IsUnbounded() || ( *cit )->IsBoundingBoxReady() )
-				{
-					if( ( *dit )->TestCellIntersectionAndAdd( *cit ) )
-					{
-						( *cit )->MarkShadowsDirtyForDynamic( *dit );
-					}
-				}
-				// Otherwise bail out
-				else
-				{
-					cellsReady = false;
-					break;
-				}
-			}
-
-			// Clear the dirty flag on the dynamic
-			if( cellsReady )
-			{
-				( *dit )->SetDirtyFlag( false );
-			}
-		}
-	}
-}
-
-// ------------------------------------------------------------------------------------------------------
-bool Tr2InteriorScene::OnLightsListModified( long event, ssize_t key, ssize_t key2, IRoot* currvalue )
-{
-	if( ( event & BELIST_LOADING ) == 0  )
-	{
-		// Respond to an item removal event
-		if( ( event & BELIST_EVENTMASK ) == BELIST_REMOVED )
-		{
-			if( currvalue )
-			{
-				// See if the removed item is a light
-				ITr2InteriorLight* light = NULL;
-				if( currvalue->QueryInterface( BlueInterfaceIID<ITr2InteriorLight>(), ( void** )&light ) )
-				{
-					// Now, if the light pointer is valid, we need to remove this light from all the cells
-					for( PTr2InteriorCellVector::iterator it = m_cells.begin(); it != m_cells.end(); ++it )
-					{
-						( *it )->RemoveLight( light );
-					}
-
-					// Remove the light from the scene
-					light->RemoveFromScene();
-
-					// QueryInterface Locks, so manually Unlock
-					light->Unlock();
-				}
-			}
-		}
-		// Respond to an item insertion event
-		else if( ( event & BELIST_EVENTMASK ) == BELIST_INSERTED )
-		{
-			if( currvalue )
-			{
-				// See if the inserted item is a light source
-				ITr2InteriorLight* light = NULL;
-				if( currvalue->QueryInterface( BlueInterfaceIID<ITr2InteriorLight>(), ( void** )&light ) )
-				{
-					light->AddToScene();
-
-					// Need to unlock, since QueryInterface Locks
-					light->Unlock();
-				}
-			}
-		}
-		// Respond to a list-cleared event
-		else if( ( event & BELIST_EVENTMASK ) == BELIST_UNLOADSTART )
-		{
-			// Now, loop over all the lights and remove them from all the cells
-			for( PITr2InteriorLightVector::iterator lit = m_lights.begin(); lit != m_lights.end(); ++lit )
-			{
-				for( PTr2InteriorCellVector::iterator cit = m_cells.begin(); cit != m_cells.end(); ++cit )
-				{
-					( *cit )->RemoveLight( *lit );
-				}
-			}
-		}
-	}
-
-	return true;
-}
-
-// ------------------------------------------------------------------------------------------------------
 bool Tr2InteriorScene::OnDynamicsListModified( long event, ssize_t key, ssize_t key2, IRoot* currvalue )
 {
 	if( ( event & BELIST_LOADING ) == 0  )
@@ -2052,12 +1564,6 @@ bool Tr2InteriorScene::OnDynamicsListModified( long event, ssize_t key, ssize_t 
 				ITr2InteriorDynamic* dynamic = NULL;
 				if( currvalue->QueryInterface( BlueInterfaceIID<ITr2InteriorDynamic>(), ( void** )&dynamic ) )
 				{
-					// Now, if the dynamic pointer is valid, we need to remove this dynamic from all the cells
-					for( PTr2InteriorCellVector::iterator it = m_cells.begin(); it != m_cells.end(); ++it )
-					{
-						( *it )->RemoveDynamic( dynamic );
-					}
-
 					// Remove from the scene
 					dynamic->RemoveFromScene();
 
@@ -2090,20 +1596,6 @@ bool Tr2InteriorScene::OnDynamicsListModified( long event, ssize_t key, ssize_t 
 					// Need to unlock, since QueryInterface Locks
 					dynamic->Unlock();
 				}
-			}
-		}
-		// Respond to a list-cleared event
-		else if( ( event & BELIST_EVENTMASK ) == BELIST_UNLOADSTART )
-		{
-			// Loop over all the dynamics and remove them from all the cells
-			for( PITr2InteriorDynamicVector::iterator dit = m_dynamics.begin(); dit != m_dynamics.end(); ++dit )
-			{
-				for( PTr2InteriorCellVector::iterator cit = m_cells.begin(); cit != m_cells.end(); ++cit )
-				{
-					( *cit )->RemoveDynamic( *dit );
-				}
-
-				( *dit )->RemoveFromScene();
 			}
 		}
 	}
@@ -2338,12 +1830,6 @@ void Tr2InteriorScene::SetBackgroundCubemapResPath()
 // ------------------------------------------------------------------------------------------------------
 void Tr2InteriorScene::RebuildSceneData( void )
 {
-	// Update internal data in all cells
-	for( PTr2InteriorCellVector::iterator it = m_cells.begin(); it != m_cells.end(); ++it )
-	{
-		( *it )->RebuildInternalData();
-	}
-
 	// Clear out any dynamics pending load
 	m_dynamicsPendingLoad.Clear();
 
@@ -2352,12 +1838,6 @@ void Tr2InteriorScene::RebuildSceneData( void )
 	{
 		// Remove from the scene
 		( *it )->RemoveFromScene();
-
-		// Remove from cells
-		for( PTr2InteriorCellVector::iterator cellIt = m_cells.begin(); cellIt != m_cells.end(); ++cellIt )
-		{
-			( *cellIt )->RemoveDynamic( *it );
-		}
 
 		// Attempt to re-add to the scene
 		if( !( *it )->AddToScene( m_apexScene ) && ( m_dynamicsPendingLoad.FindKey( ( *it ) ) == -1 ) )

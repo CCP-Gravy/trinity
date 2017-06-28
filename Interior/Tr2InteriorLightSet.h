@@ -24,9 +24,6 @@ public:
 
 	// Add light (non-instanced)
 	void AddLight( ITr2InteriorLight* lightSource, const Vector3& viewPosition );
-	// Add light (instanced)
-	void AddInstancedLight( ITr2InteriorLight* lightSource, const Vector3& viewPosition,
-							const Matrix& objectToWorldMatrix );
 	// Clear all light sources
 	void Clear( void );
 

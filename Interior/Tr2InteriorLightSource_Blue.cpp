@@ -6,41 +6,6 @@
 
 BLUE_DEFINE( Tr2InteriorLightSource );
 
-static Be::VarChooser ShadowResolutionChooser[] =
-{
-	{
-		"32",     
-		BeCast( 32 ),     
-		"32"
-	},
-	{
-		"64",     
-		BeCast( 64 ),     
-		"64"
-	},
-	{
-		"128",     
-		BeCast( 128 ),     
-		"128"
-	},
-	{
-		"256",     
-		BeCast( 256 ),     
-		"256"
-	},
-	{
-		"512",     
-		BeCast( 512 ),     
-		"512"
-	},
-	{
-		"1024",     
-		BeCast( 1024 ),     
-		"1024"
-	},
-	{ 0 }
-};
-
 const Be::ClassInfo* Tr2InteriorLightSource::ExposeToBlue()
 {
     EXPOSURE_BEGIN( Tr2InteriorLightSource, "" )
@@ -63,7 +28,6 @@ const Be::ClassInfo* Tr2InteriorLightSource::ExposeToBlue()
 		MAP_ATTRIBUTE( "coneAlphaInner", m_coneAlphaInner, "A spotlight's inner cone angle", Be::READWRITE | Be::PERSIST | Be::NOTIFY )
 		MAP_ATTRIBUTE( "coneDirection", m_coneDirection, "A spotlight's direction", Be::READWRITE | Be::PERSIST | Be::NOTIFY )
 		MAP_ATTRIBUTE( "primaryLighting", m_primaryLighting, "Does this lightsource contribute to primary lighting?", Be::READWRITE | Be::PERSIST | Be::NOTIFY )
-		MAP_ATTRIBUTE( "affectTransparentObjects", m_affectTransparentObjects, "Does this lightsource affect transparent objects?", Be::READWRITE | Be::PERSIST | Be::NOTIFY )
 
 		MAP_ATTRIBUTE( "curveSets", m_curveSets, "Curve sets to animate light attributes", Be::READWRITE | Be::PERSIST )
 

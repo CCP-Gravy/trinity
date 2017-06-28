@@ -128,8 +128,6 @@ protected:
 	void UpdateBones( Be::Time time, Tr2ApexScene* apexScene );
 	void UpdatePerObjectData();
 
-	virtual void ExplicitBoundsChanged() {};
-
 protected:
     ITr2AnimationUpdaterPtr m_animationUpdater;
     ITr2WorldTransformUpdaterPtr m_worldTransformUpdater;

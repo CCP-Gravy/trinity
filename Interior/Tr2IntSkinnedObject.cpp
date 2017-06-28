@@ -5,7 +5,6 @@
 #include "Utilities/BoundingSphere.h"
 #include "TriSettingsRegistrar.h"
 #include "Apex/Tr2ClothingActor.h"
-#include "Tr2InteriorCell.h"
 #include "Tr2LitPerObjectData.h"
 #if APEX_ENABLED
 #include "Apex/Apex.h"
@@ -21,7 +20,6 @@ Tr2IntSkinnedObject::Tr2IntSkinnedObject( IRoot* lockobj ) :
 	Tr2SkinnedObject( lockobj ),
 	m_boundingSphere( 0.f, 0.f, 0.f, 0.f ),
 	m_lightSet(),
-	m_isDirty( true ),
 	m_isInApexScene( false ),
 	m_cellReflectionTime( 0.0f ),
 	m_previousUpdateTime( 0 ),
@@ -39,8 +37,6 @@ Tr2IntSkinnedObject::Tr2IntSkinnedObject( IRoot* lockobj ) :
 	m_variableStore->RegisterVariable( "CellReflectionMap", (TriTextureRes*)NULL );
 	m_variableStore->RegisterVariable( "CellReflection2ndMap", (TriTextureRes*)NULL );
 	m_variableStore->RegisterVariable( "CellReflectionInterpolation", 0.0f );
-
-	D3DXMatrixIdentity( &m_mirrorToWorldMatrix );
 
 	CCP_STATS_INC( wodIntSkinnedObjectsAlive );
 }
@@ -254,21 +250,17 @@ Tr2PerObjectData* Tr2IntSkinnedObject::GetPerObjectData( ITriRenderBatchAccumula
 	// we support cpu AND gpu skinning, so decide which ::GetPerObjectData() to call based on the type of the Tr2 class
 	if( m_visualModel )
 	{
-		const Matrix& idMatrix = Tr2Renderer::GetIdentityTransform();
-		
 		if( m_visualModel->ClassType() == Tr2SkinnedModel::ClassType_() )
 		{
 			return GetPerObjectDataGpuSkinning( accumulator, 
 												&m_lightSet, 
-												GetSkinningTransform(), 
-												idMatrix );
+												GetSkinningTransform() );
 		}
 		else
 		{
 			return GetPerObjectDataCpuSkinning( accumulator, 
 												&m_lightSet, 
-												GetSkinningTransform(), 
-												idMatrix );
+												GetSkinningTransform() );
 		}
 	}
 	return NULL;
@@ -284,7 +276,7 @@ void Tr2IntSkinnedObject::GetBatches( ITriRenderBatchAccumulator* batches,
 	if( batchType == TRIBATCHTYPE_TRANSPARENT )
 	{
 		float maxDepth = Tr2Renderer::GetFrustumRadius();
-		Matrix instanceTransform = m_transform * m_mirrorToWorldMatrix;
+		Matrix instanceTransform = m_transform;
 
 		// Compute the depth
 		Vector3 bbMin, bbMax;
@@ -442,15 +434,13 @@ void Tr2IntSkinnedObject::GetBatches( ITriRenderBatchAccumulator* batches,
 //   accumulator		 - The accumulator used to allocate the per-object data
 //   lightSet			 - The instanced lights
 //   objectToWorldMatrix - The world transform of the object
-//   mirrorToWorldMatrix - The matrix mapping from mirrored space to world-space
 // Return Value:
 //   The allocated per-object data, or NULL if the allocation failed.
 // --------------------------------------------------------------------------------------
 Tr2PerObjectData* Tr2IntSkinnedObject::GetPerObjectDataCpuSkinning( 
 	ITriRenderBatchAccumulator* accumulator,
 	Tr2InteriorLightSet* lightSet,
-	const Matrix& objectToWorldMatrix,
-	const Matrix& mirrorToWorldMatrix )
+	const Matrix& objectToWorldMatrix )
 {
 	UpdatePerObjectData();
 
@@ -485,7 +475,7 @@ Tr2PerObjectData* Tr2IntSkinnedObject::GetPerObjectDataCpuSkinning(
 	memset( &perObjectPSBuffer.redMat, 0, sizeof( perObjectPSBuffer.redMat ) * 3 );
 
 	// Copy the mirror-to-world matrix
-	perObjectPSBuffer.mirrorToWorldMatrix = mirrorToWorldMatrix;
+	perObjectPSBuffer.mirrorToWorldMatrix = Tr2Renderer::GetIdentityTransform();
 
 	// Do the copy
 	data->CopyToPSFloatBuffer( perObjectPSBuffer );
@@ -502,15 +492,13 @@ Tr2PerObjectData* Tr2IntSkinnedObject::GetPerObjectDataCpuSkinning(
 //   accumulator		 - The accumulator used to allocate the per-object data
 //   lightSet			 - The instanced lights
 //   objectToWorldMatrix - The world transform of the object
-//   mirrorToWorldMatrix - The matrix mapping from mirrored space to world-space
 // Return Value:
 //   The allocated per-object data, or NULL if the allocation failed.
 // --------------------------------------------------------------------------------------
 Tr2PerObjectData* Tr2IntSkinnedObject::GetPerObjectDataGpuSkinning( 
 	ITriRenderBatchAccumulator* accumulator,
 	Tr2InteriorLightSet* lightSet,
-	const Matrix& objectToWorldMatrix,
-	const Matrix& mirrorToWorldMatrix )
+	const Matrix& objectToWorldMatrix )
 {
 	UpdatePerObjectData();
 
@@ -524,13 +512,7 @@ Tr2PerObjectData* Tr2IntSkinnedObject::GetPerObjectDataGpuSkinning(
 
 	data->SetSkinningMatrices( m_skinningMatrixCount, GetSkinningMatrices() );
 	data->SetWorldMatrix( objectToWorldMatrix );
-
-	Matrix mirrorMatrix;
-	D3DXMatrixTranspose( &mirrorMatrix, &mirrorToWorldMatrix );
-	D3DXMatrixInverse( &mirrorMatrix, NULL, &mirrorMatrix );
-	D3DXMatrixTranspose( &mirrorMatrix, &mirrorMatrix );
-
-	data->SetMirrorMatrix( mirrorMatrix );
+	data->SetMirrorMatrix( Tr2Renderer::GetIdentityTransform() );
 
 
 	// Pixel Shader Light information
@@ -550,57 +532,12 @@ Tr2PerObjectData* Tr2IntSkinnedObject::GetPerObjectDataGpuSkinning(
 	memset( &perObjectPSBuffer.redMat, 0, sizeof( perObjectPSBuffer.redMat ) * 3 );
 
 	// Copy the mirror-to-world matrix
-	perObjectPSBuffer.mirrorToWorldMatrix = mirrorToWorldMatrix;
+	perObjectPSBuffer.mirrorToWorldMatrix = Tr2Renderer::GetIdentityTransform();
 
 	// Do the copy
 	data->CopyToPSFloatBuffer( perObjectPSBuffer );
 
 	return data;
-}
-
-// ------------------------------------------------------------------------------------------------------
-bool Tr2IntSkinnedObject::TestCellIntersectionAndAdd( Tr2InteriorCell* cell )
-{
-	// Bail out if the cell is invalid
-	if( cell == NULL )
-	{
-		// No cell, return no intersection
-		return false;
-	}
-
-	// Get the cell's bounding box
-	Vector3 cellMinBounds, cellMaxBounds;
-	if( !cell->IsUnbounded() && !cell->GetBoundingBox( cellMinBounds, cellMaxBounds ) )
-	{
-		// Cell's bounding box not up-to-date, return false (no intersection)
-		return false;
-	}
-
-	// Get our bounding box
-	Vector3 minBounds, maxBounds;
-	if( !GetWorldBoundingBox( minBounds, maxBounds ) )
-	{
-		// Our bounding box is not ready, return false (no intersection)
-		return false;
-	}
-
-	bool intersects = cell->IsUnbounded() || cell->IntersectsAABB( minBounds, maxBounds );
-
-	// If we got an intersection, add to the cell
-	if( intersects )
-	{
-		cell->AddDynamic( this );
-		AddReflectionMap( cell->GetReflectionMap() );
-	}
-	else
-	{
-		// Remove the dynamic from the cell's internal list
-		cell->RemoveDynamic( this );
-		RemoveReflectionMap( cell->GetReflectionMap() );
-	}
-
-	// Return the result of the intersection test
-	return intersects;
 }
 
 // ------------------------------------------------------------------------------------------------------
@@ -612,8 +549,6 @@ bool Tr2IntSkinnedObject::AddToScene( Tr2ApexScene* apexScene )
 	}
 
 	AddToApexScene( apexScene );
-
-	m_isDirty = true;
 
 	return true;
 }
@@ -644,40 +579,26 @@ void Tr2IntSkinnedObject::RemoveFromScene( void )
 Tr2PerObjectData* Tr2IntSkinnedObject::GetPerObjectDataWithPerInstanceLighting( 
 	ITriRenderBatchAccumulator* accumulator,
 	Tr2InteriorLightSet* lightSet,
-	const Matrix& objectToWorldMatrix,
-	const Matrix& mirrorToWorldMatrix )
+	const Matrix& objectToWorldMatrix )
 {
 	// We support cpu AND gpu skinning, so decide which ::GetPerObjectData() to call 
 	// based on the type of the Tr2 class
 	if( m_visualModel )
 	{
-		D3DXMatrixInverse( &m_mirrorToWorldMatrix, NULL, D3DXMatrixTranspose( &m_mirrorToWorldMatrix, &mirrorToWorldMatrix ) );
-
 		if( m_visualModel->ClassType() == Tr2SkinnedModel::ClassType_() )
 		{
 			return GetPerObjectDataGpuSkinning( accumulator, 
 												lightSet, 
-												objectToWorldMatrix, 
-												mirrorToWorldMatrix );
+												objectToWorldMatrix );
 		}
 		else
 		{
 			return GetPerObjectDataCpuSkinning( accumulator, 
 												lightSet, 
-												objectToWorldMatrix, 
-												mirrorToWorldMatrix );
+												objectToWorldMatrix );
 		}
 	}
 	return NULL;
-}
-
-// --------------------------------------------------------------------------------------
-//  Description:
-//    Called by Tr2SkinnedObject whenever its explicit bounding box changes. 
-// --------------------------------------------------------------------------------------
-void Tr2IntSkinnedObject::ExplicitBoundsChanged()
-{
-	m_isDirty = true;
 }
 
 // ------------------------------------------------------------------------------------------------------
@@ -691,8 +612,6 @@ void Tr2IntSkinnedObject::SetPosition( const Vector3 &pos )
 		m_transform._41 = pos.x;
 		m_transform._42 = pos.y;
 		m_transform._43 = pos.z;
-
-		m_isDirty = true;
 	}
 }
 
@@ -710,8 +629,6 @@ void Tr2IntSkinnedObject::SetRotation( const Quaternion& rotQuat )
 
 		D3DXMatrixDecompose( &tmpScale, &tmpRotation, &tmpTranslation, &m_transform );
 		D3DXMatrixTransformation( &m_transform, NULL, NULL, &tmpScale, NULL, &rotQuat, &tmpTranslation );
-
-		m_isDirty = true;
 	}
 }
 
@@ -729,8 +646,6 @@ void Tr2IntSkinnedObject::SetScaling( const Vector3& scaleVec )
 
 		D3DXMatrixDecompose( &tmpScale, &tmpRotation, &tmpTranslation, &m_transform );
 		D3DXMatrixTransformation( &m_transform, NULL, NULL, &scaleVec, NULL, &tmpRotation, &tmpTranslation );
-
-		m_isDirty = true;
 	}
 }
 

@@ -47,30 +47,6 @@ void Tr2InteriorLightSet::AddLight( ITr2InteriorLight* lightSource,
 
 // --------------------------------------------------------------------------------------
 // Description:
-//   Adds an instanced light source and computes the view importance
-// Arguments:
-//   lightSource        - The light source to add
-//   viewPosition       - The current view position, used to determine view importance
-//   mirrorToWorld		- The mirror to world space transform
-// --------------------------------------------------------------------------------------
-void Tr2InteriorLightSet::AddInstancedLight( ITr2InteriorLight* lightSource, 
-											 const Vector3& viewPosition,
-								             const Matrix& mirrorToWorld )
-{
-	// Setup the light instance
-	InternalLightInstance instance = 
-	{
-		mirrorToWorld,
-		lightSource,
-		false
-	};
-
-	// Insert the light instance into the list
-	m_lightInstances.push_back( instance );
-}
-
-// --------------------------------------------------------------------------------------
-// Description:
 //   Clears the light set
 // --------------------------------------------------------------------------------------
 void Tr2InteriorLightSet::Clear( void )

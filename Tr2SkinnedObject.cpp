@@ -901,11 +901,6 @@ bool Tr2SkinnedObject::OnModified( Be::Var* value )
 		m_lod.OnModelChanged( m_visualModel );
 		return true;
 	}
-	else if( IsMatch( value, m_useExplicitBounds ) || IsMatch( value, m_minBounds ) || IsMatch( value, m_maxBounds ) )
-	{
-		ExplicitBoundsChanged();
-		return true;
-	}
 
 	return false;
 }

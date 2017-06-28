@@ -407,7 +407,6 @@ const Be::ClassInfo* Tr2InteriorScene::ExposeToBlue()
 		MAP_INTERFACE( INotify )
 		MAP_INTERFACE( ITr2Updateable )
 
-		MAP_ATTRIBUTE( "cells", m_cells, "List of all cells in the scene", Be::READWRITE | Be::PERSIST | Be::NOTIFY )
 		MAP_ATTRIBUTE( "lights", m_lights, "List of scene light sources", Be::READWRITE | Be::PERSIST | Be::NOTIFY )
 		MAP_ATTRIBUTE( "dynamics", m_dynamics, "List of dynamic objects in scene", Be::READWRITE | Be::PERSIST | Be::NOTIFY )
 

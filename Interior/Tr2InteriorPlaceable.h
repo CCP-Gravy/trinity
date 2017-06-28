@@ -78,13 +78,6 @@ public:
 	virtual void PrePhysicsUpdate( Be::Time time );
 	virtual void PostPhysicsUpdate( Be::Time time, Tr2ApexScene *apexScene );
 
-	virtual bool TestCellIntersectionAndAdd( Tr2InteriorCell* cell );
-	virtual bool IsDirty( void ) const { return m_isDirty; }
-	void SetDirtyFlag( bool isDirty ) { m_isDirty = isDirty; }
-	void MarkAsDirty() { m_isDirty = true; }
-	virtual bool IsShadowCaster( void ) const;
-	virtual bool IsStatic( void ) const;
-
 	virtual void SetLOD( const TriFrustum* frustum );
 
 	void BoundingBoxReset(); 
@@ -105,8 +98,7 @@ public:
 	virtual Tr2PerObjectData* GetPerObjectDataWithPerInstanceLighting( 
 		ITriRenderBatchAccumulator* accumulator,
 		Tr2InteriorLightSet* lightSet,
-		const Matrix& objectToWorldMatrix, 
-		const Matrix& mirrorToWorldMatrix 
+		const Matrix& objectToWorldMatrix
 	);
 
 	// Set stencil parameters
@@ -145,7 +137,7 @@ public:
 
 protected:
 	Tr2PerObjectData* GetPerObjectDataWithLightSet( ITriRenderBatchAccumulator* accumulator,
-		Tr2InteriorLightSet* lightSet, const Matrix& objectToWorldMatrix, const Matrix& mirrorToWorldMatrix );
+		Tr2InteriorLightSet* lightSet, const Matrix& objectToWorldMatrix );
 
 private:
 	float CalculateCameraDistance( void );
@@ -178,12 +170,6 @@ private:
 	bool m_scalingSet;
 	bool m_rotationSet;
 	PTriMatrix m_transform;
-
-	bool m_isDirty;
-
-	// True when a placeable is not intended to move, animate or be added and removed from the scene
-	// used to allow placeables cast 'static' shadows 
-	bool m_isStatic;
 
 	std::string m_placeableResPath;
 	WodPlaceableResPtr m_placeableRes;
@@ -225,9 +211,6 @@ private:
 
 	// Depth offset for transparency sorting
 	float m_depthOffset;
-
-	// Cached mirror-to-world matrix from last GetPerObjectData call
-	Matrix m_mirrorToWorldMatrix;
 };
 
 TYPEDEF_BLUECLASS( Tr2InteriorPlaceable );

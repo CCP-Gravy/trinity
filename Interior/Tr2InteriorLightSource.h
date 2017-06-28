@@ -9,8 +9,6 @@
 
 // --------------------------------------------------------------------------------------
 // Blue forwards
-BLUE_DECLARE( Tr2InteriorCell );
-BLUE_DECLARE_VECTOR( Tr2InteriorCell );
 BLUE_DECLARE( Tr2InteriorLightSource );
 BLUE_DECLARE( TriTextureRes );
 BLUE_DECLARE( Tr2KelvinColor );
@@ -79,32 +77,8 @@ public:
 	// Get importance bias as applied to the View importance of this light.
 	float GetImportanceBias()		const { return m_importanceBias; }
 
-
-	// Get the axis aligned bounding box
-	const AxisAlignedBoundingBox& GetBoundingBox() const;
-
-	// Is the light dirty (needs cell-intersection update)
-	bool IsDirty( void ) const { return m_isDirty; }
-	// Set the dirty flag
-	void SetDirtyFlag( bool isDirty ) { m_isDirty = isDirty; }
-
-	// Cell intersection
-	bool TestCellIntersectionAndAdd( Tr2InteriorCell* cell );
-
 	// Determine overall scene influence
 	float GetCurrentViewImportance( const Vector3& viewerPos ) const;
-
-	// Add the light to the scene
-	void AddToScene( void );
-	// Remove the light from the scene
-	void RemoveFromScene( void );
-
-	// Returns true if the cell is in the manual cell list used for light-cell 
-	// intersection test (when CellIntersectionType is IT_MANUAL)
-	bool HasCellInManualList( const Tr2InteriorCell* cell ) const;
-	// Adds a cell to manual cell list used for light-cell intersection test 
-	// (when CellIntersectionType is IT_MANUAL)
-	void AddCellToManualList( Tr2InteriorCell* cell );
 
 	void Update( Be::Time time );
 
@@ -144,17 +118,12 @@ protected:
 
 	// Does this light contribute to direct lighting?
 	bool m_primaryLighting;
-	// Does this light affect transparent objects?
-	bool m_affectTransparentObjects;
 
 	// A multiplier for importance. In practice actually for turning off sorting, or by
 	// enforcing a certain order, by setting it to zero for all lights and tweaking bias instead.
 	float m_importanceScale;
 	// A bias. Final view importance is [computed] * scale + bias
 	float m_importanceBias;
-
-	// Does this light source require an update?
-	bool m_isDirty;
 
 	// Box center for xnamath OBB representation
 	Vector3 m_collisionCenter;

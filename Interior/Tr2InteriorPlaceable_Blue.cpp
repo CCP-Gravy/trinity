@@ -5,6 +5,7 @@
 #include "Tr2InteriorPlaceable.h"
 
 BLUE_DEFINE( Tr2InteriorPlaceable );
+BLUE_DEFINE_INTERFACE( ITr2InteriorDynamic );
 
 const Be::ClassInfo* Tr2InteriorPlaceable::ExposeToBlue()
 {
@@ -28,7 +29,6 @@ const Be::ClassInfo* Tr2InteriorPlaceable::ExposeToBlue()
 		
 		MAP_ATTRIBUTE_WITH_CHOOSER( "placeableResPath", m_placeableResPath, "", Be::READWRITE | Be::PERSIST | Be::NOTIFY, NULL )
 		MAP_ATTRIBUTE( "isUnique", m_isUniqueInstance, "When true, the placeable res is a copy, rather than a shared instance", Be::READWRITE | Be::PERSIST | Be::NOTIFY )
-		MAP_ATTRIBUTE( "isStatic", m_isStatic, "When true, the placeable generates shadows with other static objects", Be::READWRITE | Be::PERSIST )
 
 		MAP_ATTRIBUTE( "placeableRes", m_placeableRes, "", Be::READ )
 		MAP_ATTRIBUTE( "transform", m_transform, "", Be::READWRITE | Be::PERSIST | Be::NOTIFY )
@@ -49,7 +49,6 @@ const Be::ClassInfo* Tr2InteriorPlaceable::ExposeToBlue()
 		// Bounding boxes
 		MAP_METHOD_AND_WRAP( "GetBoundingBoxInLocalSpace", GetBoundingBoxInLocalSpace, "Gets the bounding box in local space" )
 		MAP_METHOD_AND_WRAP( "GetBoundingBoxInWorldSpace", GetBoundingBoxInWorldSpace, "Gets the bounding box in world space" )
-		MAP_METHOD_AND_WRAP( "MarkAsDirty", MarkAsDirty, "Marks the placeable as dirty" )
 		MAP_METHOD_AND_WRAP( "BoundingBoxReset", BoundingBoxReset, "Resets the bounding box, removing any overrides" )
 		MAP_METHOD_AND_WRAP( 
 			"BoundingBoxOverride", 

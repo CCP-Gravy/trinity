@@ -36,8 +36,6 @@ BLUE_DECLARE( Tr2ShaderMaterial );
 BLUE_DECLARE_INTERFACE( ITr2PhysicsUpdater );
 BLUE_DECLARE( TriCurveSet );
 BLUE_DECLARE_VECTOR( TriCurveSet );
-BLUE_DECLARE( Tr2InteriorCell );
-BLUE_DECLARE_VECTOR( Tr2InteriorCell );
 BLUE_DECLARE( TriLineSet );
 
 class Tr2InteriorScene:
@@ -152,14 +150,7 @@ protected:
 private:
 	void ResolveVisibility( const Matrix& view, const Matrix& projection, size_t maxDepth );
 	void DoVisibilityQuery( const TriFrustum&, const Matrix& view, size_t depth, size_t maxDepth, const Matrix& mirrorMatrix );
-	// Update lights, adding to cells as needed
-	void UpdateLights( void );
-	// Update dynamics, adding to cells as needed
-	void UpdateDynamics( void );
-	void UpdateCells();
 
-	// Handle list-changed events for the lights list
-	bool OnLightsListModified( long event, ssize_t key, ssize_t key2, IRoot* currvalue );
 	// Handle light-changed events for the dynamics list
 	bool OnDynamicsListModified( long event, ssize_t key, ssize_t key2, IRoot* currvalue );
 
@@ -212,8 +203,6 @@ private:
 
 	Tr2Variable m_cameraPosVar;
 
-	// a scene is made of cells
-	PTr2InteriorCellVector m_cells;
 	// lights
 	PITr2InteriorLightVector m_lights;
 	// dynamics
@@ -235,8 +224,6 @@ private:
 	VisibilityQueryType m_visibilityQueryType;
 
 	// Miscellaneous Umbra bullshit
-	Matrix m_mirrorToWorldMatrix;
-	std::vector<Matrix> m_mirrorToWorldMatrixStack;
 	std::vector<std::pair<int, int> > m_transparencyStack;
 	std::vector<std::pair<int, int> > m_stencilStack;
 	int m_currentObjectGroup;

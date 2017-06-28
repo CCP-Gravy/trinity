@@ -10,7 +10,6 @@
 
 struct WodStencilBatchParams;
 class TriFrustum;
-class Tr2InteriorCell;
 class Tr2InteriorLightSet;
 struct Tr2InteriorPerObjectLightData;
 struct Tr2PerFrameVSData;
@@ -39,8 +38,7 @@ BLUE_INTERFACE( ITr2Interior ) : public ITr2InteriorCullable
 	virtual Tr2PerObjectData* GetPerObjectDataWithPerInstanceLighting( 
 		ITriRenderBatchAccumulator* accumulator,
 		Tr2InteriorLightSet* lightSet, 
-		const Matrix& objectToWorldMatrix, 
-		const Matrix& mirrorToWorldMatrix 
+		const Matrix& objectToWorldMatrix 
 	) = 0;
 };
 BLUE_DECLARE_IVECTOR( ITr2Interior );
@@ -57,16 +55,6 @@ BLUE_INTERFACE( ITr2InteriorDynamic ) : public ITr2Interior
 	// Scene add/remove
 	virtual bool AddToScene( Tr2ApexScene* apexScene ) = 0;
 	virtual void RemoveFromScene( void ) = 0;
-
-	virtual bool TestCellIntersectionAndAdd( Tr2InteriorCell* cell ) = 0;
-	virtual bool IsDirty( void ) const = 0;
-	// Set the dirty flag
-	virtual void SetDirtyFlag( bool isDirty ) = 0;
-	virtual bool IsShadowCaster( void ) const = 0;
-
-	// Some 'dynamic' placeables are actually placed by level designers and do not move or change
-	// We allow these to be treated as statics from the point of view of shadows etc
-	virtual bool IsStatic( void ) const { return false; }
 
 	// LOD
 	virtual void SetLOD( const TriFrustum* frustum ) = 0;
@@ -113,50 +101,6 @@ BLUE_INTERFACE( ITr2InteriorLight ) : public ITr2InteriorCullable
 			return (size_t)lightSource < (size_t)other.lightSource;
 		}
 	};
-
-	// -------------------------------------------------------------
-	// Description:
-	//   Returns axis aligned bounding box for light source in 
-	//   world space.
-	// -------------------------------------------------------------
-	virtual const AxisAlignedBoundingBox& GetBoundingBox() const = 0;
-
-	// -------------------------------------------------------------
-	// Description:
-	//   Returns if the light is dirty (moved/changed).
-	// Return Value:
-	//   true If light is dirty
-	//   false Otherwise
-	// -------------------------------------------------------------
-	virtual bool IsDirty( void ) const = 0;
-
-	// -------------------------------------------------------------
-	// Description:
-	//   Set the dirty flag
-	// Arguments:
-	//   isDirty - If light is dirty (has changed)
-	// -------------------------------------------------------------
-	virtual void SetDirtyFlag( bool isDirty ) = 0;
-
-	// -------------------------------------------------------------
-	// Description:
-	//   Perform cell intersection test and add light to the cell.
-	// Arguments:
-	//   cell - Cell to add light to
-	// -------------------------------------------------------------
-	virtual bool TestCellIntersectionAndAdd( Tr2InteriorCell* cell ) = 0;
-
-	// -------------------------------------------------------------
-	// Description:
-	//   Called whenever light is added to interior scene.
-	// -------------------------------------------------------------
-	virtual void AddToScene( void ) = 0;
-
-	// -------------------------------------------------------------
-	// Description:
-	//   Called whenever light is removed from interior scene.
-	// -------------------------------------------------------------
-	virtual void RemoveFromScene( void ) = 0;
 
 	// -------------------------------------------------------------
 	// Description:

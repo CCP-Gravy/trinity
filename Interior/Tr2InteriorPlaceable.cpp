@@ -7,7 +7,6 @@
 // Trinity headers
 #include "Utilities/BoundingSphere.h"
 #include "Tr2LitPerObjectData.h"
-#include "Tr2InteriorCell.h"
 #include "Wod/WodPlaceableRes.h"
 #include "TriLineSet.h"
 #include "Tr2Mesh.h"
@@ -20,13 +19,11 @@ Tr2InteriorPlaceable::Tr2InteriorPlaceable( IRoot* lockobj ) :
     m_display( true ),
 	m_isUniqueInstance( false ),
 	PARENTLOCK( m_transform, IInitialize ),
-	m_isDirty( true ),
 	m_placeableResPath(),
 	m_placeableRes(),
 	m_lightSet(),
 	m_visibilityMode( VISIBILITYMODE_NORMAL ),
 	m_boundingSphere( 0.f, 0.f, 0.f, 0.f ),
-	m_isStatic( false ),
 	m_isBoundingBoxModified( false ),
 	m_cellReflectionTime( 0.0f ),
 	m_previousUpdateTime( 0 ),
@@ -52,8 +49,6 @@ Tr2InteriorPlaceable::Tr2InteriorPlaceable( IRoot* lockobj ) :
 	m_variableStore->RegisterVariable( "CellReflection2ndMap", (TriTextureRes*)NULL );
 	m_variableStore->RegisterVariable( "CellReflectionInterpolation", 0.0f );
 
-	D3DXMatrixIdentity( &m_mirrorToWorldMatrix );
-
 	CCP_STATS_INC( wodInteriorPlaceablesAlive );
 }
 
@@ -70,8 +65,6 @@ bool Tr2InteriorPlaceable::AddToScene( Tr2ApexScene *apexScene )
 	}
 
 	RebuildVolume();
-	
-	m_isDirty = true;
 
 	return true;
 }
@@ -255,67 +248,6 @@ void Tr2InteriorPlaceable::BindLowLevelShaders()
 	}
 }
 
-// ------------------------------------------------------------------------------------------------------
-bool Tr2InteriorPlaceable::TestCellIntersectionAndAdd( Tr2InteriorCell* cell )
-{
-	// Bail out if the cell is invalid
-	if( cell == NULL )
-	{
-		// No cell, return no intersection
-		return false;
-	}
-
-	// Get the cell's bounding box
-	Vector3 cellMinBounds, cellMaxBounds;
-	if( !cell->IsUnbounded() && !cell->GetBoundingBox( cellMinBounds, cellMaxBounds ) )
-	{
-		// Cell's bounding box not up-to-date, return false (no intersection)
-		return false;
-	}
-
-	// Get our bounding box
-	Vector3 minBounds, maxBounds;
-	if( !GetWorldBoundingBox( minBounds, maxBounds ) )
-	{
-		// Our bounding box is not ready, return false (no intersection)
-		return false;
-	}
-
-	bool intersects = cell->IsUnbounded() || cell->IntersectsAABB( minBounds, maxBounds );
-
-	// If we got an intersection, add to the cell
-	if( intersects )
-	{
-		cell->AddDynamic( this );
-		AddReflectionMap( cell->GetReflectionMap() );
-	}
-	else
-	{
-		// Remove the dynamic from the cell's internal list
-		cell->RemoveDynamic( this );
-		RemoveReflectionMap( cell->GetReflectionMap() );
-	}
-
-	// Return the result of the intersection test
-	return intersects;
-}
-
-// --------------------------------------------------------------------------------------
-//  Description:
-//    Query whether the placeable can cast shadows
-//  Return Value:
-//    true, if the placeable can cast shadows
-//    false, if the placeable cannot cast shadows
-// --------------------------------------------------------------------------------------
-bool Tr2InteriorPlaceable::IsShadowCaster( void ) const
-{
-	if( m_placeableRes )
-	{
-		return m_placeableRes->IsShadowCaster();
-	}
-	return false;
-}
-
 void Tr2InteriorPlaceable::SetLOD( const TriFrustum* frustum )
 {
 	// TODO_delder: implement LOD?
@@ -332,10 +264,6 @@ bool Tr2InteriorPlaceable::OnModified( Be::Var* value )
     if( IsMatch( value, m_placeableResPath ) )
     {
         LoadPlaceableRes();
-    }
-	else if( IsMatch( value, m_transform ) )
-    {
-		m_isDirty = true;
     }
 	else if( IsMatch( value, m_isUniqueInstance ) )
 	{
@@ -389,70 +317,10 @@ void Tr2InteriorPlaceable::GetBatches( ITriRenderBatchAccumulator* batches,
 		return;
 	}
 
-	if( batchType == TRIBATCHTYPE_MIRROR )
-	{
-		if( m_placeableRes )
-		{
-			// Get the model from the res
-			Tr2Model* model = m_placeableRes->GetVisualModel();
-			if( model )
-			{
-				unsigned int numMeshes = model->GetNumOfMeshes();
-
-				for( unsigned int i = 0; i < numMeshes; ++i )
-				{
-					Tr2Mesh* mesh = model->GetMesh( i );
-					if( mesh->HasPendingLowLevelShaderBind() )
-					{
-						mesh->ExecutePendingLowLevelShaderBind();
-					}
-
-					if( !mesh->GetDisplay() )
-					{
-						continue;
-					}
-					Tr2MeshAreaVector* areas = mesh->GetAreas( TRIBATCHTYPE_MIRROR );
-
-					TriGeometryRes* geomRes = mesh->GetGeometryResource();
-					int meshIx = mesh->GetMeshIndex();
-
-					for( Tr2MeshAreaVector::iterator it = areas->begin(); it != areas->end(); ++it )
-					{
-						Tr2MeshArea* area = *it;
-						ITr2ShaderMaterial* shader = area->GetMaterialInterface();
-
-						if( !area->GetDisplay() || !shader || ( area->GetIndex() != m_stencilParams.m_areaIx ) )
-						{
-							continue;
-						}
-
-						Tr2InteriorStencilMaskBatch* batch = batches->Allocate<Tr2InteriorStencilMaskBatch>();
-						// Note that this can fail if the accumulator can't add more batches!
-						if( batch )
-						{
-							batch->SetShaderMaterial( shader );
-							batch->SetPerObjectData( data );
-							batch->SetGeometryResource( geomRes );
-							batch->SetMeshParameters( meshIx, area->GetIndex(), area->GetCount(), area->GetReversed() );
-
-							batch->SetStencilValues( m_stencilParams.m_stencilWrite, 
-								m_stencilParams.m_stencilTest );
-							batch->SetDepthClear( m_stencilParams.m_depthClear );
-							batch->SetStencilPassState( m_stencilParams.m_stencilPassState );
-							batch->SetDisableStencil( false );
-							batch->SetColorWrite( m_stencilParams.m_colorWrite );
-
-							batches->Commit( batch );
-						}
-					}
-				}
-			}
-		}
-	}
-	else if( m_visibilityMode != VISIBILITYMODE_HIDDEN )
+	if( m_visibilityMode != VISIBILITYMODE_HIDDEN )
 	{
 		float maxDepth = Tr2Renderer::GetFrustumRadius();
-		Matrix instanceToWorld = m_transform * m_mirrorToWorldMatrix;
+		Matrix instanceToWorld = m_transform;
 
 		if( m_placeableRes )
 		{
@@ -537,7 +405,7 @@ float Tr2InteriorPlaceable::GetSortValue( void )
 
 Tr2PerObjectData* Tr2InteriorPlaceable::GetPerObjectData( ITriRenderBatchAccumulator* accumulator )
 {
-	return GetPerObjectDataWithLightSet( accumulator, &m_lightSet, m_transform, Tr2Renderer::GetIdentityTransform() );
+	return GetPerObjectDataWithLightSet( accumulator, &m_lightSet, m_transform );
 }
 
 std::string Tr2InteriorPlaceable::GetPlaceableResPath( void ) const
@@ -561,8 +429,6 @@ void Tr2InteriorPlaceable::SetPosition( const Vector3& pos )
 		m_transform._41 = pos.x;
 		m_transform._42 = pos.y;
 		m_transform._43 = pos.z;
-
-		m_isDirty = true;
 	}
 }
 
@@ -590,8 +456,6 @@ void Tr2InteriorPlaceable::SetRotation( const Quaternion& rotQuat )
 
 		D3DXMatrixDecompose( &tmpScale, &tmpRotation, &tmpTranslation, &m_transform );
 		D3DXMatrixTransformation( &m_transform, NULL, NULL, &tmpScale, NULL, &rotQuat, &tmpTranslation );
-
-		m_isDirty = true;
 	}
 }
 
@@ -619,8 +483,6 @@ void Tr2InteriorPlaceable::SetScaling( const Vector3& scaleVec )
 
 		D3DXMatrixDecompose( &tmpScale, &tmpRotation, &tmpTranslation, &m_transform );
 		D3DXMatrixTransformation( &m_transform, NULL, NULL, &scaleVec, NULL, &tmpRotation, &tmpTranslation );
-
-		m_isDirty = true;
 	}
 }
 
@@ -688,13 +550,11 @@ void Tr2InteriorPlaceable::RebuildVolume( void )
 Tr2PerObjectData* Tr2InteriorPlaceable::GetPerObjectDataWithPerInstanceLighting( 
 	ITriRenderBatchAccumulator* accumulator,
 	Tr2InteriorLightSet* lightSet,
-	const Matrix& objectToWorldMatrix,
-	const Matrix& mirrorToWorldMatrix )
+	const Matrix& objectToWorldMatrix )
 {
 	return GetPerObjectDataWithLightSet( accumulator, 
 										lightSet,
-										objectToWorldMatrix, 
-										mirrorToWorldMatrix );
+										objectToWorldMatrix );
 }
 
 // ------------------------------------------------------------------------------------------------------
@@ -713,8 +573,7 @@ Tr2PerObjectData* Tr2InteriorPlaceable::GetPerObjectDataWithPerInstanceLighting(
 // -----------------------------------------------------------------------------------------------------
 Tr2PerObjectData* Tr2InteriorPlaceable::GetPerObjectDataWithLightSet( ITriRenderBatchAccumulator* accumulator,
 																	  Tr2InteriorLightSet* lightSet,
-																	  const Matrix& objectToWorldMatrix,
-																	  const Matrix& mirrorToWorldMatrix )
+																	  const Matrix& objectToWorldMatrix )
 {
 	Tr2LitPerObjectData* data = accumulator->Allocate<Tr2LitPerObjectData>();
 
@@ -746,13 +605,11 @@ Tr2PerObjectData* Tr2InteriorPlaceable::GetPerObjectDataWithLightSet( ITriRender
 	memset( &perObjectPSBuffer.redMat, 0, sizeof( perObjectPSBuffer.redMat ) * 3 );
 
 	// Copy the mirror-to-world matrix
-	perObjectPSBuffer.mirrorToWorldMatrix = mirrorToWorldMatrix;
+	perObjectPSBuffer.mirrorToWorldMatrix = Tr2Renderer::GetIdentityTransform();
 
 	// Do the copy
 	data->CopyToPSFloatBuffer( perObjectPSBuffer );
 	data->CopyToVSFloatBuffer( perObjectVSBuffer );
-
-	D3DXMatrixInverse( &m_mirrorToWorldMatrix, NULL, D3DXMatrixTranspose( &m_mirrorToWorldMatrix, &mirrorToWorldMatrix ) );
 
 	return data;
 }
@@ -770,11 +627,6 @@ void Tr2InteriorPlaceable::LoadPlaceableRes()
 
 	m_placeableRes = BlueCastPtr( p );
 	BindLowLevelShaders();
-}
-
-bool Tr2InteriorPlaceable::IsStatic( void ) const
-{
-	return m_isStatic;
 }
 
 // -------------------------------------------------------------

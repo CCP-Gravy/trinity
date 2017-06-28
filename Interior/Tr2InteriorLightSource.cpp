@@ -6,8 +6,6 @@
 
 #include "Utilities/BoundingSphere.h"
 #include "Tr2AtlasTexture.h"
-#include "Tr2InteriorCell.h"
-#include "Tr2InteriorLightGeometryRenderBatch.h"
 #include "Tr2KelvinColor.h"
 #include "Shader/Tr2ShaderMaterial.h"
 #include "Tr2ConstGeometry.h"
@@ -38,10 +36,8 @@ Tr2InteriorLightSource::Tr2InteriorLightSource( IRoot* lockobj ) :
 	m_coneAlphaInner( 180.f ),
 	m_coneDirection( 0.f, -1.f, 0.f ),
 	m_primaryLighting( true ),
-	m_affectTransparentObjects( true ),
 	m_importanceScale( 1.0f ),
 	m_importanceBias( 0.0f ),
-	m_isDirty( true ),
 	PARENTLOCK( m_curveSets )
 {
 	CCP_STATS_INC( wodIntLightsAlive );
@@ -98,9 +94,6 @@ bool Tr2InteriorLightSource::OnModified( Be::Var* value )
 	if( IsMatch( value, m_position ) )
 	{
 		m_worldBoundingBox = AxisAlignedBoundingBox( m_position - Vector3( m_radius, m_radius, m_radius ), m_position + Vector3( m_radius, m_radius, m_radius ) );
-
-		// Mark the dirty flag
-		m_isDirty = true;
 	}
 	else if( IsMatch( value, m_radius )			||
 			 IsMatch( value, m_coneAlphaOuter ) ||
@@ -110,9 +103,6 @@ bool Tr2InteriorLightSource::OnModified( Be::Var* value )
 
 		// Rebuild the bounding volume
 		RebuildVolume();
-
-		// Mark the dirty flag
-		m_isDirty = true;
 
 		PrepareResources();
 	}
@@ -209,63 +199,6 @@ void Tr2InteriorLightSource::PopulateLightData( Tr2InteriorPerObjectLightData* l
 
 // --------------------------------------------------------------------------------------
 // Description:
-//   Gets the world-space axis aligned bounding box for the light
-// --------------------------------------------------------------------------------------
-const AxisAlignedBoundingBox& Tr2InteriorLightSource::GetBoundingBox() const
-{
-	return m_worldBoundingBox;
-}
-
-// --------------------------------------------------------------------------------------
-// Description:
-//   Tests the light's bounding volume against the bounding box of a cell.  If the light
-//   intersects the cell, a ROI is created and the light is added to the cell.  If the
-//   light does not intersect, the ROI (if it exists is destroyed) and the light is
-//   removed from the cell.  The exact behavior of this function depends on the light
-//   intersection type.  If the light has a non-empty explicit cell list, then the light
-//   is not tested against the bounding box.
-// Arguments:
-//   cell - The cell to test against
-// --------------------------------------------------------------------------------------
-bool Tr2InteriorLightSource::TestCellIntersectionAndAdd( Tr2InteriorCell* cell )
-{
-	// Bail out if the cell is invalid
-	if( cell == NULL )
-	{
-		// No cell, return no intersection
-		return false;
-	}
-
-	bool intersects = cell->IsUnbounded();
-
-	if( !intersects )
-	{
-		if( !IsSpotLight() )
-		{
-			intersects = cell->IntersectsSphere( m_position, m_radius );
-		}
-		else
-		{
-			intersects = cell->IntersectsOBB( m_collisionCenter + m_position, m_collisionExtents, m_collisionOrientation );
-		}
-	}
-
-	if( intersects )
-	{
-		cell->AddLight( this );
-	}
-	else
-	{
-		// Remove the light from the cell
-		cell->RemoveLight( this );
-	}
-
-	// Return the result of the intersection test
-	return intersects;
-}
-
-// --------------------------------------------------------------------------------------
-// Description:
 //   Gets the importance of the light, given the current view position.  The view
 //   importance is simply the ratio of the light radius and the distance to the viewer.
 // Arguments:
@@ -284,17 +217,6 @@ float Tr2InteriorLightSource::GetCurrentViewImportance( const Vector3& viewerPos
 	float res = m_radius * m_radius / distToViewer;
 
 	return res * m_importanceScale + m_importanceBias;
-}
-
-void Tr2InteriorLightSource::AddToScene( void )
-{
-	// Set the dirty flag
-	m_isDirty = true;
-}
-
-
-void Tr2InteriorLightSource::RemoveFromScene( void )
-{
 }
 
 // -------------------------------------------------------------
