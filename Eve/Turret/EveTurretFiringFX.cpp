@@ -410,7 +410,7 @@ bool EveTurretFiringFX::Update( EveUpdateContext& updateContext )
 				if( m_perMuzzleData[i].started )
 				{
 					// use complete source transform or only 3d sourcepoint?
-					if( m_useMuzzleTransform )
+					if( m_useMuzzleTransform && ( m_perMuzzleData[i].muzzlePositionBoneID != INVALID_BONE_INDEX ) )
 					{
 						// pass the whole transform to the stretch effect
 						stretchEffect->SetFiringTransform( m_perMuzzleData[i].muzzleTransform, m_endPosition );
