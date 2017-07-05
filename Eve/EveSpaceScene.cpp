@@ -85,9 +85,6 @@ bool g_eveSpaceObjectImpactEffectEnabled = true;
 TRI_REGISTER_SETTING( "eveSpaceObjectImpactEffectEnabled", g_eveSpaceObjectImpactEffectEnabled );
 
 
-static const char* f_writeDepthOpaqueOverridePath = "res:/Graphics/Effect/Managed/Space/SpaceObject/V3/DepthOnlyV3.fx";
-static Tr2EffectPtr f_writeDepthOpaqueOverride = NULL;
-
 const char* s_evePickingEffectPath = "res:/Graphics/Effect/Managed/space/system/Picking.fx";
 
 bool g_eveSpaceSceneDynamicLighting = false;
@@ -209,12 +206,6 @@ EveSpaceScene::EveSpaceScene( IRoot* lockobj ) :
 	m_pickEffect->SetEffectPathName( s_evePickingEffectPath );
 
 	m_pickBuffer.PrepareResources();
-
-	if( f_writeDepthOpaqueOverride == NULL )
-	{
-		f_writeDepthOpaqueOverride.CreateInstance();
-		f_writeDepthOpaqueOverride->SetEffectPathName( f_writeDepthOpaqueOverridePath );
-	}
 
 	m_updateTime = BeOS->GetCurrentFrameTime();
 
