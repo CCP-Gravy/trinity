@@ -225,6 +225,28 @@ int EveTurretTarget::FindClosestLocator( const Vector3* source, Vector3* positio
 }
 
 // --------------------------------------------------------------------------------
+int EveTurretTarget::FindRandomValidLocator( const Vector3& source ) const
+{
+	if( !m_object )
+	{
+		return -1;
+	}
+
+	int loc = m_object->GetGoodDamageLocatorIndex( source );
+	Vector3 position;
+	if( m_object->GetDamageLocatorPosition( &position, loc, true ) )
+	{
+		return loc;
+	}
+	loc = m_object->GetClosestDamageLocatorIndex( &source );
+	if( m_object->GetDamageLocatorPosition( &position, loc, true ) )
+	{
+		return loc;
+	}
+	return -1;
+}
+
+// --------------------------------------------------------------------------------
 // Description:
 //   Set the internal behaviour of the hit/miss functionality
 // --------------------------------------------------------------------------------

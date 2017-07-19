@@ -2408,6 +2408,11 @@ bool EveTurretSet::GetClosestTurretAndLocator( unsigned int& closestTurretIx, in
 		}
 	}
 
+	if( closestTurret != INVALID_TURRET_INDEX )
+	{
+		closestLocator = m_target->FindRandomValidLocator( m_singleTurrets[closestTurret].worldMatrix.GetTranslation() );
+	}
+
 	// "failure is NOT an option" !
 	if( closestTurret == INVALID_TURRET_INDEX )
 	{
