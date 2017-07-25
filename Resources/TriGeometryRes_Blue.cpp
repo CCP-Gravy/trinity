@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 #include "TriGeometryRes.h"
 #include "Tr2Mesh.h"
+#include "Utilities/BoundingSphere.h"
 
 BLUE_DEFINE( TriGeometryRes );
 
@@ -294,3 +295,33 @@ MAP_FUNCTION( "SaveMeshDataToGrannyFile",
 			  );
 
 #endif
+
+namespace
+{
+	std::pair<Vector3, float> BoundingSphereFromPointsScript( const std::vector<Vector3>& points )
+	{
+		Vector4 sphere( 0, 0, 0, 0 );
+		if( points.empty() )
+		{
+			::BoundingSphereFromPoints( sphere, nullptr, 0 );
+		}
+		else
+		{
+			std::vector<const Vector3*> pointers;
+			pointers.reserve( points.size() );
+			auto ptr = &points[0];
+			for( size_t i = 0; i < points.size(); ++i )
+			{
+				pointers.push_back( ptr++ );
+			}
+			::BoundingSphereFromPoints( sphere, &pointers[0], points.size() );
+		}
+		return std::make_pair( Vector3( sphere.x, sphere.y, sphere.z ), sphere.w );
+	}
+}
+
+MAP_FUNCTION_AND_WRAP(
+	"BoundingSphereFromPoints",
+	BoundingSphereFromPointsScript,
+	"Generates bounding sphere around a given points.\n"
+	":param points: list of 3D points in space" );
