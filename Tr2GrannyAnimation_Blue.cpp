@@ -152,6 +152,12 @@ const Be::ClassInfo* Tr2GrannyAnimation::ExposeToBlue()
 			":param layerName: layer name\n"
 			":param boneName: bone name\n"
 		)
+		MAP_METHOD_AND_WRAP
+		(
+			"ClearAnimationLayers",
+			ClearAnimationLayers,
+			"Clears all animation layers from this granny animation controller\n"
+		)
 
 		MAP_ATTRIBUTE( "boneOffset", m_boneOffset, "Per-bone post animation offsets.", Be::READWRITE )
 

@@ -285,6 +285,15 @@ void Tr2GrannyAnimation::RebuildCachedData( BlueAsyncRes* p )
 	}
 }
 
+void Tr2GrannyAnimation::ClearAnimationLayers()
+{
+	for( auto it = m_animationLayers.begin(); it != m_animationLayers.end(); it++ )
+	{
+		it->second.Cleanup();
+	}
+	m_animationLayers.clear();
+}
+
 bool Tr2GrannyAnimation::InitializeBoundingInfo()
 {
 	const granny_file_info* const fi = GetFileInfo();

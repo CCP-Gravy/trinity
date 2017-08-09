@@ -49,6 +49,7 @@ public:
 	float	GetAnimationChainCompleteTime();
 
 	void AddAnimationLayer( const char* layerName, float layerWeight=1.0f );
+	void ClearAnimationLayers();
 	void AddAnimationLayerBone( const char* layerName, const char* boneName );
 	void RemoveAnimationLayerBone( const char* layerName, const char* boneName );
 	void AddAnimationLayerWithTrackMask( const char* layerName, const char* trackMask );
