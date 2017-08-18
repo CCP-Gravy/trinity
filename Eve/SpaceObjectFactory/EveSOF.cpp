@@ -1639,6 +1639,11 @@ void EveSOF::SetupDecals( EveSpaceObject2Ptr obj, const EveSOFDNAPtr dna ) const
 				{
 					shader->AddResourceTexture2D( gtit->first, gtit->second.resFilePath.c_str() );
 				}
+
+				// parent hull textures
+				for( auto ptit = shaderData->parentTextures.begin(); ptit != shaderData->parentTextures.end(); ++ptit )
+				{
+				}
 			}
 
 			// init and add

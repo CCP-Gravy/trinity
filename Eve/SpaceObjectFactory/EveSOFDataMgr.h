@@ -453,7 +453,7 @@ public:
 		// global textures for this shader
 		std::map<BlueSharedString, TextureData> defaultTextures;
 		// parent textures from the hull
-		std::map<BlueSharedString, TextureData> parentTextures;
+		std::vector<BlueSharedString> parentTextures;
 	};
 
 	struct VariantData

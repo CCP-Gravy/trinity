@@ -1333,8 +1333,8 @@ void EveSOFDataMgr::GenerateGenericData( GenericData& gd, EveSOFDataGenericPtr s
 
 		for( auto tpit = shaderData->m_parentTextures.begin(); tpit != shaderData->m_parentTextures.end(); ++tpit )
 		{
-			EveSOFDataTexturePtr textureData = ( *tpit );
-			gdsd.parentTextures[ textureData->m_name ].resFilePath = textureData->m_resFilePath;
+			EveSOFDataGenericStringPtr textureName = ( *tpit );
+			gdsd.parentTextures.push_back( BlueSharedString( textureName->m_str ) );
 		}
 
 		for( auto spit = shaderData->m_parameters.begin(); spit != shaderData->m_parameters.end(); ++spit )
