@@ -91,6 +91,21 @@ const Be::ClassInfo* EveStretch::ExposeToBlue()
 
 		MAP_ATTRIBUTE
 		(
+			"sourceLights",
+			m_sourceLights,
+			"Lights at the source object",
+			Be::READ | Be::PERSIST
+		)
+		MAP_ATTRIBUTE
+		(
+			"destLights",
+			m_destLights,
+			"Lights at the destination object",
+			Be::READ | Be::PERSIST
+		)
+
+		MAP_ATTRIBUTE
+		(
 			"progressCurve",
 			m_progressCurve,
 			"Curve that determines the interpolated position of the move object",

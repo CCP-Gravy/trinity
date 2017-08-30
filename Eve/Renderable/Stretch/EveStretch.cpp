@@ -6,11 +6,14 @@
 #include "Utilities/BoundingSphere.h"
 #include "Eve/Turret/EveTurretSet.h"
 #include "Curves/Tr2CurveScalar.h"
+#include "Tr2PointLight.h"
 
 static const Vector3 Y_AXIS(0.0f, 1.0f, 0.0f);
 
 EveStretch::EveStretch( IRoot* lockobj ) :
 	PARENTLOCK( m_curveSets ),
+	PARENTLOCK( m_sourceLights ),
+	PARENTLOCK( m_destLights ),
 	m_display( true ),
 	m_update( true ),
 	m_displaySourceObject( true ),
@@ -468,4 +471,62 @@ void EveStretch::DisplayEndPoints( bool displaySource, bool displayDest )
 void EveStretch::UpdateInactive( EveUpdateContext& updateContext )
 {
 	UpdateCurves( updateContext );
+}
+
+void EveStretch::GetLights( Tr2LightManager& lightManager ) const
+{
+	if( !m_display )
+	{
+		return;
+	}
+
+	Vector3 directionVec( m_sourcePosition - m_destinationPosition );
+	D3DXVec3Normalize( &directionVec, &directionVec );
+
+	if( !m_sourceLights.empty() && m_displaySourceObject )
+	{
+		Matrix m;
+
+		float scaling = 1;
+
+		if( m_useTransformsForStretch )
+		{
+			// Artwork is authored aligned to the y-axis rather than z
+			// so we add a rotation here.
+			D3DXMatrixRotationX( &m, -XM_PI / 2.0f );
+			D3DXMatrixMultiply( &m, &m, &m_sourceTransform );
+			scaling = XMVectorGetX( XMVectorAdd( XMVector3LengthEst( m.GetX() ),
+				XMVectorAdd( XMVector3LengthEst( m.GetY() ), XMVector3LengthEst( m.GetZ() ) ) ) ) / 3.f;
+		}
+		else
+		{
+			Quaternion rotation( 0.0f, 0.0f, 0.0f, 1.0f );
+			Quaternion tmpResult;
+			D3DXQuaternionMultiply( &rotation,
+				TriQuaternionRotationArc( &tmpResult, &Y_AXIS, &directionVec ), &rotation );
+
+			D3DXMatrixTransformation( &m, NULL, NULL, NULL, NULL, &rotation, &m_sourcePosition );
+		}
+
+		for( auto it = std::begin( m_sourceLights ); it != std::end( m_sourceLights ); ++it )
+		{
+			( *it )->AddLight( lightManager, m, scaling );
+		}
+	}
+	if( !m_destLights.empty() && m_displayDestObject )
+	{
+		Quaternion rotation( 0.0f, 0.0f, 0.0f, 1.0f );
+		Quaternion tmpResult;
+		D3DXQuaternionMultiply( &rotation,
+			TriQuaternionRotationArc( &tmpResult, &Y_AXIS, &directionVec ), &rotation );
+
+		Vector3 scaling = Vector3( m_destObjectScale, m_destObjectScale, m_destObjectScale );
+		Matrix m;
+		D3DXMatrixTransformation( &m, NULL, NULL, &scaling, NULL, &rotation, &m_destinationPosition );
+
+		for( auto it = std::begin( m_destLights ); it != std::end( m_destLights ); ++it )
+		{
+			( *it )->AddLight( lightManager, m, m_destObjectScale );
+		}
+	}
 }

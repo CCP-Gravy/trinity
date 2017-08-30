@@ -41,7 +41,7 @@ public:
 	virtual void GetModelCenterWorldPosition( Vector3 &position ) const {};
 	virtual bool GetLocalBoundingBox( Vector3 &min, Vector3 &max ) { return false; }
 	virtual void GetLocalToWorldTransform( Matrix &transform ) const { D3DXMatrixIdentity( &transform ); }
-	virtual void GetLights( Tr2LightManager& lightManager ) const {}
+	virtual void GetLights( Tr2LightManager& lightManager ) const;
 
 	/////////////////////////////////////////////////////////////////////////////////////
 	// IEveTranfrom
@@ -113,6 +113,9 @@ private:
 	EveTransformPtr m_destObject;
 	EveTransformPtr m_stretchObject;
 	EveTransformPtr m_moveObject;
+
+	PTr2PointLightVector m_sourceLights;
+	PTr2PointLightVector m_destLights;
 
 	ITriScalarFunctionPtr m_progressCurve;
 	PTriCurveSetVector m_curveSets;
