@@ -102,6 +102,8 @@ void EveTurretTarget::StartFireAtLocator( int l, float delay, float length )
 	float theta = acosf( 1.f - sqrtf( v ) ) * 2.f;
 	TriVectorSpherical( &m_randomMissPositionOffset, phi, theta, 3.f );
 
+	m_impactID = -1;
+
 	// pop a miss/hit from the queue
 	if( !PopShotMissed() && m_impactSize > 0.f )
 	{
