@@ -335,9 +335,6 @@ void Tr2Sprite2dLineTrace::AddSegment(
 		adjustedTo = to;
 		adjustedFrom = from;
 	}
-	
-	d = adjustedTo - adjustedFrom;
-	D3DXVec2Normalize( &d, &d );
 
 	// Rotate 90 degrees
 	Vector2 normal(d.y, -d.x);
@@ -348,7 +345,7 @@ void Tr2Sprite2dLineTrace::AddSegment(
 	uint32_t segmentIndices = 6;
 	if( capAngleTo != 0.0f)
 	{
-		if ( m_cornerType == CORNERTYPE_MITER)
+		if ( m_cornerType == CORNERTYPE_MITER )
 		{
 			segmentVertices += 1;
 			segmentIndices += 6;
@@ -365,7 +362,7 @@ void Tr2Sprite2dLineTrace::AddSegment(
 			// calculate arc length and number of steps
 			float arcLength = angleDiff * m_lineWidth;
 
-			unsigned int numSteps = (unsigned int)arcLength / 4;
+			unsigned int numSteps = (unsigned int)abs( arcLength ) / 4;
 
 			if( numSteps < 2 )
 				numSteps = 2;
@@ -462,7 +459,7 @@ void Tr2Sprite2dLineTrace::AddSegment(
 	// Construct joint
 	if( capAngleTo != 0.0f)
 	{
-		if ( m_cornerType == CORNERTYPE_MITER)
+		if ( m_cornerType == CORNERTYPE_MITER )
 		{
 			AddMiterJoint(
 				renderer,
@@ -530,7 +527,7 @@ void Tr2Sprite2dLineTrace::AddRoundJoint(
 
 	// calculate arc length and number of steps
 	float arcLength = angleDiff * m_lineWidth;
-	unsigned int numSteps = (unsigned int)arcLength / 4;
+	unsigned int numSteps = (unsigned int)abs( arcLength ) / 4;
 
 	if( numSteps < 2 )
 		numSteps = 2;
