@@ -664,6 +664,19 @@ void EveSwarm::PushRenderables( std::vector<ITr2Renderable*>& renderables )
 
 
 // --------------------------------------------------------------------------------
+void EveSwarm::EstimatePixelDiameter( const TriFrustum& frustum )
+{
+	Vector4 bs;
+	GetBoundingSphere( bs );
+	m_estimatedPixelDiameter = frustum.GetPixelSizeAccross( &bs );
+	if( m_swarmingEnabled && m_count > 1 )
+	{
+		m_estimatedPixelDiameter /= std::sqrt( (float)m_count );
+	}
+}
+
+
+// --------------------------------------------------------------------------------
 bool EveSwarm::GetRenderablesCastingShadow( bool isSelf, const TriFrustumOrtho& frustum, std::vector<ITr2Renderable*>& renderables )
 {
 	if( !m_display )
@@ -685,6 +698,17 @@ bool EveSwarm::GetRenderablesCastingShadow( bool isSelf, const TriFrustumOrtho& 
 		}
 	}
 	return false;
+}
+
+// --------------------------------------------------------------------------------
+void EveSwarm::UpdateWorldBounds()
+{
+	Vector4 bs;
+	BoundingSphereFromBox( bs, m_squadBoundsMin, m_squadBoundsMax );
+	m_boundingSphereWorldCenter.x = bs.x;
+	m_boundingSphereWorldCenter.y = bs.y;
+	m_boundingSphereWorldCenter.z = bs.z;
+	m_boundingSphereWorldRadius = bs.w + m_modelScale * m_boundingSphereRadius;
 }
 
 // --------------------------------------------------------------------------------

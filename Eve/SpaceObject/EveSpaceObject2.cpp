@@ -389,7 +389,7 @@ void EveSpaceObject2::UpdateAsyncronous( EveUpdateContext& updateContext )
 	}
 }
 
-void EveSpaceObject2::PrepareShaderData( EveUpdateContext& updateContext ) 
+void EveSpaceObject2::UpdateWorldBounds()
 {
 	if( m_dynamicBoundingSphereEnabled && m_animationUpdater && m_animationUpdater->IsInitialized() )
 	{
@@ -402,6 +402,11 @@ void EveSpaceObject2::PrepareShaderData( EveUpdateContext& updateContext )
 		D3DXVec3TransformCoord( &m_boundingSphereWorldCenter, &m_boundingSphereCenter, &m_worldTransform );
 		m_boundingSphereWorldRadius = m_modelScale * m_boundingSphereRadius;
 	}
+}
+
+void EveSpaceObject2::PrepareShaderData( EveUpdateContext& updateContext ) 
+{
+	UpdateWorldBounds();
 
 	// if we have an impact overlay it can modify the activation strength, otherwise just full on
 	m_spaceObjectShipData.y = m_impactOverlay ? m_impactOverlay->GetActivationStrength( updateContext ) : 1.f;
@@ -1140,7 +1145,7 @@ void EveSpaceObject2::UpdateVisibility( const TriFrustum& frustum, const Matrix&
 	{
 		if( frustum.IsSphereVisible( m_boundingSphereWorldCenter, m_boundingSphereWorldRadius ) )
 		{
-			m_estimatedPixelDiameter = frustum.GetPixelSizeAccross( m_boundingSphereWorldCenter, m_boundingSphereWorldRadius );
+			EstimatePixelDiameter( frustum );
 			m_isMeshVisible = true;
 		}
 	}
@@ -2583,6 +2588,16 @@ void EveSpaceObject2::SetShapeEllipsoid( const Vector3* center, const Vector3* r
 float EveSpaceObject2::GetEstimatedPixelDiameter() const
 {
 	return m_estimatedPixelDiameter;
+}
+
+
+// --------------------------------------------------------------------------------
+// Description:
+//   Update pixel diameter estimation
+// --------------------------------------------------------------------------------
+void EveSpaceObject2::EstimatePixelDiameter( const TriFrustum& frustum )
+{
+	m_estimatedPixelDiameter = frustum.GetPixelSizeAccross( m_boundingSphereWorldCenter, m_boundingSphereWorldRadius );
 }
 
 // --------------------------------------------------------------------------------

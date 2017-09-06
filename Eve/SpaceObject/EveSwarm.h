@@ -228,6 +228,7 @@ public:
 	bool GetRenderablesCastingShadow( bool isSelf, const TriFrustumOrtho& frustum, std::vector<ITr2Renderable*>& renderables );
 
 protected:
+
 	/////////////////////////////////////////////////////////////////////////////////////
 	// Object space damage locator information
 	Vector3 GetObjectSpaceDamageLocatorPosition( uint32_t index ) const;
@@ -236,6 +237,8 @@ protected:
 	
 	/////////////////////////////////////////////////////////////////////////////////////
 	// EveShip2 override
+	void UpdateWorldBounds();
+	void EstimatePixelDiameter( const TriFrustum& frustum );
 	Matrix GetObserverTransform() const;
 	const Matrix* GetTurretTransform( unsigned int turretSetIndex ) const;
 	

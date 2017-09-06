@@ -366,6 +366,8 @@ protected:
 	// LODing
 	void UnloadLodIfNeeded( Be::Time time );
 	void FreezeHighDetailMesh();
+	virtual void EstimatePixelDiameter( const TriFrustum& frustum );
+	virtual void UpdateWorldBounds();
 
 	// damage locators
 	Vector3 GetTransformedDamageLocator( uint32_t index );
