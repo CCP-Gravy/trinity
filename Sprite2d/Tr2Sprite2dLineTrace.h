@@ -118,9 +118,9 @@ private:
 
 	struct DrawCall
 	{
-		uint16_t vertexOffset;
+		uint32_t vertexOffset;
+		uint32_t indexOffset;
 		uint16_t vertexCount;
-		uint16_t indexOffset;
 		uint16_t indexCount;
 	};
 

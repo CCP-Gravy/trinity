@@ -187,8 +187,8 @@ void Tr2Sprite2dLineTrace::GatherSprites( Tr2Sprite2dScene* renderer )
 			fromColor = toColor;
 			lastRelativeLength = relativeLength;
 		}
-		m_drawCalls.back().vertexCount = uint16_t( m_renderVertices.size() ) - m_drawCalls.back().vertexOffset;
-		m_drawCalls.back().indexCount = uint16_t( m_renderIndices.size() ) - m_drawCalls.back().indexOffset;
+		m_drawCalls.back().vertexCount = uint16_t( m_renderVertices.size() - m_drawCalls.back().vertexOffset );
+		m_drawCalls.back().indexCount = uint16_t( m_renderIndices.size() - m_drawCalls.back().indexOffset );
 
 		m_isDirty = false;
 	}
@@ -379,13 +379,13 @@ void Tr2Sprite2dLineTrace::AddSegment(
 	}
 	if( totalIndexCount + segmentIndices >= renderer->GetMaxIndexCountPerDrawCall() || totalVertexCount + segmentVertices >= renderer->GetMaxVertexCountPerDrawCall() )
 	{
-		m_drawCalls.back().vertexCount = uint16_t( m_renderVertices.size() ) - m_drawCalls.back().vertexOffset;
-		m_drawCalls.back().indexCount = uint16_t( m_renderIndices.size() ) - m_drawCalls.back().indexOffset;
+		m_drawCalls.back().vertexCount = uint16_t( m_renderVertices.size() - m_drawCalls.back().vertexOffset );
+		m_drawCalls.back().indexCount = uint16_t( m_renderIndices.size() - m_drawCalls.back().indexOffset );
 
 		DrawCall dc;
-		dc.vertexOffset = uint16_t( m_renderVertices.size() );
+		dc.vertexOffset = m_renderVertices.size();
 		dc.vertexCount = 0;
-		dc.indexOffset = uint16_t( m_renderIndices.size() );
+		dc.indexOffset = m_renderIndices.size();
 		dc.indexCount = 0;
 		m_drawCalls.push_back( dc );
 
@@ -438,7 +438,7 @@ void Tr2Sprite2dLineTrace::AddSegment(
 		v3.texCoord[1] = Vector2( -pixelWidthInTexels, m_lineWidth );
 
 	// Create verticies
-	uint16_t oldSize = (uint16_t)m_renderVertices.size();
+	uint32_t oldSize = (uint32_t)m_renderVertices.size();
 	m_renderVertices.resize( oldSize + 4 );
 
 	renderer->PrepareTriangleVerts( 
@@ -449,12 +449,12 @@ void Tr2Sprite2dLineTrace::AddSegment(
 
 	// Update index buffer
 	auto indexOffset = m_drawCalls.back().vertexOffset;
-	m_renderIndices.push_back( 0 + oldSize - indexOffset );
-	m_renderIndices.push_back( 1 + oldSize - indexOffset );
-	m_renderIndices.push_back( 3 + oldSize - indexOffset );
-	m_renderIndices.push_back( 3 + oldSize - indexOffset );
-	m_renderIndices.push_back( 1 + oldSize - indexOffset );
-	m_renderIndices.push_back( 2 + oldSize - indexOffset );
+	m_renderIndices.push_back( uint16_t( 0 + oldSize - indexOffset ) );
+	m_renderIndices.push_back( uint16_t( 1 + oldSize - indexOffset ) );
+	m_renderIndices.push_back( uint16_t( 3 + oldSize - indexOffset ) );
+	m_renderIndices.push_back( uint16_t( 3 + oldSize - indexOffset ) );
+	m_renderIndices.push_back( uint16_t( 1 + oldSize - indexOffset ) );
+	m_renderIndices.push_back( uint16_t( 2 + oldSize - indexOffset ) );
 
 	// Construct joint
 	if( capAngleTo != 0.0f)
