@@ -181,21 +181,24 @@ Vector3 Tr2ManipulationTool::RayToPlaneIntersection(Vector3& P,  Vector3& d, Vec
 void Tr2ManipulationTool::ScreenCoordinatesToRay( int x, int y, Vector3& outRay, Vector3& outStart, Tr2Viewport& viewport, Matrix& viewMatrix, Matrix& projectionMatrix )
 {
 	XMVECTOR det;
-	XMMATRIX invVP = XMMatrixInverse( &det, viewMatrix * projectionMatrix );
+	XMMATRIX invP = XMMatrixInverse( &det, projectionMatrix );
+	XMMATRIX invV = XMMatrixInverse( &det, viewMatrix );
 
 	Vector3 start (		 2.0f * float( x - viewport.m_x ) / viewport.m_width  - 1.0f,
 						-2.0f * float( y - viewport.m_y ) / viewport.m_height + 1.0f,
 						0 );
 
-	outStart = XMVector3TransformCoord( start, invVP );
+	XMVECTOR vStart = XMVector3TransformCoord( start, invP );
+	outStart = XMVector3TransformCoord( vStart, invV );
 
 
 	Vector3 end = start;
 	end.z = 0.5f;
 
 
-	outRay = XMVector3TransformCoord( end, invVP );
-	outRay -= outStart;
+	outRay = XMVector3TransformCoord( end, invP );
+	outRay = XMVectorSubtract( outRay, vStart );
+	outRay = XMVector3TransformNormal( outRay, invV );
 	XMVector3Normalize( outRay );
 }
 
