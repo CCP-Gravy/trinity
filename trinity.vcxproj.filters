@@ -3,7 +3,6 @@
   <ItemGroup>
     <Filter Include="Resource Files"/>
     <Filter Include="Source Files"/>
-    <Filter Include="Source Files\Apex"/>
     <Filter Include="Source Files\Curves"/>
     <Filter Include="Source Files\Curves\Fader"/>
     <Filter Include="Source Files\Eve"/>
@@ -449,24 +448,6 @@
     </ClInclude>
     <ClInclude Include="version.h">
       <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Apex\Apex.h">
-      <Filter>Source Files\Apex</Filter>
-    </ClInclude>
-    <ClInclude Include="Apex\Tr2ApexRenderer.h">
-      <Filter>Source Files\Apex</Filter>
-    </ClInclude>
-    <ClInclude Include="Apex\Tr2ApexRes.h">
-      <Filter>Source Files\Apex</Filter>
-    </ClInclude>
-    <ClInclude Include="Apex\Tr2ApexScene.h">
-      <Filter>Source Files\Apex</Filter>
-    </ClInclude>
-    <ClInclude Include="Apex\Tr2ClothingActor.h">
-      <Filter>Source Files\Apex</Filter>
-    </ClInclude>
-    <ClInclude Include="Apex\Tr2ClothingRes.h">
-      <Filter>Source Files\Apex</Filter>
     </ClInclude>
     <ClInclude Include="Curves\Tr2BoneMatrixCurve.h">
       <Filter>Source Files\Curves</Filter>
@@ -1997,39 +1978,6 @@
     </ClCompile>
     <ClCompile Include="TriView_Blue.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Apex\Apex.cpp">
-      <Filter>Source Files\Apex</Filter>
-    </ClCompile>
-    <ClCompile Include="Apex\Apex_Blue.cpp">
-      <Filter>Source Files\Apex</Filter>
-    </ClCompile>
-    <ClCompile Include="Apex\Tr2ApexRenderer.cpp">
-      <Filter>Source Files\Apex</Filter>
-    </ClCompile>
-    <ClCompile Include="Apex\Tr2ApexRes.cpp">
-      <Filter>Source Files\Apex</Filter>
-    </ClCompile>
-    <ClCompile Include="Apex\Tr2ApexRes_Blue.cpp">
-      <Filter>Source Files\Apex</Filter>
-    </ClCompile>
-    <ClCompile Include="Apex\Tr2ApexScene.cpp">
-      <Filter>Source Files\Apex</Filter>
-    </ClCompile>
-    <ClCompile Include="Apex\Tr2ApexScene_Blue.cpp">
-      <Filter>Source Files\Apex</Filter>
-    </ClCompile>
-    <ClCompile Include="Apex\Tr2ClothingActor.cpp">
-      <Filter>Source Files\Apex</Filter>
-    </ClCompile>
-    <ClCompile Include="Apex\Tr2ClothingActor_Blue.cpp">
-      <Filter>Source Files\Apex</Filter>
-    </ClCompile>
-    <ClCompile Include="Apex\Tr2ClothingRes.cpp">
-      <Filter>Source Files\Apex</Filter>
-    </ClCompile>
-    <ClCompile Include="Apex\Tr2ClothingRes_Blue.cpp">
-      <Filter>Source Files\Apex</Filter>
     </ClCompile>
     <ClCompile Include="Curves\Tr2BoneMatrixCurve.cpp">
       <Filter>Source Files\Curves</Filter>
