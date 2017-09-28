@@ -13,6 +13,8 @@ BLUE_DECLARE_IVECTOR( ITriEffectParameter );
 BLUE_DECLARE_INTERFACE( ITriEffectResourceParameter );
 BLUE_DECLARE_IVECTOR( ITriEffectResourceParameter );
 BLUE_DECLARE( Tr2Shader );
+BLUE_DECLARE_INTERFACE( ITr2GpuBuffer );
+BLUE_DECLARE_INTERFACE( ITr2TextureProvider );
 
 BLUE_CLASS_ALLOW_DELAYED_DELETE( Tr2Effect );
 
@@ -85,6 +87,9 @@ public:
 	bool AddParameterColor( const BlueSharedString& name, const Color* value );
 	void ClearAllParameters();
 	void ClearAllResources();
+
+	void SetParameter( const BlueSharedString& name, ITr2GpuBuffer* buffer, uint32_t initialCount = -1 );
+	void SetParameter( const BlueSharedString& name, ITr2TextureProvider* texture );
 
 	void SetOption( const BlueSharedString& name, const BlueSharedString& value );
 	void ResetOption( const BlueSharedString& name );

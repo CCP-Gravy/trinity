@@ -14,6 +14,7 @@
 #include "Shader/Parameter/Tr2Texture2DLodParameter.h"
 #include "Shader/Parameter/Tr2GeometryBufferParameter.h"
 #include "Shader/Parameter/TriVariableParameter.h"
+#include "Shader/Parameter/Tr2RuntimeTextureParameter.h"
 
 BLUE_DEFINE_INTERFACE( ITr2EffectValue );
 
@@ -248,7 +249,7 @@ void ConvertEffectResource( const Tr2EffectResource& resource,
 	default:
 	{
 		OTr2GeometryBufferParameter* newBuffer = new OTr2GeometryBufferParameter();
-		newBuffer->m_name = resource.name;
+		newBuffer->m_name = BlueSharedString( resource.name );
 		resourceAdder( newBuffer );
 		newBuffer->Unlock(); // Remove the original lock created by 'new'.
 	}
@@ -1659,4 +1660,42 @@ Tr2VariableStore& Tr2Effect::GetVariableStore()
 		return *m_variableStore;
 	}
 	return GlobalStore();
+}
+
+// --------------------------------------------------------------------------------------
+void Tr2Effect::SetParameter( const BlueSharedString& name, ITr2GpuBuffer* buffer, uint32_t initialCount )
+{
+	auto existing = GetResourceByName( name.c_str() );
+	Tr2GeometryBufferParameterPtr param = BlueCastPtr( existing );
+	if( param )
+	{
+		param->SetGpuBuffer( buffer );
+		param->m_initialCount = initialCount;
+	}
+	else
+	{
+		param.CreateInstance();
+		param->m_name = name;
+		param->SetGpuBuffer( buffer );
+		param->m_initialCount = initialCount;
+		AddResource( param );
+	}
+}
+
+// --------------------------------------------------------------------------------------
+void Tr2Effect::SetParameter( const BlueSharedString& name, ITr2TextureProvider* texture )
+{
+	auto existing = GetResourceByName( name.c_str() );
+	Tr2RuntimeTextureParameterPtr param = BlueCastPtr( existing );
+
+	if( param )
+	{
+		param->SetTextureProvider( texture );
+	}
+	else
+	{
+		param.CreateInstance();
+		param->Create( name, texture );
+		AddResource( param );
+	}
 }
