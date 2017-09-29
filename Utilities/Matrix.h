@@ -688,4 +688,33 @@ inline Matrix OrthographicProjection( float width, float height, float zNear, fl
 	return out;
 }
 
+// --------------------------------------------------------------------------------------
+inline Vector3 TransformCoord( const Vector3& coord, const Matrix& transform )
+{
+	Vector3 out;
+	float norm = transform.m[0][3] * coord.x + transform.m[1][3] * coord.y + transform.m[2][3] * coord.z + transform.m[3][3];
+	if( norm != 0 )
+	{
+		out.x = ( coord.x * transform._11 + coord.y * transform._21 + coord.z * transform._31 + transform._41 ) / norm;
+		out.y = ( coord.x * transform._12 + coord.y * transform._22 + coord.z * transform._32 + transform._42 ) / norm;
+		out.z = ( coord.x * transform._13 + coord.y * transform._23 + coord.z * transform._33 + transform._43 ) / norm;
+	}
+	else
+	{
+		out.x = 0.0f;
+		out.y = 0.0f;
+		out.z = 0.0f;
+	}
+	return out;
+}
+
+// --------------------------------------------------------------------------------------
+inline Vector3 TransformNormal( const Vector3& normal, const Matrix& transform )
+{
+	return Vector3(
+		normal.x * transform._11 + normal.y * transform._21 + normal.z * transform._31,
+		normal.x * transform._12 + normal.y * transform._22 + normal.z * transform._32,
+		normal.x * transform._13 + normal.y * transform._23 + normal.z * transform._33 );
+}
+
 #endif // MATRIX_H
