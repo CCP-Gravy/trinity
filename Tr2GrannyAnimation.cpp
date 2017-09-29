@@ -1123,14 +1123,25 @@ void Tr2GrannyAnimation::SetLayerControlParam( const char* layerName, float cont
 void Tr2GrannyAnimation::SetLayerControlParamSkewRate( const char* layerName, float skewRate )
 {
 	const char* base_name_string = "";
+	Tr2GrannyAnimationLayer *layer;
 
 	if ( !strcmp(layerName, base_name_string) )
 	{
-		GetAnimationLayer( nullptr )->SetControlParamSkewRate( skewRate );
+		layer = GetAnimationLayer( nullptr );
+		if ( !layer )
+		{
+			return;
+		}
+		layer->SetControlParamSkewRate( skewRate );
 	}
 	else
 	{
-		GetAnimationLayer( layerName )->SetControlParamSkewRate( skewRate );
+		layer = GetAnimationLayer( layerName );
+		if ( !layer )
+		{
+			return;
+		}
+		layer->SetControlParamSkewRate( skewRate );
 	}
 }
 
@@ -1192,7 +1203,16 @@ void Tr2GrannyAnimation::AddAnimationLayerWithTrackMask( const char* layerName, 
 
 void Tr2GrannyAnimation::AddAnimationLayerBone( const char* layerName, const char* boneName )
 {
-	Tr2GrannyAnimationLayer* layer = GetAnimationLayer( layerName );
+	Tr2GrannyAnimationLayer* layer;
+	if ( !strcmp(layerName, "") )
+	{
+		layer = GetAnimationLayer( nullptr );
+	}
+	else
+	{
+		layer = GetAnimationLayer( layerName );
+	}
+
 	if( !layer )
 	{
 		return;
@@ -1204,7 +1224,16 @@ void Tr2GrannyAnimation::AddAnimationLayerBone( const char* layerName, const cha
 
 void Tr2GrannyAnimation::AddAnimationLayerAllBones( const char* layerName )
 {
-	Tr2GrannyAnimationLayer* layer = GetAnimationLayer( layerName );
+	Tr2GrannyAnimationLayer* layer;
+	if ( !strcmp(layerName, "") )
+	{
+		layer = GetAnimationLayer( nullptr );
+	}
+	else
+	{
+		layer = GetAnimationLayer( layerName );
+	}
+
 	if( !layer )
 	{
 		return;
@@ -1216,7 +1245,16 @@ void Tr2GrannyAnimation::AddAnimationLayerAllBones( const char* layerName )
 
 void Tr2GrannyAnimation::RemoveAnimationLayerBone( const char* layerName, const char* boneName )
 {
-	Tr2GrannyAnimationLayer* layer = GetAnimationLayer( layerName );
+	Tr2GrannyAnimationLayer* layer;
+	if ( !strcmp(layerName, "") )
+	{
+		layer = GetAnimationLayer( nullptr );
+	}
+	else
+	{
+		layer = GetAnimationLayer( layerName );
+	}
+
 	if( !layer )
 	{
 		return;

@@ -487,8 +487,6 @@ void Tr2GrannyAnimationLayer::SetControlParamSkewRate( float skewRate )
 
 void Tr2GrannyAnimationLayer::UpdateControlParam( float animation_time )
 {
-	m_lastControlUpdateTime = animation_time;
-
 	if ( m_controlParam == m_controlParamTarget )
 	{
 		return;
@@ -518,4 +516,5 @@ void Tr2GrannyAnimationLayer::UpdateControlParam( float animation_time )
 		auto duration = GrannyGetControlLocalDuration( control );
 		GrannySetControlRawLocalClock( control, m_controlParam * duration );
 	}
+	m_lastControlUpdateTime = animation_time;
 }
