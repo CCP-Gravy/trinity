@@ -74,6 +74,10 @@ int AnimNameToIndex( const granny_file_info* fi, const char *name )
 
 granny_file_info* GetSecondaryFileInfo( const std::string& grannyResPath, const TriGrannyResPtr grannyPtr )
 {
+	if ( !grannyPtr || !grannyPtr->IsPrepared() )
+	{
+		return nullptr;
+	}
 	granny_file_info* const fi = GrannyGetFileInfo( grannyPtr->GetGrannyFile() );
 	if( !fi )
 	{
