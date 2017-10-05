@@ -588,7 +588,7 @@ public:
 	Vector3 m_position, m_scaling;
 	Quaternion m_rotation;
 	std::string m_shader;
-	int m_groupIndex, m_boneIndex;
+	int m_groupIndex, m_boneIndex, m_meshIndex;
 	PEveSOFDataTextureVector m_textures;
 	PEveSOFDataParameterVector m_parameters;
 	PEveSOFDataDecalIndexStructureList m_indexBuffer;
