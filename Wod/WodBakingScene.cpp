@@ -88,6 +88,8 @@ void WodBakingScene::Render( Tr2RenderContext& renderContext )
 		return;
 	}
 
+	renderContext.AddGpuMarker( __FUNCTION__ );
+
 	Tr2PerObjectData* perObjectData = m_skinnedObject->GetPerObjectData( m_opaqueRenderBatches );
 	m_skinnedObject->GetBatches( m_opaqueRenderBatches, TRIBATCHTYPE_OPAQUE, perObjectData );	
 	

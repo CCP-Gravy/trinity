@@ -1130,6 +1130,8 @@ void EveSpaceScene::BeginRender( Tr2RenderContext& renderContext )
 		return;
 	}
 
+	renderContext.AddGpuMarker( __FUNCTION__ );
+
 	if( m_visualizeMethod != VM_NONE )
 	{
 		if( !m_visualizerEffects[m_visualizeMethod] )
@@ -1600,6 +1602,8 @@ bool EveSpaceScene::RenderBackgroundPass( Tr2RenderContext& renderContext )
 		return false;
 	}
 
+	renderContext.AddGpuMarker( __FUNCTION__ );
+
 	TriFrustum& frustum = m_frameData.frustum;
 	std::vector<ITr2Renderable*> visible;
 	Tr2RenderableSortList transparentObjects;
@@ -1704,6 +1708,8 @@ void EveSpaceScene::RenderDepthPass( Tr2RenderContext& renderContext )
 	// Render to depth map
 	if( Tr2Renderer::GetShaderModel() == TR2SM_3_0_DEPTH )
 	{
+		renderContext.AddGpuMarker( __FUNCTION__ );
+
 #if TRINITY_PLATFORM != TRINITY_DIRECTX9
 		m_hasDepthPass = true;
 #endif
@@ -1764,6 +1770,8 @@ void EveSpaceScene::RenderMainPass( Tr2RenderContext& renderContext )
 	{
 		return;
 	}
+
+	renderContext.AddGpuMarker( __FUNCTION__ );
 
 	if( m_hasDepthPass )
 	{
@@ -1867,6 +1875,8 @@ void EveSpaceScene::EndRender( Tr2RenderContext& renderContext )
 	{
 		return;
 	}
+
+	renderContext.AddGpuMarker( __FUNCTION__ );
 
 	Tr2QuadRenderer::Instance()->DoneRendering( renderContext );
 
@@ -1974,6 +1984,8 @@ void EveSpaceScene::EndRender( Tr2RenderContext& renderContext )
 // --------------------------------------------------------------------------------------
 void EveSpaceScene::Render3DUI( Tr2RenderContext& renderContext )
 {
+	renderContext.AddGpuMarker( __FUNCTION__ );
+
 	RenderDebugInfo( renderContext );
 
 	Matrix identity = Tr2Renderer::GetIdentityTransform();

@@ -485,6 +485,8 @@ void Tr2InteriorScene::RenderFullForward( Tr2RenderContext& renderContext )
 
 	D3DPERF_EVENT( L"Tr2InteriorScene::RenderFullForward" );
 
+	renderContext.AddGpuMarker( __FUNCTION__ );
+
 	// Update variable store
 	m_backgroundCubeMapVar = m_backgroundCubeMapRes;
 	

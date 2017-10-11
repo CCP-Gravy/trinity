@@ -235,6 +235,8 @@ void Tr2Sprite2dScene::Render( Tr2RenderContext& renderContext )
 		return;
 	}
 
+	renderContext.AddGpuMarker( __FUNCTION__ );
+
 	// Flash default texture to make it easier to spot missing textures
 	FlashDefaultTexture();
 
