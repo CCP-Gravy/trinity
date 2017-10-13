@@ -3112,6 +3112,7 @@
     <ClInclude Include="Utilities\Matrix.h"/>
     <ClInclude Include="Utilities\MatrixUtils.h"/>
     <ClInclude Include="Utilities\Obb.h"/>
+    <ClInclude Include="Utilities\Plane.h"/>
     <ClInclude Include="Utilities\Quaternion.h"/>
     <ClInclude Include="Utilities\StringUtils.h"/>
     <ClInclude Include="Wod\WodBakingScene.h"/>

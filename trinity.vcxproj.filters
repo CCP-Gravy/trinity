@@ -1376,6 +1376,9 @@
     <ClInclude Include="Utilities\Obb.h">
       <Filter>Source Files\Utilities</Filter>
     </ClInclude>
+    <ClInclude Include="Utilities\Plane.h">
+      <Filter>Source Files\Utilities</Filter>
+    </ClInclude>
     <ClInclude Include="Utilities\Quaternion.h">
       <Filter>Source Files\Utilities</Filter>
     </ClInclude>
