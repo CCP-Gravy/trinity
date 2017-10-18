@@ -650,7 +650,7 @@ void EveSpaceObject2::RenderDebugInfo( Tr2DebugRenderer& renderer )
 					Tr2DebugObjectReference( &locators, uint32_t( i ) ),
 					Vector3( XMVector3TransformCoord( position, m_worldTransform ) ),
 					Vector3( XMVector3TransformNormal( Vector3( 0, 1, 0 ), Matrix( XMMatrixRotationQuaternion( rotation ) ) * m_worldTransform ) ),
-					m_boundingSphereRadius / 50.f,
+					m_boundingSphereRadius * m_modelScale / 50.f,
 					8,
 					Tr2DebugRenderer::Lit,
 					color );
