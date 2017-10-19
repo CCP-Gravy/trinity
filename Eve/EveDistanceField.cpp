@@ -30,7 +30,7 @@ EveDistanceField::EveDistanceField( IRoot* lockobj ) :
 float EveDistanceField::CalculateFieldCoverageAndDistance( Be::Time t, const Vector3& posRef, const Vector3& originShift )
 {
 	Vector3 minBounds( FLT_MAX, FLT_MAX, FLT_MAX );
-	Vector3 maxBounds( FLT_MIN, FLT_MIN, FLT_MIN );
+	Vector3 maxBounds( -FLT_MAX, -FLT_MAX, -FLT_MAX);
 	Vector3 averagePos( 0, 0, 0 );
 	Vector3 posObj;
 
@@ -163,6 +163,18 @@ void EveDistanceField::Update( const EveUpdateContext& updateContext )
 			m_curveSet->Update( m_distance );
 		}
 	}
+
+	if( m_debug )
+	{
+		m_debugPositions.clear();
+		for( auto it = m_objects.begin(); it != m_objects.end(); ++it )
+		{
+			Vector3 position;
+			(*it)->GetValueAt( &position, t );
+			m_debugPositions.push_back( position );
+		}
+		m_debug = false;
+	}
 }
 
 void EveDistanceField::UpdateDistanceCurveSize()
@@ -278,5 +290,38 @@ bool EveDistanceField::OnModified( Be::Var* value )
 }
 
 
+// --------------------------------------------------------------------------------------
+void EveDistanceField::GetDebugOptions( Tr2DebugRendererOptions& options )
+{
+	options.insert( "DistanceField" );
+}
+
+
+// --------------------------------------------------------------------------------
+void EveDistanceField::RenderDebugInfo( Tr2DebugRenderer& renderer )
+{
+	if( !renderer.HasOption( this, "DistanceField" ) )
+	{
+		return;
+	}
+	m_debug = true;
+
+	// Show the dimension and midpoint of the field
+	const Vector3 aabbMin = m_middle - m_dimensions * 0.5f;
+	const Vector3 aabbMax = m_middle + m_dimensions * 0.5f;
+	renderer.DrawSphere( this, m_middle, 1000.f, 3, Tr2DebugRenderer::Wireframe, 0xff00ff00 );
+	renderer.DrawBox( this, aabbMin, aabbMax, Tr2DebugRenderer::Wireframe, 0xff00ff00 );
+	char str[128];
+	sprintf_s( str, "Object Count: %i", m_objects.GetSize() );
+	renderer.DrawText( TRI_DBG_FONT_LARGE, m_middle, 0xff00ff00, str );
+
+	for( auto it = m_debugPositions.begin(); it != m_debugPositions.end(); ++it )
+	{
+		const Vector3 pos = *it;
+		renderer.DrawLine( this, m_middle, pos, 0x3f00ff00 );
+		renderer.DrawSphere( this, pos, m_minDistance, 3, Tr2DebugRenderer::Wireframe, 0x3fffffff );
+		renderer.DrawSphere( this, pos, m_maxDistance, 3, Tr2DebugRenderer::Wireframe, 0x1fffffff );
+	}
+}
 
 

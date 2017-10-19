@@ -2842,6 +2842,10 @@ void EveSpaceScene::RenderDebugInfo( Tr2RenderContext& renderContext )
 			(*it)->RenderDebugInfo( *m_debugRenderer );
 		}
 
+		for( auto it = m_distanceFields.begin(); it != m_distanceFields.end(); ++it )
+		{
+			(*it)->RenderDebugInfo( *m_debugRenderer );
+		}
 		m_debugRenderer->EndRender( renderContext );
 
 		Tr2Renderer::RenderDebugInfo( renderContext );

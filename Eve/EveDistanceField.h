@@ -7,6 +7,8 @@
 #ifndef EveDistanceField_H
 #define EveDistanceField_H
 
+#include "Tr2DebugRenderer.h"
+
 BLUE_DECLARE( EveUpdateContext );
 BLUE_DECLARE_INTERFACE( ITriVectorFunction );
 BLUE_DECLARE_VECTOR( ITriVectorFunction );
@@ -21,7 +23,8 @@ BLUE_DECLARE( Tr2CurveScalar );
 // --------------------------------------------------------------------------------------
 BLUE_CLASS( EveDistanceField ):
 	public IListNotify,
-	public INotify
+	public INotify,
+	public ITr2DebugRenderable
 {
 public:
 	EveDistanceField( IRoot* lockobj = 0 );
@@ -35,6 +38,12 @@ public:
 	/////////////////////////////////////////////////////////////////////////////////////
 	// INotify
 	bool OnModified( Be::Var* value );
+
+
+	/////////////////////////////////////////////////////////////////////////////////////
+	// ITr2DebugRenderable
+    void GetDebugOptions( Tr2DebugRendererOptions& options );
+    void RenderDebugInfo( Tr2DebugRenderer& renderer );
 
 	void Update( const EveUpdateContext& updateContext );
 	
@@ -85,6 +94,10 @@ private:
 	Vector3 m_dimensions;
 	void SetNeutralValues();
 	float CalculateFieldCoverageAndDistance( Be::Time t, const Vector3& posRef, const Vector3& originShift );
+
+    // members for debug purposes
+	bool m_debug;
+	std::vector<Vector3> m_debugPositions;
 };
 	
 TYPEDEF_BLUECLASS( EveDistanceField );
