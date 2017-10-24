@@ -2807,6 +2807,9 @@ void EveSpaceObject2::GetPickingBatches( ITriRenderBatchAccumulator* batches, Tr
 	if( ( pickTypes & PICK_TYPE_OPAQUE ) != 0 )
 	{
 		GetBatches( batches, TRIBATCHTYPE_OPAQUE, perObjectData );
+		// We also get stuff from overlay so that some effects (like cloaking) can be pickable
+		GetBatchesFromOverlayVector( batches, perObjectData, TRIBATCHTYPE_TRANSPARENT );
+		GetBatchesFromOverlayVector( batches, perObjectData, TRIBATCHTYPE_ADDITIVE );
 	}
 	if( ( pickTypes & PICK_TYPE_TRANSPARENT ) != 0 )
 	{
@@ -2843,6 +2846,7 @@ void EveSpaceObject2::GetPickingBatches( ITriRenderBatchAccumulator* batches, Tr
 		}
 	}
 }
+
 bool EveSpaceObject2::IsImpostor() const
 {
 	return m_impostorMode;
