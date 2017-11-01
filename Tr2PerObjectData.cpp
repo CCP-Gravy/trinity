@@ -14,7 +14,6 @@ Tr2PerObjectData::~Tr2PerObjectData()
 //   The function should use the provided buffer(s) to first map them and fill them up 
 //   with per object data, _and_ then set the buffer to the renderContext at the correct 
 //   register.
-//   Default implementation calls UpdateConstantBuffer for each shader type.
 // Arguments:
 //   buffers - points to an array of SHADER_TYPE_COUNT constant buffers; the elements in 
 //             the array are pointers to make it easy to mix-and-match "global" buffers 
@@ -27,14 +26,6 @@ void Tr2PerObjectData::SetPerObjectDataToDevice( Tr2ConstantBufferAL** buffers,
 												 unsigned constantTypeMask,
 												 Tr2RenderContext& renderContext ) const
 {
-	using namespace Tr2RenderContextEnum;
-	for( unsigned i = SHADER_TYPE_FIRST; i < SHADER_TYPE_COUNT; ++i )
-	{
-		if( constantTypeMask & ( 1 << i ) )
-		{
-			UpdateConstantBuffer( ShaderType( i ), *buffers[i], UPDATE_CONTEXT, constantTypeMask, renderContext );
-		}
-	}
 }
 
 
@@ -44,102 +35,65 @@ Tr2PerObjectDataStandard::Tr2PerObjectDataStandard()
 {
 }
 
-void Tr2PerObjectDataStandard::UpdateConstantBuffer(	Tr2RenderContextEnum::ShaderType type, 
-														Tr2ConstantBufferAL& buffer, 
-														UpdateDestination updateDestination,
-														unsigned constantTypeMask,
-														Tr2RenderContext& renderContext ) const
+void Tr2PerObjectDataStandard::SetPerObjectDataToDevice( Tr2ConstantBufferAL** buffers, unsigned constantTypeMask, Tr2RenderContext& renderContext ) const
 {
-	CCP_STATS_ZONE( __FUNCTION__ );
-
-	using namespace Tr2RenderContextEnum;
-	if( type == VERTEX_SHADER && m_vertexShaderFloatBufferSize )
-	{
-		if( updateDestination == UPDATE_CONTEXT )
-		{
-			static const unsigned perFrameVsMask = 
-				SHADER_TYPE_EXISTS( VERTEX_SHADER )		|
-				SHADER_TYPE_EXISTS( COMPUTE_SHADER )	|
-				SHADER_TYPE_EXISTS( GEOMETRY_SHADER )	|
-				SHADER_TYPE_EXISTS( HULL_SHADER )		|
-				SHADER_TYPE_EXISTS( DOMAIN_SHADER)		;
-			FillAndSetConstants( buffer, 
-											  m_vertexShaderFloatConstantBuffer, 
-											  m_vertexShaderFloatBufferSize, 
-											  perFrameVsMask & constantTypeMask,
-											  Tr2Renderer::GetPerObjectVSStartRegister(), 
-											  renderContext );
-		}
-		else if( void* mirror = buffer.GetBufferMirror( m_vertexShaderFloatBufferSize, renderContext ) )
-		{
-			memcpy( mirror, m_vertexShaderFloatConstantBuffer, m_vertexShaderFloatBufferSize );
-		}
-	}
-	else if( type == PIXEL_SHADER && m_pixelShaderFloatBufferSize )
-	{
-		if( updateDestination == UPDATE_CONTEXT )
-		{
-			FillAndSetConstants( buffer, 
-											  m_pixelShaderFloatConstantBuffer, 
-											  m_pixelShaderFloatBufferSize, 
-											  PIXEL_SHADER, 
-											  Tr2Renderer::GetPerObjectPSStartRegister(), 
-											  renderContext );
-		}
-		else if( void* mirror = buffer.GetBufferMirror( m_pixelShaderFloatBufferSize, renderContext ) )
-		{
-			memcpy( mirror, m_pixelShaderFloatConstantBuffer, m_pixelShaderFloatBufferSize );
-		}
-	}
+	const unsigned perFrameVsMask =
+		SHADER_TYPE_EXISTS( VERTEX_SHADER ) |
+		SHADER_TYPE_EXISTS( COMPUTE_SHADER ) |
+		SHADER_TYPE_EXISTS( GEOMETRY_SHADER ) |
+		SHADER_TYPE_EXISTS( HULL_SHADER ) |
+		SHADER_TYPE_EXISTS( DOMAIN_SHADER );
+	FillAndSetConstants( *buffers[VERTEX_SHADER],
+		m_vertexShaderFloatConstantBuffer,
+		m_vertexShaderFloatBufferSize,
+		perFrameVsMask & constantTypeMask,
+		Tr2Renderer::GetPerObjectVSStartRegister(),
+		renderContext );
+	FillAndSetConstants( *buffers[PIXEL_SHADER],
+		m_pixelShaderFloatConstantBuffer,
+		m_pixelShaderFloatBufferSize,
+		PIXEL_SHADER,
+		Tr2Renderer::GetPerObjectPSStartRegister(),
+		renderContext );
 }
 
-void Tr2PerObjectDataSkinned::UpdateConstantBuffer( Tr2RenderContextEnum::ShaderType type, 
-													Tr2ConstantBufferAL& buffer, 
-													UpdateDestination updateDestination,
-													unsigned constantTypeMask,
-													Tr2RenderContext& renderContext ) const
+void Tr2PerObjectDataSkinned::SetPerObjectDataToDevice( Tr2ConstantBufferAL** buffers, unsigned constantTypeMask, Tr2RenderContext& renderContext ) const
 {
-	CCP_STATS_ZONE( __FUNCTION__ );
-
-	using namespace Tr2RenderContextEnum;
-	if( type == PIXEL_SHADER && m_pixelShaderFloatBufferSize )
+	if( ( constantTypeMask & ( 1 << PIXEL_SHADER ) ) != 0 )
 	{
-		if( updateDestination == UPDATE_CONTEXT )
-		{
-			FillAndSetConstants( buffer, 
-											  m_pixelShaderFloatConstantBuffer, 
-											  m_pixelShaderFloatBufferSize, 
-											  PIXEL_SHADER, 
-											  Tr2Renderer::GetPerObjectPSStartRegister(), 
-											  renderContext );
-		}
-		else if( void* mirror = buffer.GetBufferMirror( m_pixelShaderFloatBufferSize, renderContext ) )
-		{
-			memcpy( mirror, m_pixelShaderFloatConstantBuffer, m_pixelShaderFloatBufferSize );
-		}
+		FillAndSetConstants( *buffers[PIXEL_SHADER],
+			m_pixelShaderFloatConstantBuffer,
+			m_pixelShaderFloatBufferSize,
+			PIXEL_SHADER,
+			Tr2Renderer::GetPerObjectPSStartRegister(),
+			renderContext );
 	}
-	else if( type == VERTEX_SHADER )
+	const unsigned perFrameVsMask =
+		SHADER_TYPE_EXISTS( VERTEX_SHADER ) |
+		SHADER_TYPE_EXISTS( COMPUTE_SHADER ) |
+		SHADER_TYPE_EXISTS( GEOMETRY_SHADER ) |
+		SHADER_TYPE_EXISTS( HULL_SHADER ) |
+		SHADER_TYPE_EXISTS( DOMAIN_SHADER );
+	if( ( constantTypeMask & perFrameVsMask ) != 0 )
 	{
 		const unsigned totalSize = ( TR2_MAX_BONES_PER_MESHAREA * 3 + 5 + 4 ) * 16;
-		if( char* VS = (char*)buffer.GetBufferMirror( totalSize, renderContext ) )
+		if( char* VS = (char*)buffers[VERTEX_SHADER]->GetBufferMirror( totalSize, renderContext ) )
 		{
-			memcpy( VS + ( TR2_MAX_BONES_PER_MESHAREA * 3     ) * 16, &m_worldMat.m[0][0],     4 * 16 );
+			memcpy( VS + ( TR2_MAX_BONES_PER_MESHAREA * 3 ) * 16, &m_worldMat.m[0][0], 4 * 16 );
 			memcpy( VS + ( TR2_MAX_BONES_PER_MESHAREA * 3 + 5 ) * 16, &m_mirrorMatrix.m[0][0], 4 * 16 );
 		}
-		if( updateDestination == UPDATE_CONTEXT )
-		{
-			buffer.UpdateFromMirror( renderContext );
-			static const unsigned perFrameVsMask = 
-				SHADER_TYPE_EXISTS( VERTEX_SHADER )		|
-				SHADER_TYPE_EXISTS( COMPUTE_SHADER )	|
-				SHADER_TYPE_EXISTS( GEOMETRY_SHADER )	|
-				SHADER_TYPE_EXISTS( HULL_SHADER )		|
-				SHADER_TYPE_EXISTS( DOMAIN_SHADER)		;
-			SetConstants( buffer, perFrameVsMask, Tr2Renderer::GetPerObjectVSStartRegister(), renderContext );
-		}
+		buffers[VERTEX_SHADER]->UpdateFromMirror( renderContext );
+		SetConstants( *buffers[VERTEX_SHADER], perFrameVsMask & constantTypeMask, Tr2Renderer::GetPerObjectVSStartRegister(), renderContext );
 	}
 }
 
+void Tr2PerObjectDataSkinned::UpdateVertexShaderCBMirror( void* destination, Tr2RenderContext& renderContext ) const
+{
+	const unsigned totalSize = ( TR2_MAX_BONES_PER_MESHAREA * 3 + 5 + 4 ) * 16;
+	uint8_t* vs = static_cast<uint8_t*>( destination );
+	memcpy( vs + ( TR2_MAX_BONES_PER_MESHAREA * 3 ) * 16, &m_worldMat.m[0][0], 4 * 16 );
+	memcpy( vs + ( TR2_MAX_BONES_PER_MESHAREA * 3 + 5 ) * 16, &m_mirrorMatrix.m[0][0], 4 * 16 );
+}
 
 void Tr2PerObjectDataSkinned::SetSkinningMatrices( unsigned int n, float* data )
 {
@@ -152,44 +106,35 @@ float* Tr2PerObjectDataSkinned::GetSkinningMatrix( unsigned int ix ) const
 	return &m_data[ix*3*4];
 }
 
-
-void Tr2PerAreaDataSkinned::UpdateConstantBuffer(	Tr2RenderContextEnum::ShaderType type, 
-													Tr2ConstantBufferAL& buffer, 
-													UpdateDestination updateDestination,
-													unsigned constantTypeMask,
-													Tr2RenderContext& renderContext ) const
+void Tr2PerAreaDataSkinned::SetPerObjectDataToDevice( Tr2ConstantBufferAL** buffers, unsigned constantTypeMask, Tr2RenderContext& renderContext ) const
 {
-	CCP_STATS_ZONE( __FUNCTION__ );
-
-	using namespace Tr2RenderContextEnum;
-	if( type == VERTEX_SHADER )
+	const unsigned perFrameVsMask =
+		SHADER_TYPE_EXISTS( VERTEX_SHADER ) |
+		SHADER_TYPE_EXISTS( COMPUTE_SHADER ) |
+		SHADER_TYPE_EXISTS( GEOMETRY_SHADER ) |
+		SHADER_TYPE_EXISTS( HULL_SHADER ) |
+		SHADER_TYPE_EXISTS( DOMAIN_SHADER );
+	if( ( constantTypeMask & perFrameVsMask ) != 0 )
 	{
-		m_perObjectDataPtr->UpdateConstantBuffer( type, buffer, UPDATE_MIRROR, constantTypeMask, renderContext );
+		auto& buffer = *buffers[VERTEX_SHADER];
 
 		CCP_ASSERT( m_jointCount <= TR2_MAX_BONES_PER_MESHAREA );
 
 		const unsigned totalSize = m_jointCount * 3 * 16;
 
-		if( char* VS = (char*)buffer.GetBufferMirror( totalSize, renderContext ) )
+		if( char* vs = (char*)buffer.GetBufferMirror( totalSize, renderContext ) )
 		{
-			memcpy( VS, &m_jointTransforms, totalSize );
-		}	
-
-		if( updateDestination == UPDATE_CONTEXT )
-		{
-			buffer.UpdateFromMirror( renderContext );
-			static const unsigned perFrameVsMask = 
-				SHADER_TYPE_EXISTS( VERTEX_SHADER )		|
-				SHADER_TYPE_EXISTS( COMPUTE_SHADER )	|
-				SHADER_TYPE_EXISTS( GEOMETRY_SHADER )	|
-				SHADER_TYPE_EXISTS( HULL_SHADER )		|
-				SHADER_TYPE_EXISTS( DOMAIN_SHADER)		;
-			SetConstants( buffer, perFrameVsMask & constantTypeMask, Tr2Renderer::GetPerObjectVSStartRegister(), renderContext );
+			m_perObjectDataPtr->UpdateVertexShaderCBMirror( vs, renderContext );
+			memcpy( vs, &m_jointTransforms, totalSize );
 		}
+
+		buffer.UpdateFromMirror( renderContext );
+		SetConstants( buffer, perFrameVsMask & constantTypeMask, Tr2Renderer::GetPerObjectVSStartRegister(), renderContext );
 	}
-	else
+	constantTypeMask = constantTypeMask & ~perFrameVsMask;
+	if( constantTypeMask )
 	{
-		m_perObjectDataPtr->UpdateConstantBuffer( type, buffer, updateDestination, constantTypeMask, renderContext );
+		m_perObjectDataPtr->SetPerObjectDataToDevice( buffers, constantTypeMask, renderContext );
 	}
 }
 

@@ -19,30 +19,10 @@ public:
 		m_padding[0] = m_padding[1] = m_padding[2] = 0;
 	}
 
-	// --------------------------------------------------------------------------------------
-	// Description:
-	//   Updates constant buffer with per-object data for specified input stage (shader 
-	//   type). Based on updateDestination parameter the function either updates buffer's
-	//   mirror or commits data to the render context. This function is used for nested (for
-	//   example per-area) data.
-	//   Sets number of lights for pixel shader constant buffer.
-	// Arguments:
-	//   type - stage input type
-	//   buffer - constant buffer to update
-	//   updateDestination - what to update
-	//   renderContext - current render context
-	// --------------------------------------------------------------------------------------
-	void UpdateConstantBuffer( Tr2RenderContextEnum::ShaderType type, 
-							   Tr2ConstantBufferAL& buffer, 
-							   UpdateDestination updateDestination,
-							   unsigned constantTypeMask, 
-							   Tr2RenderContext& renderContext ) const
+	virtual void SetPerObjectDataToDevice( Tr2ConstantBufferAL** buffers, unsigned constantTypeMask, Tr2RenderContext& renderContext ) const
 	{
-		Tr2PerObjectDataStandard::UpdateConstantBuffer( type, buffer, updateDestination, constantTypeMask, renderContext );
-		if( type == Tr2RenderContextEnum::PIXEL_SHADER )
-		{
-			renderContext.SetNumberOfLights( m_numPointLights );
-		}
+		Tr2PerObjectDataStandard::SetPerObjectDataToDevice( buffers, constantTypeMask, renderContext );
+		renderContext.SetNumberOfLights( m_numPointLights );
 	}
 
 	// ----------------------------------------------------------------------------------
@@ -78,30 +58,10 @@ public:
 		m_padding[0] = m_padding[1] = m_padding[2] = 0;
 	}
 
-	// --------------------------------------------------------------------------------------
-	// Description:
-	//   Updates constant buffer with per-object data for specified input stage (shader 
-	//   type). Based on updateDestination parameter the function either updates buffer's
-	//   mirror or commits data to the render context. This function is used for nested (for
-	//   example per-area) data.
-	//   Sets number of lights for pixel shader constant buffer.
-	// Arguments:
-	//   type - stage input type
-	//   buffer - constant buffer to update
-	//   updateDestination - what to update
-	//   renderContext - current render context
-	// --------------------------------------------------------------------------------------
-	void UpdateConstantBuffer( Tr2RenderContextEnum::ShaderType type, 
-							   Tr2ConstantBufferAL& buffer, 
-							   UpdateDestination updateDestination,
-							   unsigned constantTypeMask, 
-							   Tr2RenderContext& renderContext ) const
+	virtual void SetPerObjectDataToDevice( Tr2ConstantBufferAL** buffers, unsigned constantTypeMask, Tr2RenderContext& renderContext ) const
 	{
-		Tr2PerObjectDataSkinned::UpdateConstantBuffer( type, buffer, updateDestination, constantTypeMask, renderContext );
-		if( type == Tr2RenderContextEnum::PIXEL_SHADER )
-		{
-			renderContext.SetNumberOfLights( m_numPointLights );
-		}
+		Tr2PerObjectDataSkinned::SetPerObjectDataToDevice( buffers, constantTypeMask, renderContext );
+		renderContext.SetNumberOfLights( m_numPointLights );
 	}
 
 	// ----------------------------------------------------------------------------------

@@ -20,41 +20,6 @@ public:
 	unsigned int GetUserData() const { return m_userData; }
 	void SetUserData(unsigned int val) { m_userData = val; }
 
-	// --------------------------------------------------------------------------------------
-	// Description:
-	//   Type of update for UpdateConstantBuffer method.
-	// --------------------------------------------------------------------------------------
-	enum UpdateDestination
-	{
-		// Update constant buffer mirror
-		UPDATE_MIRROR,
-		// Update constant buffer and commit it to render context
-		UPDATE_CONTEXT,
-	};
-
-	// --------------------------------------------------------------------------------------
-	// Description:
-	//   Updates constant buffer with per-object data for specified input stage (shader 
-	//   type). Based on updateDestination parameter the function either updates buffer's
-	//   mirror or commits data to the render context. This function is used for nested (for
-	//   example per-area) data.
-	//   Default implementation is empty, so derived classes are supposed to fully override
-	//   either SetPerObjectDataToDevice or UpdateConstantBuffer (or both) methods.
-	// Arguments:
-	//   type - stage input type
-	//   buffer - constant buffer to update
-	//   updateDestination - what to update
-	//   constantTypeMask - bitmask telling us which shaderTypes are actually in use by the current effect
-	//   renderContext - current render context
-	// --------------------------------------------------------------------------------------
-	virtual void UpdateConstantBuffer( Tr2RenderContextEnum::ShaderType type, 
-									   Tr2ConstantBufferAL& buffer, 
-									   UpdateDestination updateDestination,
-									   unsigned constantTypeMask, 
-									   Tr2RenderContext& renderContext ) const 
-	{
-	}
-
 private:
 	unsigned int m_userData;
 };
@@ -99,11 +64,7 @@ public:
 
 	Tr2PerObjectDataStandard();
 
-	virtual void UpdateConstantBuffer( Tr2RenderContextEnum::ShaderType type, 
-									   Tr2ConstantBufferAL& buffer, 
-									   UpdateDestination updateDestination,
-									   unsigned constantTypeMask, 
-									   Tr2RenderContext& renderContext ) const;
+	virtual void SetPerObjectDataToDevice( Tr2ConstantBufferAL** buffers, unsigned constantTypeMask, Tr2RenderContext& renderContext ) const;
 
 	template<typename T> void CopyToVSFloatBuffer( const T& objectRef )
 	{
@@ -137,11 +98,7 @@ public:
 	{
 	}
 
-	virtual void UpdateConstantBuffer( Tr2RenderContextEnum::ShaderType type, 
-									   Tr2ConstantBufferAL& buffer, 
-									   UpdateDestination updateDestination,
-									   unsigned constantTypeMask, 
-									   Tr2RenderContext& renderContext ) const;
+	virtual void SetPerObjectDataToDevice( Tr2ConstantBufferAL** buffers, unsigned constantTypeMask, Tr2RenderContext& renderContext ) const;
 	
 	void SetSkinningMatrices( unsigned int n, float* data );
 	float* GetSkinningMatrices() const { return m_data; }
@@ -150,6 +107,8 @@ public:
 	void SetMirrorMatrix( const Matrix& mirrorMat ) { m_mirrorMatrix = mirrorMat; }
 	const Matrix& GetMirrorMatrix() const { return m_mirrorMatrix; }
 	void SetWorldPosition( const Vector3& worldPos ) { m_worldPos = Vector4( worldPos.x, worldPos.y, worldPos.z, 0.0f ); }
+
+	void UpdateVertexShaderCBMirror( void* destination, Tr2RenderContext& renderContext ) const;
 
 private:
 	unsigned int m_jointCount;
@@ -173,15 +132,11 @@ public:
 		memset( m_jointTransforms, 0, sizeof( m_jointTransforms ) );
 	}
 
-	virtual void UpdateConstantBuffer( Tr2RenderContextEnum::ShaderType type, 
-									   Tr2ConstantBufferAL& buffer, 
-									   UpdateDestination updateDestination,
-									   unsigned constantTypeMask, 
-									   Tr2RenderContext& renderContext ) const;
+	virtual void SetPerObjectDataToDevice( Tr2ConstantBufferAL** buffers, unsigned constantTypeMask, Tr2RenderContext& renderContext ) const;
 
 	void SetJointCount( unsigned int n );
 	void SetJointTransform( unsigned int ix, float* data );
-	void SetPerObjectData( const Tr2PerObjectData& perObjectData ) { m_perObjectDataPtr = &perObjectData; };
+	void SetPerObjectData( const Tr2PerObjectDataSkinned& perObjectData ) { m_perObjectDataPtr = &perObjectData; };
 	
 	const unsigned	GetJointCount() const { return m_jointCount; }
 	const float*	GetMatrices()	const { return (const float*)m_jointTransforms; }
@@ -189,7 +144,7 @@ public:
 private:
 	unsigned int m_jointCount;
 	float m_jointTransforms[TR2_MAX_BONES_PER_MESHAREA * ( 3 * 4 )];
-	const Tr2PerObjectData* m_perObjectDataPtr;
+	const Tr2PerObjectDataSkinned* m_perObjectDataPtr;
 };
 
 

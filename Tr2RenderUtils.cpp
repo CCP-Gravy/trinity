@@ -111,6 +111,10 @@ void SetupScreenQuadInCameraSpace( Tr2ScreenVertex quad[4], int width, int heigh
 
 bool FillAndSetConstants( Tr2ConstantBufferAL& buffer, const void* const data, const size_t dataSize, unsigned constantTypeMask, const unsigned registerIndex, Tr2RenderContext& renderContext )
 {
+	if( constantTypeMask == 0 )
+	{
+		return true;
+	}
 	if( !buffer.IsValid() || dataSize > buffer.GetSize() )
 	{
 		USE_MAIN_THREAD_RENDER_CONTEXT();
