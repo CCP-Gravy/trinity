@@ -284,6 +284,8 @@ private:
 
 	void DeviceLost();
 
+	static void LogAllLiveResources( Tr2ALMemoryTypes flags = AL_MEMORY_VIDEO | AL_MEMORY_MANAGED );
+
 
 private:
 	BlueScriptCallback m_onDeviceRemoved;

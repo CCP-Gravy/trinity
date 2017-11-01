@@ -1328,6 +1328,27 @@ void TriDevice::SetTickInterval( int value )
 	mTickInterval = value;
 }
 
+void TriDevice::LogAllLiveResources( Tr2ALMemoryTypes flags )
+{
+	auto logObject = [&]( Tr2RenderContextEnum::ObjectType /*type*/, const char* typeName, const void* address, const std::map<std::string, uint32_t>& description )
+	{
+		char buffer[64];
+		std::string message = typeName;
+		sprintf_s( buffer, " 0x%X: ", address );
+		message += buffer;
+		for( auto it = description.begin(); it != description.end(); ++it )
+		{
+			message += it->first;
+			sprintf_s( buffer, ": %u, ", it->second );
+			message += buffer;
+		}
+
+		CCP_LOGERR( "%s", message.c_str() );
+	};
+	Tr2TrackedALObjectBase::GetAllObjectDescriptions( flags, logObject );
+}
+
+
 //  Description:
 //    This class is an RAII implementation of management for an 'IsDeviceResetting' state
 //    It is intended to prevent python from calling functions that would trigger a device

@@ -64,7 +64,7 @@ bool TriDevice::DoLowLevelDeviceReset( const Tr2PresentParametersAL& presentatio
 		CCP_LOGERR( "Second device reset attempt failed - %X: %s", hr, DXGetErrorString( hr ) );
 
 		// This does nothing except for in dev9
-		Tr2TrackedALObjectBase::LogAllLiveResources( TRISTORAGE_VIDEOMEMORY );
+		LogAllLiveResources( TRISTORAGE_VIDEOMEMORY );
 		TriError::ReportError( hr, Clsid(), "Device Reset failed" );
 		return false;
 	}

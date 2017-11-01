@@ -120,7 +120,7 @@ void TriDevice::HandleRenderTick(  Be::Time realTime, Be::Time simTime )
 			mDeviceLost = true;
 			Tr2RenderContext::DestroyMainThreadRenderContext();
 
-			Tr2TrackedALObjectBase::LogAllLiveResources();
+			LogAllLiveResources();
 			return;
 		}
 	}
