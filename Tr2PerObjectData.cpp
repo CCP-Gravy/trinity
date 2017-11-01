@@ -93,44 +93,6 @@ void Tr2PerObjectDataStandard::UpdateConstantBuffer(	Tr2RenderContextEnum::Shade
 	}
 }
 
-// cppcheck-suppress uninitMemberVar
-Tr2PerObjectDataPrePass::Tr2PerObjectDataPrePass()
-	: m_vertexShaderFloatBufferSize( 0 )
-{}
-
-void Tr2PerObjectDataPrePass::UpdateConstantBuffer(		Tr2RenderContextEnum::ShaderType type, 
-														Tr2ConstantBufferAL& buffer, 
-														UpdateDestination updateDestination,
-														unsigned constantTypeMask,
-														Tr2RenderContext& renderContext ) const
-{
-	CCP_STATS_ZONE( __FUNCTION__ );
-
-	using namespace Tr2RenderContextEnum;
-	if( type == VERTEX_SHADER && m_vertexShaderFloatBufferSize )
-	{
-		if( updateDestination == UPDATE_CONTEXT )
-		{
-			static const unsigned perFrameVsMask = 
-				SHADER_TYPE_EXISTS( VERTEX_SHADER )		|
-				SHADER_TYPE_EXISTS( COMPUTE_SHADER )	|
-				SHADER_TYPE_EXISTS( GEOMETRY_SHADER )	|
-				SHADER_TYPE_EXISTS( HULL_SHADER )		|
-				SHADER_TYPE_EXISTS( DOMAIN_SHADER)		;
-			FillAndSetConstants( buffer, 
-											  m_vertexShaderFloatConstantBuffer, 
-											  m_vertexShaderFloatBufferSize, 
-											  perFrameVsMask & constantTypeMask,
-											  Tr2Renderer::GetPerObjectVSStartRegister(), 
-											  renderContext );
-		}
-		else if( void* mirror = buffer.GetBufferMirror( m_vertexShaderFloatBufferSize, renderContext ) )
-		{
-			memcpy( mirror, m_vertexShaderFloatConstantBuffer, m_vertexShaderFloatBufferSize );
-		}
-	}
-}
-
 void Tr2PerObjectDataSkinned::UpdateConstantBuffer( Tr2RenderContextEnum::ShaderType type, 
 													Tr2ConstantBufferAL& buffer, 
 													UpdateDestination updateDestination,

@@ -93,99 +93,11 @@ protected:
 	unsigned int m_pixelShaderFloatBufferSize;
 };
 
-// -------------------------------------------------------------
-// Description:
-//   Tr2PerAreaSHLightingData overrides some PS registers of
-//   the original per-object data. It must be used in conjunction
-//   with some other per-object data that is set with
-//   SetPerObjectData method.
-// -------------------------------------------------------------
-class Tr2PerAreaSHLightingData : public Tr2PerObjectDataPSBuffer
-{
-public:
-	Tr2PerAreaSHLightingData()
-		:m_perObjectDataPtr( nullptr )
-	{
-	}
-
-	virtual void UpdateConstantBuffer( Tr2RenderContextEnum::ShaderType type, 
-									   Tr2ConstantBufferAL& buffer, 
-									   UpdateDestination updateDestination,
-									   unsigned constantTypeMask, 
-									   Tr2RenderContext& renderContext ) const
-	{
-		CCP_STATS_ZONE( __FUNCTION__ );
-
-		using namespace Tr2RenderContextEnum;
-		if( type == PIXEL_SHADER )
-		{
-			m_perObjectDataPtr->UpdateConstantBuffer( type, buffer, UPDATE_MIRROR, constantTypeMask, renderContext );
-
-			void* mirror = buffer.GetBufferMirror( m_pixelShaderFloatBufferSize, renderContext );
-			if( mirror )
-			{
-				memcpy( mirror, m_pixelShaderFloatConstantBuffer, m_pixelShaderFloatBufferSize );
-			}
-
-			if( updateDestination == UPDATE_CONTEXT )
-			{
-				buffer.UpdateFromMirror( renderContext );
-				renderContext.SetConstants( buffer, type, Tr2Renderer::GetPerObjectPSStartRegister() );
-			}
-		}
-		else
-		{
-			m_perObjectDataPtr->UpdateConstantBuffer( type, buffer, updateDestination, constantTypeMask, renderContext );
-		}
-	}
-
-	void SetPerObjectData( const Tr2PerObjectData* perObjectData ) 
-	{ 
-		m_perObjectDataPtr = perObjectData; 
-	}
-
-	const Tr2PerObjectData* GetPerObjectData() const
-	{ 
-		return m_perObjectDataPtr; 
-	}
-private:
-	const Tr2PerObjectData* m_perObjectDataPtr;
-};
-
 class Tr2PerObjectDataStandard : public Tr2PerObjectDataPSBuffer
 {
 public:
 
 	Tr2PerObjectDataStandard();
-
-	virtual void UpdateConstantBuffer( Tr2RenderContextEnum::ShaderType type, 
-									   Tr2ConstantBufferAL& buffer, 
-									   UpdateDestination updateDestination,
-									   unsigned constantTypeMask, 
-									   Tr2RenderContext& renderContext ) const;
-
-	template<typename T> void CopyToVSFloatBuffer( const T& objectRef )
-	{
-		// In-place buffer must be large enough to contain the data in the type being set
-		static_assert( sizeof(T) <= sizeof(m_vertexShaderFloatConstantBuffer), "Size of per-object data is too large" );
-		// Size of the data being set must fill registers (float4s)
-		static_assert( sizeof(T) % (sizeof(float)*4) == 0, "Size of per-object data must be a multiple of Vector4" );
-		// Object is a pointer ( please resolve possible NULL pointers yourself )
-		static_assert( (!std::is_pointer<T>::value), "Need to pass reference to the data" );
-
-		m_vertexShaderFloatBufferSize = sizeof(T);
-		memcpy( &m_vertexShaderFloatConstantBuffer[0], (float*)&objectRef, sizeof(T) );
-	}
-
-protected:
-	float m_vertexShaderFloatConstantBuffer[40*4];
-	unsigned int m_vertexShaderFloatBufferSize;
-};
-
-class Tr2PerObjectDataPrePass : public Tr2PerObjectData
-{
-public:
-	Tr2PerObjectDataPrePass();
 
 	virtual void UpdateConstantBuffer( Tr2RenderContextEnum::ShaderType type, 
 									   Tr2ConstantBufferAL& buffer, 

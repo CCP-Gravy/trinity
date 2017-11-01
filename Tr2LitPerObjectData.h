@@ -123,15 +123,4 @@ private:
 	int32_t m_padding[3];
 };
 
-// --------------------------------------------------------------------------------------
-// Description:
-//   Per-object data for skinned objects rendered in light-prepass scene
-// --------------------------------------------------------------------------------------
-class Tr2PerObjectDataPrePassSkinned : public Tr2PerObjectDataSkinned
-{
-public:
-	// Constructor
-	Tr2PerObjectDataPrePassSkinned() {}
-};
-
 #endif
