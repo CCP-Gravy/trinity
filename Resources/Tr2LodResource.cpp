@@ -30,7 +30,9 @@ void Tr2LodResource::SetResourcePath( Tr2Lod lod, const char* resPath )
 
 IBlueResource* Tr2LodResource::GetResource()
 {
-	if( m_requested )
+	// This function can be called on multiple threads simultaneously,
+	// we don't want to mutate ref counts in such scenario
+	if( BeResMan->IsOnMainThread() && m_requested )
 	{
 		if( m_requested->IsGood() )
 		{
