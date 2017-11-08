@@ -66,7 +66,6 @@ EveSOF::EveSOF( IRoot* lockobj ) :
 	m_spriteSetEffect.CreateInstance();
 	m_spriteSetEffect->StartUpdate();
 	m_spriteSetEffect->SetEffectPathName( "res:/graphics/effect/managed/space/spaceobject/fx/blinkinglightspool.fx" );
-	m_spriteSetEffect->AddResourceTexture2D( gradientMap, "res:/texture/particle/whitesharp_gradient.dds" );
 	m_spriteSetEffect->EndUpdate();
 
 	m_shadowEffect.CreateInstance();
