@@ -13,6 +13,7 @@
 
 #include "Eve/SpaceObject/EveSpaceObject2.h"
 #include "Resources/Tr2LodResource.h"
+#include "TransformModifiers/IEveChildTransformModifier.h"
 
 BLUE_DECLARE( TriFrustum );
 BLUE_DECLARE( Tr2InstancedMesh );
@@ -74,6 +75,7 @@ private:
 
 	Tr2InstancedMeshPtr m_mesh;
 	PTr2ParticleSystemVector m_particleSystems;
+	PIEveChildTransformModifierVector m_transformModifiers;
 
 	// Lodding
 	bool m_useDynamicLod;

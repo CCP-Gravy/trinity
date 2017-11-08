@@ -26,6 +26,7 @@ EveChildParticleSystem::EveChildParticleSystem( IRoot* lockobj ):
 	EveChildTransform(),
 	PARENTLOCK( m_particleEmitters ),
 	PARENTLOCK( m_particleSystems ),
+	PARENTLOCK( m_transformModifiers ),
 	m_boundingSphere( 0, 0, 0, -1 ),
 	m_lodSphere( 0, 0, 0, -1 ),
 	m_display( true ),
@@ -168,6 +169,10 @@ void EveChildParticleSystem::UpdateAsyncronous( EveUpdateContext& updateContext,
 		return;
 	}
 	UpdateTransform( localToWorldTransform );
+	for( auto it = m_transformModifiers.begin(); it != m_transformModifiers.end(); ++it )
+	{
+		m_worldTransform = (*it)->ApplyTransform( m_worldTransform );
+	}
 	
 	Vector3 minBounds, maxBounds;
 	if( m_mesh && m_mesh->GetBoundingBox( minBounds, maxBounds ) )
