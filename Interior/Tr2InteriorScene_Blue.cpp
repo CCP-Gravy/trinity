@@ -410,8 +410,6 @@ const Be::ClassInfo* Tr2InteriorScene::ExposeToBlue()
 		MAP_ATTRIBUTE( "lights", m_lights, "List of scene light sources", Be::READWRITE | Be::PERSIST | Be::NOTIFY )
 		MAP_ATTRIBUTE( "dynamics", m_dynamics, "List of dynamic objects in scene", Be::READWRITE | Be::PERSIST | Be::NOTIFY )
 
-		MAP_ATTRIBUTE( "renderDebugInfo", m_renderDebugInfo, "If true, objects are given a chance to render debugging info.", Be::READWRITE )
-
 		MAP_ATTRIBUTE( "sunDiffuseColor", m_sunDiffuseColor, "Sun diffuse color", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "sunSpecularColor", m_sunSpecularColor, "Sun specular color", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "sunDirection", m_sunDirection, "Sun direction", Be::READWRITE | Be::PERSIST )

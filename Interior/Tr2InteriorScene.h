@@ -35,7 +35,6 @@ BLUE_DECLARE_VECTOR( Tr2TextureAtlas );
 BLUE_DECLARE_INTERFACE( ITr2PhysicsUpdater );
 BLUE_DECLARE( TriCurveSet );
 BLUE_DECLARE_VECTOR( TriCurveSet );
-BLUE_DECLARE( TriLineSet );
 
 class Tr2InteriorScene:
 	public IInitialize,
@@ -244,10 +243,6 @@ private:
 
 	float m_apexLODResourceBudget;
 	float m_apexLODResourceBudgetConsumed;
-
-	// debug
-	bool m_renderDebugInfo;
-    TriLineSetPtr m_debugLines;
 
 	// visualization
 	VisualizeMethod m_visualizeMethod;

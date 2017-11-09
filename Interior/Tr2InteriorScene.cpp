@@ -12,7 +12,6 @@
 #include "Tr2PushPopDS.h"
 #include "Tr2PushPopRT.h"
 
-#include "TriLineSet.h"
 #include "Tr2InteriorPlaceable.h"
 #include "ITr2PhysicsUpdater.h"
 #include "Curves/TriCurveSet.h"
@@ -110,7 +109,6 @@ Tr2InteriorScene::Tr2InteriorScene( IRoot* lockobj /*= NULL */ ):
 	PARENTLOCK( m_dynamics ),
 	PARENTLOCK( m_dynamicsPendingLoad ),
 	PARENTLOCK( m_curveSets ),
-	m_renderDebugInfo( false ),
 	m_sunDirection( 0.0f, 0.0f, 1.0f ),
 	m_sunDiffuseColor( 0.0f, 0.0f, 0.0f, 1.0f ),
 	m_sunSpecularColor( 0.8f, 0.8f, 0.8f, 1.0f ),
@@ -155,9 +153,6 @@ Tr2InteriorScene::Tr2InteriorScene( IRoot* lockobj /*= NULL */ ):
 	m_sunDirectionVar.Register( "Sun.DirWorld", dir );	
 	GlobalStore().RegisterVariable( "PickingComponents", Vector4() );
 	
-	// create debug renderer
-	m_debugLines.CreateInstance();
-
 	m_dynamics.SetNotify( this );
 
 	PrepareResources();
@@ -171,12 +166,6 @@ Tr2InteriorScene::~Tr2InteriorScene()
 	CCP_DELETE( m_primaryRenderBatches );
 	CCP_DELETE( m_pickingBatches );
 	CCP_DELETE( m_opaquePickingBatches );
-
-	// release debug renderer
-	if( m_debugLines )
-	{
-		m_debugLines = NULL;
-	}
 
     m_pickBuffer.ReleaseResources( TRISTORAGE_ALL );
 }

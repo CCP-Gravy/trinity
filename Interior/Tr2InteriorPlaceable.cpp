@@ -8,7 +8,6 @@
 #include "Utilities/BoundingSphere.h"
 #include "Tr2LitPerObjectData.h"
 #include "Wod/WodPlaceableRes.h"
-#include "TriLineSet.h"
 #include "Tr2Mesh.h"
 #include "Curves/TriCurveSet.h"
 #include "TriFrustum.h"

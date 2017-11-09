@@ -43,9 +43,6 @@ protected:
 	// Pick buffers
 	Tr2RenderTargetAL m_pickTarget;
 	Tr2DepthStencilAL m_depthBuffer;
-
-	// Store old states for restoring them after pick-rendering
-	uint32_t m_oldDepthState;
 };
 
 #endif

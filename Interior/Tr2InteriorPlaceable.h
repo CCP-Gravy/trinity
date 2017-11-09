@@ -23,7 +23,6 @@ BLUE_DECLARE( WodPlaceableRes );
 BLUE_DECLARE_VECTOR( Tr2InteriorPlaceable );
 
 BLUE_DECLARE( Tr2MeshArea );
-BLUE_DECLARE( TriLineSet );
 BLUE_DECLARE( TriTextureRes );
 BLUE_DECLARE( Tr2VariableStore );
 

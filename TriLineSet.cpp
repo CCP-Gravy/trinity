@@ -434,16 +434,8 @@ void TriLineSet::SubmitGeometry( Tr2RenderContext& renderContext )
 	void* verts = &m_vertices[0];
 	uint32_t stride = sizeof( TriDebugResourceHelper::VertexPosColor );
 
-    uint32_t origZEnable = 0;
-	CR( renderContext.GetRenderState( RS_ZENABLE, &origZEnable ) );
-	CR( renderContext.SetRenderState( RS_ZENABLE, m_zEnable ) );
-
 	renderContext.SetTopology( TOP_LINES );
 	renderContext.DrawPrimitiveUP( numLines, verts, stride );
-
-    // State should be restored, since trinity probably assumes it is managing
-    // the state.
-	CR( renderContext.SetRenderState( RS_ZENABLE, origZEnable ) );
 }
 
 void TriLineSet::AddLines( std::vector<std::pair<Vector3, Vector3>> lines )

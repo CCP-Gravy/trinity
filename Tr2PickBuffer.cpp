@@ -8,8 +8,7 @@ using namespace Tr2RenderContextEnum;
 Tr2PickBuffer::Tr2PickBuffer( IRoot* lockobj, Tr2RenderContextEnum::PixelFormat format, int size ) :
 	m_size( size ),
 	m_format( format ),
-	m_clearColor( 0xFFFFFFFF ),
-	m_oldDepthState( 0 )
+	m_clearColor( 0xFFFFFFFF )
 {
 	m_pickTarget.SetHintLockOften();
 }
@@ -60,10 +59,6 @@ bool Tr2PickBuffer::BeginRendering( float initialDepth, Tr2RenderContext& render
 	Tr2Renderer::PushRenderTarget( m_pickTarget, renderContext );
 	Tr2Renderer::PushDepthStencilBuffer( m_depthBuffer, renderContext );
 
-	// buffer z state
-	CR( renderContext.GetRenderState( RS_ZENABLE, &m_oldDepthState ) );	
-	CR( renderContext.SetRenderState( RS_ZENABLE, TRUE ) );
-
 	CR( renderContext.Clear( CLEARFLAGS_TARGET | CLEARFLAGS_ZBUFFER, m_clearColor, initialDepth ) );
 
     Tr2Renderer::SetFullScreenViewport();
@@ -74,9 +69,6 @@ bool Tr2PickBuffer::BeginRendering( float initialDepth, Tr2RenderContext& render
 // ------------------------------------------------------------------------------------------------------
 bool Tr2PickBuffer::EndRendering( Tr2RenderContext& renderContext )
 {
-	CR( renderContext.SetRenderState( RS_ZENABLE, m_oldDepthState ) );
-
-    //D3DXSaveSurfaceToFile( "c:/test.dds", D3DXIFF_DDS, m_pickTarget, 0, 0 );
 	Tr2Renderer::PopDepthStencilBuffer( renderContext );
 	Tr2Renderer::PopRenderTarget( renderContext );
 
