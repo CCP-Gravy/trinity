@@ -3,6 +3,7 @@
 #define Tr2DepthStencil_h_
 
 #include "ITr2TextureProvider.h"
+#include "Tr2DeviceResource.h"
 
 BLUE_DECLARE( Tr2DepthStencil );
 
@@ -13,7 +14,9 @@ BLUE_DECLARE( Tr2DepthStencil );
 //   This class replaces TriSurface for those use-cases where the
 //   surface was just a depth stencil surface.
 // -------------------------------------------------------------
-BLUE_CLASS( Tr2DepthStencil ) : public ITr2TextureProvider
+BLUE_CLASS( Tr2DepthStencil ) : 
+	public ITr2TextureProvider,
+	public Tr2DeviceResource
 {
 public:
 	EXPOSE_TO_BLUE();
@@ -57,8 +60,17 @@ public:
 	operator const Tr2DepthStencilAL&() const { return m_depthStencil; }
 	
 	std::string m_name;
+protected:
+	virtual void ReleaseResources( TriStorage s );
+	virtual bool OnPrepareResources();
 private:
 	bool HasALObject( int type, size_t object );
+
+	uint32_t m_width;
+	uint32_t m_height;
+	Tr2RenderContextEnum::DepthStencilFormat m_format;
+	Tr2MsaaDesc m_msaa;
+	Tr2RenderContextEnum::ExFlag m_flags;
 };
 
 TYPEDEF_BLUECLASS( Tr2DepthStencil );

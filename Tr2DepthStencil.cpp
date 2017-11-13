@@ -4,6 +4,10 @@
 using namespace Tr2RenderContextEnum;
 
 Tr2DepthStencil::Tr2DepthStencil( IRoot* )
+	:m_width( 0 ),
+	m_height( 0 ),
+	m_format( Tr2RenderContextEnum::DSFMT_AUTO ),
+	m_flags( Tr2RenderContextEnum::EX_NONE )
 {	
 }
 
@@ -31,9 +35,21 @@ void Tr2DepthStencil::py__init__(
 
 long Tr2DepthStencil::Create( unsigned width, unsigned height, DepthStencilFormat dsFormat, unsigned msaaType, unsigned msaaQuality, Tr2RenderContextEnum::ExFlag flags )
 {
-	CCP_STATS_ZONE( __FUNCTION__ );
 	USE_MAIN_THREAD_RENDER_CONTEXT();
-	return m_depthStencil.Create( width, height, dsFormat, Tr2MsaaDesc( msaaType, msaaQuality ), flags, renderContext ).GetResult();
+	auto hr = m_depthStencil.Create( width, height, dsFormat, Tr2MsaaDesc( msaaType, msaaQuality ), flags, renderContext ).GetResult();
+	if( SUCCEEDED( hr ) )
+	{
+		m_width = width;
+		m_height = height;
+		m_format = dsFormat;
+		m_msaa = Tr2MsaaDesc( msaaType, msaaQuality );
+		m_flags = flags;
+	}
+	else
+	{
+		Destroy();
+	}
+	return hr;
 }
 
 Tr2TextureAL* Tr2DepthStencil::GetTexture()
@@ -52,14 +68,18 @@ bool Tr2DepthStencil::IsReadable() const
 
 bool Tr2DepthStencil::IsValid() const
 {
-	CCP_STATS_ZONE( __FUNCTION__ );
 	return m_depthStencil.IsValid();
 }	
 
 void Tr2DepthStencil::Destroy()
 {
-	CCP_STATS_ZONE( __FUNCTION__ );
 	m_depthStencil.Destroy();
+
+	m_width = 0;
+	m_height = 0;
+	m_format = DSFMT_AUTO;
+	m_msaa = Tr2MsaaDesc();
+	m_flags = EX_NONE;
 }
 
 // --------------------------------------------------------------------------------------
@@ -123,3 +143,23 @@ Tr2RenderContextEnum::DepthStencilFormat Tr2DepthStencil::GetFormat() const
 	return m_depthStencil.GetFormat();
 }
 
+// --------------------------------------------------------------------------------------
+void Tr2DepthStencil::ReleaseResources( TriStorage s )
+{
+	if( m_depthStencil.IsValid() && ( s & m_depthStencil.GetMemoryClass() ) )
+	{
+		m_depthStencil.Destroy();
+	}
+}
+
+// --------------------------------------------------------------------------------------
+bool Tr2DepthStencil::OnPrepareResources()
+{
+	if( !m_depthStencil.IsValid() && m_width != 0 )
+	{
+		USE_MAIN_THREAD_RENDER_CONTEXT();
+
+		m_depthStencil.Create( m_width, m_height, m_format, m_msaa, m_flags, renderContext );
+	}
+	return true;
+}
