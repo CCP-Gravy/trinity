@@ -437,7 +437,7 @@ void TriDevice::ReleaseDeviceResources( TriStorage s )
 	m_ignoreInvalidate = true;  //to prevent recursion
 	ON_BLOCK_EXIT( [&]{ m_ignoreInvalidate = false; } );
 
-	Tr2AutoResetObjectAL::ReleaseALResources();
+	Tr2TrackedALObjectBase::DestroyObjects( s );
 
 	// Call those objects that registered with us.  This is the preferred modus operandi in future.
 	//The new resource registry.  Objects put themselves here.
@@ -976,8 +976,6 @@ void TriDevice::PrepareDeviceResources()
 	// NB: Unchecked return.
 	// Also, why are we calling this?
 	renderContext.SetPresentParameters( mAdapter, mPresentParam );
-
-	Tr2AutoResetObjectAL::PrepareALResources( renderContext );
 
 	// Rebuild C++ device resources
 	const ResourceSet& rs = GetResourcesRegistered();

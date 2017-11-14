@@ -3,6 +3,7 @@
 #define Tr2RenderTarget_h_
 
 #include "ITr2TextureProvider.h"
+#include "Tr2DeviceResource.h"
 
 BLUE_DECLARE( Tr2RenderTarget );
 
@@ -12,7 +13,9 @@ BLUE_DECLARE( Tr2RenderTarget );
 //   a renderTarget.
 //   This class replaces TriSurface and TriTextureRes.
 // -------------------------------------------------------------
-BLUE_CLASS( Tr2RenderTarget ) : public ITr2TextureProvider
+BLUE_CLASS( Tr2RenderTarget ) : 
+	public ITr2TextureProvider,
+	public Tr2DeviceResource
 {
 public:
 	EXPOSE_TO_BLUE();
@@ -66,10 +69,20 @@ public:
 	uintptr_t GetSharedHandle() const;
 	
 	std::string m_name;
+protected:
+	virtual void ReleaseResources( TriStorage s );
+	virtual bool OnPrepareResources();
 private:
 	Tr2RenderTargetAL m_renderTarget;
 	Tr2RenderTargetAL* m_attachedRenderTarget;
 	BlueWeakRef<IRoot> m_attachedOwner;
+
+	uint32_t m_width;
+	uint32_t m_height;
+	uint32_t m_mipCount;
+	Tr2RenderContextEnum::PixelFormat m_format;
+	Tr2MsaaDesc m_msaa;
+	Tr2RenderContextEnum::ExFlag m_flags;
 
 	bool HasALObject( int type, size_t object );
 };

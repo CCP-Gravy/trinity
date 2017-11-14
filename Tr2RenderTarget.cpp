@@ -4,7 +4,12 @@
 using namespace Tr2RenderContextEnum;
 
 Tr2RenderTarget::Tr2RenderTarget( IRoot* )
-	:m_attachedRenderTarget( nullptr )
+	:m_attachedRenderTarget( nullptr ),
+	m_width( 0 ),
+	m_height( 0 ),
+	m_mipCount( 0 ),
+	m_format( PIXEL_FORMAT_UNKNOWN ),
+	m_flags( EX_NONE )
 {	
 }
 
@@ -47,7 +52,7 @@ long Tr2RenderTarget::Create(
 	{
 		return E_INVALIDARG;
 	}
-	return m_renderTarget.Create(
+	auto hr = m_renderTarget.Create(
 		width,
 		height,
 		mipLevelCount,
@@ -56,6 +61,20 @@ long Tr2RenderTarget::Create(
 		( flags & Tr2RenderContextEnum::EX_BIND_UNORDERED_ACCESS ) ? Tr2RenderContextEnum::USAGE_UNORDERED_ACCESS : 0,
 		ExFlag( flags ),
 		renderContext ).GetResult();
+	if( SUCCEEDED( hr ) )
+	{
+		m_width = width;
+		m_height = height;
+		m_mipCount = mipLevelCount;
+		m_format = format;
+		m_msaa = Tr2MsaaDesc( msaaType, msaaQuality );
+		m_flags = ExFlag( flags );
+	}
+	else
+	{
+		Destroy();
+	}
+	return hr;
 }
 
 Tr2TextureAL* Tr2RenderTarget::GetTexture()
@@ -138,6 +157,12 @@ bool Tr2RenderTarget::IsValid() const
 void Tr2RenderTarget::Destroy()
 {
 	m_renderTarget.Destroy();
+	m_width = 0;
+	m_height = 0;
+	m_mipCount = 0;
+	m_format = PIXEL_FORMAT_UNKNOWN;
+	m_msaa = Tr2MsaaDesc();
+	m_flags = EX_NONE;
 }
 
 bool Tr2RenderTarget::IsReadable() const
@@ -258,4 +283,33 @@ uint32_t Tr2RenderTarget::GetMsaaQuality() const
 Tr2RenderContextEnum::PixelFormat Tr2RenderTarget::GetFormat() const
 {
 	return GetRenderTarget().GetFormat();
+}
+
+// --------------------------------------------------------------------------------------
+void Tr2RenderTarget::ReleaseResources( TriStorage s )
+{
+	if( m_renderTarget.IsValid() && ( m_renderTarget.GetMemoryClass() & s ) )
+	{
+		m_renderTarget.Destroy();
+	}
+}
+
+// --------------------------------------------------------------------------------------
+bool Tr2RenderTarget::OnPrepareResources()
+{
+	if( !m_renderTarget.IsValid() && m_width != 0 )
+	{
+		USE_MAIN_THREAD_RENDER_CONTEXT();
+
+		m_renderTarget.Create(
+			m_width,
+			m_height,
+			m_mipCount,
+			m_format,
+			m_msaa,
+			( m_flags & EX_BIND_UNORDERED_ACCESS ) ? USAGE_UNORDERED_ACCESS : 0,
+			m_flags,
+			renderContext );
+	}
+	return true;
 }
