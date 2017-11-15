@@ -98,16 +98,13 @@ TriDevice::TriDevice(IRoot* lockobj) :
 	mWidth            ( 0 ),
 
 	// default render states
-	mHdrEnable		  ( false ),
 	mBackBufferCount ( 1                     ),
 	mSwapEffect		 ( SWAP_EFFECT_DISCARD ),
 	mDeviceLost( true ),
 	m_deviceType( TriDevice::DEVICE_TYPE_HARDWARE ),
 
-	mDisplay( false ),
 	mAdapter ( 0 ),
 	mTickInterval ( 10 ), // ten ms between ticks
-	m_ignoreInvalidate ( false ),
 	PARENTLOCK( mViewport ),
 	m_animationTime( 0.0f ),
 	m_animationTimeScale( 1.0f ),
@@ -166,8 +163,6 @@ TriDevice::~TriDevice()
     m_scene = (ITr2Scene*)NULL;
 
 	BeOS->UnregisterForSimTimeRebase( this );
-	//This is handled in a subclass, so that the IRoot interface is intact when it happens
-	//Invalidate(TRIRO_ALL);
 }
 
 bool TriDevice::CreateSimpleDevice(
@@ -178,7 +173,7 @@ bool TriDevice::CreateSimpleDevice(
 	Tr2RenderContextEnum::PresentInterval presentInterval )
 {
 	// Clean out old resources and the old device (if exists)
-	Invalidate( TRISTORAGE_ALL );
+	DestroyRenderContext();
 
 	// Build a windowd device:
 	Tr2PresentParametersAL pp = mPresentParam;
@@ -240,7 +235,6 @@ bool TriDevice::CreateSimpleDevice(
 
 	PrepareDeviceResources();
 
-	mDisplay = true;
 	BeOS->RegisterForTicks(this, (void*)TRINITY);
 
 	return true;
@@ -310,8 +304,6 @@ bool TriDevice::ChangeDevice(
 	{
 		return false;
 	}
-
-	Tr2Renderer::SetResourceCreationAllowed( true );
 
 	mAdapter = adapter;
 	mHwnd = hWnd;
@@ -391,42 +383,11 @@ void TriDevice::Update( Be::Time realTime, Be::Time simTime )
 	}
 }
 
-void TriDevice::Shutdown()
+void TriDevice::DestroyRenderContext()
 {
-#if BLUE_WITH_PYTHON
-	m_pyResourceSet.Release();  //must release all python stuff, before python is shut down.
-#endif
-
-	//also release children
-	m_scene.Unlock();
-
-	Invalidate( TRISTORAGE_ALL );
-
-#if TRINITYDEV
-	if( !GetResourcesRegistered().empty() )
-	{
-		OutputDebugString( "Resources still active at shutdown:\n" );
-		DumpResources();
-	}
-#endif
-
-	gTriDev = 0;
-}
-
-void TriDevice::Invalidate( long level )
-{
-	if( m_ignoreInvalidate )
-	{
-		return;
-	}
-	
-	mDisplay = false;
-
 	if( DeviceExists() )
 	{
-		Tr2Renderer::SetResourceCreationAllowed( false );
-		ReleaseDeviceResources( (TriStorage)level );  //we are about to release device.
-		Tr2Renderer::SetResourceCreationAllowed( true );
+		ReleaseDeviceResources( TRISTORAGE_ALL );  //we are about to release device.
 		Tr2RenderContext::DestroyMainThreadRenderContext();	
 	}
 }
@@ -437,14 +398,6 @@ void TriDevice::Invalidate( long level )
 //This is necessary prior to resetting the device.
 void TriDevice::ReleaseDeviceResources( TriStorage s )
 {
-	if( m_ignoreInvalidate )
-	{
-		return;
-	}
-
-	m_ignoreInvalidate = true;  //to prevent recursion
-	ON_BLOCK_EXIT( [&]{ m_ignoreInvalidate = false; } );
-
 	// Call those objects that registered with us.  This is the preferred modus operandi in future.
 	//The new resource registry.  Objects put themselves here.
 	auto& rs = GetResourcesRegistered();
@@ -578,7 +531,6 @@ bool TriDevice::SetPresentation( int adapter, const Tr2PresentParametersAL* d3dp
 		mWidth = d3dpp->mode.width;
 		mHeight = d3dpp->mode.height;
 		BeOS->RegisterForTicks(this, (void*)TRINITY);
-		mDisplay = true;
 	} 
 	else 
 	{
@@ -589,9 +541,8 @@ bool TriDevice::SetPresentation( int adapter, const Tr2PresentParametersAL* d3dp
 
 void TriDevice::InvalidateAndUnregisterForTicks()
 {
-	Invalidate( TRISTORAGE_ALL );
+	DestroyRenderContext();
 	BeOS->UnregisterForTicks(this, (void*)TRINITY);
-	mDisplay = false;
 	mHwnd = 0;
 	mWidth = mHeight = 0;
 }
@@ -773,17 +724,10 @@ float TriDevice::GetAnimationTimeElapsed( float startTime )
 	return elapsed;
 }
 
-//Device has been lost.  Send an event here to free up memory.  We repeat these messages when the
-//device comes back up, to release anything that gets created after this.
-void TriDevice::DeviceLost()
-{
-	ReleaseDeviceResources( TRISTORAGE_VIDEOMEMORY );
-}
-
 // Convenience function.
-bool TriDevice::ResetDevice( const Tr2PresentParametersAL* pp )
+bool TriDevice::ResetDevice()
 {
-	return ResetDevice( mAdapter, pp );
+	return ResetDevice( mAdapter, &mPresentParam );
 }
 
 // Reset the device.  Much required.  Note, the device should be NOTRESET here.
@@ -792,11 +736,14 @@ bool TriDevice::ResetDevice( unsigned adapter, const Tr2PresentParametersAL* pp 
 	CCP_LOGNOTICE( "Starting Device Reset Resource Release" );
 
 	// Prevent a second device reset from being triggered by python code within this context
-	DeviceResetContextManager resetContext;
+	static bool inReset = false;
 
-	// Setting this flag should disable all creation of device resources that would
-	// prevent a reset
-	Tr2Renderer::SetResourceCreationAllowed( false );
+	if( inReset )
+	{
+		return true;
+	}
+	inReset = true;
+	ON_BLOCK_EXIT( [&] { inReset = false; } );
 
 	ReleaseDeviceResources( TRISTORAGE_VIDEOMEMORY );
 
@@ -826,7 +773,6 @@ bool TriDevice::ResetDevice( unsigned adapter, const Tr2PresentParametersAL* pp 
 		&& FAILED( Tr2VideoAdapterInfo::GetAdapterDisplayMode( mAdapter, mDisplayMode ) ) )
 	{
 		CCP_LOGNOTICE( "Device Reset: Adapter Display Mode Changed" );
-		Tr2Renderer::SetResourceCreationAllowed( true );
 		return false;	
 	}
 
@@ -837,9 +783,6 @@ bool TriDevice::ResetDevice( unsigned adapter, const Tr2PresentParametersAL* pp 
 	}
 
 	mAdapter = adapter;
-
-	// This must be unset to allow us to prepare resources
-	Tr2Renderer::SetResourceCreationAllowed( true );
 
 	CCP_LOGNOTICE( "Device Reset: Re-Preparing Resources" );
 	PrepareDeviceResources();
@@ -867,11 +810,6 @@ bool TriDevice::OnModified( Be::Var* value )
 }
 
 #if BLUE_WITH_PYTHON
-void TriDevice::DisableResourceLoad( bool flag )
-{
-	Tr2Renderer::DisableResourceLoad( flag );
-}
-
 PyObject* TriDevice::PythonCreateDeviceHelper( PyObject* args, DeviceScreenType screenType )
 {
 	TriPythonContext pythonCtx;
@@ -963,18 +901,6 @@ PyObject *TriDevice::PyRegisterResource( PyObject *args )
 	//Add the object as a key in the dictionary
 	return PyObject_CallMethod( m_pyResourceSet, const_cast<char*>("__setitem__"), const_cast<char*>("OO"), obj, Py_None );
 }
-
-PyObject* TriDevice::PyResetDeviceResources( PyObject* args )
-{
-	if( Tr2Renderer::IsDeviceResetting() )
-	{
-		TriError::ReportError(E_INVALIDCALL, NULL, "Device reset is already in progress" );
-		return nullptr;
-	}
-	
-	ResetDevice( NULL );
-	Py_RETURN_NONE;
-}
 #endif
 
 bool TriDevice::SetPresentParameters( unsigned adapter, const Tr2PresentParametersAL& pp )
@@ -1014,45 +940,6 @@ void TriDevice::PrepareDeviceResources()
 	RebuildDeviceResourcesInPython();
 }
 
-#if BLUE_WITH_PYTHON
-PyObject* TriDevice::PyChangeBackBufferSize( PyObject* args )
-{
-	TriPythonContext pythonCtx;
-
-	if( Tr2Renderer::IsDeviceResetting() )
-	{
-		TriError::ReportError(E_INVALIDCALL, NULL, "Device reset is already in progress" );
-		return nullptr;
-	}
-
-	int width, height;
-
-	if( !PyArg_ParseTuple( args, "ii", &width, &height ) )
-	{
-		return nullptr;
-	}
-
-	width  = std::max( 0, width );
-	height = std::max( 0, height );
-
-	PresentationParameters pp = mPresentParam;
-	pp.mode.height = height;
-	pp.mode.width = width;
-	if( !ResetDevice( &pp ) )
-	{
-		return nullptr;
-	}
-
-	Py_RETURN_NONE;
-}
-#endif
-
-void TriDevice::PyInvalidateAndUnregisterForTicks()
-{
-	TriPythonContext pythonCtx;
-	InvalidateAndUnregisterForTicks();
-}
-
 TriDevice::ResourceSet& TriDevice::GetResourcesRegistered()
 {
 	static NeverEndingSingleton<TriDevice::ResourceSet> registered;
@@ -1070,28 +957,6 @@ TriDevice::ResourceSet& TriDevice::GetResourcesToReload()
 	static NeverEndingSingleton<TriDevice::ResourceSet> reloadSet;
 	return reloadSet.GetInstance();
 }
-
-#if TRINITYDEV
-void TriDevice::DumpResources()
-{
-	const ResourceSet& resources = GetResourcesRegistered();
-	for( ResourceSet::const_iterator it = resources.begin(); it != resources.end(); ++it)
-	{
-		std::string desc;
-		(*it)->GetDescription( desc );
-		desc += "\n";
-		OutputDebugString( desc.c_str() );
-		fprintf( stdout, desc.c_str() );
-	}
-}
-
-#if BLUE_WITH_PYTHON
-void TriDevice::PyDumpResources()
-{
-	DumpResources();
-}
-#endif
-#endif
 
 #if BLUE_WITH_PYTHON
 void TriDevice::PyRender()
@@ -1308,31 +1173,4 @@ void TriDevice::LogAllLiveResources( Tr2ALMemoryTypes flags )
 		CCP_LOGERR( "%s", message.c_str() );
 	};
 	Tr2TrackedALObjectBase::GetAllObjectDescriptions( flags, logObject );
-}
-
-
-//  Description:
-//    This class is an RAII implementation of management for an 'IsDeviceResetting' state
-//    It is intended to prevent python from calling functions that would trigger a device
-//    reset, while we're inside a device reset context (through python callbacks)
-TriDevice::DeviceResetContextManager::DeviceResetContextManager()
-{
-	m_originalSetting = Tr2Renderer::IsDeviceResetting();
-	// If the device was originally resetting, we may have gotten in here because
-	// we needed to have this scope in two places. This isn't necessarily an error
-	// in C++ (if, for example, we need to put it in SetShaderModel, which calls
-	// ResetDevice())
-	if( !m_originalSetting )
-	{
-		Tr2Renderer::SetIsDeviceResetting( true );
-	}
-}
-
-TriDevice::DeviceResetContextManager::~DeviceResetContextManager()
-{
-	// We don't unset the flag, unless we were the context to set it 
-	if( !m_originalSetting )
-	{
-		Tr2Renderer::SetIsDeviceResetting( false );
-	}
 }

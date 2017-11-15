@@ -45,7 +45,7 @@ void TriDevice::HandleRenderTick( Be::Time realTime, Be::Time simTime )
 
 	USE_MAIN_THREAD_RENDER_CONTEXT();
 
-	if( !renderContext.m_d3dDevice9 || !mDisplay )
+	if( !renderContext.m_d3dDevice9 )
 	{
 		return;
 	}
@@ -68,7 +68,7 @@ void TriDevice::HandleRenderTick( Be::Time realTime, Be::Time simTime )
 	case E_DEVICELOST:
 		if( !mDeviceLost )
 		{
-			DeviceLost();
+			ReleaseDeviceResources( TRISTORAGE_VIDEOMEMORY );
 			mDeviceLost = true;
 			return; // There's no point in continuing along this function now...
 		}
@@ -76,7 +76,7 @@ void TriDevice::HandleRenderTick( Be::Time realTime, Be::Time simTime )
 
 	case D3DERR_DEVICENOTRESET:
 		// Device coming back from lost state.
-		if( !ResetDevice( nullptr ) )
+		if( !ResetDevice() )
 		{
 			return; //big problem.  we are probably lost here.  
 		}
@@ -85,7 +85,7 @@ void TriDevice::HandleRenderTick( Be::Time realTime, Be::Time simTime )
 
 	case D3DERR_DRIVERINTERNALERROR:
 		TriError::ReportError(hr, Clsid(), "TestCooperativeLevel failed");
-		ResetDevice( nullptr );
+		ResetDevice();
 		return;
 
 	default:
@@ -130,22 +130,6 @@ bool TriDevice::DeviceExists()
 {
 	USE_MAIN_THREAD_RENDER_CONTEXT();
 	return renderContext.m_d3dDevice9 != nullptr;
-}
-
-// Show or hide the cursor
-void TriDevice::DoShowCursor( bool show )
-{
-	USE_MAIN_THREAD_RENDER_CONTEXT();
-	if( renderContext.m_d3dDevice9 )
-	{
-		renderContext.m_d3dDevice9->ShowCursor( show );
-	}
-}
-
-bool TriDevice::DeviceSupportsVertexTexture()
-{
-	USE_MAIN_THREAD_RENDER_CONTEXT();
-	return renderContext.GetCaps().SupportsVertexShaderTextures();
 }
 
 // --------------------------------------------------------------------------------------

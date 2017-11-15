@@ -19,16 +19,7 @@ void TriDevice::UpdateCursor()
 {
 }
 
-bool TriDevice::DeviceSupportsVertexTexture()
-{
-	return true;
-}
-
 void TriDevice::ApplicationActivated( ApplicationActivation activated )
-{
-}
-
-void TriDevice::DoShowCursor( bool show )
 {
 }
 

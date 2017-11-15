@@ -57,8 +57,6 @@ BLUE_CLASS( TriDevice ):
 public:	
 	using ITriDevice::Lock;
 	using ITriDevice::Unlock;
-	
-	bool mDisplay;
 
     ITr2ScenePtr m_scene;
 
@@ -75,8 +73,6 @@ public:
 	// device information parameters
 	Tr2DisplayModeInfo mDisplayMode;
 
-	bool mHdrEnable;
-
 	PTriViewport mViewport;
 
 	int mTickInterval;
@@ -84,8 +80,6 @@ public:
 	void Update( Be::Time realTime, Be::Time simTime );
 
 	bool Render();
-
-	void Invalidate( long level );
 
 	/////////////////////////////////////////////////////////////////////////////////////
 	// ITriDevice
@@ -161,7 +155,6 @@ public:
 	static void UnregisterForUpdates(ITr2Updateable *item);
 
 	void QueueForReload(Tr2DeviceResource *resource);
-	void Shutdown();  //shuts the device down, clears all stuff.
 
 	// Temporary function created during re-factoring. This method contains common code
 	// that is now re-used in a couple of places through this method. Yay! Now, the difference
@@ -249,13 +242,8 @@ public:
 	// ISimTimeRebaseNotify
 	/////////////////////////////////////////////////////////////////////////////////////
 	void OnSimClockRebase( Be::Time oldTime, Be::Time newTime );
-#if TRINITYDEV
-	static void DumpResources();
-#endif
 
-	// Reset the device
-	// This is not private, since it can be called from python anyway...
-	bool ResetDevice( const Tr2PresentParametersAL* pp );
+	bool ResetDevice();
 
 	int GetAdapter() { return mAdapter; }
 	bool DeviceExists();
@@ -267,16 +255,13 @@ public:
 
 private:
 	bool InitD3DDevice();  //call when a new device has been set
-	bool DeviceSupportsVertexTexture();
+	void DestroyRenderContext();
 
-	void DoShowCursor( bool show );
 	void DoReleaseDevice();
 
 	bool ResetDevice( unsigned adapter, const Tr2PresentParametersAL* pp );
 
 	void HandleRenderTick( Be::Time realTime, Be::Time simTime );
-
-	void DeviceLost();
 
 	bool SetPresentParameters( unsigned adapter, const Tr2PresentParametersAL& pp );
 
@@ -291,8 +276,6 @@ private:
 	int mAdapter;	
 	PresentationParameters mPresentParam;
 
-	//Stuff here deals with lost devices.
-	bool m_ignoreInvalidate; //to avoid recursion when deleting memory
 	// We must use a container class that can survive insertions during iteration without invalidating
 	// the iterator.  std::set is such a container and offers fast insertion/removal.
 	typedef std::set<Tr2DeviceResource *> ResourceSet;
@@ -352,30 +335,22 @@ public:
 
 	/////////////////////////////////////////
 	// Python thunkers
-	void PyInvalidateAndUnregisterForTicks();
 #if BLUE_WITH_PYTHON
 	PyObject* PyCreateWindowedDevice ( PyObject* args );
 	PyObject* PyCreateFullScreenDevice ( PyObject* args );
 	PyObject* PyCreateWindowlessDevice ( PyObject* args );
 	
-	PyObject* PyChangeBackBufferSize ( PyObject* args );
 	long PyGetWindow();
 	void PyRender();
 
 	PyObject* PyGetPresentParameters ( PyObject* args );
 
 	PyObject* PyRegisterResource ( PyObject* args );
-	PyObject* PyResetDeviceResources ( PyObject* args );
 	PyObject* PyGetPickRayFromViewport ( PyObject* args );
-	void DisableResourceLoad( bool flag );
 
 	void RefreshDeviceResources();
 
 	PyObject* PythonCreateDeviceHelper( PyObject* args, DeviceScreenType screenType );
-#endif
-
-#if TRINITYDEV
-	void PyDumpResources();
 #endif
 
 	//--bpe stupid hack until I can figure out how to export trinity.renderContext similar to trinity.device

@@ -39,16 +39,6 @@ bool TriDevice::DeviceExists()
 	return renderContext.IsValid();
 }
 
-// Show or hide the cursor
-void TriDevice::DoShowCursor( bool show )
-{
-}
-
-bool TriDevice::DeviceSupportsVertexTexture()
-{
-	return true;
-}
-
 // --------------------------------------------------------------------------------------
 // Description:
 //   A chance for device to respond to application window being activated/deactivated. 

@@ -23,15 +23,9 @@ void TriDevice::HandleRenderTick(  Be::Time realTime, Be::Time simTime )
 	AutoTasklet _at( PyOS->GetTaskletTimer(), "TriDevice::HandleRenderTick" );
 #endif
 
-	if( !mDisplay )
-	{
-		return;
-	}
-	
 	if( mDeviceLost )
 	{
 		ChangeDevice( mAdapter, mHwnd, nullptr );
-		Tr2Renderer::SetIsDeviceResetting( mDeviceLost );
 		return;
 	}
 
@@ -111,8 +105,6 @@ void TriDevice::HandleRenderTick(  Be::Time realTime, Be::Time simTime )
 					BeCrashes->SetCrashKeyValueW( (wchar_t*)L"gpuPageFaultResource", (wchar_t*)CA2W( resourceDesc ) );
 				}
 			}
-			Tr2Renderer::SetIsDeviceResetting( true );
-			DeviceLost();
 			ReleaseDeviceResources( TRISTORAGE_ALL );
 
 			mDeviceLost = true;
@@ -157,15 +149,7 @@ void TriDevice::HandleRenderTick(  Be::Time realTime, Be::Time simTime )
 bool TriDevice::DeviceExists()
 {
 	USE_MAIN_THREAD_RENDER_CONTEXT();
-	return renderContext.m_d3dDevice11 != nullptr;
-}
-
-// Show or hide the cursor
-void TriDevice::DoShowCursor( bool show ) {}
-
-bool TriDevice::DeviceSupportsVertexTexture()
-{
-	return true;
+	return renderContext.IsValid();
 }
 
 // --------------------------------------------------------------------------------------

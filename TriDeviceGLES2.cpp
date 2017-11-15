@@ -15,7 +15,7 @@ void TriDevice::HandleRenderTick( Be::Time realTime, Be::Time simTime )
 {
 	USE_MAIN_THREAD_RENDER_CONTEXT();
 
-	if( !renderContext.IsValid() || !mDisplay )
+	if( !renderContext.IsValid() )
 	{
 		return;
 	}
@@ -67,15 +67,6 @@ bool TriDevice::DeviceExists()
 {
 	USE_MAIN_THREAD_RENDER_CONTEXT();
 	return renderContext.IsValid();
-}
-
-// Show or hide the cursor
-void TriDevice::DoShowCursor( bool show ) {}
-
-bool TriDevice::DeviceSupportsVertexTexture()
-{
-	//TODO?
-	return true;
 }
 
 // --------------------------------------------------------------------------------------

@@ -110,12 +110,6 @@ static PyObject* PySetShaderModel( PyObject* self, PyObject* args )
 
 	const char* name = 0;
 
-	if( Tr2Renderer::IsDeviceResetting() )
-	{
-		TriError::ReportError(E_INVALIDCALL, NULL, "Device reset is already in progress" );
-		return NULL;
-	}
-
 	if( !PyArg_ParseTuple( args, "s", &name ))
 	{
         isShaderModelChanging = false;

@@ -98,8 +98,6 @@ const Be::ClassInfo* TriDevice::ExposeToBlue()
 		MAP_ATTRIBUTE_WITH_CHOOSER( "swapEffect", mSwapEffect, "na", Be::READWRITE | Be::NOTIFY | Be::PERSIST | Be::ENUM, Tr2RenderContextEnum_SwapEffect_Chooser )	
 		MAP_ATTRIBUTE( "multiSampleType", mPresentParam.msaaType, "na", Be::READWRITE | Be::NOTIFY | Be::PERSIST )	
 		MAP_ATTRIBUTE_WITH_CHOOSER( "presentationInterval", mPresentParam.presentInterval, "na", Be::READWRITE | Be::NOTIFY | Be::PERSIST | Be::ENUM, Tr2RenderContextEnum_PresentInterval_Chooser )	
-		
-		MAP_ATTRIBUTE( "hdrEnable", mHdrEnable, "Enable High Dynamic Range rendering", Be::READWRITE | Be::PERSIST )
 
 		MAP_ATTRIBUTE( "adapterWidth", mDisplayMode.width, "na", Be::READ ) 
 		MAP_ATTRIBUTE( "adapterHeight", mDisplayMode.height, "na", Be::READ )
@@ -165,13 +163,6 @@ const Be::ClassInfo* TriDevice::ExposeToBlue()
 			Be::READWRITE
 		)
 
-		MAP_METHOD_AND_WRAP
-		( 
-			"InvalidateAndUnregisterForTicks",
-			PyInvalidateAndUnregisterForTicks,
-			"Releases the device and all associate device resources.\n" 
-			"Unregisters the device from Blue ticks.\n"
-		)
 		MAP_METHOD_AS_METHOD
 		( 
 			"CreateWindowedDevice",
@@ -213,25 +204,7 @@ const Be::ClassInfo* TriDevice::ExposeToBlue()
 			"Create a simple device with no swap chain.\n" 
 			":rtype: None"
 		)
-		MAP_METHOD_AS_METHOD
-		(
-			"ChangeBackBufferSize",
-			PyChangeBackBufferSize,
-			"Changes the drawable area.\n"
-			":param width: back buffer width\n"
-			":type width: int\n"
-			":param heigh: back buffer height\n"
-			":type heigh: int\n"
-			":rtype: None"
-		)
 #if BLUE_WITH_PYTHON
-		MAP_METHOD_AND_WRAP
-		( 
-			"DisableResourceLoad",
-			DisableResourceLoad, 
-			"Disable reloading of all external resources.\n" 
-			":param disable: disable or enable loading"
-		)
 		MAP_METHOD_AND_WRAP
 		( 
 			"GetWindow",
@@ -268,14 +241,6 @@ const Be::ClassInfo* TriDevice::ExposeToBlue()
 		)
 		MAP_METHOD_AS_METHOD
 		(
-			"ResetDeviceResources",
-			PyResetDeviceResources,
-			"Requests that all device resources be reloaded immediately. Used for chaging HDR settings etc."
-			"\nMay raise a trinity.D3DERR_INVALIDCALL if a device reset is already in progress"
-			"\n:rtype: None"
-		)
-		MAP_METHOD_AS_METHOD
-		(
 			"GetPickRayFromViewport",
 			PyGetPickRayFromViewport,
 			"Get a ray for picking in world coordinates from screen space, using the given viewport\n"
@@ -296,26 +261,10 @@ const Be::ClassInfo* TriDevice::ExposeToBlue()
 
 		MAP_METHOD_AND_WRAP
 		(
-			"ShowDeviceCursor",
-			DoShowCursor,
-			"( show ): Show the window cursor.\n"
-			":param show: show/hide cursor"
-		)
-
-		MAP_METHOD_AND_WRAP
-		(
 			"DoesD3DDeviceExist",
 			DeviceExists,
 			"Returns true if TriDevice currently has a valid D3D Device."
 		)
-#if TRINITYDEV
-		MAP_METHOD_AND_WRAP
-		(
-			"DumpResources",
-			PyDumpResources,
-			"Dumps a list of all resources currently live in the system"
-		)
-#endif
 #if BLUE_WITH_PYTHON
 		MAP_METHOD_AND_WRAP( 
 			"RefreshDeviceResources", 

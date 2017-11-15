@@ -263,21 +263,10 @@ public:
 
 	// Used to detect if the creation of resources is allowed
 	static bool IsResourceCreationAllowed();
-	// Used to prevent python triggered device resets from within a resetting context
-	static bool IsDeviceResetting();
-	// Used to prevent python triggered device resets from within a resetting context
-	// Will cause certain python calls to raise exceptions
-	static void SetIsDeviceResetting( bool resetInProgress );
 
 	static void EnableFallbackTextureDebugging();
 	static void DisableFallbackTextureDebugging();
 	static void ApplyFallbackTexture( Tr2RenderContextEnum::ShaderType stage, uint32_t registerIndex, Tr2EffectResource::Type textureType, const char* debugContext, Tr2RenderContext &renderContext );
-private:
-
-	static void SetResourceCreationAllowed( bool isAllowed );
-	
-	friend class TriDevice;
-
 };
 
 #endif // Tr2Renderer_H

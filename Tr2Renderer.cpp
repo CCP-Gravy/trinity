@@ -39,11 +39,6 @@ namespace
 {
 	bool s_isRightHanded = true;
 
-	// This flag is used to prevent code from inadvertently creating device resources in the middle of a device reset/invalidate attempt
-	bool s_isResourceCreationAllowed = true;
-	// This flag is used to raise exceptions to python, if it's trying to trigger a device reset, from within a device reset context
-	bool s_isDeviceResetting = false;
-
 	TR2SHADERMODEL s_shaderModel = TR2SM_3_0_HI;
 	TR2SHADERMODEL s_prevShaderModel = TR2SM_3_0_HI;
 
@@ -1402,7 +1397,7 @@ void Tr2Renderer::SetShaderModel( TR2SHADERMODEL sm )
 		// todo: is this the best way here?
 		if( gTriDev && gTriDev->DeviceExists() )
 		{
-			gTriDev->ResetDevice( nullptr );
+			gTriDev->ResetDevice();
 		}
 
 		// Reinitialize registered Tr2Effects
@@ -1814,22 +1809,8 @@ bool Tr2Renderer::IsRightHanded()
 
 bool Tr2Renderer::IsResourceCreationAllowed()
 {
-	return gTriDev && gTriDev->DeviceExists() && s_isResourceCreationAllowed;
-}
-
-void Tr2Renderer::SetResourceCreationAllowed( bool isAllowed )
-{
-	s_isResourceCreationAllowed = isAllowed;
-}
-
-void Tr2Renderer::SetIsDeviceResetting( bool resetInProgress )
-{
-	s_isDeviceResetting = resetInProgress;
-}
-
-bool Tr2Renderer::IsDeviceResetting()
-{
-	return s_isDeviceResetting;
+	USE_MAIN_THREAD_RENDER_CONTEXT();
+	return renderContext.IsValid();
 }
 
 void Tr2Renderer::EnableFallbackTextureDebugging()
