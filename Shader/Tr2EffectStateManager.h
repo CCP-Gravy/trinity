@@ -70,7 +70,6 @@ public:
 	void ApplyStandardStates( RenderingMode rm );
 
 	void ApplyRenderStates( uint32_t ix );
-	void ApplySamplerSetup( Tr2RenderContextEnum::ShaderType inputType, uint32_t samplerIx, const Tr2SamplerStateAL& sampler );
 	void ApplyShaderBuffer( Tr2RenderContextEnum::ShaderType inputType, uint32_t samplerIx, const Tr2GpuBufferAL& buffer );
 	void ApplyTexture( 
 		Tr2RenderContextEnum::ShaderType inputType, 

@@ -197,6 +197,7 @@ struct Tr2Pass
 	unsigned int renderStates;
 	unsigned int shaderTypeMask;
 	unsigned int shaderProgram;
+	Tr2ResourceSetDescriptionAL resourceSetDesc;
 };
 
 struct Tr2EffectTechnique

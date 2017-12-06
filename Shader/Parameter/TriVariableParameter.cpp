@@ -53,6 +53,33 @@ bool TriVariableParameter::Initialize()
 	return true;
 }
 
+// ---------------------------------------------------------------
+bool TriVariableParameter::CopyToResourceSet(
+	Tr2ResourceSetDescriptionAL& resourceDesc,
+	Tr2RenderContextEnum::ShaderType stage,
+	uint32_t registerIndex,
+	ResourceFlags flags ) const
+{
+	if( !m_variable )
+	{
+		return false;
+	}
+	return m_variable->CopyToResourceSet( resourceDesc, stage, registerIndex, flags );
+}
+
+// ---------------------------------------------------------------
+void TriVariableParameter::ApplyUav(
+	Tr2RenderContextEnum::ShaderType stage,
+	uint32_t registerIndex,
+	uint32_t initialCount,
+	Tr2RenderContext &renderContext ) const
+{
+	if( m_variable )
+	{
+		m_variable->ApplyUav( stage, registerIndex, initialCount, renderContext );
+	}
+}
+
 void TriVariableParameter::CopyValueToEffect(	Tr2RenderContextEnum::ShaderType inputType, 
 												unsigned char* destHandle, 
 												size_t size,

@@ -12,6 +12,7 @@
 #include "Tr2VariableStore.h"
 
 CCP_STATS_DECLARE( effectCBLocks, "Trinity/effectCBLocks", true, CST_COUNTER_LOW, "number of CB locks for effect parameters" );
+CCP_STATS_DECLARE( effectResourceSetCreated, "Trinity/effectResourceSetCreated", true, CST_COUNTER_LOW, "number of resource sets created" );
 
 namespace
 {
@@ -21,6 +22,7 @@ CcpAtomic<uint32_t> s_materialId( 0 );
 }
 
 Tr2EffectPassParameters::Tr2EffectPassParameters()
+	:m_resourceSetDirty( true )
 {
 }
 
@@ -65,37 +67,37 @@ Tr2Material::~Tr2Material()
 {
 }
 
-uint32_t Tr2Material::ApplyMaterialDataForPass( uint32_t techniqueIndex, unsigned int passIndex, Tr2RenderContext& renderContext ) const
+void Tr2Material::ApplyMaterialDataForPass( uint32_t techniqueIndex, unsigned int passIndex, Tr2RenderContext& renderContext ) const
 {
 	if( !m_shader )
 	{
-		return 0;
+		return;
 	}
 	unsigned mask = m_shader->GetShaderTypeMask( techniqueIndex );
-	uint32_t samplersChangedMask = 0;
+	auto& pp = *m_parametersForPasses[techniqueIndex][passIndex];
+	bool descChanged = pp.m_resourceSetDirty;
 	for( unsigned i = 0; i != Tr2RenderContextEnum::SHADER_TYPE_COUNT && mask; ++i )
 	{
 		if( mask & ( 1 << i ) )
 		{
-			bool samplersChanged = false;
-			ApplyShaderInputs( techniqueIndex, passIndex, Tr2RenderContextEnum::ShaderType( i ), samplersChanged, renderContext );
+			descChanged |= ApplyShaderInputs( techniqueIndex, passIndex, Tr2RenderContextEnum::ShaderType( i ), renderContext );
 			mask &= ~( 1 << i );
-			if( samplersChanged )
-			{
-				samplersChangedMask |= 1 << i;
-			}
 		}
 	}
-	return samplersChangedMask;
+
+	if( descChanged || !pp.m_resourceSet.IsValid() )
+	{
+		USE_MAIN_THREAD_RENDER_CONTEXT();
+
+		CCP_STATS_INC( effectResourceSetCreated );
+		pp.m_resourceSet.Create( pp.m_resourceSetDesc, renderContext );
+		pp.m_resourceSetDirty = false;
+	}
+
+	renderContext.SetResourceSet( pp.m_resourceSet );
 }
 
-void Tr2Material::ApplyShaderInputs( uint32_t techniqueIndex, unsigned int passIndex, Tr2RenderContextEnum::ShaderType shaderType, Tr2RenderContext& renderContext ) const
-{
-	bool samplersChanged;
-	ApplyShaderInputs( techniqueIndex, passIndex, shaderType, samplersChanged, renderContext );
-}
-
-void Tr2Material::ApplyShaderInputs( uint32_t techniqueIndex, unsigned int passIndex, Tr2RenderContextEnum::ShaderType shaderType, bool& samplersChanged, Tr2RenderContext& renderContext ) const
+bool Tr2Material::ApplyShaderInputs( uint32_t techniqueIndex, unsigned int passIndex, Tr2RenderContextEnum::ShaderType shaderType, Tr2RenderContext& renderContext ) const
 {
 	auto& pp = *m_parametersForPasses[techniqueIndex][passIndex];
 	auto& input = pp.m_stageInput[shaderType];
@@ -120,30 +122,20 @@ void Tr2Material::ApplyShaderInputs( uint32_t techniqueIndex, unsigned int passI
 		}
 	}
 
-	unsigned char destHandle[8] = { 0 };
 
-	samplersChanged = false;
+	bool descChanged = false;
+
 	for( auto it = input.m_textures.cbegin(); it != input.m_textures.cend(); ++it )
 	{
-		destHandle[0] = static_cast<unsigned char>( it->m_registerIndex );
-		it->m_sourceValue->CopyValueToEffect( shaderType, destHandle, it->m_registerCount, renderContext );
-		if( destHandle[1] )
-		{
-			samplersChanged = true;
-		}
-	}
-	samplersChanged |= !input.m_samplers.empty();
-	for( auto it = input.m_samplers.begin(); it != input.m_samplers.end(); ++it )
-	{
-		renderContext.m_esm.ApplySamplerSetup( shaderType, it->registerIndex, it->sampler );
+		descChanged |= it->m_sourceValue->CopyToResourceSet( pp.m_resourceSetDesc, shaderType, it->m_registerIndex, ITr2EffectValue::ResourceFlags( it->m_registerCount ) );
 	}
 
 	for( auto it = input.m_uavs.cbegin(); it != input.m_uavs.cend(); ++it )
 	{
-		destHandle[0] = static_cast<unsigned char>( it->m_registerIndex );
-		reinterpret_cast<uint32_t*>( destHandle )[1] = it->m_initialCount;
-		it->m_sourceValue->CopyValueToEffect( shaderType, destHandle, it->m_registerCount, renderContext );
+		it->m_sourceValue->ApplyUav( shaderType, it->m_registerIndex, it->m_initialCount, renderContext );
 	}
+
+	return descChanged;
 }
 unsigned int Tr2Material::GetSortValue() const
 {
@@ -160,4 +152,9 @@ unsigned int Tr2Material::GetSortValue() const
 Tr2Shader* Tr2Material::GetShaderStateInterface() const
 {
 	return m_shader;
+}
+
+Tr2EffectPassParameters* Tr2Material::GetPassDescription( uint32_t techniqueIndex, uint32_t passIndex )
+{
+	return m_parametersForPasses[techniqueIndex][passIndex].get();
 }

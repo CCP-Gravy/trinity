@@ -186,8 +186,7 @@ private:
 protected:
 	void MapPassResources( 
 		const Tr2EffectResourceMap& resources, 
-		Tr2EffectParamVector &pv, 
-		uint32_t resourceFlags );
+		Tr2EffectParamVector &pv );
 	void MapPassParameters(
 		size_t technique,
 		unsigned passIx,

@@ -566,20 +566,6 @@ void Tr2EffectStateManager::DoApplyRenderStates( uint32_t ix )
 	}
 }
 
-void Tr2EffectStateManager::ApplySamplerSetup( ShaderType inputType, uint32_t samplerIx, const Tr2SamplerStateAL& sampler )
-{
-	if( m_isManagedRendering )
-	{
-		if( sampler == m_currentValues.m_samplerSetupBinding[inputType][samplerIx] )
-		{
-			return;
-		}
-		m_currentValues.m_samplerSetupBinding[inputType][samplerIx] = sampler;
-	}
-
-	m_renderContext.SetSamplerState( sampler, inputType, samplerIx );
-}
-
 void Tr2EffectStateManager::ForgetTexture( const Tr2TextureAL& texture )
 {
 	using namespace std;

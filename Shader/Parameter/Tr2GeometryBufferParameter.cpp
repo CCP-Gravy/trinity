@@ -121,39 +121,41 @@ void Tr2GeometryBufferParameter::RebuildEffectHandles( Tr2Shader* effectRes )
 }
 
 // --------------------------------------------------------------------------------------
-// Description:
-//   Implements ITriEffectResourceParameter interface. Applies paramter value to effect.
-// Arguments:
-//   inputType - Shader type to apply resource to
-//   destHandle - Slot number
-//   resourceFlags - union of ITr2EffectValue::ResourceFlags
-//   renderContext - current render context
+bool Tr2GeometryBufferParameter::CopyToResourceSet(
+	Tr2ResourceSetDescriptionAL& resourceDesc,
+	Tr2RenderContextEnum::ShaderType stage,
+	uint32_t registerIndex,
+	ResourceFlags flags ) const
+{
+	if( !m_gpuBuffer )
+	{
+		return false;
+	}
+	Tr2GpuBufferAL* buffer = m_gpuBuffer->GetGpuBuffer( m_meshIndex );
+	if( !buffer )
+	{
+		return false;
+	}
+	return resourceDesc.Set( stage, registerIndex, *buffer );
+}
+
 // --------------------------------------------------------------------------------------
-void Tr2GeometryBufferParameter::CopyValueToEffect(		Tr2RenderContextEnum::ShaderType inputType, 
-														unsigned char* destHandle, 
-														size_t resourceFlags,
-														Tr2RenderContext &renderContext ) const
+void Tr2GeometryBufferParameter::ApplyUav(
+	Tr2RenderContextEnum::ShaderType stage,
+	uint32_t registerIndex,
+	uint32_t initialCount,
+	Tr2RenderContext &renderContext ) const
 {
 	if( !m_gpuBuffer )
 	{
 		return;
 	}
-	bool isUav = ( resourceFlags & RESOURCE_FLAG_UAV ) != 0;
-	unsigned int ix = *destHandle;
-	uint32_t initialCount = reinterpret_cast<uint32_t*>( destHandle )[1];
 	Tr2GpuBufferAL* buffer = m_gpuBuffer->GetGpuBuffer( m_meshIndex );
 	if( !buffer )
 	{
 		return;
 	}
-	if( isUav )
-	{
-		renderContext.SetUav( inputType, ix, *buffer, initialCount == -1 ? m_initialCount : initialCount );
-	}
-	else
-	{
-		renderContext.m_esm.ApplyShaderBuffer( inputType, ix, *buffer );
-	}
+	renderContext.SetUav( stage, registerIndex, *buffer, initialCount == -1 ? m_initialCount : initialCount );
 }
 
 // --------------------------------------------------------------------------------------

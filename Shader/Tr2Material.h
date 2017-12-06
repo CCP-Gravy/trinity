@@ -70,6 +70,9 @@ public:
 
 	StageInput m_stageInput[Tr2RenderContextEnum::SHADER_TYPE_COUNT];
 	std::vector<ITriReroutable*> m_reroutedParameters;
+	Tr2ResourceSetDescriptionAL m_resourceSetDesc;
+	Tr2ResourceSetAL m_resourceSet;
+	bool m_resourceSetDirty;
 };
 
 typedef std::vector<std::unique_ptr<Tr2EffectPassParameters>> Tr2EffectPassParametersVector;
@@ -84,16 +87,17 @@ public:
 
 	EXPOSE_TO_BLUE();
 
-	uint32_t ApplyMaterialDataForPass( uint32_t techniqueIndex, unsigned int passIndex, Tr2RenderContext& renderContext ) const;
-	void ApplyShaderInputs( uint32_t techniqueIndex, unsigned int passIndex, Tr2RenderContextEnum::ShaderType shaderType, Tr2RenderContext& renderContext ) const;
+	void ApplyMaterialDataForPass( uint32_t techniqueIndex, unsigned int passIndex, Tr2RenderContext& renderContext ) const;
 	uint32_t GetSortValue() const;
 	Tr2Shader* GetShaderStateInterface() const;
+
+	Tr2EffectPassParameters* GetPassDescription( uint32_t techniqueIndex, uint32_t passIndex );
 protected:
+	bool ApplyShaderInputs( uint32_t techniqueIndex, unsigned int passIndex, Tr2RenderContextEnum::ShaderType shaderType, Tr2RenderContext& renderContext ) const;
+
 	Tr2ShaderPtr m_shader;
 	Tr2EffectTechniqueParametersVector m_parametersForPasses;
 	uint32_t m_sortValue;
-private:
-	void ApplyShaderInputs( uint32_t techniqueIndex, unsigned int passIndex, Tr2RenderContextEnum::ShaderType shaderType, bool& samplersChanged, Tr2RenderContext& renderContext ) const;
 };
 
 TYPEDEF_BLUECLASS( Tr2Material );

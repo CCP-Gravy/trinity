@@ -10,25 +10,42 @@ BLUE_INTERFACE( ITr2EffectValue ) : public IRoot
 	// ----------------------------------------------------------------------------------
 	enum ResourceFlags
 	{
+		RESOURCE_FLAG_NONE  = 0,
 		// Resource needs to be applied as sRGB texture
 		RESOURCE_FLAG_SRGB	= 1,
-		// Resource needs to be applied into UAV slot
-		RESOURCE_FLAG_UAV	= 2,
 	};
 
 	// Copy the value to the effect using 'destHandle'.  For basic types 'destHandle'
 	// is a memory address for the constant block being constructed for the effect.
-	// For resources the 'destHandle' plays the role of the sampler index and size
-	// is a bit field with ResourceFlags.
 	// Size is passed down to potentially limit the number of bytes copied.
 	// For example, a TriTransformParameter holds a 4x4 matrix but the shader
 	// might use only a 2x2 portion of it. The fxc compiler is clever enough to only
 	// give 2 constants to the variable in that case.
 	// The size is in bytes.
-	virtual void CopyValueToEffect(		Tr2RenderContextEnum::ShaderType inputType, 
-										unsigned char* destHandle, 
-										size_t size,
-										Tr2RenderContext &renderContext ) const = 0;
+	virtual void CopyValueToEffect( 
+		Tr2RenderContextEnum::ShaderType inputType,
+		unsigned char* destHandle,
+		size_t size,
+		Tr2RenderContext &renderContext ) const
+	{
+	}
+
+	virtual bool CopyToResourceSet(
+		Tr2ResourceSetDescriptionAL& resourceDesc,
+		Tr2RenderContextEnum::ShaderType stage,
+		uint32_t registerIndex,
+		ResourceFlags flags ) const
+	{
+		return false;
+	}
+
+	virtual void ApplyUav(
+		Tr2RenderContextEnum::ShaderType stage,
+		uint32_t registerIndex,
+		uint32_t initialCount,
+		Tr2RenderContext &renderContext ) const
+	{
+	}
 };
 
 TYPEDEF_BLUECLASS( ITr2EffectValue );

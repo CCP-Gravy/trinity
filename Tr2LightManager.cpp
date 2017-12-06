@@ -223,8 +223,6 @@ ALResult Tr2LightManager::DoUpdateLists( uint32_t msaaType, Tr2RenderContext& re
 		BlueSharedString( "DEPTH_BUFFER_MSAA" ) };
 	m_effect->SetOption( BlueSharedString( "DEPTH_BUFFER_TYPE" ), msaaOptions[std::min( msaaType, 2u )]);
 
-	renderContext.m_esm.ApplyShaderBuffer( Tr2RenderContextEnum::COMPUTE_SHADER, 1, *m_lightBuffer->GetGpuBuffer( 0 ) );
-	CR_RETURN_HR( renderContext.SetUav( Tr2RenderContextEnum::COMPUTE_SHADER, 1, *m_indexBuffer->GetGpuBuffer( 0 ), 0 ) );
 	if( !Tr2Renderer::RunComputeShader( m_effect, perFrameData.tilesX, perFrameData.tilesY, 1, renderContext ) )
 	{
 		return E_FAIL;
@@ -266,6 +264,9 @@ bool Tr2LightManager::OnPrepareResources()
 	m_lightBuffer->Create( LIGHT_BUFFER_SIZE, sizeof( PerLightData ), Tr2GpuBuffer::CPU_WRITABLE );
 	m_indexBuffer->Create( INDEX_BUFFER_SIZE, sizeof( uint32_t ), Tr2GpuStructuredBuffer::GPU_WRITABLE | Tr2GpuStructuredBuffer::COUNTER );
 	m_perFrameData.Create( sizeof( PerFrameData ), Tr2RenderContextEnum::USAGE_LOCK_FREQUENTLY, nullptr, renderContext );
+
+	m_effect->SetParameter( BlueSharedString( "LightBuffer" ), m_lightBuffer );
+	m_effect->SetParameter( BlueSharedString( "LightIndices" ), m_indexBuffer, 0 );
 
 	return true;
 }

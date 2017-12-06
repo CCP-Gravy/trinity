@@ -17,38 +17,39 @@ Tr2RuntimeTextureParameter::Tr2RuntimeTextureParameter( IRoot* lockobj )
 }
 
 // --------------------------------------------------------------------------------------
-void Tr2RuntimeTextureParameter::CopyValueToEffect(
-	Tr2RenderContextEnum::ShaderType inputType,
-	unsigned char* destHandle,
-	size_t resourceFlags,
-	Tr2RenderContext &renderContext ) const
+bool Tr2RuntimeTextureParameter::CopyToResourceSet(
+	Tr2ResourceSetDescriptionAL& resourceDesc,
+	Tr2RenderContextEnum::ShaderType stage,
+	uint32_t registerIndex,
+	ResourceFlags flags ) const
 {
-	unsigned int ix = *destHandle;
-	bool isUav = ( resourceFlags & RESOURCE_FLAG_UAV ) != 0;
+	bool isSrgb = ( flags & RESOURCE_FLAG_SRGB ) != 0;
+	auto colorSpace = isSrgb ? Tr2RenderContextEnum::COLOR_SPACE_SRGB : Tr2RenderContextEnum::COLOR_SPACE_LINEAR;
 	if( Tr2TextureAL* tex = ( m_texture ? m_texture->GetTexture() : nullptr ) )
 	{
-		if( isUav )
-		{
-			renderContext.SetUav( inputType, ix, *tex );
-		}
-		else
-		{
-			bool isSrgb = ( resourceFlags & RESOURCE_FLAG_SRGB ) != 0;
-			auto colorSpace = isSrgb ? Tr2RenderContextEnum::COLOR_SPACE_SRGB : Tr2RenderContextEnum::COLOR_SPACE_LINEAR;
-			renderContext.m_esm.ApplyTexture( inputType, ix, *tex, colorSpace );
-		}
+		return resourceDesc.Set( stage, registerIndex, *tex, colorSpace );
 	}
 	else
 	{
-		if( isUav )
-		{
-			// TODO: Fix the signature of SetUav to take a const reference
-			renderContext.SetUav( inputType, ix, const_cast<Tr2TextureAL&>( nullTX ) );
-		}
-		else
-		{
-			Tr2Renderer::ApplyFallbackTexture( inputType, ix, m_resourceType, m_name.c_str(), renderContext );
-		}
+		return resourceDesc.Set( stage, registerIndex, Tr2Renderer::GetFallbackTexture( m_resourceType, m_name.c_str() ), colorSpace );
+	}
+}
+
+// --------------------------------------------------------------------------------------
+void Tr2RuntimeTextureParameter::ApplyUav(
+	Tr2RenderContextEnum::ShaderType stage,
+	uint32_t registerIndex,
+	uint32_t initialCount,
+	Tr2RenderContext &renderContext ) const
+{
+	if( Tr2TextureAL* tex = ( m_texture ? m_texture->GetTexture() : nullptr ) )
+	{
+		renderContext.SetUav( stage, registerIndex, *tex );
+	}
+	else
+	{
+		// TODO: Fix the signature of SetUav to take a const reference
+		renderContext.SetUav( stage, registerIndex, const_cast<Tr2TextureAL&>( nullTX ) );
 	}
 }
 

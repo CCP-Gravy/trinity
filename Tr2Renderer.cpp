@@ -986,7 +986,7 @@ bool Tr2Renderer::RunComputeShader( Tr2Material* effect,
 		if( stage.m_exists )
 		{
 			shader->ApplyAllStateForPass( 0, i, renderContext );
-			effect->ApplyShaderInputs( 0, i, COMPUTE_SHADER, renderContext );
+			effect->ApplyMaterialDataForPass( 0, i, renderContext );
 			CR_RETURN_VAL( renderContext.RunComputeShader( groupDimX, groupDimY, groupDimZ ), false );
 			// Unset UAVs
 			const Tr2EffectResourceMap& uavs = stage.uavs;
@@ -1036,7 +1036,7 @@ bool Tr2Renderer::RunComputeShader(
 		if( stage.m_exists )
 		{
 			shader->ApplyAllStateForPass( techniqueIndex, i, renderContext );
-			effect->ApplyShaderInputs( techniqueIndex, i, COMPUTE_SHADER, renderContext );
+			effect->ApplyMaterialDataForPass( techniqueIndex, i, renderContext );
 			CR_RETURN_VAL( renderContext.RunComputeShader( groupDimX, groupDimY, groupDimZ ), false );
 			// Unset UAVs
 			const Tr2EffectResourceMap& uavs = stage.uavs;
@@ -1088,7 +1088,7 @@ bool Tr2Renderer::RunComputeShaderIndirect( Tr2Material* effect, Tr2GpuBufferAL&
 		if( stage.m_exists )
 		{
 			shader->ApplyAllStateForPass( 0, uint32_t( i ), renderContext );
-			effect->ApplyShaderInputs( 0, uint32_t( i ), COMPUTE_SHADER, renderContext );
+			effect->ApplyMaterialDataForPass( 0, uint32_t( i ), renderContext );
 			CR_RETURN_VAL( renderContext.RunComputeShaderIndirect( indirectParams, offset ), false );
 			// Unset UAVs
 			const Tr2EffectResourceMap& uavs = stage.uavs;
@@ -1833,7 +1833,7 @@ void Tr2Renderer::DisableFallbackTextureDebugging()
 	}
 }
 
-void Tr2Renderer::ApplyFallbackTexture( Tr2RenderContextEnum::ShaderType stage, uint32_t registerIndex, Tr2EffectResource::Type textureType, const char* debugContext, Tr2RenderContext &renderContext )
+const Tr2TextureAL& Tr2Renderer::GetFallbackTexture( Tr2EffectResource::Type textureType, const char* debugContext )
 {
 	uint32_t textureSet = 0;
 	if( s_debugFallbackTexture )
@@ -1845,15 +1845,15 @@ void Tr2Renderer::ApplyFallbackTexture( Tr2RenderContextEnum::ShaderType stage, 
 	{
 	case Tr2EffectResource::TEXTURE_1D:
 	case Tr2EffectResource::TEXTURE_2D:
-		renderContext.m_esm.ApplyTexture( stage, registerIndex, s_fallbackTextures[textureSet][0] );
+		return s_fallbackTextures[textureSet][0];
 		break;
 	case Tr2EffectResource::TEXTURE_3D:
-		renderContext.m_esm.ApplyTexture( stage, registerIndex, s_fallbackTextures[textureSet][1] );
+		return s_fallbackTextures[textureSet][1];
 		break;
 	case Tr2EffectResource::TEXTURE_CUBE:
-		renderContext.m_esm.ApplyTexture( stage, registerIndex, s_fallbackTextures[textureSet][2] );
+		return s_fallbackTextures[textureSet][2];
 		break;
 	default:
-		return;
+		return nullTX;
 	}
 }

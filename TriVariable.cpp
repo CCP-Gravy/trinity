@@ -20,6 +20,98 @@ const Be::ClassInfo* TriVariable::ExposeToBlue()
 	EXPOSURE_END()
 }
 
+bool TriVariable::CopyToResourceSet(
+	Tr2ResourceSetDescriptionAL& resourceDesc,
+	Tr2RenderContextEnum::ShaderType stage,
+	uint32_t registerIndex,
+	ResourceFlags flags ) const
+{
+	switch( m_type )
+	{
+	case TRIVARIABLE_TEXTURE_RES:
+	{
+		auto colorSpace = ( flags & RESOURCE_FLAG_SRGB ) != 0 ? Tr2RenderContextEnum::COLOR_SPACE_SRGB : Tr2RenderContextEnum::COLOR_SPACE_LINEAR;
+		Tr2TextureAL* tex = nullptr;
+		if( m_texture )
+		{
+			tex = m_texture->GetTexture();
+		}
+		if( tex )
+		{
+			return resourceDesc.Set( stage, registerIndex, *tex, colorSpace );
+		}
+		else
+		{
+			return resourceDesc.Set( stage, registerIndex, nullTX, colorSpace );
+		}
+	}
+	case TRIVARIABLE_GPUBUFFER:
+	{
+		Tr2GpuBufferAL* buffer = nullptr;
+		if( m_gpuBuffer )
+		{
+			buffer = m_gpuBuffer->GetGpuBuffer( 0 );
+		}
+		if( buffer )
+		{
+			return resourceDesc.Set( stage, registerIndex, *buffer );
+		}
+		else
+		{
+			return resourceDesc.Set( stage, registerIndex, nullGB );
+		}
+	}
+	default:
+		return false;
+	}
+}
+
+void TriVariable::ApplyUav(
+	Tr2RenderContextEnum::ShaderType stage,
+	uint32_t registerIndex,
+	uint32_t initialCount,
+	Tr2RenderContext &renderContext ) const
+{
+	switch( m_type )
+	{
+	case TRIVARIABLE_TEXTURE_RES:
+	{
+		Tr2TextureAL* tex = nullptr;
+		if( m_texture )
+		{
+			tex = m_texture->GetTexture();
+		}
+		if( tex )
+		{
+			renderContext.SetUav( stage, registerIndex, *tex );
+		}
+		else
+		{
+			renderContext.SetUav( stage, registerIndex, nullGB );
+		}
+		break;
+	}
+	case TRIVARIABLE_GPUBUFFER:
+	{
+		Tr2GpuBufferAL* buffer = nullptr;
+		if( m_gpuBuffer )
+		{
+			buffer = m_gpuBuffer->GetGpuBuffer( 0 );
+		}
+		if( buffer )
+		{
+			renderContext.SetUav( stage, registerIndex, *buffer, initialCount );
+		}
+		else
+		{
+			renderContext.SetUav( stage, registerIndex, nullGB );
+		}
+		break;
+	}
+	default:
+		break;
+	}
+}
 
 void TriVariable::CopyValueToEffect(	Tr2RenderContextEnum::ShaderType inputType, 
 										unsigned char* destHandle, 
@@ -30,6 +122,8 @@ void TriVariable::CopyValueToEffect(	Tr2RenderContextEnum::ShaderType inputType,
 	{
 	case TRIVARIABLE_INVALID:
 	case TRIVARIABLE_UNKNOWN_FLOAT:
+	case TRIVARIABLE_TEXTURE_RES:
+	case TRIVARIABLE_GPUBUFFER:
 		// Do Nothing
 		break;
 	case TRIVARIABLE_FLOAT4X4:
@@ -40,75 +134,6 @@ void TriVariable::CopyValueToEffect(	Tr2RenderContextEnum::ShaderType inputType,
 				reinterpret_cast<Matrix*>( destHandle ), 
 				reinterpret_cast<const Matrix*>( m_value ), 
 				(unsigned int)(size < ts ? size : ts) );
-			break;
-		}
-	case TRIVARIABLE_TEXTURE_RES:
-		{
-			uint32_t samplerIx = *destHandle;
-			bool isUav = ( size & RESOURCE_FLAG_UAV ) != 0;
-			auto colorSpace = ( size & RESOURCE_FLAG_SRGB ) != 0 ? Tr2RenderContextEnum::COLOR_SPACE_SRGB : Tr2RenderContextEnum::COLOR_SPACE_LINEAR;
-			Tr2TextureAL* tex = nullptr;
-			if( m_texture )
-			{
-				tex = m_texture->GetTexture();
-			}
-			if( tex )
-			{		
-				if( isUav )
-				{
-					renderContext.SetUav( inputType, samplerIx, *tex );
-				}
-				else
-				{
-					renderContext.m_esm.ApplyTexture( inputType, samplerIx, *tex, colorSpace );
-				}
-			}
-			else
-			{
-				if( isUav )
-				{
-					renderContext.SetUav( inputType, samplerIx, nullGB );
-				}
-				else
-				{
-					renderContext.m_esm.ApplyTexture( inputType, samplerIx, nullTX, colorSpace );
-				}
-			}
-			break;
-		}
-	case TRIVARIABLE_GPUBUFFER:
-		{
-			uint32_t samplerIx = *destHandle;
-			uint32_t initialCount = reinterpret_cast<uint32_t*>( destHandle )[1];
-			bool isUav = ( size & RESOURCE_FLAG_UAV ) != 0;
-			Tr2GpuBufferAL* buffer = nullptr;
-
-			if( m_gpuBuffer )
-			{
-				buffer = m_gpuBuffer->GetGpuBuffer( 0 );
-			}
-			if( buffer )
-			{		
-				if( isUav )
-				{
-					renderContext.SetUav( inputType, samplerIx, *buffer, initialCount );
-				}
-				else
-				{
-					renderContext.m_esm.ApplyShaderBuffer( inputType, samplerIx, *buffer );
-				}
-			}
-			else
-			{
-				if( isUav )
-				{
-					renderContext.SetUav( inputType, samplerIx, nullGB );
-				}
-				else
-				{
-					renderContext.m_esm.ApplyShaderBuffer( inputType, samplerIx, nullGB );
-				}
-			}
 			break;
 		}
 	default:

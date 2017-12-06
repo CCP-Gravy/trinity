@@ -266,7 +266,7 @@ public:
 
 	static void EnableFallbackTextureDebugging();
 	static void DisableFallbackTextureDebugging();
-	static void ApplyFallbackTexture( Tr2RenderContextEnum::ShaderType stage, uint32_t registerIndex, Tr2EffectResource::Type textureType, const char* debugContext, Tr2RenderContext &renderContext );
+	static const Tr2TextureAL& GetFallbackTexture( Tr2EffectResource::Type textureType, const char* debugContext );
 };
 
 #endif // Tr2Renderer_H

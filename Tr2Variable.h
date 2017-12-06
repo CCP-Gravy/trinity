@@ -82,17 +82,6 @@ public:
 		return m_variable ? m_variable->GetTypeName() : "null var";
 	}
 
-	void CopyValueToEffect(	Tr2RenderContextEnum::ShaderType inputType, 
-							unsigned char* destHandle, 
-							size_t size,
-							Tr2RenderContext &renderContext ) const
-	{
-		if( m_variable )
-		{
-			m_variable->CopyValueToEffect( inputType, destHandle, size, renderContext );
-		}
-	}
-	
 	// Invalidate the variable
 	void Invalidate()
 	{

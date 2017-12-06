@@ -416,6 +416,7 @@ bool Tr2EffectDescription::Read( const void* data,
 					samplerSetup.sampler.Create( sampler, renderContext );
 
 					pass.stageInputs[type].samplers[registerIndex] = samplerSetup;
+					pass.resourceSetDesc.Set( type, registerIndex, samplerSetup.sampler );
 				}
 
 				if( version >= 3 )

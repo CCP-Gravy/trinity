@@ -68,46 +68,41 @@ bool TriTextureParameter::OnModified(	Be::Var* val )
 }
 
 // --------------------------------------------------------------------------------------
-// Description:
-//   Applies texture to the render context.
-// Arguments:
-//   inputType - shader type
-//   destHandle - reinterpreted as a sampler index
-//   resourceFlags - union of ITr2EffectValue::ResourceFlags
-//   renderContext - current render context
-// --------------------------------------------------------------------------------------
-void TriTextureParameter::CopyValueToEffect(	Tr2RenderContextEnum::ShaderType inputType, 
-												unsigned char* destHandle, 
-												size_t resourceFlags,
-												Tr2RenderContext &renderContext ) const
+bool TriTextureParameter::CopyToResourceSet(
+	Tr2ResourceSetDescriptionAL& resourceDesc,
+	Tr2RenderContextEnum::ShaderType stage,
+	uint32_t registerIndex,
+	ResourceFlags flags ) const
 {
-	unsigned int ix = *destHandle;
-	bool isUav = ( resourceFlags & RESOURCE_FLAG_UAV ) != 0;
-	TriTextureRes* resource = GetResource();
-	if( Tr2TextureAL* tex = ( resource ? resource->GetTexture() : nullptr ) )
-	{		
-		if( isUav )
-		{
-			renderContext.SetUav( inputType, ix, *tex );
-		}
-		else
-		{
-			bool isSrgb = ( resourceFlags & RESOURCE_FLAG_SRGB ) != 0;
-			auto colorSpace = isSrgb ? Tr2RenderContextEnum::COLOR_SPACE_SRGB : Tr2RenderContextEnum::COLOR_SPACE_LINEAR;
-			renderContext.m_esm.ApplyTexture( inputType, ix, *tex, colorSpace );
-		}
+	const TriTextureRes* resource = GetResource();
+	bool isSrgb = ( flags & RESOURCE_FLAG_SRGB ) != 0;
+	auto colorSpace = isSrgb ? Tr2RenderContextEnum::COLOR_SPACE_SRGB : Tr2RenderContextEnum::COLOR_SPACE_LINEAR;
+	if( const Tr2TextureAL* tex = ( resource ? resource->GetTexture() : nullptr ) )
+	{
+		return resourceDesc.Set( stage, registerIndex, *tex, colorSpace );
 	}
 	else
 	{
-		if( isUav )
-		{
-			// TODO: Fix the signature of SetUav to take a const reference
-			renderContext.SetUav( inputType, ix, const_cast<Tr2TextureAL&>( nullTX ) );
-		}
-		else
-		{
-			Tr2Renderer::ApplyFallbackTexture( inputType, ix, m_resourceType, m_name.c_str(), renderContext );
-		}
+		return resourceDesc.Set( stage, registerIndex, Tr2Renderer::GetFallbackTexture( m_resourceType, m_name.c_str() ), colorSpace );
+	}
+}
+
+// --------------------------------------------------------------------------------------
+void TriTextureParameter::ApplyUav(
+	Tr2RenderContextEnum::ShaderType stage,
+	uint32_t registerIndex,
+	uint32_t initialCount,
+	Tr2RenderContext &renderContext ) const
+{
+	TriTextureRes* resource = GetResource();
+	if( Tr2TextureAL* tex = ( resource ? resource->GetTexture() : nullptr ) )
+	{
+		renderContext.SetUav( stage, registerIndex, *tex );
+	}
+	else
+	{
+		// TODO: Fix the signature of SetUav to take a const reference
+		renderContext.SetUav( stage, registerIndex, const_cast<Tr2TextureAL&>( nullTX ) );
 	}
 }
 

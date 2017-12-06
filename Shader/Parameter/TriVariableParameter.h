@@ -52,7 +52,17 @@ public:
 	/////////////////////////////////////////////////////////////////////////////////////
 	// ITriEffectParameter
 	/////////////////////////////////////////////////////////////////////////////////////
-	void CopyValueToEffect(	Tr2RenderContextEnum::ShaderType inputType, 
+	virtual bool CopyToResourceSet(
+		Tr2ResourceSetDescriptionAL& resourceDesc,
+		Tr2RenderContextEnum::ShaderType stage,
+		uint32_t registerIndex,
+		ResourceFlags flags ) const;
+	virtual void ApplyUav(
+		Tr2RenderContextEnum::ShaderType stage,
+		uint32_t registerIndex,
+		uint32_t initialCount,
+		Tr2RenderContext &renderContext ) const;
+	virtual void CopyValueToEffect(	Tr2RenderContextEnum::ShaderType inputType,
 							unsigned char* destHandle, 
 							size_t size,
 							Tr2RenderContext &renderContext ) const; 

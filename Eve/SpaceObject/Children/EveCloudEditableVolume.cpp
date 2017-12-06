@@ -426,38 +426,23 @@ void EveCloudVolumeTextureParameter::RebuildEffectHandles( Tr2Shader* effectRes 
 	m_isUsedByEffect = true;
 }
 
-void EveCloudVolumeTextureParameter::CopyValueToEffect(	
-	Tr2RenderContextEnum::ShaderType inputType, 
-	unsigned char* destHandle, 
-	size_t resourceFlags,
-	Tr2RenderContext &renderContext ) const
+bool EveCloudVolumeTextureParameter::CopyToResourceSet(
+	Tr2ResourceSetDescriptionAL& resourceDesc,
+	Tr2RenderContextEnum::ShaderType stage,
+	uint32_t registerIndex,
+	ResourceFlags flags ) const
 {
-	unsigned int ix = *destHandle;
-	bool isUav = ( resourceFlags & RESOURCE_FLAG_UAV ) != 0;
 	TriTextureRes* resource = m_volume ? m_volume->GetTexture() : nullptr;
+	bool isSrgb = ( flags & RESOURCE_FLAG_SRGB ) != 0;
+	auto colorSpace = isSrgb ? Tr2RenderContextEnum::COLOR_SPACE_SRGB : Tr2RenderContextEnum::COLOR_SPACE_LINEAR;
 	if( Tr2TextureAL* tex = ( resource ? resource->GetTexture() : nullptr ) )
 	{		
-		if( isUav )
-		{
-			renderContext.SetUav( inputType, ix, *tex );
-		}
-		else
-		{
-			bool isSrgb = ( resourceFlags & RESOURCE_FLAG_SRGB ) != 0;
-			auto colorSpace = isSrgb ? Tr2RenderContextEnum::COLOR_SPACE_SRGB : Tr2RenderContextEnum::COLOR_SPACE_LINEAR;
-			renderContext.m_esm.ApplyTexture( inputType, ix, *tex, colorSpace );
-		}
+
+		return resourceDesc.Set( stage, registerIndex, *tex, colorSpace );
 	}
 	else
 	{
-		if( isUav )
-		{
-			renderContext.SetUav( inputType, ix, const_cast<Tr2TextureAL&>( nullTX ) );
-		}
-		else
-		{
-			Tr2Renderer::ApplyFallbackTexture( inputType, ix, Tr2EffectResource::TEXTURE_3D, m_name.c_str(), renderContext );
-		}
+		return resourceDesc.Set( stage, registerIndex, Tr2Renderer::GetFallbackTexture( Tr2EffectResource::TEXTURE_3D, m_name.c_str() ), colorSpace );
 	}
 }
 

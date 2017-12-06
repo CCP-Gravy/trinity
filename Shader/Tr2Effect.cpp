@@ -677,6 +677,7 @@ void Tr2Effect::RebuildSamplerOverrides()
 							d.registerIndex = it->first;
 
 							pp.m_stageInput[i].m_samplers.push_back( d );
+							pp.m_resourceSetDesc.Set( ShaderType( i ), it->first, d.sampler );
 							break;
 						}
 					}
@@ -722,6 +723,8 @@ void Tr2Effect::RebuildCachedDataInternal()
 				{
 					m_parametersForPasses[technique][passIx].reset( CCP_NEW( "Tr2EffectPassParameters" ) Tr2EffectPassParameters() );
 					Tr2EffectPassParameters& pp = *m_parametersForPasses[technique][passIx];
+					pp.m_resourceSetDesc = desc.techniques[technique].passes[passIx].resourceSetDesc;
+					pp.m_resourceSetDirty = true;
 
 					for( unsigned i = 0; i != Tr2RenderContextEnum::SHADER_TYPE_COUNT; ++i )
 					{
@@ -736,11 +739,11 @@ void Tr2Effect::RebuildCachedDataInternal()
 						auto& input = pp.m_stageInput[i];
 						if( !stage.resources.empty() )
 						{
-							MapPassResources( stage.resources, input.m_textures, 0 );
+							MapPassResources( stage.resources, input.m_textures );
 						}
 						if( !stage.uavs.empty() )
 						{
-							MapPassResources( stage.uavs, input.m_uavs, ITr2EffectValue::RESOURCE_FLAG_UAV );
+							MapPassResources( stage.uavs, input.m_uavs );
 						}
 					}
 				}
@@ -1177,7 +1180,7 @@ const Tr2ConstantEffectParameter* Tr2Effect::GetConstParameters( size_t& count )
 }
 
 
-void Tr2Effect::MapPassResources( const Tr2EffectResourceMap& resources, Tr2EffectParamVector &pv, uint32_t resourceFlags )
+void Tr2Effect::MapPassResources( const Tr2EffectResourceMap& resources, Tr2EffectParamVector &pv )
 {
 	CCP_STATS_ZONE( __FUNCTION__ );
 
@@ -1225,7 +1228,7 @@ void Tr2Effect::MapPassResources( const Tr2EffectResourceMap& resources, Tr2Effe
 		{
 			param.m_sourceName = ss.name;
 			param.m_registerIndex = it->first;
-			param.m_registerCount = resourceFlags | ( it->second.isSRGB ? ITr2EffectValue::RESOURCE_FLAG_SRGB : 0 );
+			param.m_registerCount = it->second.isSRGB ? ITr2EffectValue::RESOURCE_FLAG_SRGB : 0;
 			param.m_initialCount = it->second.initialCount;
 
 			pv.push_back( param );

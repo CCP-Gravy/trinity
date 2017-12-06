@@ -736,7 +736,13 @@ void Tr2Sprite2dScene::SetTexture( unsigned ix, Tr2AtlasTexturePtr tex, Tr2Sprit
 		CCP_STATS_INC( spriteSceneDrawCallTexture );
 		IssueDrawCall();
 		m_texture[ix] = tex;
-		renderContext.m_esm.ApplyTexture( PIXEL_SHADER, ix, texAL ? *texAL : nullTX );
+
+		if( m_effect )
+		{
+			auto desc = m_effect->GetPassDescription( 0, 0 );
+			desc->m_resourceSetDirty |= desc->m_resourceSetDesc.Set( PIXEL_SHADER, ix, texAL ? *texAL : nullTX );
+		}
+
 		if( ix == 0 )
 		{
 			Vector4 texelSize;
@@ -2045,9 +2051,10 @@ void Tr2Sprite2dScene::ReplayCapture( Tr2Sprite2dDisplayList* dl )
 		{
 			m_texelSizeVar[0] = entry.texelSize0;
 			m_texelSizeVar[1] = entry.texelSize1;
-			
-			renderContext.m_esm.ApplyTexture( PIXEL_SHADER, 0, ( entry.texture0 && entry.texture0->GetTexture() ) ? *entry.texture0->GetTexture() : nullTX );
-			renderContext.m_esm.ApplyTexture( PIXEL_SHADER, 1, ( entry.texture1 && entry.texture1->GetTexture() ) ? *entry.texture1->GetTexture() : nullTX );
+
+			auto desc = entry.effect->GetPassDescription( 0, 0 );
+			desc->m_resourceSetDirty |= desc->m_resourceSetDesc.Set( PIXEL_SHADER, 0, ( entry.texture0 && entry.texture0->GetTexture() ) ? *entry.texture0->GetTexture() : nullTX );
+			desc->m_resourceSetDirty |= desc->m_resourceSetDesc.Set( PIXEL_SHADER, 1, ( entry.texture1 && entry.texture1->GetTexture() ) ? *entry.texture1->GetTexture() : nullTX );
 			
 			CCP_STATS_INC( spriteSceneDrawCallCount );
 

@@ -162,21 +162,6 @@ void Tr2Shader::ApplyAllStateForPass( uint32_t techniqueIndex, uint32_t passInde
 
 	renderContext.m_esm.ApplyShaderProgram( pass.shaderProgram );
 
-	for( unsigned i = SHADER_TYPE_FIRST; i != SHADER_TYPE_COUNT; ++i )
-	{
-		if( pass.shaderTypeMask & ( 1 << i ) )
-		{
-			for( Tr2SamplerSetupMap::const_iterator it = pass.stageInputs[i].samplers.begin(); 
-				it != pass.stageInputs[i].samplers.end(); ++it )
-			{
-				renderContext.m_esm.ApplySamplerSetup( 
-					Tr2RenderContextEnum::ShaderType( i ), 
-					it->first, 
-					it->second.sampler );
-			}
-		}
-	}
-
 	renderContext.m_esm.ApplyRenderStates( pass.renderStates );
 }
 
@@ -196,22 +181,6 @@ void Tr2Shader::ApplyRenderStates( uint32_t techniqueIndex, uint32_t passIndex, 
 	auto& pass = technique.passes[passIndex];
 
 	renderContext.m_esm.ApplyRenderStates( pass.renderStates );
-}
-
-// --------------------------------------------------------------------------------------
-void Tr2Shader::ApplySamplerStates( uint32_t techniqueIndex, uint32_t passIndex, Tr2RenderContextEnum::ShaderType type, Tr2RenderContext &renderContext ) const
-{
-	auto& technique = m_effect.techniques[techniqueIndex];
-	auto& pass = technique.passes[passIndex];
-
-	for( Tr2SamplerSetupMap::const_iterator it = pass.stageInputs[type].samplers.begin(); 
-		it != pass.stageInputs[type].samplers.end(); ++it )
-	{
-		renderContext.m_esm.ApplySamplerSetup( 
-			type, 
-			it->first, 
-			it->second.sampler );
-	}
 }
 
 // --------------------------------------------------------------------------------------

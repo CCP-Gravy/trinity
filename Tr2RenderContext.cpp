@@ -288,28 +288,14 @@ void Tr2RenderContextBase::RenderBatchesSortedByEffect( ITriRenderBatchAccumulat
 				lastBatch = lastBatch->GetNext();
 			}
 
-			uint32_t samplersDirtyMask = Tr2RenderContext::SHADER_TYPE_MASK;
-
 			while( batch && batch != lastBatch )
 			{
 				D3DPERF_EVENT( CA2W( batch->GetBatchTypeName().c_str() ) );
 
 				if( hasPerEffectData || batch == startOfPass )
 				{
-					if( hasPerEffectData && samplersDirtyMask )
-					{
-						// We have to apply sampler states in case any of the batches override them
-						const uint32_t shaderMask = currentShaderMask & Tr2RenderContext::SHADER_TYPE_MASK & samplersDirtyMask;
-						for( uint32_t shaderType = SHADER_TYPE_FIRST; shaderType < SHADER_TYPE_COUNT; ++shaderType )
-						{
-							if( shaderMask & ( 1 << shaderType ) )
-							{
-								currentShader->ApplySamplerStates( technique, passIx, ShaderType( shaderType ), *renderContext );
-							}
-						}
-					}
 					// Set the data from the material, i.e constants and samplers for this pass
-					samplersDirtyMask = batch->GetShaderMaterialInterface()->ApplyMaterialDataForPass( technique, passIx, *renderContext );
+					batch->GetShaderMaterialInterface()->ApplyMaterialDataForPass( technique, passIx, *renderContext );
 				}
 
 				// If the batch has per-object data, set it to the device
@@ -414,27 +400,11 @@ void Tr2RenderContextBase::RenderBatchesWithOverride( ITriRenderBatchAccumulator
 
 			const uint32_t shaderMaskAS = mode == TriRenderBatch::DO_NOT_USE_OVERRIDE_SHADERS ? Tr2RenderContext::SHADER_TYPE_MASK : ( Tr2RenderContext::SHADER_TYPE_MASK & ~( 1 << PIXEL_SHADER ) );
 			const uint32_t shaderMask = shaderMaskAS & shaderForThisBatch->GetShaderTypeMask( technique );
-			for( uint32_t shaderType = SHADER_TYPE_FIRST; shaderType < SHADER_TYPE_COUNT; ++shaderType )
-			{
-				if( shaderMask & ( 1 << shaderType ) )
-				{
-					shaderForThisBatch->ApplySamplerStates( technique, 0, ShaderType( shaderType ), *renderContext );
-					materialForThisBatch->ApplyShaderInputs( technique, 0, ShaderType( shaderType ), *renderContext );
-				}
-			}
-			if( overrideMode != OM_DO_NOT_SET_ORIGINAL_PS && mode != TriRenderBatch::DO_NOT_USE_OVERRIDE_SHADERS )
-			{
-				materialForThisBatch->ApplyShaderInputs( technique, 0, PIXEL_SHADER, *renderContext );
-			}
+			materialForThisBatch->ApplyMaterialDataForPass( technique, 0, *renderContext );
 
 			if( mode != TriRenderBatch::DO_NOT_USE_OVERRIDE_SHADERS )
 			{
 				overrideShader->ApplyRenderStates( 0, passIx, *renderContext );
-				overrideShader->ApplySamplerStates( 0, passIx, PIXEL_SHADER, *renderContext );
-
-				// The override may need specific data. 
-				// This isn't guaranteed to play well together.
-				overrideMaterial->ApplyShaderInputs( 0, 0, PIXEL_SHADER, *renderContext );
 			}
 			else
 			{
@@ -456,11 +426,6 @@ void Tr2RenderContextBase::RenderBatchesWithOverride( ITriRenderBatchAccumulator
 			{
 				D3DPERF_EVENT(L"Tr2RenderContextBase::RenderBatchesWithOverride - SetPerObjectDataToDevice");
 				perObjectData->SetPerObjectDataToDevice( perObjectConstantBuffers, overrideShader->GetShaderTypeMask( 0 ), *renderContext );
-			}
-
-			if( mode != TriRenderBatch::DO_NOT_USE_OVERRIDE_SHADERS && overrideEffect && overrideMode == OM_APPLY_PS )
-			{
-				overrideEffect->ApplyShaderInputs( 0, passIx, PIXEL_SHADER, *renderContext );
 			}
 
 			it->SubmitGeometry( *renderContext );

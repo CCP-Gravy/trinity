@@ -156,10 +156,11 @@ public:
 
 	//////////////////////////////////////////////////////////////////////////
 	// ITriEffectResourceParameter
-	void CopyValueToEffect(	Tr2RenderContextEnum::ShaderType inputType, 
-							unsigned char* destHandle, 
-							size_t isSRGB,
-							Tr2RenderContext &renderContext ) const;
+	virtual bool CopyToResourceSet(
+		Tr2ResourceSetDescriptionAL& resourceDesc,
+		Tr2RenderContextEnum::ShaderType stage,
+		uint32_t registerIndex,
+		ResourceFlags flags ) const;
 	unsigned GetHashValue( unsigned startingHash ) const;
 private:
 	BlueSharedString m_name;
