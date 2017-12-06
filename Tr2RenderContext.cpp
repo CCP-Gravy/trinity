@@ -398,8 +398,6 @@ void Tr2RenderContextBase::RenderBatchesWithOverride( ITriRenderBatchAccumulator
 
 			shaderForThisBatch->ApplyShaderOverride( technique, 0, *overrideShader, passIx, *renderContext );
 
-			const uint32_t shaderMaskAS = mode == TriRenderBatch::DO_NOT_USE_OVERRIDE_SHADERS ? Tr2RenderContext::SHADER_TYPE_MASK : ( Tr2RenderContext::SHADER_TYPE_MASK & ~( 1 << PIXEL_SHADER ) );
-			const uint32_t shaderMask = shaderMaskAS & shaderForThisBatch->GetShaderTypeMask( technique );
 			materialForThisBatch->ApplyMaterialDataForPass( technique, 0, *renderContext );
 
 			if( mode != TriRenderBatch::DO_NOT_USE_OVERRIDE_SHADERS )

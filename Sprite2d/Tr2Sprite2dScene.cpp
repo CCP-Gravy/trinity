@@ -727,8 +727,6 @@ void Tr2Sprite2dScene::SetTexture( unsigned ix, Tr2AtlasTexturePtr tex, Tr2Sprit
 		}
 	}
 
-	USE_MAIN_THREAD_RENDER_CONTEXT();
-
 	// Note that we can't assume that the same value for 'tex' results in the
 	// same D3D texture - the underlying texture may shift in the atlas.
 	if( !m_texture[ix] || texAL != m_texture[ix]->GetTexture() )
