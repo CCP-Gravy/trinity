@@ -2693,7 +2693,6 @@
     <ClInclude Include="Tr2Blitter.h"/>
     <ClInclude Include="Tr2BoundingLineSet.h"/>
     <ClInclude Include="Tr2ConstantBufferFormats.h"/>
-    <ClInclude Include="Tr2ConstGeometry.h"/>
     <ClInclude Include="Tr2CpuSkinnedModel.h"/>
     <ClInclude Include="Tr2CurveLineSet.h"/>
     <ClInclude Include="Tr2DebugRenderer.h"/>
@@ -3138,7 +3137,6 @@
     <ClCompile Include="Tr2BoundingLineSet.cpp"/>
     <ClCompile Include="Tr2BoundingLineSet_Blue.cpp"/>
     <ClCompile Include="Tr2ConstantBufferFormats.cpp"/>
-    <ClCompile Include="Tr2ConstGeometry.cpp"/>
     <ClCompile Include="Tr2CpuSkinnedModel.cpp"/>
     <ClCompile Include="Tr2CpuSkinnedModel_Blue.cpp"/>
     <ClCompile Include="Tr2CurveLineSet.cpp"/>

@@ -120,9 +120,6 @@
     <ClInclude Include="Tr2ConstantBufferFormats.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="Tr2ConstGeometry.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="Tr2CpuSkinnedModel.h">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -1441,9 +1438,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Tr2ConstantBufferFormats.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Tr2ConstGeometry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Tr2CpuSkinnedModel.cpp">
