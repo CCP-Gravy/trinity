@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include "TriStepPythonCB.h"
-#include "Tr2Renderer.h"
+
 
 CCP_STATS_DECLARE( rsPythonCBCount, "Trinity/RenderStep/PythonCBCount", true, CST_COUNTER_LOW, "Calls to TriStepPythonCB::Execute per frame" );
 

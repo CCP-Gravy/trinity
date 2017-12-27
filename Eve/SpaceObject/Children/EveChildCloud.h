@@ -12,7 +12,6 @@
 #include "ITr2GeometryProvider.h"
 #include "Eve/IEveSpaceObject2.h"
 #include "Eve/SpaceObject/Children/IEveSpaceObjectChild.h"
-#include "Tr2Renderer.h"
 #include "Tr2ShLightingManager.h"
 
 BLUE_DECLARE( EveCloudEditableVolume );

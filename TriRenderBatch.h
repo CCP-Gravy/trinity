@@ -4,7 +4,6 @@
 
 
 #include "TriPoolAllocator.h"
-#include "Tr2Renderer.h"
 #include "ITr2GeometryProvider.h"
 #include "include/Rect.h"
 #include "Shader/Tr2Material.h"

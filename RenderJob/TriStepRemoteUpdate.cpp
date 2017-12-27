@@ -3,7 +3,7 @@
 #ifdef _WIN32
 
 #include "TriStepRemoteUpdate.h"
-#include "Tr2Renderer.h"
+
 
 static std::string appendIdToString( const char* str, int id )
 {

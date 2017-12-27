@@ -5,7 +5,7 @@
 //
 #include "StdAfx.h"
 #include "Tr2PrimitiveText.h"
-#include "Tr2Renderer.h"
+
 
 BLUE_DEFINE( Tr2PrimitiveText );
 

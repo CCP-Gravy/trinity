@@ -15,7 +15,7 @@ Tr2GrannyPrimitiveSet::Tr2GrannyPrimitiveSet( IRoot* lockobj /*= NULL*/ ):
 	m_pickingIndexOffset( 0 )
 {
 	TriDevice::RegisterResource( this );
-	D3DXMatrixIdentity( &m_localTransform );
+	m_localTransform = IdentityMatrix();
 }
 
 Tr2GrannyPrimitiveSet::~Tr2GrannyPrimitiveSet()

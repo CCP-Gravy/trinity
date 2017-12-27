@@ -527,7 +527,7 @@ void Tr2InteriorScene::PrepareBackgroundCubemapBatch( ITriRenderBatchAccumulator
 			Tr2InteriorPerObjectPSData perObjectPSBuffer;
 			memset( &perObjectPSBuffer, 0, sizeof( perObjectPSBuffer ) );
 			// Set the mirror-to-world matrix
-			perObjectPSBuffer.mirrorToWorldMatrix = Tr2Renderer::GetIdentityTransform();
+			perObjectPSBuffer.mirrorToWorldMatrix = IdentityMatrix();
 
 			// Copy buffer into the per-object data
 			perObjectData->CopyToPSFloatBuffer( perObjectPSBuffer );

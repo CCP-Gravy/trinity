@@ -1,7 +1,6 @@
 #include "StdAfx.h"
 #include "Tr2DistanceTracker.h"
 #include "include/TriMath.h"
-#include "Tr2Renderer.h"
 
 // --------------------------------------------------------------------------------------
 // Description:

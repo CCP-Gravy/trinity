@@ -3,9 +3,9 @@
 
 TriFrustumOrtho::TriFrustumOrtho() :
 	m_boundsMin( 0.0f, 0.0f, 0.0f ),
-	m_boundsMax( 0.0f, 0.0f, 0.0f )
+	m_boundsMax( 0.0f, 0.0f, 0.0f ),
+	m_view( IdentityMatrix() )
 {
-	D3DXMatrixIdentity( &m_view );
 }
 
 void TriFrustumOrtho::DeriveFrustum( const Matrix& view, const Vector3& minBounds, const Vector3& maxBounds )

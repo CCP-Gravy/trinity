@@ -1,6 +1,5 @@
 #include "StdAfx.h"
 #include "Tr2Sprite2dLayer.h"
-#include "Tr2Renderer.h"
 #include "Tr2Sprite2dScene.h"
 
 using namespace Tr2RenderContextEnum;

@@ -9,7 +9,6 @@
 
 #include "Include/TriMath.h"
 #include "Tr2QuadRenderer.h"
-#include "Tr2Renderer.h"
 #include "Utilities/MatrixUtils.h"
 #include "Shader/Tr2Effect.h"
 
@@ -223,7 +222,7 @@ void EveSpriteLineSet::AddToQuadRenderer( Tr2QuadRenderer& quadRenderer, const M
 	{
 		return;
 	}
-	Matrix m = Tr2Renderer::GetIdentityTransform();
+	Matrix m = IdentityMatrix();
 	auto n = m_spriteData.size();
 	if( !m_skinned )
 	{

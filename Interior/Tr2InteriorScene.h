@@ -7,6 +7,7 @@
 #include "ITr2VisibilityQueryable.h"
 #include "Tr2PickBuffer.h"
 #include "Tr2InteriorVisualization.h"
+#include "Tr2Variable.h"
 #include "include/ITr2MultiPassScene.h"
 #include "ITr2VisualizationModeRenderer.h"
 #include "Tr2InteriorLightSet.h"

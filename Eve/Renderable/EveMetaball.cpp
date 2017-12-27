@@ -39,10 +39,9 @@ EveMetaball::EveMetaball( IRoot* lockobj ) :
 	m_cellCounter( 0 ),
 	m_gridSizeX( 0 ),
 	m_gridSizeY( 0 ),
-	m_gridSizeZ( 0 )
+	m_gridSizeZ( 0 ),
+	m_worldTransform( IdentityMatrix() )
 {
-	// 0
-	D3DXMatrixIdentity( &m_worldTransform );
 }
 
 // --------------------------------------------------------------------------------

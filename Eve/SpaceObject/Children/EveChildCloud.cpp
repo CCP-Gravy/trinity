@@ -14,6 +14,8 @@
 #include "Tr2PerObjectData.h"
 #include "EveCloudEditableVolume.h"
 #include "Eve/EveUpdateContext.h"
+#include "Tr2Renderer.h"
+
 
 using namespace Tr2RenderContextEnum;
 
@@ -159,8 +161,8 @@ void GetProjectedCubeBounds(  AxisAlignedBoundingBox& box, const Matrix& worldVi
 
 
 EveChildCloud::EveChildCloud( IRoot* lockobj )
-	:m_localTransform( Tr2Renderer::GetIdentityTransform() ),
-	m_worldTransform( Tr2Renderer::GetIdentityTransform() ),
+	:m_localTransform( IdentityMatrix() ),
+	m_worldTransform( IdentityMatrix() ),
 	m_scaling( 1.0f, 1.0f, 1.0f ),
 	m_translation( 0.f, 0.f, 0.f ),
 	m_rotation( 0.f, 0.f, 0.f, 1.0f ),

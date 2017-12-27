@@ -29,12 +29,11 @@ EveStretch::EveStretch( IRoot* lockobj ) :
 	m_moveCompleted( false ),
 	m_moving( false ),
 	m_destObjectScale( 1.0f ),
-	m_sourceObjectScale( 1.0f )
+	m_sourceObjectScale( 1.0f ),
+	m_sourceTransform( IdentityMatrix() ),
+	m_destinationTransform( IdentityMatrix() )
 {
 	m_length.CreateInstance();
-
-	m_sourceTransform = Tr2Renderer::GetIdentityTransform();
-	m_destinationTransform = Tr2Renderer::GetIdentityTransform();
 }
 
 void EveStretch::UpdateSyncronous( EveUpdateContext& updateContext )

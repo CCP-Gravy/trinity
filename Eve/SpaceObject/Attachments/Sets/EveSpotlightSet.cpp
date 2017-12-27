@@ -136,7 +136,7 @@ void EveSpotlightSet::AddToQuadRenderer( Tr2QuadRenderer& quadRenderer, const Ma
 
 	activation *= m_intensity;
 
-	Matrix m = Tr2Renderer::GetIdentityTransform();
+	Matrix m = IdentityMatrix();
 	if( !m_skinned )
 	{
 		for( size_t i = 0; i < m_spotlightData.size(); ++i )

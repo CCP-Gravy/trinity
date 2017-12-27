@@ -30,7 +30,7 @@ EveCurveLineSet::EveCurveLineSet( IRoot* lockobj /*= NULL*/ ):
 	m_pickEffect = pickEffect;
 
 	// init
-	D3DXMatrixIdentity( &m_worldTransform );
+	m_worldTransform = IdentityMatrix();
 	BoundingSphereInitialize( m_boundingSphere );
 }
 

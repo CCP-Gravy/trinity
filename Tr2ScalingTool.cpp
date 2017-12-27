@@ -466,9 +466,9 @@ void Tr2ScalingTool::ResetPrimitives(){
 		(*it)->m_localTransform = m_localTransform;
 		(*it)->UpdateTransform();
 	}
-	m_xLine->m_localTransform = Tr2Renderer::GetIdentityTransform();
-	m_yLine->m_localTransform = Tr2Renderer::GetIdentityTransform();
-	m_zLine->m_localTransform = Tr2Renderer::GetIdentityTransform();
+	m_xLine->m_localTransform = IdentityMatrix();
+	m_yLine->m_localTransform = IdentityMatrix();
+	m_zLine->m_localTransform = IdentityMatrix();
 
 	UpdateLines();
 }

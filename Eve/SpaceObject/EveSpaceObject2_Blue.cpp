@@ -23,8 +23,7 @@ namespace
 			if( boneCount )
 			{
 				const granny_matrix_3x4* bones = animation->GetMeshBoneMatrixList();
-				Matrix boneTF;
-				D3DXMatrixIdentity( &boneTF );
+				Matrix boneTF = IdentityMatrix();
 				TriMatrixCopyFrom3x4( &boneTF, &bones[boneIndex] );
 				position = XMVector3TransformCoord( position, boneTF );
 

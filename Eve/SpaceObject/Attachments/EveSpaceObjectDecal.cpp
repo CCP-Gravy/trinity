@@ -29,15 +29,15 @@ EveSpaceObjectDecal::EveSpaceObjectDecal( IRoot* lockobj ) :
 	m_parentBoneIndex( -1 ),
 	m_rebuildIndexBuffer( false ),
 	m_decalPrimitiveCount( 0 ),
-	PARENTLOCK( m_indices )
+	PARENTLOCK( m_indices ),
+	m_decalMatrix( IdentityMatrix() ),
+	m_invDecalMatrix( IdentityMatrix() ),
+	m_parentBoneMatrix( IdentityMatrix() )
 {
 	// init
 	PrepareResources();
 	memset( &m_parentData, 0, sizeof( ParentData ) );
-	D3DXMatrixIdentity( &m_decalMatrix );
-	D3DXMatrixIdentity( &m_invDecalMatrix );
-	D3DXMatrixIdentity( &m_parentData.transform );
-	D3DXMatrixIdentity( &m_parentBoneMatrix );
+	m_parentData.transform = IdentityMatrix();
 	m_indices.SetStructureDefinition( s_eveSpaceObjectDecalIndexDef );
 }
 

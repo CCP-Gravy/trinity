@@ -1,6 +1,5 @@
 #include "StdAfx.h"
 #include "TriStepSetProjection.h"
-#include "Tr2Renderer.h"
 
 
 TriStepSetProjection::TriStepSetProjection( IRoot* lockobj )

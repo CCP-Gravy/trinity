@@ -77,7 +77,8 @@ EveCamera::EveCamera(IRoot* lockobj) :
 	m_useExtraParentTranslation( false ),
 
 	m_update( true ),
-	m_failedLastFrame( false )
+	m_failedLastFrame( false ),
+	m_projectionTransform( IdentityMatrix() )
 {
 	Tr2CurveScalarPtr zoomCurve;
 	zoomCurve.CreateInstance();
@@ -89,7 +90,6 @@ EveCamera::EveCamera(IRoot* lockobj) :
 
 	m_zoomCurve = zoomCurve;
 
-	D3DXMatrixIdentity(&m_projectionTransform);
 	m_projectionMatrix.CreateInstance();
 	m_viewMatrix.CreateInstance();
 }

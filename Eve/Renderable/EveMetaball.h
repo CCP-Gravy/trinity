@@ -11,7 +11,6 @@
 #include "ITr2GeometryProvider.h"
 #include "Eve/IEveSpaceObject2.h"
 #include "EveMetaballItem.h"
-#include "Tr2Renderer.h"
 #include "Tr2PersistentPerObjectData.h"
 
 // --------------------------------------------------------------------------------
@@ -42,7 +41,7 @@ public:
 	void UpdateModelCenterWorldPosition( Vector3 &position, Be::Time t ) {}
 	void GetModelCenterWorldPosition( Vector3 &position ) const {}
 	bool GetLocalBoundingBox( Vector3 &min, Vector3 &max ) { return false; }
-	void GetLocalToWorldTransform( Matrix &transform ) const { D3DXMatrixIdentity( &transform ); }
+	void GetLocalToWorldTransform( Matrix &transform ) const { transform = IdentityMatrix(); }
 
 	/////////////////////////////////////////////////////////////////////////////////////
 	// per-object data

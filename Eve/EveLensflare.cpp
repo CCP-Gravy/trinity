@@ -40,9 +40,9 @@ EveLensflare::EveLensflare( IRoot* lockobj ) :
 	m_backgroundOcclusionIntensity( 1.f ),
 	m_sunSize( 0.f ),
 	m_directionVar( "LensflareFxDirectionScale", Vector4( 0.f, 0.f, 0.f, 1.f ) ),
-	m_occScaleVar( "LensflareFxOccScale", Vector4( 1.f, 0.f, 0.f, 0.f ) )
+	m_occScaleVar( "LensflareFxOccScale", Vector4( 1.f, 0.f, 0.f, 0.f ) ),
+	m_transform( IdentityMatrix() )
 {
-	D3DXMatrixIdentity( &m_transform );
 }
 
 // --------------------------------------------------------------------------------

@@ -696,17 +696,14 @@ void Tr2SkinnedObject::AllocateSkinningMatrices( unsigned int numBones )
 	{
 		float* p = CCP_NEW( "Tr2SkinnedObject/m_skinningMatrices" ) float[numBones * 3*4];
 		m_skinningMatrixQueue.push_back( p );
-		m_worldTransformsQueue.push_back( Tr2Renderer::GetIdentityTransform() );
+		m_worldTransformsQueue.push_back( IdentityMatrix() );
 
 		Matrix* m = CCP_NEW( "Tr2SkinnedObject/m_accumulatedTransformsQueue" ) Matrix[numBones];
 		m_accumulatedTransformsQueue.push_back( m );
 
 		if( m_debugRenderSkeletonTrail )
 		{
-			for( unsigned int idIx = 0; idIx < m_skinningMatrixCount; ++idIx )
-			{
-				D3DXMatrixIdentity( &m[idIx] );
-			}
+			std::fill_n( m, m_skinningMatrixCount, IdentityMatrix() );
 		}
 	}
 

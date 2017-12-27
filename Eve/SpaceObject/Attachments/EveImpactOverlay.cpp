@@ -142,7 +142,7 @@ void EveImpactOverlay::UpdateSyncronous( EveUpdateContext& updateContext, EveSpa
 						// loding for emit rate?
 						float rateModifier = Clamp( m_renderPriority / IMPACT_ARMOR_PARTICLE_LOD_FACTOR, 0.f, 1.f );
 						// put together particle update info
-						ITr2GenericEmitter::UpdateArguments args( updateContext.GetTime(), updateContext.GetGpuParticleSystem(), Tr2Renderer::GetIdentityTransform(), updateContext.GetOriginShift() );
+						ITr2GenericEmitter::UpdateArguments args( updateContext.GetTime(), updateContext.GetGpuParticleSystem(), IdentityMatrix(), updateContext.GetOriginShift() );
 						// do the spawn here once!
 						m_armorImpactEmitter->SpawnOnce( args, parentVelocityWS, scale, rateModifier );
 						aidit->second.requestSpawnDebris = false;

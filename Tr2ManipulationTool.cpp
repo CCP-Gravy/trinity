@@ -20,7 +20,9 @@ Tr2ManipulationTool::Tr2ManipulationTool( IRoot* lockobj ):
 	m_pythonUserData( NULL ),
 #endif
 	m_captured( false ),
-	m_moved( false )
+	m_moved( false ),
+	m_localTransform( IdentityMatrix() ),
+	m_worldTransform( IdentityMatrix() )
 {
 	m_pivot.x = 0.0f;
 	m_pivot.y = 0.0f;
@@ -28,8 +30,6 @@ Tr2ManipulationTool::Tr2ManipulationTool( IRoot* lockobj ):
 	m_movement.x = 0.0f;
 	m_movement.y = 0.0f;
 	m_movement.z = 0.0f;
-	D3DXMatrixIdentity(&m_localTransform);
-	D3DXMatrixIdentity(&m_worldTransform);
 }
 
 Tr2ManipulationTool::~Tr2ManipulationTool()

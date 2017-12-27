@@ -13,6 +13,8 @@
 #include "Tr2PerObjectData.h"
 #include "Tr2PickBuffer.h"
 #include "Include/TriMath.h"
+#include "Tr2Renderer.h"
+
 
 // --------------------------------------------------------------------------------------
 // Description:
@@ -97,8 +99,7 @@ void ITr2PickableScene::PickObject( Tr2RenderContext& renderContext, int x, int 
 		CR_RETURN( Tr2Renderer::BeginRenderContext() );
 		ON_BLOCK_EXIT( Tr2Renderer::EndRenderContext );
 
-		const Matrix* pCurMatrix = &Tr2Renderer::GetIdentityTransform();
-		Tr2Renderer::SetWorldTransform( *pCurMatrix );
+		Tr2Renderer::SetWorldTransform( IdentityMatrix() );
 
 		SetPerFrameDataForPicking();
 
@@ -409,8 +410,7 @@ bool ITr2PickableScene::RenderPickingBuffer( std::vector<ITr2Renderable*> const&
     CR_RETURN_VAL( Tr2Renderer::BeginRenderContext(), false );
 	ON_BLOCK_EXIT( Tr2Renderer::EndRenderContext );
 
-    const Matrix* pCurMatrix = &Tr2Renderer::GetIdentityTransform();
-    Tr2Renderer::SetWorldTransform( *pCurMatrix );
+    Tr2Renderer::SetWorldTransform( IdentityMatrix() );
 
 	SetPerFrameDataForPicking();
 

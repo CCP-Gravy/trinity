@@ -59,9 +59,9 @@ EveMissileWarhead::EveMissileWarhead( IRoot* lockobj ) :
 	m_explosionPosition( 0.f, 0.f, 0.f ),
 	m_bombFlightpath( false ),
 	m_doSpread( true ),
-	m_lastPositionValid( false )
+	m_lastPositionValid( false ),
+	m_currentOffsetTransform( IdentityMatrix() )
 {
-	D3DXMatrixIdentity( &m_currentOffsetTransform );
 	m_speedModifier = 1.04f - TriRand() * 0.08f;
 	m_finalTargetTime = 0.75f - TriRand() * 0.1f;
 }
@@ -291,7 +291,7 @@ void EveMissileWarhead::PrepareLaunch()
 	m_explosionPosition = Vector3( 0.f, 0.f, 0.f );
 
 	// inits from the constructor of this class
-	D3DXMatrixIdentity( &m_currentOffsetTransform );
+	m_currentOffsetTransform = IdentityMatrix();
 	m_speedModifier = 1.04f - TriRand() * 0.08f;
 	m_finalTargetTime = 0.75f - TriRand() * 0.1f;
 }

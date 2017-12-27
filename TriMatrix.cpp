@@ -140,9 +140,9 @@ float TriMatrix::Determinant(
 }
 
 void TriMatrix::Identity(
-	) 
+)
 {
-	D3DXMatrixIdentity(this);
+	static_cast<Matrix&>( *this ) = IdentityMatrix();
 }
 
 float TriMatrix::Inverse(

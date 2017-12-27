@@ -276,9 +276,7 @@ void EveSpaceObject2::UpdateSyncronous( EveUpdateContext& updateContext )
 	}
 	if( m_animationUpdater )
 	{
-		Matrix m;
-		D3DXMatrixIdentity( &m );
-		m_animationUpdater->PrePhysicsAnimation( 0, m );
+		m_animationUpdater->PrePhysicsAnimation( 0, IdentityMatrix() );
 	}
 
 	TriObserverLocalVector::iterator observersEnd = m_observers.end();
@@ -644,8 +642,7 @@ void EveSpaceObject2::RenderDebugInfo( Tr2DebugRenderer& renderer )
 						if( locator.boneIndex < int( boneCount ) )
 						{
 							const granny_matrix_3x4* bones = m_animationUpdater->GetMeshBoneMatrixList();
-							Matrix boneTF;
-							D3DXMatrixIdentity( &boneTF );
+							Matrix boneTF = IdentityMatrix();
 							TriMatrixCopyFrom3x4( &boneTF, &bones[locator.boneIndex] );
 							position = XMVector3TransformCoord( position, boneTF );
 
@@ -1512,9 +1509,7 @@ void EveSpaceObject2::RebuildCachedData( BlueAsyncRes* p )
 
 	if( m_animationUpdater->IsInitialized() )
 	{
-		Matrix m;
-		D3DXMatrixIdentity( &m );
-		m_animationUpdater->PrePhysicsAnimation( 0, m );
+		m_animationUpdater->PrePhysicsAnimation( 0, IdentityMatrix() );
 	}
 
 	if( m_animationSequencer )
@@ -2498,8 +2493,7 @@ Vector3 EveSpaceObject2::GetObjectSpaceDamageLocatorPosition( uint32_t index ) c
 		if( boneCount && damageLocator.boneIndex < int( boneCount ) )
 		{
 			const granny_matrix_3x4* bones = m_animationUpdater->GetMeshBoneMatrixList();
-			Matrix boneTF;
-			D3DXMatrixIdentity( &boneTF );
+			Matrix boneTF = IdentityMatrix();
 			TriMatrixCopyFrom3x4( &boneTF, &bones[ damageLocator.boneIndex ] );
 			damageLocatorPosition = XMVector3TransformCoord( damageLocatorPosition, boneTF );
 		}
@@ -2541,8 +2535,7 @@ Vector3 EveSpaceObject2::GetObjectSpaceDamageLocatorDirection( uint32_t index ) 
 		{
 			const granny_matrix_3x4* bones = m_animationUpdater->GetMeshBoneMatrixList();
 
-			Matrix boneTF;
-			D3DXMatrixIdentity( &boneTF );	
+			Matrix boneTF = IdentityMatrix();
 			TriMatrixCopyFrom3x4( &boneTF, &bones[ damageLocator.boneIndex ] );
 			damagelocatorDirection = XMVector3TransformNormal( damagelocatorDirection, boneTF );
 		}

@@ -64,7 +64,7 @@ Tr2ParticleSystem::Tr2ParticleSystem( IRoot* lockobj )
 	m_useSimTimeRebase( false ),
 	m_isUsingSimTimeRebase( false ),
 	m_shouldSortVisible( true ),
-	m_worldTransform( Tr2Renderer::GetIdentityTransform() )
+	m_worldTransform( IdentityMatrix() )
 {
 	for( unsigned i = 0; i < Tr2ParticleElementData::COUNT; ++i )
 	{

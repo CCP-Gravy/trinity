@@ -40,7 +40,8 @@ EveSpherePin::EveSpherePin( IRoot* lockobj /*= NULL*/ ):
 	m_primitiveCount( 0 ),
 	m_tree( 0 ),
 	m_rebuildIndices( 0 ),
-	m_uvAtlasScaleOffset( 1.f, 1.f, 0.f, 0.f )
+	m_uvAtlasScaleOffset( 1.f, 1.f, 0.f, 0.f ),
+	m_worldTransform( IdentityMatrix() )
 {
 	// create pin draw effect
 	m_pinEffect.CreateInstance();
@@ -50,7 +51,6 @@ EveSpherePin::EveSpherePin( IRoot* lockobj /*= NULL*/ ):
 	m_pickEffect->SetEffectPathName( PIN_PICK_EFFECT_PATH );
 
 	// init
-	D3DXMatrixIdentity( &m_worldTransform );
 	BuildBoundingSphere();
 	PrepareResources();
 }

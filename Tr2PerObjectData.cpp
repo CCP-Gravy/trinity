@@ -1,5 +1,7 @@
 #include "StdAfx.h"
 #include "Tr2PerObjectData.h"
+#include "Tr2Renderer.h"
+
 
 using namespace Tr2RenderContextEnum;
 

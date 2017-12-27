@@ -10,7 +10,7 @@ TriTransformParameter::TriTransformParameter(IRoot* lockobj):
 	m_rotation( 0.0f, 0.0f, 0.0f, 1.0f ),
 	m_translation( 0.0f, 0.0f, 0.0f ),
 	m_transformBase( TRITB_FIXED ),
-	m_worldTransform( Tr2Renderer::GetIdentityTransform() )
+	m_worldTransform( IdentityMatrix() )
 {
 }
 
@@ -63,7 +63,7 @@ void TriTransformParameter::CopyValueToEffect(	Tr2RenderContextEnum::ShaderType 
 			Matrix mat;
 			if( !D3DXMatrixInverse( &mat, NULL, &m_worldTransform ) )
 			{
-				D3DXMatrixIdentity(&mat);
+				mat = IdentityMatrix();
 			}
 			mat._41 = mat._42 = mat._43 = 0.0f;			
 			D3DXMatrixMultiply( &texTransform, &texTransform, &mat );

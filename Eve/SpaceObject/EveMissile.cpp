@@ -123,8 +123,7 @@ void EveMissile::UpdateSyncronous( EveUpdateContext& updateContext )
 	float deltaT = updateContext.GetDeltaT();
 
 	// get inv ball rotation, is needed for update of each warhead
-	Matrix invBallRotationMatrix;
-	D3DXMatrixIdentity( &invBallRotationMatrix );
+	Matrix invBallRotationMatrix = IdentityMatrix();
 	if( m_ballRotation )
 	{
 		Quaternion quat( 0.f, 0.f, 0.f, 1.f );

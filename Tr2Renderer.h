@@ -128,9 +128,6 @@ public:
 
 	static void ClearDepthBuffer( float z = 1.0f );
 
-    static const Matrix& GetIdentityTransform();
-	static const Matrix& GetNullTransform();
-
     static void GetBackBufferDimensions( unsigned int& w, unsigned int& h );
     
 	// Sets up a perspective projection transform based on the field of view, front/back plane and aspect ratio

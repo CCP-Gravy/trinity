@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include "TriStepSetRenderState.h"
-#include "Tr2Renderer.h"
+
 
 TriStepSetRenderState::TriStepSetRenderState( IRoot* lockobj )
 	:m_state( static_cast<Tr2RenderContextEnum::RenderState>( 0 ) ),

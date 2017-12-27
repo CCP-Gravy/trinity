@@ -12,6 +12,8 @@
 #include "Utilities/BoundingSphere.h"
 #include "Tr2PickingHelperBatch.h"
 #include "Tr2DebugRenderer.h"
+#include "Tr2Renderer.h"
+
 
 // vertex layout struct
 struct HazeVertex

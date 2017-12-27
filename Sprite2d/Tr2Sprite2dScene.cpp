@@ -144,10 +144,7 @@ Tr2Sprite2dScene::Tr2Sprite2dScene( IRoot* lockobj ) :
 		CCP_ASSERT( atlas );
 	}
 
-	for( int i=0; i<TR2_SS_MAX_TRANSFORM_COUNT; ++i )
-	{
-		D3DXMatrixIdentity( &m_transformArray[i] );
-	}
+	std::fill_n( m_transformArray, TR2_SS_MAX_TRANSFORM_COUNT, IdentityMatrix() );
 
 	for( unsigned int i = 0; i < s_textureMax; ++i )
 	{

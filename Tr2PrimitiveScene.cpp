@@ -9,6 +9,8 @@
 #include "TriFrustum.h"
 #include "Tr2ManipulationTool.h"
 #include "TriViewport.h"
+#include "Tr2Renderer.h"
+
 
 struct PerFrameVSData
 {

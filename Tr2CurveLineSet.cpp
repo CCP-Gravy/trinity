@@ -10,6 +10,8 @@
 #include "Utilities/BoundingBox.h"
 #include "Utilities/BoundingSphere.h"
 #include "TriRenderBatch.h"
+#include "Tr2Renderer.h"
+
 
 using namespace Tr2RenderContextEnum;
 

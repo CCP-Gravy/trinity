@@ -91,7 +91,7 @@ public:
 	virtual void UpdateModelCenterWorldPosition( Vector3 &position, Be::Time t ) {}
 	virtual void GetModelCenterWorldPosition( Vector3 &position ) const {}
 	virtual bool GetLocalBoundingBox( Vector3 &min, Vector3 &max ) { return false; }
-	virtual void GetLocalToWorldTransform( Matrix &transform ) const { D3DXMatrixIdentity( &transform ); }
+	virtual void GetLocalToWorldTransform( Matrix &transform ) const { transform = IdentityMatrix(); }
 
 	//////////////////////////////////////////////////////////////////////////////////////
 	// ITriDeviceResource

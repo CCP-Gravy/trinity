@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include "TriStepClear.h"
-#include "Tr2Renderer.h"
+
 
 TriStepClear::TriStepClear( IRoot* lockobj ) :
 	m_depth( 1.0f ),

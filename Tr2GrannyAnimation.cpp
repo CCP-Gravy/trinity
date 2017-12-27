@@ -610,8 +610,7 @@ const std::string& Tr2GrannyAnimation::GetModel() const
 
 bool Tr2GrannyAnimation::CalculateSkinnedBoundingBoxFromTransform( const Matrix& transform, Vector3& bbMin, Vector3& bbMax, granny_file_info* fi )
 {
-	Matrix m;
-	PrePhysicsAnimation( 0, *D3DXMatrixIdentity( &m ) );
+	PrePhysicsAnimation( 0, IdentityMatrix() );
 
 	if( !m_meshBinding )
 	{
@@ -676,8 +675,7 @@ bool Tr2GrannyAnimation::CalculateSkinnedBoundingBoxFromTransform( const Matrix&
 
 Vector4 Tr2GrannyAnimation::CalculateSkinnedBoundingSphere( granny_file_info* fi )
 {
-	Matrix m;
-	PrePhysicsAnimation( 0, *D3DXMatrixIdentity( &m ) );
+	PrePhysicsAnimation( 0, IdentityMatrix() );
 
 	if( !m_meshBinding )
 	{
@@ -852,7 +850,8 @@ void Tr2GrannyAnimation::PrePhysicsAnimation( Be::Time time, const Matrix &model
 
 			if ( GrannyFindBoneByNameLowercase( m_skeleton, m_aimBone.c_str(), &boneIndex ) )
 			{
-				GrannyBuildWorldPose( m_skeleton, 0, m_skeleton->BoneCount, m_localPose, &Tr2Renderer::GetIdentityTransform().m[0][0], m_worldPose );
+				auto id = IdentityMatrix();
+				GrannyBuildWorldPose( m_skeleton, 0, m_skeleton->BoneCount, m_localPose, &id.m[0][0], m_worldPose );
 				GrannyIKOrientTowards( boneIndex, orientAxis, target, m_skeleton, m_localPose, offset_matrix, m_worldPose);
 			}
 		}
@@ -867,8 +866,9 @@ void Tr2GrannyAnimation::PrePhysicsAnimation( Be::Time time, const Matrix &model
 
 		if( !m_boneOffset.HaveTransforms() )
 		{
+			auto id = IdentityMatrix();
 			// build the worldpos out of the localpose using identity matrix as base
-			GrannyBuildWorldPose( m_skeleton, 0, m_skeleton->BoneCount, m_localPose, &Tr2Renderer::GetIdentityTransform().m[0][0], m_worldPose );
+			GrannyBuildWorldPose( m_skeleton, 0, m_skeleton->BoneCount, m_localPose, &id.m[0][0], m_worldPose );
 			// construct the 3x4 matrix list, that will be passed to the shader, if we have a meshbinding at all
 			if( m_meshBinding )
 			{
@@ -1332,7 +1332,7 @@ bool CopyIndices( Tr2BufferAL& from, CcpMallocBuffer& to, uint32_t offset )
 
 std::pair<TriGeometryRes*, std::map<std::pair<TriGeometryRes*, uint32_t>, uint32_t>> Tr2GrannyAnimation::CreateStaticGeometry( std::vector<TriGeometryRes*> grannies )
 {
-	PrePhysicsAnimation( 0, Tr2Renderer::GetIdentityTransform() );
+	PrePhysicsAnimation( 0, IdentityMatrix() );
 
 	std::map<std::pair<TriGeometryRes*, uint32_t>, uint32_t> result;
 

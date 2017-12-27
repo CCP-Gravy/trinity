@@ -28,10 +28,10 @@ Tr2PrimitiveSet::Tr2PrimitiveSet( IRoot* lockobj ):
 #endif
 	m_viewOriented( false ),
 	m_isDrawingForPicking( false ),
-	m_vertexDeclHandle( Tr2EffectStateManager::UNINITIALIZED_DECLARATION )
+	m_vertexDeclHandle( Tr2EffectStateManager::UNINITIALIZED_DECLARATION ),
+	m_localTransform( IdentityMatrix() ),
+	m_worldTransform( IdentityMatrix() )
 {	
-	D3DXMatrixIdentity( &m_localTransform );	
-	D3DXMatrixIdentity( &m_worldTransform );
 	m_boundingSphere = Vector4( 0.0f, 0.0f, 0.0f, 0.0f );
 	m_color = Color( 0.5f, 0.5f, 0.5f, 1.0f );
 }
@@ -127,9 +127,8 @@ Tr2PerObjectData* Tr2PrimitiveSet::GetPerObjectData( ITriRenderBatchAccumulator*
 void Tr2PrimitiveSet::UpdateTransform( void )
 {
 	Matrix finalTransform;
-	Matrix scale_mat;
+	Matrix scale_mat = IdentityMatrix();
 	Matrix view = Tr2Renderer::GetViewTransform();
-	D3DXMatrixIdentity( &scale_mat );
 
 	if( m_scaleByDistanceToView )
 	{
@@ -151,8 +150,7 @@ void Tr2PrimitiveSet::UpdateTransform( void )
 	{
 		// The primitives need to be oriented in such a way
 		// as you were drawing on a x,y plane
-		Matrix rotation;
-		D3DXMatrixIdentity( &rotation );
+		Matrix rotation = IdentityMatrix();
 		rotation._11 = view._11;
 		rotation._12 = view._21;
 		rotation._13 = view._31;

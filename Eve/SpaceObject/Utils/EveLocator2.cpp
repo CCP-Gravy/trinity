@@ -3,6 +3,6 @@
 
 
 EveLocator2::EveLocator2( IRoot* lockobj )
+	:m_transform( IdentityMatrix() )
 {
-	D3DXMatrixIdentity( &m_transform );
 }

@@ -7,10 +7,10 @@ EveChildTransform::EveChildTransform() :
 	m_translation( 0, 0, 0 ),
 	m_useSRT( true ),
 	m_staticTransform( false ),
-	m_useStaticRotation( false )
+	m_useStaticRotation( false ),
+	m_localTransform( IdentityMatrix() ),
+	m_worldTransform( IdentityMatrix() )
 {
-	D3DXMatrixIdentity( &m_localTransform );
-	D3DXMatrixIdentity( &m_worldTransform );
 }
 
 void EveChildTransform::RebuildLocalTransform()

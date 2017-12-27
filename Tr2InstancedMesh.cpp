@@ -7,6 +7,8 @@
 #include "StdAfx.h"
 #include "Tr2InstancedMesh.h"
 #include "Resources/TriGeometryRes.h"
+#include "Tr2Renderer.h"
+
 
 CCP_STATS_DECLARED_ELSEWHERE( primitiveCount );
 CCP_STATS_DECLARED_ELSEWHERE( vertexCount );

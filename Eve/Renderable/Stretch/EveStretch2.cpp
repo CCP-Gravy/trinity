@@ -14,6 +14,8 @@
 #include "Shader/Tr2Effect.h"
 #include "Particle/Tr2GpuSharedEmitter.h"
 #include "TriObserverLocal.h"
+#include "Tr2Renderer.h"
+
 
 namespace
 {
@@ -257,7 +259,7 @@ void EveStretch2::GetEndPointTransforms( Matrix& source, Matrix& destination ) c
 		up = Vector3( 0, 0, 1 );
 	}
 
-	source = Tr2Renderer::GetIdentityTransform();
+	source = IdentityMatrix();
 	source.GetZ() = XMVector3Normalize( direction );
 	source.GetX() = XMVector3Normalize( XMVector3Cross( up, source.GetZ() ) );
 	source.GetY() = XMVector3Cross( source.GetX(), source.GetZ() );

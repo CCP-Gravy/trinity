@@ -12,6 +12,9 @@
 #include "Curves/TriCurveSet.h"
 #include "TriFrustum.h"
 #include "Resources/TriTextureRes.h"
+#include "Tr2VariableStore.h"
+#include "Tr2Renderer.h"
+
 
 CCP_STATS_DECLARE( wodInteriorPlaceablesAlive, "Trinity/Tr2InteriorPlaceables", false, CST_COUNTER_LOW, "Count of Tr2InteriorPlaceables alive" );
 
@@ -30,7 +33,7 @@ Tr2InteriorPlaceable::Tr2InteriorPlaceable( IRoot* lockobj ) :
 	m_probeOffset( 0.f, 0.f, 0.f ),
 	m_depthOffset( 0.f )
 {
-    D3DXMatrixIdentity( &m_transform );
+	static_cast<Matrix&>( m_transform ) = IdentityMatrix();
 
 	m_currentPosition = Vector3( 0.0f, 0.0f, 0.0f );
 	m_currentScaling = Vector3( 1.0f, 1.0f, 1.0f );
@@ -576,7 +579,7 @@ Tr2PerObjectData* Tr2InteriorPlaceable::GetPerObjectDataWithLightSet( ITriRender
 	memset( &perObjectPSBuffer.redMat, 0, sizeof( perObjectPSBuffer.redMat ) * 3 );
 
 	// Copy the mirror-to-world matrix
-	perObjectPSBuffer.mirrorToWorldMatrix = Tr2Renderer::GetIdentityTransform();
+	perObjectPSBuffer.mirrorToWorldMatrix = IdentityMatrix();
 
 	// Do the copy
 	data->CopyToPSFloatBuffer( perObjectPSBuffer );

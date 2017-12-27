@@ -42,7 +42,7 @@ EveTurretFiringFX::EveTurretFiringFX( IRoot* lockobj ) :
 		m_perMuzzleData[i].muzzlePositionBoneID = INVALID_BONE_INDEX;
 		m_perMuzzleData[i].constantDelay = 0.f;
 		m_perMuzzleData[i].currentStartDelay = 0.f;
-		D3DXMatrixIdentity( &m_perMuzzleData[i].muzzleTransform );
+		m_perMuzzleData[i].muzzleTransform = IdentityMatrix();
 	}
 }
 

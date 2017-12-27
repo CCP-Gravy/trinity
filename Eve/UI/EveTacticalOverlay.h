@@ -89,7 +89,7 @@ public:
 	void UpdateModelCenterWorldPosition( Vector3 &position, Be::Time t ) { position = Vector3( 0.f, 0.f, 0.f ); }
 	void GetModelCenterWorldPosition( Vector3 &position ) const { position = Vector3( 0.f, 0.f, 0.f ); }
 	bool GetLocalBoundingBox( Vector3 &min, Vector3 &max ) { return false; }
-	void GetLocalToWorldTransform( Matrix &transform ) const { D3DXMatrixIdentity( &transform ); }
+	void GetLocalToWorldTransform( Matrix &transform ) const { transform = IdentityMatrix(); }
 
 	// Registers an object and its attachments with the quad renderer
 	virtual void RegisterWithQuadRenderer( Tr2QuadRenderer& quadRenderer );

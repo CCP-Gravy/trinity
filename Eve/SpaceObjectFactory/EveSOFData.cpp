@@ -319,8 +319,8 @@ EveSOFDataHullDecal::EveSOFDataHullDecal( IRoot* lockobj ) :
 
 
 EveSOFDataHullLocator::EveSOFDataHullLocator( IRoot* lockobj )
+	:m_transform( IdentityMatrix() )
 {
-	D3DXMatrixIdentity( &m_transform );
 }
 
 
@@ -378,9 +378,9 @@ EveSOFDataHullSpotlightSetItem::EveSOFDataHullSpotlightSetItem( IRoot* lockobj )
 	m_spriteScale( 1.f, 1.f, 1.f ),
 	m_coneIntensity( 0.f ),
 	m_flareIntensity( 0.f ),
-	m_spriteIntensity( 0.f )
+	m_spriteIntensity( 0.f ),
+	m_transform( IdentityMatrix() )
 {
-	D3DXMatrixIdentity( &m_transform );
 }
 
 
@@ -465,9 +465,9 @@ EveSOFDataHullBoosterItem::EveSOFDataHullBoosterItem( IRoot* lockobj ) :
 	m_functionality( 0.f, 1.f, 1.f, 1.f ),
 	m_hasTrail( true ),
 	m_atlasIndex0( 0 ),
-	m_atlasIndex1( 0 )
+	m_atlasIndex1( 0 ),
+	m_transform( IdentityMatrix() )
 {
-	D3DXMatrixIdentity( &m_transform );
 }
 
 

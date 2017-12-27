@@ -3,7 +3,6 @@
 #ifndef Tr2PerObjectData_H
 #define Tr2PerObjectData_H
 
-#include "Tr2Renderer.h"
 
 class Tr2PerObjectData
 {
@@ -92,8 +91,8 @@ public:
 	Tr2PerObjectDataSkinned()
 		:m_jointCount( 0 ),
 		m_data( nullptr ),
-		m_worldMat( Tr2Renderer::GetIdentityTransform() ),
-		m_mirrorMatrix( Tr2Renderer::GetIdentityTransform() ),
+		m_worldMat( IdentityMatrix() ),
+		m_mirrorMatrix( IdentityMatrix() ),
 		m_worldPos( 0.0f, 0.0f, 0.0f, 0.0f )
 	{
 	}

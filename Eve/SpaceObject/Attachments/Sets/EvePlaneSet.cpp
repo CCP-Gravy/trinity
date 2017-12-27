@@ -12,6 +12,8 @@
 #include "Utilities/BoundingSphere.h"
 #include "Tr2PickingHelperBatch.h"
 #include "Tr2DebugRenderer.h"
+#include "Tr2Renderer.h"
+
 
 static const char* PLANESET_PICK_EFFECT_PATH = "res:/Graphics/Effect/Managed/Space/SpaceObject/FX/PlanePicking.fx";
 

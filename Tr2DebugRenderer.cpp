@@ -17,7 +17,7 @@ namespace
 
 Matrix LineTransform( const Vector3& start, const Vector3& end )
 {
-	Matrix transform = Tr2Renderer::GetIdentityTransform();
+	Matrix transform = IdentityMatrix();
 	transform.GetY() = XMVector3Normalize( ( end - start ) * 0.5 );
 	if( std::abs( transform.GetY().x ) > 0.9f )
 	{
@@ -256,7 +256,7 @@ void Tr2DebugRenderer::DrawTriangle(
 
 void Tr2DebugRenderer::DrawBox( Tr2DebugObjectReference owner, const Vector3& min, const Vector3& max, Effect effect, Tr2DebugColor color )
 {
-	DrawBox( owner, Tr2Renderer::GetIdentityTransform(), min, max, effect, color );
+	DrawBox( owner, IdentityMatrix(), min, max, effect, color );
 }
 
 void Tr2DebugRenderer::DrawBox( Tr2DebugObjectReference owner, const Matrix& transform, const Vector3& min, const Vector3& max, Effect effect, Tr2DebugColor color )
@@ -326,12 +326,12 @@ void Tr2DebugRenderer::DrawBox( Tr2DebugObjectReference owner, const Matrix& tra
 
 void Tr2DebugRenderer::DrawSphere( Tr2DebugObjectReference owner, const Vector4& sphere, uint32_t segments, Effect effect, Tr2DebugColor color )
 {
-	DrawSphere( owner, Tr2Renderer::GetIdentityTransform(), Vector3( sphere.x, sphere.y, sphere.z ), sphere.w, segments, effect, color );
+	DrawSphere( owner, IdentityMatrix(), Vector3( sphere.x, sphere.y, sphere.z ), sphere.w, segments, effect, color );
 }
 
 void Tr2DebugRenderer::DrawSphere( Tr2DebugObjectReference owner, const Vector3& center, float radius, uint32_t segments, Effect effect, Tr2DebugColor color )
 {
-	DrawSphere( owner, Tr2Renderer::GetIdentityTransform(), center, radius, segments, effect, color );
+	DrawSphere( owner, IdentityMatrix(), center, radius, segments, effect, color );
 }
 
 void Tr2DebugRenderer::DrawSphere( Tr2DebugObjectReference owner, const Matrix& transform, uint32_t segments, Effect effect, Tr2DebugColor color )
@@ -439,7 +439,7 @@ void Tr2DebugRenderer::DrawCylinder( Tr2DebugObjectReference owner, const Matrix
 
 void Tr2DebugRenderer::DrawCylinder( Tr2DebugObjectReference owner, const Vector3& cap0, const Vector3& cap1, float radius, uint32_t segments, Effect effect, Tr2DebugColor color )
 {
-	DrawCylinder( owner, Tr2Renderer::GetIdentityTransform(), cap0, cap1, radius, segments, effect, color );
+	DrawCylinder( owner, IdentityMatrix(), cap0, cap1, radius, segments, effect, color );
 }
 
 void Tr2DebugRenderer::DrawCylinder( Tr2DebugObjectReference owner, const Matrix& transform, const Vector3& cap0, const Vector3& cap1, float radius, uint32_t segments, Effect effect, Tr2DebugColor color )

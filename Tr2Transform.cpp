@@ -3,6 +3,8 @@
 #include "Tr2Mesh.h"
 #include "include/TriMath.h"
 #include "Curves/TriCurveSet.h"
+#include "Tr2Renderer.h"
+
 
 Tr2Transform::Tr2Transform( IRoot* lockobj ) :
 	PARENTLOCK( m_curveSets ),
@@ -15,10 +17,10 @@ Tr2Transform::Tr2Transform( IRoot* lockobj ) :
 	m_useDistanceBasedScale( false ),
 	m_distanceBasedScaleArg1( 0.2f ),
 	m_distanceBasedScaleArg2( 0.63f ),
-	m_sortValueMultiplier( 1.0f )
+	m_sortValueMultiplier( 1.0f ),
+	m_worldTransform( IdentityMatrix() ),
+	m_localTransform( IdentityMatrix() )
 {
-	D3DXMatrixIdentity( &m_worldTransform );
-	D3DXMatrixIdentity( &m_localTransform );
 }
 
 void Tr2Transform::Update( Be::Time time )

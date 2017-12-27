@@ -25,10 +25,9 @@ EveSceneStaticParticles::EveSceneStaticParticles( IRoot* lockobj ) :
 	m_clusterParticleDensity( 100.f ),
 	m_clusterParticleDensityAdjust( 1.f ),
 	m_centerOfClusters( 0.0, 0.0, 0.0 ),
-	m_boundingSphere( 0.f, 0.f, 0.f, 0.f )
+	m_boundingSphere( 0.f, 0.f, 0.f, 0.f ),
+	m_worldMatrix( IdentityMatrix() )
 {
-	// 0
-	D3DXMatrixIdentity( &m_worldMatrix );
 }
 
 // --------------------------------------------------------------------------------

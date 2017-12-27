@@ -2,6 +2,7 @@
 
 #include "Tr2InteriorRenderBatch.h"
 #include "Resources/TriGeometryRes.h"
+#include "Tr2Renderer.h"
 
 
 // -----------------------------------------------------------------------------------------------------

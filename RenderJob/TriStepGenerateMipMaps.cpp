@@ -1,6 +1,5 @@
 #include "StdAfx.h"
 #include "TriStepGenerateMipMaps.h"
-#include "Tr2Renderer.h"
 
 
 TriStepGenerateMipMaps::TriStepGenerateMipMaps( IRoot* lockobj )

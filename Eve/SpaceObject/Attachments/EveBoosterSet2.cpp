@@ -62,10 +62,9 @@ EveBoosterSet2Renderable::EveBoosterSet2Renderable( IRoot* lockobj ) :
 	m_trailsTimeToNext( 0.f ),
 	m_trailsTimeDelta( 1.f ),
 	m_trailsOffsetLatest( 0 ),
-	m_trailsOffsetAccu( 0.f, 0.f, 0.f )
+	m_trailsOffsetAccu( 0.f, 0.f, 0.f ),
+	m_parentTransform( IdentityMatrix() )
 {
-	D3DXMatrixIdentity( &m_parentTransform );
-
 	BoundingBoxInitialize( m_trailsBoundsMin, m_trailsBoundsMax );
 	// "invalidate" all trail control positions
 	for( unsigned int i = 0; i < EVE_MAX_CONTROL_POINT_COUNT; ++i )

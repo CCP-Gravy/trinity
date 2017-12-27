@@ -84,7 +84,7 @@ void EveCustomMask::FillPerObjectData( size_t n, EveSpaceObjectVSData* vsData, E
 void EveCustomMask::ZeroPerObjectData( size_t n, EveSpaceObjectVSData* vsData, EveSpaceObjectPSData* psData )
 {
 	// 0
-	vsData->customMaskMatrix[n] = Tr2Renderer::GetIdentityTransform();
+	vsData->customMaskMatrix[n] = IdentityMatrix();
 	psData->customMaskTargets[n] = psData->customMaskMaterialIDs[n] = vsData->customMaskData[n] = Vector4( 0.f, 0.f, 0.f, 0.f );
 }
 

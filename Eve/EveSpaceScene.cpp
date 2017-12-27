@@ -151,8 +151,8 @@ EveSpaceScene::EveSpaceScene( IRoot* lockobj ) :
 	m_reflectionMaskMapVar( "ReflectionMaskMap", m_envMap2 ),
 	m_depthMapVar( "DepthMap", (ITr2TextureProvider*)nullptr ),
 	m_depthMapMsaaVar( "DepthMapMsaa", (ITr2TextureProvider*)nullptr ),
-	m_envMapTransformVar( "EnvMapTransform", Tr2Renderer::GetIdentityTransform() ),
-	m_reflectionMapTransformVar( "ReflectionMapTransform", Tr2Renderer::GetIdentityTransform() ),
+	m_envMapTransformVar( "EnvMapTransform", IdentityMatrix() ),
+	m_reflectionMapTransformVar( "ReflectionMapTransform", IdentityMatrix() ),
 	m_suncVecVar( "SunVec", Vector3( 0.0f, 0.0f, 1.0f )),
 	m_shadowLightnessVar( "ShadowLightness", 0.0f ),
 	m_nebulaIntensity( 1.f ),
@@ -387,7 +387,7 @@ void EveSpaceScene::Update( Be::Time realTime, Be::Time simTime )
 	ITr2GenericEmitter::UpdateArguments args( 
 		m_updateContext.GetTime(), 
 		m_updateContext.GetGpuParticleSystem(), 
-		Tr2Renderer::GetIdentityTransform(), 
+		IdentityMatrix(),
 		m_updateContext.GetOriginShift() );
 	Tr2ParticleSystem::UpdateAllSystems( args );
 
@@ -1265,7 +1265,7 @@ void EveSpaceScene::GatherBatches( Tr2RenderContext& renderContext )
 	std::vector<IEveSpaceObject2*> objectsNotReceivingShadow;
 	std::vector<ITr2Renderable*> renderables;
 	Tr2RenderableSortList transparentObjects;
-	const Matrix& identity = Tr2Renderer::GetIdentityTransform();
+	const Matrix& identity = IdentityMatrix();
 
 	{
 		CCP_STATS_ZONE( "UpdateVisibility" );
@@ -1661,7 +1661,7 @@ bool EveSpaceScene::RenderBackgroundPass( Tr2RenderContext& renderContext )
 		for( EveTransformVector::iterator it = m_backgroundObjects.begin(); it != m_backgroundObjects.end(); ++it )
 		{
 			EveTransform* obj = *it;
-			obj->UpdateVisibility( frustum, Tr2Renderer::GetIdentityTransform() );
+			obj->UpdateVisibility( frustum, IdentityMatrix() );
 			obj->GetRenderables( visible );	
 		}
 		if( !visible.empty() )
@@ -1696,7 +1696,7 @@ bool EveSpaceScene::RenderBackgroundPass( Tr2RenderContext& renderContext )
 
 	if( m_warpTunnel )
 	{
-		m_warpTunnel->UpdateVisibility( frustum, Tr2Renderer::GetIdentityTransform() );	
+		m_warpTunnel->UpdateVisibility( frustum, IdentityMatrix() );
 		m_warpTunnel->GetRenderables( visible, nullptr );	
 		
 		GetTransparentBatchesFromRenderables( visible, transparentObjects, m_secondaryBatches );
@@ -1910,13 +1910,13 @@ void EveSpaceScene::EndRender( Tr2RenderContext& renderContext )
 	// dustfield
 	if( m_dustfield )
 	{
-		m_dustfield->UpdateVisibility( frustum, Tr2Renderer::GetIdentityTransform() );
+		m_dustfield->UpdateVisibility( frustum, IdentityMatrix() );
 		m_dustfield->GetRenderables( visible );
 	}
 
 	if( m_cloudfield )
 	{
-		m_cloudfield->UpdateVisibility( frustum, Tr2Renderer::GetIdentityTransform() );
+		m_cloudfield->UpdateVisibility( frustum, IdentityMatrix() );
 		m_cloudfield->GetRenderables( visible );
 	}
 
@@ -2001,7 +2001,7 @@ void EveSpaceScene::Render3DUI( Tr2RenderContext& renderContext )
 
 	RenderDebugInfo( renderContext );
 
-	Matrix identity = Tr2Renderer::GetIdentityTransform();
+	Matrix identity = IdentityMatrix();
 	std::vector<ITr2Renderable*> renderables;
 	Tr2RenderableSortList transparentObjects;
 
@@ -2588,8 +2588,7 @@ IRoot* EveSpaceScene::PickObjectAndArea( int x, int y, TriProjection* proj, TriV
 				}
 			}
 
-			const Matrix* pCurMatrix = &Tr2Renderer::GetIdentityTransform();
-			Tr2Renderer::SetWorldTransform( *pCurMatrix );
+			Tr2Renderer::SetWorldTransform( IdentityMatrix() );
 
 			m_pickingBatches->Finalize();
 
@@ -2679,7 +2678,7 @@ void EveSpaceScene::GetPickingObjectsToRender( std::vector<ITr2Renderable*>& pic
 		// function to decide what objects are pickable in the given frustum.
 		// This is not necessarily what we want, as some objects might be
 		// renderable but not pickable (particle clouds?)
-		(*it)->UpdateVisibility( pickFrustum, Tr2Renderer::GetIdentityTransform() );
+		(*it)->UpdateVisibility( pickFrustum, IdentityMatrix() );
 		(*it)->GetRenderables( pickableRenderObjects, nullptr );
 	}
 }
@@ -2710,7 +2709,7 @@ void EveSpaceScene::RenderPlanets( Tr2RenderContext& renderContext )
 	Matrix orgViewMatrix = SetupPlanetViewMatrix();
 	Matrix planetProjection = EveCamera::ModifyClipPlanes( Tr2Renderer::GetProjectionTransform(), 0.01f, 1e5f );
 	Tr2Renderer::SetProjectionTransform( planetProjection );
-	const Matrix& identity = Tr2Renderer::GetIdentityTransform();
+	const Matrix& identity = IdentityMatrix();
 
 	// Planets are rendered with a custom frustum
 	TriFrustum frustum;

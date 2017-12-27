@@ -18,9 +18,9 @@ EveSpotlightSetItem::EveSpotlightSetItem( IRoot* lockobj ) :
 	m_spriteColor( 1.0f, 1.0f, 1.0f, 1.0f ),
 	m_flareColor ( 1.0f, 1.0f, 1.0f, 1.0f ),
 	m_boneIndex( 0 ),
-	m_boosterGainInfluence( false )
+	m_boosterGainInfluence( false ),
+	m_transform( IdentityMatrix() )
 {
-	D3DXMatrixIdentity( &m_transform );
 }
 
 

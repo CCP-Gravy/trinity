@@ -382,7 +382,7 @@ bool Tr2Renderer::Initialize()
 	USE_MAIN_THREAD_RENDER_CONTEXT();	//TODO!
 	renderContext.m_esm.Initialize();
 
-	D3DXMatrixIdentity( &s_viewport2projectionAdjustment );
+	s_viewport2projectionAdjustment = IdentityMatrix();
 
 	return true;
 }
@@ -686,23 +686,6 @@ const Vector3& Tr2Renderer::GetViewLookAt()
     v.y = s_viewTransform._23;
     v.z = s_viewTransform._33;
     return v;
-}
-
-const Matrix& Tr2Renderer::GetIdentityTransform()
-{
-    static Matrix id( 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f );
-
-    return id;
-}
-
-const Matrix& Tr2Renderer::GetNullTransform()
-{
-	static Matrix nullMat( 0.0f, 0.0f, 0.0f, 0.0f, 
-		                   0.0f, 0.0f, 0.0f, 0.0f, 
-						   0.0f, 0.0f, 0.0f, 0.0f, 
-						   0.0f, 0.0f, 0.0f, 0.0f );
-
-	return nullMat;
 }
 
 Vector4 ColorToVec4( uint32_t color )
@@ -1165,7 +1148,7 @@ void UpdateRenderTargetViewport( unsigned width, unsigned height )
 	s_viewportSizeVar = Vector4( s_viewportOnDevice.m_width, s_viewportOnDevice.m_height, (float)s_renderTargetWidth, (float)s_renderTargetHeight );
 
 	// Reset the projection adjustment
-	D3DXMatrixIdentity( &s_viewport2projectionAdjustment );
+	s_viewport2projectionAdjustment = IdentityMatrix();
 }
 
 void Tr2Renderer::PopRenderTarget( Tr2RenderContext& renderContext )

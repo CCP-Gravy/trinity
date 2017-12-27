@@ -13,7 +13,6 @@
 #include "ITr2GeometryProvider.h"
 #include "Eve/IEveSpaceObject2.h"
 #include "EveMetaballItem.h"
-#include "Tr2Renderer.h"
 #include "Tr2PersistentPerObjectData.h"
 #include "Tr2DebugRenderer.h"
 

@@ -13,6 +13,7 @@
 #include "TriFrustumOrtho.h"
 #include "TriRenderBatch.h"
 #include "Tr2DebugRenderer.h"
+#include "Tr2Renderer.h"
 
 #include "Eve/EveUpdateContext.h"
 #include "Eve/Turret/EveTurretTarget.h"
@@ -112,7 +113,7 @@ EveTurretSet::EveTurretSet( IRoot* lockobj ) :
 {
 	// 0
 	memset( &m_parentData, 0, sizeof( ParentData ) );
-	D3DXMatrixIdentity( &m_parentData.transform );
+	m_parentData.transform = IdentityMatrix();
 	for( unsigned int i = 0; i < SYSBONE_MAX; ++i )
 	{
 		m_systemBoneID[i] = INVALID_BONE_INDEX;
@@ -956,9 +957,10 @@ void EveTurretSet::UpdateAsyncronous( EveUpdateContext& updateContext, const Par
 							// if we find a case that uses them.
 							if( bone >= SYSBONE_PITCH && bone <= SYSBONE_PITCH2 && m_updatePitchPose )
 							{
-								GrannyBuildWorldPose( it->grnSkeleton, 0, it->grnSkeleton->BoneCount, it->grnLocalPose, &Tr2Renderer::GetIdentityTransform().m[0][0], it->grnWorldPose );
+								Matrix id = IdentityMatrix();
+								GrannyBuildWorldPose( it->grnSkeleton, 0, it->grnSkeleton->BoneCount, it->grnLocalPose, &id.m[0][0], it->grnWorldPose );
 								granny_real32* boneWorldTransform = GrannyGetWorldPose4x4( it->grnWorldPose, m_systemBoneID[bone] );
-								D3DXMatrixMultiply( &localTransform, reinterpret_cast<const Matrix*>( boneWorldTransform ), &Tr2Renderer::GetIdentityTransform() );
+								D3DXMatrixMultiply( &localTransform, reinterpret_cast<const Matrix*>( boneWorldTransform ), &id );
 								localTransformPtr = &localTransform;
 							}
 							// modify this bone's transform data
@@ -972,7 +974,8 @@ void EveTurretSet::UpdateAsyncronous( EveUpdateContext& updateContext, const Par
 				}
 			}
 
-			GrannyBuildWorldPose( it->grnSkeleton, 0, it->grnSkeleton->BoneCount, it->grnLocalPose, &Tr2Renderer::GetIdentityTransform().m[0][0], it->grnWorldPose );
+			Matrix id = IdentityMatrix();
+			GrannyBuildWorldPose( it->grnSkeleton, 0, it->grnSkeleton->BoneCount, it->grnLocalPose, &id.m[0][0], it->grnWorldPose );
 		}
 	}
 
@@ -1257,9 +1260,9 @@ void EveTurretSet::SetLocalTransform( unsigned int turretIndex, const Matrix* lo
 				data.grnSkeleton = NULL;
 				data.grnLocalPose = NULL;
 				data.grnWorldPose = NULL;
-			}			
-			D3DXMatrixIdentity( &data.worldMatrix );
-			D3DXMatrixIdentity( &data.invWorldMatrix );
+			}
+			data.worldMatrix = IdentityMatrix();
+			data.invWorldMatrix = IdentityMatrix();
 			data.valid = false;
 			data.visible = false;
 
@@ -1269,8 +1272,7 @@ void EveTurretSet::SetLocalTransform( unsigned int turretIndex, const Matrix* lo
 		}
 	}
 	
-	Matrix noScaleLocalMatrix;
-	D3DXMatrixIdentity( &noScaleLocalMatrix );
+	Matrix noScaleLocalMatrix = IdentityMatrix();
 
 	// remove scaling: this matrix comes from a locator which can have scaling, but we don't want it!
 	TriMatrixRemoveScaling( &noScaleLocalMatrix , localMatrix );
@@ -1579,10 +1581,6 @@ Tr2PerObjectData* EveTurretSet::GetPerObjectData( ITriRenderBatchAccumulator* ac
 	{
 		return NULL;
 	}
-
-	// make an identity 3x4 matrix for use later
-	Matrix idMatrix;
-	D3DXMatrixIdentity( &idMatrix );
 
 	Vector3 scale, translation;
 

@@ -68,7 +68,7 @@ void EveSpriteSet::AddBoosterGlowToQuadRenderer( Tr2QuadRenderer& quadRenderer, 
 	{
 		return;
 	}
-	Matrix m = Tr2Renderer::GetIdentityTransform();
+	Matrix m = IdentityMatrix();
 	auto n = m_spriteData.size();
 
 	XMVector3TransformCoordStream( reinterpret_cast
@@ -119,7 +119,7 @@ void EveSpriteSet::AddToQuadRenderer( Tr2QuadRenderer& quadRenderer, const Matri
 	{
 		return;
 	}
-	Matrix m = Tr2Renderer::GetIdentityTransform();
+	Matrix m = IdentityMatrix();
 	auto n = m_spriteData.size();
 	if( !m_skinned )
 	{

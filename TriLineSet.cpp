@@ -20,9 +20,9 @@ inline unsigned SwizzleColor( unsigned color )
 
 TriLineSet::TriLineSet( IRoot* lockobj ) : 
 	m_defaultColor( 0xffffffff ),
-	m_zEnable( true )
+	m_zEnable( true ),
+	m_transform( IdentityMatrix() )
 {
-	D3DXMatrixIdentity( &m_transform );
 }
 
 void TriLineSet::AddDefaultColor(const Vector3 &from, const Vector3 &to)

@@ -7,6 +7,8 @@
 #include "StdAfx.h"
 #include "Tr2MeshBase.h"
 #include "Resources/TriGeometryRes.h"
+#include "Tr2Renderer.h"
+
 
 CCP_STATS_DECLARE( tr2MeshBindToRig, "Trinity/BindToRig", true, CST_COUNTER_LOW, "Number of times a mesh executed bind to a new rig" );
 

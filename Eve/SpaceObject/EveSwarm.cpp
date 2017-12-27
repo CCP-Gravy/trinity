@@ -597,7 +597,7 @@ void EveSwarm::AddQuadsToQuadRenderer( const TriFrustum& frustum, Tr2QuadRendere
 	}
 	if( DisplayBoosters() )
 	{
-		m_boosters->AddToQuadRenderer( quadRenderer, Tr2Renderer::GetIdentityTransform() );
+		m_boosters->AddToQuadRenderer( quadRenderer, IdentityMatrix() );
 	}
 }
 

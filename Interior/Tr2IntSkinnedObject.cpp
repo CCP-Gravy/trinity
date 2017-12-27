@@ -366,7 +366,6 @@ Tr2PerObjectData* Tr2IntSkinnedObject::GetPerObjectDataCpuSkinning(
 	memset( &perObjectVSBuffer, 0, sizeof( perObjectVSBuffer ) );
 
 	// put worldmatrix to identity: translation comes from gameworld in the skinning matrices
-	//D3DXMatrixIdentity( &perObjectVSBuffer.WorldMat );
 	perObjectVSBuffer.WorldMat = objectToWorldMatrix;
 
 	// put pointlights in perobject data
@@ -380,7 +379,7 @@ Tr2PerObjectData* Tr2IntSkinnedObject::GetPerObjectDataCpuSkinning(
 	memset( &perObjectPSBuffer.redMat, 0, sizeof( perObjectPSBuffer.redMat ) * 3 );
 
 	// Copy the mirror-to-world matrix
-	perObjectPSBuffer.mirrorToWorldMatrix = Tr2Renderer::GetIdentityTransform();
+	perObjectPSBuffer.mirrorToWorldMatrix = IdentityMatrix();
 
 	// Do the copy
 	data->CopyToPSFloatBuffer( perObjectPSBuffer );
@@ -417,7 +416,7 @@ Tr2PerObjectData* Tr2IntSkinnedObject::GetPerObjectDataGpuSkinning(
 
 	data->SetSkinningMatrices( m_skinningMatrixCount, GetSkinningMatrices() );
 	data->SetWorldMatrix( objectToWorldMatrix );
-	data->SetMirrorMatrix( Tr2Renderer::GetIdentityTransform() );
+	data->SetMirrorMatrix( IdentityMatrix() );
 
 
 	// Pixel Shader Light information
@@ -437,7 +436,7 @@ Tr2PerObjectData* Tr2IntSkinnedObject::GetPerObjectDataGpuSkinning(
 	memset( &perObjectPSBuffer.redMat, 0, sizeof( perObjectPSBuffer.redMat ) * 3 );
 
 	// Copy the mirror-to-world matrix
-	perObjectPSBuffer.mirrorToWorldMatrix = Tr2Renderer::GetIdentityTransform();
+	perObjectPSBuffer.mirrorToWorldMatrix = IdentityMatrix();
 
 	// Do the copy
 	data->CopyToPSFloatBuffer( perObjectPSBuffer );
