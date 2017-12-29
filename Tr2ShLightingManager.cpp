@@ -411,7 +411,7 @@ void Tr2ShLightingManager::UpdateSourceData()
 	SourceData* data = reinterpret_cast<SourceData*>( m_sourceData.get() );
 	for( auto it = m_sources.begin(); it != m_sources.end(); ++it )
 	{
-		if( it->radius > 0 )
+		if( *it->radius > 0 )
 		{
 			data->position = *it->position;
 			data->radius = *it->radius;
