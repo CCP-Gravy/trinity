@@ -1458,7 +1458,7 @@
       <IgnoreAllDefaultLibraries>True</IgnoreAllDefaultLibraries>
       <AdditionalAppleFrameworks>CoreFoundation;CoreFoundation;%(AdditionalAppleFrameworks)</AdditionalAppleFrameworks>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
-      <AdditionalDependencies>CcpCore.lib;CcpMath.lib;FreeType26.lib;GFSDK_Aftermath_Lib.x86.lib;ImageIO.lib;TrinityAL_dx11.lib;atimgpud_s_x86.lib;atls.lib;blue.lib;d3d11.lib;d3d9.lib;d3dx10.lib;d3dx11.lib;d3dx9.lib;dbghelp.lib;dxerr.lib;dxgi.lib;dxguid.lib;granny2_static.lib;jpeg.lib;libpng.lib;msvcprt.lib;msvcrt.lib;muparser.lib;nvapi.lib;oldnames.lib;psapi.lib;python27.lib;rad_tm_win32.lib;squish.lib;tbb.lib;zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>CcpCore.lib;CcpMath.lib;FreeType26.lib;GFSDK_Aftermath_Lib.x86.lib;ImageIO.lib;TrinityAL_dx11.lib;atimgpud_s_x86.lib;atls.lib;blue.lib;d3d11.lib;d3d9.lib;d3dx9.lib;dbghelp.lib;dxerr.lib;dxgi.lib;dxguid.lib;granny2_static.lib;jpeg.lib;libpng.lib;msvcprt.lib;msvcrt.lib;muparser.lib;nvapi.lib;oldnames.lib;psapi.lib;python27.lib;rad_tm_win32.lib;squish.lib;tbb.lib;zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ResourceCompile>
       <PreprocessorDefinitions>TARGET_FILENAME=$(TargetFileName);TARGET_NAME=$(TargetName);%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -1492,7 +1492,7 @@
       <ProgramDatabaseFile>$(TargetDir)$(TargetName).pdb</ProgramDatabaseFile>
       <IgnoreAllDefaultLibraries>True</IgnoreAllDefaultLibraries>
       <AdditionalAppleFrameworks>CoreFoundation;CoreFoundation;%(AdditionalAppleFrameworks)</AdditionalAppleFrameworks>
-      <AdditionalDependencies>CcpCore.lib;CcpMath.lib;FreeType26.lib;GFSDK_Aftermath_Lib.x86.lib;ImageIO_dev.lib;TrinityAL_dx11_dev.lib;atimgpud_s_x86.lib;atls.lib;blue.lib;d3d11.lib;d3d9.lib;d3dx10.lib;d3dx11.lib;d3dx9.lib;dbghelp.lib;dxerr.lib;dxgi.lib;dxguid.lib;granny2_static.lib;jpeg.lib;libpng.lib;msvcprt.lib;msvcrt.lib;muparser.lib;nvapi.lib;oldnames.lib;psapi.lib;python27.lib;rad_tm_win32.lib;squish.lib;tbb.lib;zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>CcpCore.lib;CcpMath.lib;FreeType26.lib;GFSDK_Aftermath_Lib.x86.lib;ImageIO_dev.lib;TrinityAL_dx11_dev.lib;atimgpud_s_x86.lib;atls.lib;blue.lib;d3d11.lib;d3d9.lib;d3dx9.lib;dbghelp.lib;dxerr.lib;dxgi.lib;dxguid.lib;granny2_static.lib;jpeg.lib;libpng.lib;msvcprt.lib;msvcrt.lib;muparser.lib;nvapi.lib;oldnames.lib;psapi.lib;python27.lib;rad_tm_win32.lib;squish.lib;tbb.lib;zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ResourceCompile>
       <PreprocessorDefinitions>TARGET_FILENAME=$(TargetFileName);TARGET_NAME=$(TargetName);%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -1810,7 +1810,7 @@
       <IgnoreAllDefaultLibraries>True</IgnoreAllDefaultLibraries>
       <AdditionalAppleFrameworks>CoreFoundation;CoreFoundation;%(AdditionalAppleFrameworks)</AdditionalAppleFrameworks>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
-      <AdditionalDependencies>CcpCore.lib;CcpMath.lib;FreeType26.lib;GFSDK_Aftermath_Lib.x64.lib;ImageIO.lib;TrinityAL_dx11.lib;atimgpud_s_x64.lib;atls.lib;blue.lib;d3d11.lib;d3d9.lib;d3dx10.lib;d3dx11.lib;d3dx9.lib;dbghelp.lib;dxerr.lib;dxgi.lib;dxguid.lib;granny2_static_x64.lib;jpeg.lib;libpng.lib;msvcprt.lib;msvcrt.lib;muparser.lib;nvapi.lib;oldnames.lib;psapi.lib;python27.lib;rad_tm_win64.lib;tbb.lib;zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>CcpCore.lib;CcpMath.lib;FreeType26.lib;GFSDK_Aftermath_Lib.x64.lib;ImageIO.lib;TrinityAL_dx11.lib;atimgpud_s_x64.lib;atls.lib;blue.lib;d3d11.lib;d3d9.lib;d3dx9.lib;dbghelp.lib;dxerr.lib;dxgi.lib;dxguid.lib;granny2_static_x64.lib;jpeg.lib;libpng.lib;msvcprt.lib;msvcrt.lib;muparser.lib;nvapi.lib;oldnames.lib;psapi.lib;python27.lib;rad_tm_win64.lib;tbb.lib;zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ResourceCompile>
       <PreprocessorDefinitions>TARGET_FILENAME=$(TargetFileName);TARGET_NAME=$(TargetName);%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -1948,7 +1948,7 @@
       <IgnoreAllDefaultLibraries>True</IgnoreAllDefaultLibraries>
       <AdditionalAppleFrameworks>CoreFoundation;CoreFoundation;%(AdditionalAppleFrameworks)</AdditionalAppleFrameworks>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
-      <AdditionalDependencies>CcpCore.lib;CcpMath.lib;FreeType26.lib;GFSDK_Aftermath_Lib.x64.lib;ImageIO.lib;TrinityAL_dx11.lib;atimgpud_s_x64.lib;atls.lib;blue.lib;d3d11.lib;d3d9.lib;d3dx10.lib;d3dx11.lib;d3dx9.lib;dbghelp.lib;dxerr.lib;dxgi.lib;dxguid.lib;granny2_static_x64.lib;jpeg.lib;libpng.lib;msvcprt.lib;msvcrt.lib;muparser.lib;nvapi.lib;oldnames.lib;psapi.lib;python27.lib;rad_tm_win64.lib;tbb.lib;zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>CcpCore.lib;CcpMath.lib;FreeType26.lib;GFSDK_Aftermath_Lib.x64.lib;ImageIO.lib;TrinityAL_dx11.lib;atimgpud_s_x64.lib;atls.lib;blue.lib;d3d11.lib;d3d9.lib;d3dx9.lib;dbghelp.lib;dxerr.lib;dxgi.lib;dxguid.lib;granny2_static_x64.lib;jpeg.lib;libpng.lib;msvcprt.lib;msvcrt.lib;muparser.lib;nvapi.lib;oldnames.lib;psapi.lib;python27.lib;rad_tm_win64.lib;tbb.lib;zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ResourceCompile>
       <PreprocessorDefinitions>TARGET_FILENAME=$(TargetFileName);TARGET_NAME=$(TargetName);%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -2128,7 +2128,7 @@
       <IgnoreAllDefaultLibraries>True</IgnoreAllDefaultLibraries>
       <AdditionalAppleFrameworks>CoreFoundation;CoreFoundation;%(AdditionalAppleFrameworks)</AdditionalAppleFrameworks>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
-      <AdditionalDependencies>CcpCore.lib;CcpMath.lib;FreeType26.lib;GFSDK_Aftermath_Lib.x86.lib;ImageIO.lib;TrinityAL_dx11.lib;atimgpud_s_x86.lib;atls.lib;blue.lib;d3d11.lib;d3d9.lib;d3dx10.lib;d3dx11.lib;d3dx9.lib;dbghelp.lib;dxerr.lib;dxgi.lib;dxguid.lib;granny2_static.lib;jpeg.lib;libpng.lib;msvcprt.lib;msvcrt.lib;muparser.lib;nvapi.lib;oldnames.lib;psapi.lib;python27.lib;rad_tm_win32.lib;squish.lib;tbb.lib;zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>CcpCore.lib;CcpMath.lib;FreeType26.lib;GFSDK_Aftermath_Lib.x86.lib;ImageIO.lib;TrinityAL_dx11.lib;atimgpud_s_x86.lib;atls.lib;blue.lib;d3d11.lib;d3d9.lib;d3dx9.lib;dbghelp.lib;dxerr.lib;dxgi.lib;dxguid.lib;granny2_static.lib;jpeg.lib;libpng.lib;msvcprt.lib;msvcrt.lib;muparser.lib;nvapi.lib;oldnames.lib;psapi.lib;python27.lib;rad_tm_win32.lib;squish.lib;tbb.lib;zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ResourceCompile>
       <PreprocessorDefinitions>TARGET_FILENAME=$(TargetFileName);TARGET_NAME=$(TargetName);%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -2198,7 +2198,7 @@
       <ProgramDatabaseFile>$(TargetDir)$(TargetName).pdb</ProgramDatabaseFile>
       <IgnoreAllDefaultLibraries>True</IgnoreAllDefaultLibraries>
       <AdditionalAppleFrameworks>CoreFoundation;CoreFoundation;%(AdditionalAppleFrameworks)</AdditionalAppleFrameworks>
-      <AdditionalDependencies>CcpCore_d.lib;CcpMath_d.lib;FreeType26_D.lib;GFSDK_Aftermath_Lib.x86.lib;ImageIO_d.lib;TrinityAL_dx11_d.lib;atimgpud_s_x86.lib;atlsD.lib;blue_d.lib;d3d11.lib;d3d9.lib;d3dx10.lib;d3dx11.lib;d3dx9d.lib;dbghelp.lib;dxerr.lib;dxgi.lib;dxguid.lib;granny2_static.lib;jpeg_d.lib;libpng_d.lib;msvcprtD.lib;msvcrtD.lib;muparserd.lib;nvapi.lib;oldnames.lib;psapi.lib;python27_d.lib;rad_tm_win32.lib;squish.lib;tbb_debug.lib;zlib_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>CcpCore_d.lib;CcpMath_d.lib;FreeType26_D.lib;GFSDK_Aftermath_Lib.x86.lib;ImageIO_d.lib;TrinityAL_dx11_d.lib;atimgpud_s_x86.lib;atlsD.lib;blue_d.lib;d3d11.lib;d3d9.lib;d3dx9d.lib;dbghelp.lib;dxerr.lib;dxgi.lib;dxguid.lib;granny2_static.lib;jpeg_d.lib;libpng_d.lib;msvcprtD.lib;msvcrtD.lib;muparserd.lib;nvapi.lib;oldnames.lib;psapi.lib;python27_d.lib;rad_tm_win32.lib;squish.lib;tbb_debug.lib;zlib_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ResourceCompile>
       <PreprocessorDefinitions>TARGET_FILENAME=$(TargetFileName);TARGET_NAME=$(TargetName);%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -2270,7 +2270,7 @@
       <IgnoreAllDefaultLibraries>True</IgnoreAllDefaultLibraries>
       <AdditionalAppleFrameworks>CoreFoundation;CoreFoundation;%(AdditionalAppleFrameworks)</AdditionalAppleFrameworks>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
-      <AdditionalDependencies>CcpCore.lib;CcpMath.lib;FreeType26.lib;GFSDK_Aftermath_Lib.x86.lib;ImageIO.lib;TrinityAL_dx11.lib;atimgpud_s_x86.lib;atls.lib;blue.lib;d3d11.lib;d3d9.lib;d3dx10.lib;d3dx11.lib;d3dx9.lib;dbghelp.lib;dxerr.lib;dxgi.lib;dxguid.lib;granny2_static.lib;jpeg.lib;libpng.lib;msvcprt.lib;msvcrt.lib;muparser.lib;nvapi.lib;oldnames.lib;psapi.lib;python27.lib;rad_tm_win32.lib;squish.lib;tbb.lib;zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>CcpCore.lib;CcpMath.lib;FreeType26.lib;GFSDK_Aftermath_Lib.x86.lib;ImageIO.lib;TrinityAL_dx11.lib;atimgpud_s_x86.lib;atls.lib;blue.lib;d3d11.lib;d3d9.lib;d3dx9.lib;dbghelp.lib;dxerr.lib;dxgi.lib;dxguid.lib;granny2_static.lib;jpeg.lib;libpng.lib;msvcprt.lib;msvcrt.lib;muparser.lib;nvapi.lib;oldnames.lib;psapi.lib;python27.lib;rad_tm_win32.lib;squish.lib;tbb.lib;zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ResourceCompile>
       <PreprocessorDefinitions>TARGET_FILENAME=$(TargetFileName);TARGET_NAME=$(TargetName);%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -2304,7 +2304,7 @@
       <ProgramDatabaseFile>$(TargetDir)$(TargetName).pdb</ProgramDatabaseFile>
       <IgnoreAllDefaultLibraries>True</IgnoreAllDefaultLibraries>
       <AdditionalAppleFrameworks>CoreFoundation;CoreFoundation;%(AdditionalAppleFrameworks)</AdditionalAppleFrameworks>
-      <AdditionalDependencies>CcpCore.lib;CcpMath.lib;FreeType26.lib;GFSDK_Aftermath_Lib.x64.lib;ImageIO_dev.lib;TrinityAL_dx11_dev.lib;atimgpud_s_x64.lib;atls.lib;blue.lib;d3d11.lib;d3d9.lib;d3dx10.lib;d3dx11.lib;d3dx9.lib;dbghelp.lib;dxerr.lib;dxgi.lib;dxguid.lib;granny2_static_x64.lib;jpeg.lib;libpng.lib;msvcprt.lib;msvcrt.lib;muparser.lib;nvapi.lib;oldnames.lib;psapi.lib;python27.lib;rad_tm_win64.lib;tbb.lib;zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>CcpCore.lib;CcpMath.lib;FreeType26.lib;GFSDK_Aftermath_Lib.x64.lib;ImageIO_dev.lib;TrinityAL_dx11_dev.lib;atimgpud_s_x64.lib;atls.lib;blue.lib;d3d11.lib;d3d9.lib;d3dx9.lib;dbghelp.lib;dxerr.lib;dxgi.lib;dxguid.lib;granny2_static_x64.lib;jpeg.lib;libpng.lib;msvcprt.lib;msvcrt.lib;muparser.lib;nvapi.lib;oldnames.lib;psapi.lib;python27.lib;rad_tm_win64.lib;tbb.lib;zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ResourceCompile>
       <PreprocessorDefinitions>TARGET_FILENAME=$(TargetFileName);TARGET_NAME=$(TargetName);%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -2410,7 +2410,7 @@
       <IgnoreAllDefaultLibraries>True</IgnoreAllDefaultLibraries>
       <AdditionalAppleFrameworks>CoreFoundation;CoreFoundation;%(AdditionalAppleFrameworks)</AdditionalAppleFrameworks>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
-      <AdditionalDependencies>CcpCore.lib;CcpMath.lib;FreeType26.lib;GFSDK_Aftermath_Lib.x86.lib;ImageIO.lib;TrinityAL_dx11.lib;atimgpud_s_x86.lib;atls.lib;blue.lib;d3d11.lib;d3d9.lib;d3dx10.lib;d3dx11.lib;d3dx9.lib;dbghelp.lib;dxerr.lib;dxgi.lib;dxguid.lib;granny2_static.lib;jpeg.lib;libpng.lib;msvcprt.lib;msvcrt.lib;muparser.lib;nvapi.lib;oldnames.lib;psapi.lib;python26.lib;rad_tm_win32.lib;squish.lib;tbb.lib;zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>CcpCore.lib;CcpMath.lib;FreeType26.lib;GFSDK_Aftermath_Lib.x86.lib;ImageIO.lib;TrinityAL_dx11.lib;atimgpud_s_x86.lib;atls.lib;blue.lib;d3d11.lib;d3d9.lib;d3dx9.lib;dbghelp.lib;dxerr.lib;dxgi.lib;dxguid.lib;granny2_static.lib;jpeg.lib;libpng.lib;msvcprt.lib;msvcrt.lib;muparser.lib;nvapi.lib;oldnames.lib;psapi.lib;python26.lib;rad_tm_win32.lib;squish.lib;tbb.lib;zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ResourceCompile>
       <PreprocessorDefinitions>TARGET_FILENAME=$(TargetFileName);TARGET_NAME=$(TargetName);%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -2480,7 +2480,7 @@
       <IgnoreAllDefaultLibraries>True</IgnoreAllDefaultLibraries>
       <AdditionalAppleFrameworks>CoreFoundation;CoreFoundation;%(AdditionalAppleFrameworks)</AdditionalAppleFrameworks>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
-      <AdditionalDependencies>CcpCore.lib;CcpMath.lib;FreeType26.lib;GFSDK_Aftermath_Lib.x64.lib;ImageIO.lib;TrinityAL_dx11.lib;atimgpud_s_x64.lib;atls.lib;blue.lib;d3d11.lib;d3d9.lib;d3dx10.lib;d3dx11.lib;d3dx9.lib;dbghelp.lib;dxerr.lib;dxgi.lib;dxguid.lib;granny2_static_x64.lib;jpeg.lib;libpng.lib;msvcprt.lib;msvcrt.lib;muparser.lib;nvapi.lib;oldnames.lib;psapi.lib;python27.lib;rad_tm_win64.lib;tbb.lib;zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>CcpCore.lib;CcpMath.lib;FreeType26.lib;GFSDK_Aftermath_Lib.x64.lib;ImageIO.lib;TrinityAL_dx11.lib;atimgpud_s_x64.lib;atls.lib;blue.lib;d3d11.lib;d3d9.lib;d3dx9.lib;dbghelp.lib;dxerr.lib;dxgi.lib;dxguid.lib;granny2_static_x64.lib;jpeg.lib;libpng.lib;msvcprt.lib;msvcrt.lib;muparser.lib;nvapi.lib;oldnames.lib;psapi.lib;python27.lib;rad_tm_win64.lib;tbb.lib;zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ResourceCompile>
       <PreprocessorDefinitions>TARGET_FILENAME=$(TargetFileName);TARGET_NAME=$(TargetName);%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -2550,7 +2550,7 @@
       <IgnoreAllDefaultLibraries>True</IgnoreAllDefaultLibraries>
       <AdditionalAppleFrameworks>CoreFoundation;CoreFoundation;%(AdditionalAppleFrameworks)</AdditionalAppleFrameworks>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
-      <AdditionalDependencies>CcpCore.lib;CcpMath.lib;FreeType26.lib;GFSDK_Aftermath_Lib.x64.lib;ImageIO.lib;TrinityAL_dx11.lib;atimgpud_s_x64.lib;atls.lib;blue.lib;d3d11.lib;d3d9.lib;d3dx10.lib;d3dx11.lib;d3dx9.lib;dbghelp.lib;dxerr.lib;dxgi.lib;dxguid.lib;granny2_static_x64.lib;jpeg.lib;libpng.lib;msvcprt.lib;msvcrt.lib;muparser.lib;nvapi.lib;oldnames.lib;psapi.lib;python26.lib;rad_tm_win64.lib;tbb.lib;zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>CcpCore.lib;CcpMath.lib;FreeType26.lib;GFSDK_Aftermath_Lib.x64.lib;ImageIO.lib;TrinityAL_dx11.lib;atimgpud_s_x64.lib;atls.lib;blue.lib;d3d11.lib;d3d9.lib;d3dx9.lib;dbghelp.lib;dxerr.lib;dxgi.lib;dxguid.lib;granny2_static_x64.lib;jpeg.lib;libpng.lib;msvcprt.lib;msvcrt.lib;muparser.lib;nvapi.lib;oldnames.lib;psapi.lib;python26.lib;rad_tm_win64.lib;tbb.lib;zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ResourceCompile>
       <PreprocessorDefinitions>TARGET_FILENAME=$(TargetFileName);TARGET_NAME=$(TargetName);%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -2652,7 +2652,7 @@
       <ProgramDatabaseFile>$(TargetDir)$(TargetName).pdb</ProgramDatabaseFile>
       <IgnoreAllDefaultLibraries>True</IgnoreAllDefaultLibraries>
       <AdditionalAppleFrameworks>CoreFoundation;CoreFoundation;%(AdditionalAppleFrameworks)</AdditionalAppleFrameworks>
-      <AdditionalDependencies>CcpCore_d.lib;CcpMath_d.lib;FreeType26_D.lib;GFSDK_Aftermath_Lib.x64.lib;ImageIO_d.lib;TrinityAL_dx11_d.lib;atimgpud_s_x64.lib;atlsD.lib;blue_d.lib;d3d11.lib;d3d9.lib;d3dx10.lib;d3dx11.lib;d3dx9d.lib;dbghelp.lib;dxerr.lib;dxgi.lib;dxguid.lib;granny2_static_x64.lib;jpeg_d.lib;libpng_d.lib;msvcprtD.lib;msvcrtD.lib;muparserd.lib;nvapi.lib;oldnames.lib;psapi.lib;python27_d.lib;rad_tm_win64.lib;tbb_debug.lib;zlib_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>CcpCore_d.lib;CcpMath_d.lib;FreeType26_D.lib;GFSDK_Aftermath_Lib.x64.lib;ImageIO_d.lib;TrinityAL_dx11_d.lib;atimgpud_s_x64.lib;atlsD.lib;blue_d.lib;d3d11.lib;d3d9.lib;d3dx9d.lib;dbghelp.lib;dxerr.lib;dxgi.lib;dxguid.lib;granny2_static_x64.lib;jpeg_d.lib;libpng_d.lib;msvcprtD.lib;msvcrtD.lib;muparserd.lib;nvapi.lib;oldnames.lib;psapi.lib;python27_d.lib;rad_tm_win64.lib;tbb_debug.lib;zlib_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ResourceCompile>
       <PreprocessorDefinitions>TARGET_FILENAME=$(TargetFileName);TARGET_NAME=$(TargetName);%(PreprocessorDefinitions)</PreprocessorDefinitions>
