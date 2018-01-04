@@ -69,7 +69,7 @@ float EveDistanceField::CalculateFieldCoverageAndDistance( Be::Time t, const Vec
 			(*oit)->GetValueAt( &posObj, t );
 			const Vector3 d = posObj - averagePos;
 			float distance = Length( d );
-			if( m_distanceThreshold == 0.f || distance < m_distanceThreshold * averageDistance )
+			if( m_distanceThreshold == 0.f || distance <= m_distanceThreshold * averageDistance )
 			{
 				minBounds = Minimize( posObj, minBounds );
 				maxBounds = Maximize( posObj, maxBounds );
