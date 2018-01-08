@@ -133,7 +133,7 @@ float TriMatrix::Inverse(
 	) 
 {
 	float ret;
-	::Inverse( *this, ret, *this );
+	::Inverse( *this, ret, Matrix( *this ) );
 	return ret;
 }
 
