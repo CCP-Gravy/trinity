@@ -2692,13 +2692,11 @@
     <ClInclude Include="Tr2Blitter.h" />
     <ClInclude Include="Tr2BoundingLineSet.h" />
     <ClInclude Include="Tr2ConstantBufferFormats.h" />
-    <ClInclude Include="Tr2CpuSkinnedModel.h" />
     <ClInclude Include="Tr2CurveLineSet.h" />
     <ClInclude Include="Tr2DebugRenderer.h" />
     <ClInclude Include="Tr2DepthStencil.h" />
     <ClInclude Include="Tr2DeviceResource.h" />
     <ClInclude Include="Tr2DxtCompressor.h" />
-    <ClInclude Include="Tr2DynamicMesh.h" />
     <ClInclude Include="Tr2DynamicRingBuffer.h" />
     <ClInclude Include="Tr2ExternalParameter.h" />
     <ClInclude Include="Tr2FileExportInfo.h" />
@@ -3129,8 +3127,6 @@
     <ClCompile Include="Tr2BoundingLineSet.cpp" />
     <ClCompile Include="Tr2BoundingLineSet_Blue.cpp" />
     <ClCompile Include="Tr2ConstantBufferFormats.cpp" />
-    <ClCompile Include="Tr2CpuSkinnedModel.cpp" />
-    <ClCompile Include="Tr2CpuSkinnedModel_Blue.cpp" />
     <ClCompile Include="Tr2CurveLineSet.cpp" />
     <ClCompile Include="Tr2CurveLineSet_Blue.cpp" />
     <ClCompile Include="Tr2DebugRenderer.cpp" />
@@ -3140,8 +3136,6 @@
     <ClCompile Include="Tr2DeviceResource.cpp" />
     <ClCompile Include="Tr2DxtCompressor.cpp" />
     <ClCompile Include="Tr2DxtCompressor_Blue.cpp" />
-    <ClCompile Include="Tr2DynamicMesh.cpp" />
-    <ClCompile Include="Tr2DynamicMesh_Blue.cpp" />
     <ClCompile Include="Tr2DynamicRingBuffer.cpp" />
     <ClCompile Include="Tr2ExternalParameter.cpp" />
     <ClCompile Include="Tr2ExternalParameter_Blue.cpp" />

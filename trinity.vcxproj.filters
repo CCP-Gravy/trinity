@@ -117,9 +117,6 @@
     <ClInclude Include="Tr2ConstantBufferFormats.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="Tr2CpuSkinnedModel.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="Tr2CurveLineSet.h">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -133,9 +130,6 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Tr2DxtCompressor.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Tr2DynamicMesh.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Tr2DynamicRingBuffer.h">
@@ -1416,12 +1410,6 @@
     <ClCompile Include="Tr2ConstantBufferFormats.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Tr2CpuSkinnedModel.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Tr2CpuSkinnedModel_Blue.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Tr2CurveLineSet.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -1447,12 +1435,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Tr2DxtCompressor_Blue.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Tr2DynamicMesh.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Tr2DynamicMesh_Blue.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Tr2DynamicRingBuffer.cpp">
