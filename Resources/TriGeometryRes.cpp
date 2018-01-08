@@ -1225,8 +1225,8 @@ void TriGeometryRes::ProcessMeshTriangles( int meshIx, PerTriangleCallback cb, v
 		return;
 	}
 
+	bool foundPosition = false;
 	unsigned int positionByteOffset = 0;
-
 	Tr2VertexDefinition::DataType declType;
 	for ( size_t j = 0; j < decl.m_items.size(); j++ )
 	{
@@ -1234,8 +1234,13 @@ void TriGeometryRes::ProcessMeshTriangles( int meshIx, PerTriangleCallback cb, v
 		{
 			declType = decl.m_items[j].m_dataType;
 			positionByteOffset = decl.m_items[j].m_offset;
+			foundPosition = true;
 			break;
 		}
+	}
+	if( !foundPosition )
+	{
+		return;
 	}
 
 	int numPrim = m_meshes[i]->m_primitiveCount;

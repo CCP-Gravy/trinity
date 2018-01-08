@@ -72,9 +72,6 @@ namespace
 		}
 		ON_BLOCK_EXIT( [&]() { buffer->UnmapForReading( renderContext ); } );
 
-		auto format = pThis->GetFormat();
-		auto count = pThis->GetCount();
-
 		return PyString_FromStringAndSize( static_cast<const char*>( data ), buffer->GetSize() );
 	}
 }

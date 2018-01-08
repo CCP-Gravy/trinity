@@ -58,8 +58,8 @@ TriStepResult TriStepRunComputeShader::Execute( Be::Time realTime, Be::Time simT
 		{
 		}
 	}
-#endif
 	Be::Time start = BeOS->GetActualTime();
+#endif
 
 	if( m_indirectionBuffer )
 	{

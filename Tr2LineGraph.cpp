@@ -191,7 +191,6 @@ void Tr2LineGraph::Render( float scale )
 	LineGraphVertex* pVerts;
 	CR_RETURN( m_vertexBuffer.MapForWriting( pVerts, renderContext ) );
 
-	LineGraphVertex* pVertsStart = pVerts;
 	LineGraphVertex* pVertsEnd = pVerts + m_primitiveCount * 2;
 
 	unsigned int count = (unsigned int)m_data.size();

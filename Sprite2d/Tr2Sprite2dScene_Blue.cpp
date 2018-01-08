@@ -285,15 +285,6 @@ const Be::ClassInfo* Tr2Sprite2dScene::ExposeToBlue()
 
 		MAP_ATTRIBUTE
 		(
-			"setLockFrequentlyFlag",
-			m_setLockFrequentlyFlag,
-			"If True, then vertex/index buffers are created with the usage flag\n"
-			"for frequent locking set. This is the default.",
-			Be::READWRITE | Be::NOTIFY
-		)
-
-		MAP_ATTRIBUTE
-		(
 			"captureIndexDataCapacity",
 			m_captureIndexDataCapacity,
 			"Capacity of buffer used for indices while capturing display lists.\n"

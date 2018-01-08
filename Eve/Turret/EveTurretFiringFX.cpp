@@ -361,7 +361,6 @@ bool EveTurretFiringFX::ReadyToFire() const
 // --------------------------------------------------------------------------------
 bool EveTurretFiringFX::Update( EveUpdateContext& updateContext )
 {
-	Be::Time time = updateContext.GetTime();
 	float deltaT = updateContext.GetDeltaT();
 	bool retVal = false;
 	

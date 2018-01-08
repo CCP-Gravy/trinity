@@ -325,9 +325,9 @@ void Tr2GrannyPrimitiveSet::CreatePrimitive()
 				GrannyReal16ToReal32( *(posPtr+1), &newVertex.m_position.y );
 				GrannyReal16ToReal32( *(posPtr+2), &newVertex.m_position.z );
 
-				GrannyReal16ToReal32( *posPtr, &newVertex.m_normal.x );
-				GrannyReal16ToReal32( *(posPtr+1), &newVertex.m_normal.y );
-				GrannyReal16ToReal32( *(posPtr+2), &newVertex.m_normal.z );
+				GrannyReal16ToReal32( *normalPtr, &newVertex.m_normal.x );
+				GrannyReal16ToReal32( *( normalPtr +1), &newVertex.m_normal.y );
+				GrannyReal16ToReal32( *( normalPtr +2), &newVertex.m_normal.z );
 				newVertex.m_color = m_color;
 				m_points.push_back( newVertex );
 			}

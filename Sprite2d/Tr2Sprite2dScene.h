@@ -344,7 +344,6 @@ private:
 	Tr2ConstantBufferAL	m_uiTransformsCb;
 
 	unsigned int m_maxSpriteCount;
-	bool m_setLockFrequentlyFlag;
 };
 
 TYPEDEF_BLUECLASS( Tr2Sprite2dScene );

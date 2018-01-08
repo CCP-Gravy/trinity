@@ -307,7 +307,7 @@ void Tr2Sprite2dLineTrace::AddSegment(
 	// alpha values to do the anti-aliasing
 
 	bool isAA = m_spriteEffect == TR2_SFX_FILL_AA;
-	float pixelWidthInTexels;
+	float pixelWidthInTexels = 1;
 
 	float halfWidth = 0.5f * m_lineWidth;
 

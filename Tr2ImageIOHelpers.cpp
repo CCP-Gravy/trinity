@@ -74,7 +74,7 @@ bool CreateVolumeTexture( ImageIO::HostBitmap& bitmap, Tr2TextureAL &out,
 		Tr2SubresourceData srd;
 
 		srd.m_sysMem			= const_cast<char*>( bitmap.GetMipRawData( i ) );
-		srd.m_sysMemSlicePitch	= bitmap.GetMipSize( i ) / bitmap.GetMipDepth( i );
+		srd.m_sysMemSlicePitch	= bitmap.GetMipSize( i ) / std::max( bitmap.GetMipDepth( i ), 1u );
 		srd.m_sysMemPitch		= bitmap.GetMipPitch( i );	
 
 		if( !srd.m_sysMem )

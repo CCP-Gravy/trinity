@@ -117,7 +117,6 @@ Tr2Sprite2dScene::Tr2Sprite2dScene( IRoot* lockobj ) :
 	m_viewportSizeVar( "UIViewportSize", Vector4( 0.0f, 0.0f, 0.0f, 0.0f ) ),
 	m_dotVectorVar( "g_DotVector", Vector4( 0.0f, 0.0f, 0.0f, 1.0f ) ),
 	m_maxSpriteCount( 1024 ),
-	m_setLockFrequentlyFlag( true ),
 	m_tileMode( S2D_TS_NONE ),
 	m_drawCallStartIndex( 0 ),
 	m_transformsHandle()
@@ -1214,12 +1213,6 @@ bool Tr2Sprite2dScene::OnPrepareResources()
 		m_vertexDecl = Tr2EffectStateManager::GetVertexDeclarationHandle( s_vertexDesc );
 	}
 
-	Tr2RenderContextEnum::BufferUsage usageFlags = USAGE_CPU_WRITE;
-	if( m_setLockFrequentlyFlag )
-	{
-		usageFlags |= USAGE_LOCK_FREQUENTLY;
-	}
-
 	unsigned int indexCount = m_maxSpriteCount * 6;
 	unsigned int ibSize = indexCount * sizeof( uint32_t );
 	unsigned int vbSize = m_maxSpriteCount * 4 * sizeof(Tr2Sprite2dD3DVertex);
@@ -2119,7 +2112,7 @@ unsigned int Tr2Sprite2dScene::GetMaxIndexCountPerDrawCall()
 
 bool Tr2Sprite2dScene::OnModified( Be::Var* value )
 {
-	if( IsMatch( value, m_maxSpriteCount ) || IsMatch( value, m_setLockFrequentlyFlag ) )
+	if( IsMatch( value, m_maxSpriteCount ) )
 	{
 		if( m_maxSpriteCount > SPRITE_COUNT_MAX )
 		{

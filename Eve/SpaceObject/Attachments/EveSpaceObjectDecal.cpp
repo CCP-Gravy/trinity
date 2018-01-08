@@ -481,7 +481,6 @@ void EveSpaceObjectDecal::CreateDecalIndexBuffer( TriGeometryResPtr geomRes )
 	// correct source pointers
 	const unsigned int* indices32 = reinterpret_cast<const unsigned int*>( originalIndices );
 	const unsigned short* indices16 = reinterpret_cast<const unsigned short*>( originalIndices );
-	const Vector3* positions = reinterpret_cast<const Vector3*>( originalVertices );
 	// collect indices for decal geometry
 	std::vector<unsigned int> decalIndices32;
 	std::vector<unsigned short> decalIndices16;

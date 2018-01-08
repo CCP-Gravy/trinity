@@ -284,6 +284,10 @@ void ITr2PickableScene::GetBatches( std::vector<ITr2Renderable*> const& pickable
     pPickingBatches = GetPickingBatchAccumulator();
 
 	CCP_ASSERT( pOpaquePickingBatches && pOpaquePickingBatches->GetBatchCount() == 0 );
+	if( !pOpaquePickingBatches )
+	{
+		return;
+	}
 
 	if( pPickingBatches )
 	{

@@ -63,7 +63,6 @@ void EveStretch::UpdateSyncronous( EveUpdateContext& updateContext )
 
 void EveStretch::UpdateAsyncronous( EveUpdateContext& updateContext )
 {
-	Be::Time time = updateContext.GetTime();
 	if( !m_update )
 	{
 		return;

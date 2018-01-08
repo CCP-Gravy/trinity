@@ -74,6 +74,10 @@ void Tr2TranslationTool::Move( int mouseX, int mouseY, int mouseXDelta, int mous
 		float scale = Dot( delta, zAxis );
 		translate = zAxis * scale;
 	}
+	else
+	{
+		return;
+	}
 
 	m_movement.x += translate.x;
 	m_movement.y += translate.y;

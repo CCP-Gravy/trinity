@@ -1292,6 +1292,10 @@ bool Tr2TextureAtlas::EjectTextureHelper( Tr2AtlasTexture *tex )
 	USE_MAIN_THREAD_RENDER_CONTEXT();
 
 	CCP_ASSERT( tex );
+	if( !tex )
+	{
+		return false;
+	}
 	CCP_ASSERT( tex->m_textureAtlas == this );
 	CCP_ASSERT( tex->m_atlasArea );
 	
