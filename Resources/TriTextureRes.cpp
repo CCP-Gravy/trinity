@@ -556,16 +556,13 @@ BlueStdResult TriTextureRes::CreateFromTexture( TriTextureRes* texture )
 
 	CR_RETURN_VAL( m_ownTexture.Create( 
 		Tr2BitmapDimensions( width, height, other.GetTrueMipCount(), other.GetFormat() ), 
-			Tr2GpuUsage::SHADER_RESOURCE,
+			Tr2GpuUsage::SHADER_RESOURCE | Tr2GpuUsage::COPY_DESTINATION,
 			Tr2CpuUsage::READ, 
 			renderContext ),
 		BlueStdResult( BLUE_STD_RESULT_RUNTIME_ERROR, "could not create a texture" ) );
 
-	Tr2TextureSubresource dst;
-	dst.m_right  = width;
-	dst.m_bottom = height;
 	CR_RETURN_VAL( 
-		m_ownTexture.CopySubresourceRegion( Tr2TextureSubresource(), other, dst, renderContext ),
+		m_ownTexture.CopySubresourceRegion( Tr2TextureSubresource(), other, Tr2TextureSubresource(), renderContext ),
 		BlueStdResult( BLUE_STD_RESULT_RUNTIME_ERROR, "could not copy a texture" ) );
 	m_isTextureResizable = false;
 	return BLUE_STD_RESULT_OK;
