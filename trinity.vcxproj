@@ -2707,10 +2707,8 @@
     <ClInclude Include="Eve\SpaceObject\Children\TransformModifiers\EveChildModifierBillboard3D.h" />
     <ClInclude Include="Eve\SpaceObject\Children\TransformModifiers\EveChildModifierBooster.h" />
     <ClInclude Include="Eve\SpaceObject\Children\TransformModifiers\EveChildModifierCameraOrientedRotationConstrained.h" />
-    <ClInclude Include="Eve\SpaceObject\Children\TransformModifiers\EveChildModifierCameraRotationAligned.h" />
     <ClInclude Include="Eve\SpaceObject\Children\TransformModifiers\EveChildModifierHalo.h" />
     <ClInclude Include="Eve\SpaceObject\Children\TransformModifiers\EveChildModifierHaloInverted.h" />
-    <ClInclude Include="Eve\SpaceObject\Children\TransformModifiers\EveChildModifierLookAtCamera.h" />
     <ClInclude Include="Eve\SpaceObject\Children\TransformModifiers\EveChildModifierSRT.h" />
     <ClInclude Include="Eve\SpaceObject\Children\TransformModifiers\EveChildModifierTransformCommon.h" />
     <ClInclude Include="Eve\SpaceObject\Children\TransformModifiers\EveChildModifierTranslateWithCamera.h" />
@@ -3303,14 +3301,10 @@
     <ClCompile Include="Eve\SpaceObject\Children\TransformModifiers\EveChildModifierBooster_Blue.cpp" />
     <ClCompile Include="Eve\SpaceObject\Children\TransformModifiers\EveChildModifierCameraOrientedRotationConstrained.cpp" />
     <ClCompile Include="Eve\SpaceObject\Children\TransformModifiers\EveChildModifierCameraOrientedRotationConstrained_Blue.cpp" />
-    <ClCompile Include="Eve\SpaceObject\Children\TransformModifiers\EveChildModifierCameraRotationAligned.cpp" />
-    <ClCompile Include="Eve\SpaceObject\Children\TransformModifiers\EveChildModifierCameraRotationAligned_Blue.cpp" />
     <ClCompile Include="Eve\SpaceObject\Children\TransformModifiers\EveChildModifierHalo.cpp" />
     <ClCompile Include="Eve\SpaceObject\Children\TransformModifiers\EveChildModifierHaloInverted.cpp" />
     <ClCompile Include="Eve\SpaceObject\Children\TransformModifiers\EveChildModifierHaloInverted_Blue.cpp" />
     <ClCompile Include="Eve\SpaceObject\Children\TransformModifiers\EveChildModifierHalo_Blue.cpp" />
-    <ClCompile Include="Eve\SpaceObject\Children\TransformModifiers\EveChildModifierLookAtCamera.cpp" />
-    <ClCompile Include="Eve\SpaceObject\Children\TransformModifiers\EveChildModifierLookAtCamera_Blue.cpp" />
     <ClCompile Include="Eve\SpaceObject\Children\TransformModifiers\EveChildModifierSRT.cpp" />
     <ClCompile Include="Eve\SpaceObject\Children\TransformModifiers\EveChildModifierSRT_Blue.cpp" />
     <ClCompile Include="Eve\SpaceObject\Children\TransformModifiers\EveChildModifierTranslateWithCamera.cpp" />
