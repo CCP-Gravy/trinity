@@ -22,7 +22,6 @@
 #include "Tr2RenderTarget.h"
 #include "Tr2DepthStencil.h"
 #include "EveTransform.h"
-#include "EveDustfieldConstraint.h"
 #include "TbbStub.h"
 #include "Include/TriMath.h"
 #include "EveDistanceField.h"
@@ -304,26 +303,6 @@ void EveSpaceScene::Update( Be::Time realTime, Be::Time simTime )
 	{
 		m_warpTunnel->UpdateSyncronous( m_updateContext );
 		m_warpTunnel->UpdateAsyncronous( m_updateContext );
-	}
-
-	if( m_dustfieldConstaint )
-	{
-		m_dustfieldConstaint->Update( m_updateContext, m_ballpark );
-	}
-
-	if( m_dustfield )
-	{
-		m_dustfield->Update( m_updateContext );
-	}
-
-	if( m_cloudfieldConstaint )
-	{
-		m_cloudfieldConstaint->Update( m_updateContext, m_ballpark );
-	}
-
-	if( m_cloudfield )
-	{
-		m_cloudfield->Update( m_updateContext );
 	}
 
 	if( m_starfield )
@@ -1928,19 +1907,6 @@ void EveSpaceScene::EndRender( Tr2RenderContext& renderContext )
 	PopulatePerFramePSData( m_perFramePS );
 	PopulatePerFrameVSData( m_perFrameVS );
 	ApplyPerFrameData( renderContext );
-
-	// dustfield
-	if( m_dustfield )
-	{
-		m_dustfield->UpdateVisibility( frustum, IdentityMatrix() );
-		m_dustfield->GetRenderables( visible );
-	}
-
-	if( m_cloudfield )
-	{
-		m_cloudfield->UpdateVisibility( frustum, IdentityMatrix() );
-		m_cloudfield->GetRenderables( visible );
-	}
 
 	if( !visible.empty() )
 	{

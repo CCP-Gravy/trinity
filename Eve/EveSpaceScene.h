@@ -47,7 +47,6 @@ BLUE_DECLARE( TriTextureRes );
 BLUE_DECLARE( EveLensflare );
 BLUE_DECLARE_VECTOR( EveLensflare );
 BLUE_DECLARE( TriShadowMap );
-BLUE_DECLARE( EveDustfieldConstraint );
 BLUE_DECLARE( Tr2RenderTarget );
 struct ShadowReceiver;
 BLUE_DECLARE( EveTransform );
@@ -424,12 +423,6 @@ protected:
 
 	EveVisualizeMethod m_visualizeMethod;
 	float m_perFrameDebug;
-
-	EveTransformPtr m_dustfield;
-	EveDustfieldConstraintPtr m_dustfieldConstaint;
-	
-	EveTransformPtr m_cloudfield;
-	EveDustfieldConstraintPtr m_cloudfieldConstaint;
 
 	PEveSceneStaticParticlesVector m_staticParticles;
 

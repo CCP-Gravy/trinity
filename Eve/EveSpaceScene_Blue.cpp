@@ -441,34 +441,6 @@ const Be::ClassInfo* EveSpaceScene::ExposeToBlue()
 		)
 		MAP_ATTRIBUTE
 		( 
-			"dustfield", 
-			m_dustfield, 
-			"n/a", 
-			Be::READWRITE | Be::PERSIST 
-		)
-		MAP_ATTRIBUTE
-		( 
-			"dustfieldConstraint", 
-			m_dustfieldConstaint, 
-			"n/a", 
-			Be::READWRITE
-		)
-		MAP_ATTRIBUTE
-		( 
-			"cloudfield", 
-			m_cloudfield, 
-			"n/a", 
-			Be::READWRITE
-		)
-		MAP_ATTRIBUTE
-		( 
-			"cloudfieldConstraint", 
-			m_cloudfieldConstaint, 
-			"n/a", 
-			Be::READWRITE
-		)
-		MAP_ATTRIBUTE
-		( 
 			"staticParticles", 
 			m_staticParticles, 
 			"n/a",
