@@ -1218,6 +1218,11 @@ void EveSpaceScene::BeginRender( Tr2RenderContext& renderContext )
 				m_objects[i]->GetLights( *lightManager );
 			}
 		} );
+
+		for( auto it = begin( m_backgroundObjects ); it != end( m_backgroundObjects ); ++it )
+		{
+			( *it )->GetLights( *lightManager );
+		}
 		m_cameraAttachmentParent->GetLights( *lightManager );
 	}
 	else
