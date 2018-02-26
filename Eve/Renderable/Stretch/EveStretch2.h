@@ -79,6 +79,7 @@ private:
 	Tr2PointLightPtr m_sourceLight;
 	Tr2PointLightPtr m_destinationLight;
 	Tr2GpuSharedEmitterPtr m_sourceEmitter;
+	Tr2GpuSharedEmitterPtr m_destinationEmitter;
 
 	TriObserverLocalPtr m_sourceObserver;
 	TriObserverLocalPtr m_destinationObserver;

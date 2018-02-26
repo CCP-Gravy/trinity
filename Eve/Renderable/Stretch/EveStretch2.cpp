@@ -202,6 +202,15 @@ void EveStretch2::Update(EveUpdateContext& updateContext)
 			updateContext.GetOriginShift() );
 		m_sourceEmitter->Update( args );
 	}
+	if( m_destinationEmitter )
+	{
+		ITr2GenericEmitter::UpdateArguments args(
+			updateContext.GetTime(),
+			updateContext.GetGpuParticleSystem(),
+			dest,
+			updateContext.GetOriginShift() );
+		m_destinationEmitter->Update( args );
+	}
 }
 
 void EveStretch2::UpdateInactive( EveUpdateContext& updateContext )
