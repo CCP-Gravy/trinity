@@ -51,6 +51,8 @@ public:
 	void	ClearAnimations();
 	float	GetAnimationChainCompleteTime();
 
+	Tr2GrannyAnimationLayer* GetAnimationLayer( const char* name );
+
 	void AddAnimationLayer( const char* layerName, float layerWeight=1.0f );
 	void ClearAnimationLayers();
 	void AddAnimationLayerBone( const char* layerName, const char* boneName );
@@ -156,7 +158,6 @@ private:
 	float m_totalPauseOffset;
 
 	granny_file_info* GetFileInfo() const;
-	Tr2GrannyAnimationLayer* GetAnimationLayer( const char* name );
 	void LoadSecondaryResPath( const std::string& val );
 	void	ApplyBoneOffsets ( unsigned i );
 	
