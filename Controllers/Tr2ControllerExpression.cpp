@@ -93,17 +93,17 @@ std::string Tr2ControllerExpression::SetExpr( const char* expression, const Tr2S
 {
 	m_stateMachine = &stateMachine;
 	m_controller = stateMachine.GetController();
-	return CreateParser( expression );
+	return CreateParser( expression, nullptr );
 }
 
-std::string Tr2ControllerExpression::SetExpr( const char* expression, const Tr2Controller& controller )
+std::string Tr2ControllerExpression::SetExpr( const char* expression, const Tr2Controller& controller, ModifyParser modifyParser )
 {
 	m_stateMachine = nullptr;
 	m_controller = &controller;
-	return CreateParser( expression );
+	return CreateParser( expression, modifyParser );
 }
 
-std::string Tr2ControllerExpression::CreateParser( const char* expression )
+std::string Tr2ControllerExpression::CreateParser( const char* expression, ModifyParser modifyParser )
 {
 	m_expressionParser = mu::Parser();
 	auto& variables = m_controller->GetVariables();
@@ -120,6 +120,10 @@ std::string Tr2ControllerExpression::CreateParser( const char* expression )
 	m_expressionParser.DefineFun( "AnimationTime", AnimationTime, false );
 	m_expressionParser.DefineFun( "IsAnimationPlaying", IsAnimationPlaying, false );
 	m_expressionParser.DefineFun( "CurveSetTime", CurveSetTime, false );
+	if( modifyParser )
+	{
+		( *modifyParser )( m_expressionParser );
+	}
 	
 	m_expressionParser.SetExpr( expression );
 	s_stateMachine = m_stateMachine;
@@ -171,5 +175,13 @@ void Tr2ControllerExpression::Clear()
 
 bool Tr2ControllerExpression::IsExpressionValid() const
 {
-	return m_expressionParser.GetNumResults() != 0;
+	try
+	{
+		m_expressionParser.Eval();
+	}
+	catch( const mu::Parser::exception_type& )
+	{
+		return false;
+	}
+	return true;
 }

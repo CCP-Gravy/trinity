@@ -21,7 +21,17 @@ namespace
 
 	float Curve( float time )
 	{
-		return s_action->GetCurveValue( s_stateTime );
+		if( !s_action )
+		{
+			return 0;
+		}
+		return s_action->GetCurveValue( time );
+	}
+
+	void ModifyParser( mu::Parser& parser )
+	{
+		parser.DefineFun( "StateTime", StateTime );
+		parser.DefineFun( "Curve", Curve );
 	}
 }
 
@@ -39,7 +49,7 @@ void Tr2ActionAnimateValue::Link( Tr2Controller& controller )
 	std::unordered_map<std::string, IRoot*> roots;
 	controller.GetBindingPathRoots( roots );
 	m_destination.Link( roots );
-	m_evaluator.SetExpr( m_value.c_str(), controller );
+	m_evaluator.SetExpr( m_value.c_str(), controller, ModifyParser );
 }
 
 void Tr2ActionAnimateValue::Unlink()
@@ -99,7 +109,7 @@ bool Tr2ActionAnimateValue::OnModified( Be::Var* value )
 	}
 	else if( IsMatch( value, m_value ) )
 	{
-		m_evaluator.SetExpr( m_value.c_str(), *m_controller );
+		m_evaluator.SetExpr( m_value.c_str(), *m_controller, ModifyParser );
 	}
 	return true;
 }
@@ -107,6 +117,11 @@ bool Tr2ActionAnimateValue::OnModified( Be::Var* value )
 bool Tr2ActionAnimateValue::IsBindingValid() const
 {
 	return m_destination.IsValid();
+}
+
+bool Tr2ActionAnimateValue::IsExpressionValid() const
+{
+	return m_evaluator.IsExpressionValid();
 }
 
 float Tr2ActionAnimateValue::GetCurveValue( float time ) const

@@ -33,6 +33,7 @@ public:
 	virtual bool OnModified( Be::Var* value );
 
 	bool IsBindingValid() const;
+	bool IsExpressionValid() const;
 
 	float GetCurveValue( float time ) const;
 private:
