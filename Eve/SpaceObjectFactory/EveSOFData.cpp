@@ -311,6 +311,7 @@ EveSOFDataHullDecal::EveSOFDataHullDecal( IRoot* lockobj ) :
 	m_groupIndex( -1 ),
 	m_boneIndex( -1 ),
 	m_meshIndex( -1 ),
+	m_glowColorType( EveSOFDataFactionColorSet::TYPE_PRIMARY ),
 	PARENTLOCK( m_textures ),
 	PARENTLOCK( m_parameters ),
 	PARENTLOCK( m_indexBuffer )

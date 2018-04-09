@@ -132,6 +132,7 @@ public:
 		TYPE_REACTOR,
 		TYPE_DARKHULL,
 		TYPE_BOOSTER,
+		TYPE_KILLMARK,
 
 		TYPE_MAX,
 	};
@@ -693,6 +694,7 @@ public:
 	Quaternion m_rotation;
 	std::string m_shader;
 	int m_groupIndex, m_boneIndex, m_meshIndex;
+	EveSOFDataFactionColorSet::ColorType m_glowColorType;
 	PEveSOFDataTextureVector m_textures;
 	PEveSOFDataParameterVector m_parameters;
 	PEveSOFDataDecalIndexStructureList m_indexBuffer;

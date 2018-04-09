@@ -664,6 +664,7 @@ void EveSOFDataMgr::GenerateHullData( HullData& hd, EveSOFDataHullPtr srcData ) 
 		hdd.groupIndex = hullDecal->m_groupIndex;
 		hdd.boneIndex = hullDecal->m_boneIndex;
 		hdd.meshIndex = hullDecal->m_meshIndex;
+		hdd.glowColorType = hullDecal->m_glowColorType;
 		hdd.indexBuffer.insert( hdd.indexBuffer.begin(), hullDecal->m_indexBuffer.begin(), hullDecal->m_indexBuffer.end() );
 		hdd.shader = hullDecal->m_shader;
 		for( auto hdtit = hullDecal->m_textures.begin(); hdtit != hullDecal->m_textures.end(); ++hdtit )

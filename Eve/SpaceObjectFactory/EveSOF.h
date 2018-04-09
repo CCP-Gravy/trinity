@@ -51,12 +51,11 @@ public:
 	void SetupTurretMaterialFromFaction( EveTurretSet* turretSet, const char* factionName );
 
 	bool LoadData( const char* filePath );
-	const EveSOFDataMgr& DataManager() const { return m_dataMgr; }
 private:
 	// creation
 	EveSpaceObject2Ptr CreateSpaceObject( const EveSOFDNAPtr dna ) const;
 
-	// all setup functions for the to-be-created speco object
+	// all setup functions for the to-be-created space object
 	void SetupConsts( EveSpaceObject2Ptr obj, const EveSOFDNAPtr dna ) const;
 	void SetupMesh( EveSpaceObject2Ptr obj, const EveSOFDNAPtr dna ) const;
 	void SetupSpriteSets( EveSpaceObject2Ptr obj, const EveSOFDNAPtr dna ) const;

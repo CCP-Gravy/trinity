@@ -26,6 +26,7 @@ Be::VarChooser EveSOFDataFactionColorSetTypeChooser[] =
 	{ "Reactor", BeCast( EveSOFDataFactionColorSet::TYPE_REACTOR ), "Material Reactorarea Glow" },
 	{ "Darkhull", BeCast( EveSOFDataFactionColorSet::TYPE_DARKHULL ), "Material Darkhull Glow" },
 	{ "Booster", BeCast( EveSOFDataFactionColorSet::TYPE_BOOSTER ), "Material Hullarea Heat Shimmer Glow" },
+	{ "Killmark", BeCast( EveSOFDataFactionColorSet::TYPE_KILLMARK ), "Killmark glow color" },
 	{ 0 }
 };
 BLUE_REGISTER_ENUM_EX( "EveSOFDataFactionColorSetType", EveSOFDataFactionColorSet::ColorType, EveSOFDataFactionColorSetTypeChooser, ENUM_REG_ENUM_OBJECT_ON_MODULE );
@@ -114,6 +115,7 @@ const Be::ClassInfo* EveSOFDataFactionColorSet::ExposeToBlue()
 		MAP_ATTRIBUTE( EveSOFDataFactionColorSetTypeChooser[TYPE_REACTOR].mKey, m_colors[TYPE_REACTOR], ":jessica-group:Material Glow Colors", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( EveSOFDataFactionColorSetTypeChooser[TYPE_DARKHULL].mKey, m_colors[TYPE_DARKHULL], ":jessica-group:Material Glow Colors", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( EveSOFDataFactionColorSetTypeChooser[TYPE_BOOSTER].mKey, m_colors[TYPE_BOOSTER], ":jessica-group:Material Glow Colors", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( EveSOFDataFactionColorSetTypeChooser[TYPE_KILLMARK].mKey, m_colors[TYPE_KILLMARK], ":jessica-group:Decal Glow Colors", Be::READWRITE | Be::PERSIST )
 		EXPOSURE_END()
 }
 
@@ -752,6 +754,7 @@ const Be::ClassInfo* EveSOFDataHullDecal::ExposeToBlue()
 		MAP_ATTRIBUTE( "groupIndex", m_groupIndex, "", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "boneIndex", m_boneIndex, ":jessica-widget: boneindex", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "meshIndex", m_meshIndex, "", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE_WITH_CHOOSER( "glowColorType", m_glowColorType, "", Be::READWRITE | Be::PERSIST | Be::ENUM, EveSOFDataFactionColorSetTypeChooser )
 		MAP_ATTRIBUTE( "parameters", m_parameters, "", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "textures", m_textures, "", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "indexBuffer", m_indexBuffer, "", Be::READWRITE | Be::PERSIST )
