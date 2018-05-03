@@ -116,6 +116,7 @@ const Be::ClassInfo* EveEffectRoot2::ExposeToBlue()
 			"",
 			Be::READWRITE | Be::PERSIST
 		)
+		MAP_ATTRIBUTE( "controllers", m_controllers, "List of object controllers", Be::READ | Be::PERSIST )
 
 		MAP_ATTRIBUTE( 
 			"secondaryLightingSphereRadius", 
@@ -141,6 +142,14 @@ const Be::ClassInfo* EveEffectRoot2::ExposeToBlue()
 			":jessica-icon: timeline/stop.png" )
 			
 		MAP_METHOD_AND_WRAP( "GetBoundingSphereRadius", GetBoundingSphereRadius, "Returns the bounding sphere radius." )	
+
+		MAP_METHOD_AND_WRAP(
+			"SetControllerVariable",
+			SetControllerVariable,
+			"Set variable for all applicable controllers\n"
+			":param name: variable name\n"
+			":param value: new variable value\n"
+		)
 
     EXPOSURE_END();
 }

@@ -578,6 +578,15 @@ const Be::ClassInfo* EveSpaceObject2::ExposeToBlue()
 		MAP_ATTRIBUTE( "lights", m_lights, "List of dynamic lights", Be::READ | Be::PERSIST );
 
 		MAP_ATTRIBUTE( "externalParameters", m_externalParameters, "List of external parameters to bind to object elements", Be::READ | Be::PERSIST )
+		MAP_ATTRIBUTE( "controllers", m_controllers, "List of object controllers", Be::READ | Be::PERSIST )
+
+		MAP_METHOD_AND_WRAP( 
+			"SetControllerVariable", 
+			SetControllerVariable, 
+			"Set variable for all applicable controllers\n"
+			":param name: variable name\n"
+			":param value: new variable value\n"
+		)
 
 #if BLUE_WITH_PYTHON
 		MAP_METHOD( 

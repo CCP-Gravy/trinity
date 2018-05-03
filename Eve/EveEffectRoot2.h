@@ -16,6 +16,9 @@
 BLUE_DECLARE( Tr2PointLight );
 BLUE_DECLARE_VECTOR( Tr2PointLight );
 
+BLUE_DECLARE_INTERFACE( ITr2Controller );
+BLUE_DECLARE_IVECTOR( ITr2Controller );
+
 BLUE_DECLARE( EveEffectRoot2 );
 
 BLUE_CLASS( EveEffectRoot2 ):
@@ -23,7 +26,8 @@ BLUE_CLASS( EveEffectRoot2 ):
 	public IInitialize,
 	public ITr2SecondaryLightSource,
 	public ITriTargetable,
-	public ITr2DebugRenderable
+	public ITr2DebugRenderable,
+	public IListNotify
 {
 public:
     EXPOSE_TO_BLUE();
@@ -35,6 +39,10 @@ public:
 	//////////////////////////////////////////////////////////////////////////////////////
 	// IInitialize
 	bool Initialize();
+
+	//////////////////////////////////////////////////////////////////////////////////////
+	// IListNotify
+	virtual void OnListModified( long event, ssize_t key, ssize_t key2, IRoot* value, const IList* list );
 
 	/////////////////////////////////////////////////////////////////////////////////////
 	// IEveSpaceObject2
@@ -82,6 +90,8 @@ public:
 	PIEveSpaceObjectChildVector& GetChildren();
 
 	void SetTransform( const Matrix& transform );
+
+	void SetControllerVariable( const char* name, float value );
 private:
 	// general
 	std::string m_name;
@@ -126,7 +136,9 @@ private:
 	Tr2Lod m_lodLevel;
 	
 	PTr2PointLightVector m_lights;
-	
+
+	PITr2ControllerVector m_controllers;
+
 	float GetBoundingSphereRadius() { return m_boundingSphere.w; }
 	float m_estimatedSize;
 	float m_effectDuration;

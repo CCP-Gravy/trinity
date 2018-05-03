@@ -65,6 +65,7 @@ bool EveMobile::Initialize()
 // --------------------------------------------------------------------------------
 void EveMobile::OnListModified( long event, ssize_t key, ssize_t key2, IRoot* value, const IList* theList )
 {
+	EveSpaceObject2::OnListModified( event, key, key2, value, theList );
 	if( (event & BELIST_LOADING) == 0  )
 	{
 		switch( event & BELIST_EVENTMASK )

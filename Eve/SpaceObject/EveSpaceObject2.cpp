@@ -33,6 +33,8 @@
 #include "Utilities/StringUtils.h"
 #include "Tr2ExternalParameter.h"
 
+#include "Controllers/ITr2Controller.h"
+
 #include <limits>
 
 
@@ -150,6 +152,7 @@ EveSpaceObject2::EveSpaceObject2( IRoot* lockobj ) :
 	PARENTLOCK( m_lights ),
 	PARENTLOCK( m_externalParameters ),
 	PARENTLOCK( m_customMasks ),
+	PARENTLOCK( m_controllers ),
 	m_impostorMode( false ),
 	m_display( true ),
 	m_update( true ),
@@ -192,6 +195,8 @@ EveSpaceObject2::EveSpaceObject2( IRoot* lockobj ) :
 
 	memset( &m_psData, 0, sizeof( EveSpaceObjectPSData ) );
 	memset( &m_vsData, 0, sizeof( EveSpaceObjectVSData ) );
+
+	m_controllers.SetNotify( this );
 }
 
 EveSpaceObject2::~EveSpaceObject2()
@@ -223,9 +228,37 @@ bool EveSpaceObject2::Initialize()
 		PrepareForAnimation();
 	}
 
+	for( auto it = begin( m_controllers ); it != end( m_controllers ); ++it )
+	{
+		( *it )->Link( *GetRawRoot() );
+	}
+
 	return true;
 }
 
+void EveSpaceObject2::OnListModified( long event, ssize_t key, ssize_t key2, IRoot* value, const IList* list )
+{
+	if( list == &m_controllers && ( event & BELIST_LOADING ) == 0 )
+	{
+		switch( event & BELIST_EVENTMASK )
+		{
+		case BELIST_INSERTED:
+			if( ITr2ControllerPtr controller = BlueCastPtr( value ) )
+			{
+				controller->Link( *GetRawRoot() );
+			}
+			break;
+		case BELIST_REMOVED:
+			if( ITr2ControllerPtr controller = BlueCastPtr( value ) )
+			{
+				controller->Unlink();
+			}
+			break;
+		default:
+			break;
+		}
+	}
+}
 void EveSpaceObject2::RegisterSecondaryLightSource( Tr2ShLightingManager& manager )
 {
 	static const Color s_noEmissiveColor( 0.f, 0.f, 0.f, 0.f );
@@ -325,6 +358,11 @@ void EveSpaceObject2::UpdateSyncronous( EveUpdateContext& updateContext )
 			float boxVolume = aabbSize.x * aabbSize.y * aabbSize.z;
 			m_secondaryLightingSphereRadius = pow( boxVolume / 4.f * 3.f / TRI_PI, 1.0f / 3.0f );
 		}
+	}
+
+	for( auto it = begin( m_controllers ); it != end( m_controllers ); ++it )
+	{
+		( *it )->Update();
 	}
 }
 
@@ -2917,4 +2955,12 @@ float EveSpaceObject2::GetRenderPriority( const ImpostorHash& oldHash, const Imp
 bool EveSpaceObject2::GetImpostorBoundingSphere( Vector4& sphere ) const
 {
 	return GetBoundingSphere( sphere );
+}
+
+void EveSpaceObject2::SetControllerVariable( const char* name, float value )
+{
+	for( auto it = begin( m_controllers ); it != end( m_controllers ); ++it )
+	{
+		( *it )->SetVariable( name, value );
+	}
 }

@@ -74,6 +74,10 @@ BLUE_DECLARE_VECTOR( Tr2PointLight );
 BLUE_DECLARE( Tr2ExternalParameter );
 BLUE_DECLARE_VECTOR( Tr2ExternalParameter );
 
+BLUE_DECLARE_INTERFACE( ITr2Controller );
+BLUE_DECLARE_IVECTOR( ITr2Controller );
+
+
 struct granny_skeleton;
 
 class TriFrustum;
@@ -149,7 +153,8 @@ BLUE_CLASS( EveSpaceObject2 ):
 	public INotify,
 	public ITr2SecondaryLightSource,
 	public ITr2ImpostorSource,
-	public ITr2DebugRenderable
+	public ITr2DebugRenderable,
+	public IListNotify
 {
 public:
 	EXPOSE_TO_BLUE();
@@ -214,6 +219,10 @@ public:
 	//////////////////////////////////////////////////////////////////////////////////////
 	// IInitialize
 	bool Initialize();
+
+	//////////////////////////////////////////////////////////////////////////////////////
+	// IListNotify
+	virtual void OnListModified( long event, ssize_t key, ssize_t key2, IRoot* value, const IList* list );
 
 	/////////////////////////////////////////////////////////////////////////////////////
 	// ITr2Renderable
@@ -365,6 +374,8 @@ public:
 
 	// external parameters
 	void AddExternalParameter( Tr2ExternalParameter* externalParameter );
+
+	void SetControllerVariable( const char* name, float value );
 
 protected:
 	// LODing
@@ -569,6 +580,7 @@ private:
 
 	PTr2ExternalParameterVector m_externalParameters;
 
+	PITr2ControllerVector m_controllers;
 };
 
 TYPEDEF_BLUECLASS( EveSpaceObject2 );

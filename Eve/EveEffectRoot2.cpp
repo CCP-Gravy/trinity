@@ -5,6 +5,7 @@
 #include "TriFrustum.h"
 #include "Tr2PointLight.h"
 #include "Tr2LightManager.h"
+#include "Controllers/ITr2Controller.h"
 #include "Curves/TriCurveSet.h"
 #include "Eve/EveUpdateContext.h"
 #include "Eve/SpaceObject/EveSpaceObject2.h"
@@ -19,6 +20,7 @@ EveEffectRoot2::EveEffectRoot2( IRoot* lockobj ) :
 	PARENTLOCK( m_lights ),
 	PARENTLOCK( m_effectChildren ),
 	PARENTLOCK( m_curveSets ),
+	PARENTLOCK( m_controllers ),
 	m_boundingSphere( 0, 0, 0, 0 ),
 	m_scaling( 1.0f, 1.0f, 1.0f ),
 	m_rotation( 0.0f, 0.0f, 0.0f, 1.0f ),
@@ -34,11 +36,40 @@ EveEffectRoot2::EveEffectRoot2( IRoot* lockobj ) :
 	m_secondaryLightingSphereRadiusWorld( 0.5f ),
 	m_secondaryLightingEmissiveColor( 0.f, 0.f, 0.f, 0.f )
 {
+	m_controllers.SetNotify( this );
 }
 
 bool EveEffectRoot2::Initialize()
 {
+	for( auto it = begin( m_controllers ); it != end( m_controllers ); ++it )
+	{
+		( *it )->Link( *GetRawRoot() );
+	}
 	return true;
+}
+
+void EveEffectRoot2::OnListModified( long event, ssize_t key, ssize_t key2, IRoot* value, const IList* list )
+{
+	if( list == &m_controllers && ( event & BELIST_LOADING ) == 0 )
+	{
+		switch( event & BELIST_EVENTMASK )
+		{
+		case BELIST_INSERTED:
+			if( ITr2ControllerPtr controller = BlueCastPtr( value ) )
+			{
+				controller->Link( *GetRawRoot() );
+			}
+			break;
+		case BELIST_REMOVED:
+			if( ITr2ControllerPtr controller = BlueCastPtr( value ) )
+			{
+				controller->Unlink();
+			}
+			break;
+		default:
+			break;
+		}
+	}
 }
 
 void EveEffectRoot2::UpdateSyncronous( EveUpdateContext& updateContext ) 
@@ -59,6 +90,11 @@ void EveEffectRoot2::UpdateSyncronous( EveUpdateContext& updateContext )
 	for( auto ecIt = m_effectChildren.begin(); ecIt != m_effectChildren.end(); ++ecIt ) 
 	{
 		(*ecIt)->UpdateSyncronous( updateContext, this, nullptr );
+	}
+
+	for( auto it = begin( m_controllers ); it != end( m_controllers ); ++it )
+	{
+		( *it )->Update();
 	}
 }
 
@@ -462,5 +498,14 @@ void EveEffectRoot2::RenderDebugInfo( Tr2DebugRenderer& renderer )
 		{
 			renderable->RenderDebugInfo( renderer );
 		}
+	}
+}
+
+// -----------------------------------------------------------------------------
+void EveEffectRoot2::SetControllerVariable( const char* name, float value )
+{
+	for( auto it = begin( m_controllers ); it != end( m_controllers ); ++it )
+	{
+		( *it )->SetVariable( name, value );
 	}
 }

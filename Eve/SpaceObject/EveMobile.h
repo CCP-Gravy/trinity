@@ -21,8 +21,7 @@ BLUE_DECLARE_VECTOR( EveTurretSet );
 //   EveSpaceObject2
 // --------------------------------------------------------------------------------
 BLUE_CLASS( EveMobile ) :
-	public EveSpaceObject2,
-	public IListNotify
+	public EveSpaceObject2
 {
 public:
 	EXPOSE_TO_BLUE();
