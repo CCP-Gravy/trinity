@@ -204,6 +204,16 @@ bool EveChildCloud::OnModified( Be::Var* value )
 	return true;
 }
 
+const char* EveChildCloud::GetName() const
+{
+	return m_name.c_str();
+}
+
+void EveChildCloud::SetName( const char* name )
+{
+	m_name = name;
+}
+
 void EveChildCloud::UpdateVisibility( const TriFrustum& frustum, const Matrix& parentTransform, Tr2Lod parentLod )
 {
 	m_isVisible = !( !m_display || !frustum.IsSphereVisible( &m_boundingSphere ) || frustum.GetPixelSizeAccross( &m_boundingSphere ) < m_minScreenSize * g_eveSpaceSceneLODFactor );

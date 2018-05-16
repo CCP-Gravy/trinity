@@ -11,6 +11,9 @@ class Tr2LightManager;
 
 BLUE_INTERFACE( IEveSpaceObjectChild ) : public IRoot
 {
+	virtual const char* GetName() const = 0;
+	virtual void SetName( const char* name ) = 0;
+
 	virtual void UpdateVisibility( const TriFrustum& frustum, const Matrix& parentTransform, Tr2Lod parentLod ) = 0;
 	virtual void GetRenderables( std::vector<ITr2Renderable*>& renderables ) = 0;
 	virtual bool GetBoundingSphere( Vector4& sphere, BoundingSphereQuery query=EVE_BOUNDS_NORMAL ) const = 0;

@@ -8,6 +8,7 @@
 #define EveChildContainer_H
 
 #include "IEveSpaceObjectChild.h"
+#include "IEveEffectChildrenOwner.h"
 #include "EveChildTransform.h"
 #include "Tr2DebugRenderer.h"
 #include "TransformModifiers/IEveChildTransformModifier.h"
@@ -29,6 +30,7 @@ BLUE_CLASS( EveChildContainer ) :
 	public ITr2CurveSetOwner,
 	public IInitialize,
 	public IListNotify,
+	public IEveEffectChildrenOwner,
 	public ITr2DebugRenderable
 {
 public:
@@ -44,6 +46,15 @@ public:
 	//////////////////////////////////////////////////////////////////////////////////////
 	// IListNotify
 	virtual void OnListModified( long event, ssize_t key, ssize_t key2, IRoot* value, const IList* list );
+
+	/////////////////////////////////////////////////////////////////////////////////////
+	// IEveEffectChildrenOwner
+	IEveSpaceObjectChildPtr GetEffectChildByName( const char* name ) const;
+	void AddToEffectChildrenList( IEveSpaceObjectChild* child );
+	void RemoveFromEffectChildrenList( IEveSpaceObjectChild* child );
+
+	const char* GetName() const;
+	void SetName( const char* name );
 
 	void UpdateVisibility( const TriFrustum& frustum, const Matrix& parentTransform, Tr2Lod parentLod );
 	void GetRenderables( std::vector<ITr2Renderable*>& renderables );

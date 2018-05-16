@@ -9,6 +9,7 @@
 #include "EveLODHelper.h"
 #include "IEveSpaceObject2.h"
 #include "Eve/SpaceObject/Children/IEveSpaceObjectChild.h"
+#include "Eve/SpaceObject/Children/IEveEffectChildrenOwner.h"
 #include "Tr2ShLightingManager.h"
 #include "Include/ITriTargetable.h"
 #include "Tr2DebugRenderer.h"
@@ -29,7 +30,8 @@ BLUE_CLASS( EveEffectRoot2 ):
 	public ITriTargetable,
 	public ITr2DebugRenderable,
 	public ITr2CurveSetOwner,
-	public IListNotify
+	public IListNotify,
+	public IEveEffectChildrenOwner
 {
 public:
     EXPOSE_TO_BLUE();
@@ -87,6 +89,12 @@ public:
 	virtual void StopCurveSet( const std::string& name );
 	virtual void UpdateCurveSet( const std::string& name, Be::Time time );
 	virtual float GetCurveSetDuration( const std::string& name ) const;
+
+	/////////////////////////////////////////////////////////////////////////////////////
+	// IEveEffectChildrenOwner
+	IEveSpaceObjectChildPtr GetEffectChildByName( const char* name ) const;
+	void AddToEffectChildrenList( IEveSpaceObjectChild* child );
+	void RemoveFromEffectChildrenList( IEveSpaceObjectChild* child );
 
 	/////////////////////////////////////////////////////////////////////////////////////
 	// ITr2DebugRenderable

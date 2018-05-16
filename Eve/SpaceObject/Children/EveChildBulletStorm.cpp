@@ -80,6 +80,18 @@ bool EveChildBulletStorm::OnModified( Be::Var* val )
 }
 
 // --------------------------------------------------------------------------------
+const char* EveChildBulletStorm::GetName() const
+{
+	return m_name.c_str();
+}
+
+// --------------------------------------------------------------------------------
+void EveChildBulletStorm::SetName( const char* name )
+{
+	m_name = name;
+}
+
+// --------------------------------------------------------------------------------
 // Description:
 //   Trinity's way of rendering
 // --------------------------------------------------------------------------------

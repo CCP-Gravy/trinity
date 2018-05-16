@@ -54,6 +54,16 @@ bool EveChildParticleSystem::Initialize()
 	return true;
 }
 
+const char* EveChildParticleSystem::GetName() const
+{
+	return m_name.c_str();
+}
+
+void EveChildParticleSystem::SetName( const char* name )
+{
+	m_name = BlueSharedString( name );
+}
+
 // --------------------------------------------------------------------------------
 // Description:
 //   Setup function to set data from outside, in this case just pass it to

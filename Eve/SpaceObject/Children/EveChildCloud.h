@@ -49,6 +49,8 @@ public:
 
 	//////////////////////////////////////////////////////////////////////////////////////
 	// IEveSpaceObjectChild
+	virtual const char* GetName() const;
+	virtual void SetName( const char* name );
 	virtual void UpdateSyncronous( EveUpdateContext& updateContext, IEveSpaceObject2* spaceObjectParent, IEveSpaceObjectChild* childParent );
 	virtual void UpdateAsyncronous( EveUpdateContext& updateContext, IEveSpaceObject2* spaceObjectParent, IEveSpaceObjectChild* childParent );
 	virtual void GetLocalToWorldTransform( Matrix &transform ) const;

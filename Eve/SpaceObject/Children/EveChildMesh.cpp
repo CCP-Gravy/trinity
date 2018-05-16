@@ -48,6 +48,16 @@ bool EveChildMesh::Initialize()
 	return true;
 }
 
+const char* EveChildMesh::GetName() const
+{
+	return m_name.c_str();
+}
+
+void EveChildMesh::SetName( const char* name )
+{
+	m_name = BlueSharedString( name );
+}
+
 void EveChildMesh::UpdateVisibility( const TriFrustum& frustum, const Matrix& parentTransform, Tr2Lod parentLod )
 {
 	m_isVisible = false;

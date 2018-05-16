@@ -2413,10 +2413,24 @@ void EveSpaceObject2::AddToChildrenList( EveTransformPtr transform )
 }
 
 // --------------------------------------------------------------------------------
+IEveSpaceObjectChildPtr EveSpaceObject2::GetEffectChildByName( const char* name ) const
+{
+	for( auto it = begin( m_effectChildren ); it != end( m_effectChildren ); ++it )
+	{
+		auto child = *it;
+		if( strcmp( child->GetName(), name ) == 0 )
+		{
+			return child;
+		}
+	}
+	return nullptr;
+}
+
+// --------------------------------------------------------------------------------
 // Description:
 //   Add a child to the effectChildren list
 // --------------------------------------------------------------------------------
-void EveSpaceObject2::AddToEffectChildrenList( IEveSpaceObjectChildPtr child )
+void EveSpaceObject2::AddToEffectChildrenList( IEveSpaceObjectChild* child )
 {
 	m_effectChildren.Append( child->GetRootObject() );
 }

@@ -22,6 +22,7 @@
 #include "Eve/SpaceObject/Attachments/EveSpaceObjectDecal.h"
 #include "Eve/SpaceObject/Attachments/EveImpactOverlay.h"
 #include "Eve/SpaceObject/Children/IEveSpaceObjectChild.h"
+#include "Eve/SpaceObject/Children/IEveEffectChildrenOwner.h"
 #include "Eve/SpaceObject/Utils/EveLocatorSets.h"
 #include "Tr2ImpostorManager.h"
 #include "Tr2DebugRenderer.h"
@@ -156,7 +157,8 @@ BLUE_CLASS( EveSpaceObject2 ):
 	public ITr2ImpostorSource,
 	public ITr2DebugRenderable,
 	public IListNotify,
-	public ITr2CurveSetOwner
+	public ITr2CurveSetOwner,
+	public IEveEffectChildrenOwner
 {
 public:
 	EXPOSE_TO_BLUE();
@@ -297,6 +299,12 @@ public:
     virtual void GetDebugOptions( Tr2DebugRendererOptions& options );
     virtual void RenderDebugInfo( Tr2DebugRenderer& renderer );
 
+	/////////////////////////////////////////////////////////////////////////////////////
+	// IEveEffectChildrenOwner
+	IEveSpaceObjectChildPtr GetEffectChildByName( const char* name ) const;
+	void AddToEffectChildrenList( IEveSpaceObjectChild* child );
+	void RemoveFromEffectChildrenList( IEveSpaceObjectChild* child );
+
 	// For stateful GPU particles
 	ITriVectorFunctionPtr GetPositionFunction();
 
@@ -346,10 +354,6 @@ public:
 
 	// access to children
 	void AddToChildrenList( EveTransformPtr transform );
-
-	// add to children
-	void AddToEffectChildrenList( IEveSpaceObjectChildPtr child );
-	void RemoveFromEffectChildrenList( IEveSpaceObjectChild* child );
 
 	// access to curves
 	void SetModelRotationCurve( ITriQuaternionFunctionPtr rotationCurve );

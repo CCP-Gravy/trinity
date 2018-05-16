@@ -11,6 +11,7 @@ const Be::ClassInfo* EveEffectRoot2::ExposeToBlue()
 		MAP_INTERFACE( ITr2SecondaryLightSource )
 		MAP_INTERFACE( ITriTargetable )
 		MAP_INTERFACE( ITr2CurveSetOwner )
+		MAP_INTERFACE( IEveEffectChildrenOwner )
 
 		MAP_ATTRIBUTE
 		(

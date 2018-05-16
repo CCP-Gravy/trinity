@@ -636,3 +636,33 @@ void EveEffectRoot2::StartControllers()
 		( *it )->StartControllers();
 	}
 }
+
+// --------------------------------------------------------------------------------
+IEveSpaceObjectChildPtr EveEffectRoot2::GetEffectChildByName( const char* name ) const
+{
+	for( auto it = begin( m_effectChildren ); it != end( m_effectChildren ); ++it )
+	{
+		auto child = *it;
+		if( strcmp( child->GetName(), name ) == 0 )
+		{
+			return child;
+		}
+	}
+	return nullptr;
+}
+
+// --------------------------------------------------------------------------------
+void EveEffectRoot2::AddToEffectChildrenList( IEveSpaceObjectChild* child )
+{
+	m_effectChildren.Append( child->GetRootObject() );
+}
+
+// --------------------------------------------------------------------------------
+void EveEffectRoot2::RemoveFromEffectChildrenList( IEveSpaceObjectChild* child )
+{
+	auto index = m_effectChildren.FindKey( child );
+	if( index >= 0 )
+	{
+		m_effectChildren.Remove( index );
+	}
+}

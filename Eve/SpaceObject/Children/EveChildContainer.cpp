@@ -72,6 +72,16 @@ void EveChildContainer::OnListModified( long event, ssize_t key, ssize_t key2, I
 	}
 }
 
+const char* EveChildContainer::GetName() const
+{
+	return m_name.c_str();
+}
+
+void EveChildContainer::SetName( const char* name )
+{
+	m_name = BlueSharedString( name );
+}
+
 void EveChildContainer::UpdateVisibility( const TriFrustum& frustum, const Matrix& parentTransform, Tr2Lod parentLod )
 {
 	if( !m_display )
@@ -410,5 +420,32 @@ void EveChildContainer::StartControllers()
 	for( auto it = begin( m_controllers ); it != end( m_controllers ); ++it )
 	{
 		( *it )->Start();
+	}
+}
+
+IEveSpaceObjectChildPtr EveChildContainer::GetEffectChildByName( const char* name ) const
+{
+	for( auto it = begin( m_objects ); it != end( m_objects ); ++it )
+	{
+		auto child = *it;
+		if( strcmp( child->GetName(), name ) == 0 )
+		{
+			return child;
+		}
+	}
+	return nullptr;
+}
+
+void EveChildContainer::AddToEffectChildrenList( IEveSpaceObjectChild* child )
+{
+	m_objects.Append( child->GetRootObject() );
+}
+
+void EveChildContainer::RemoveFromEffectChildrenList( IEveSpaceObjectChild* child )
+{
+	auto index = m_objects.FindKey( child );
+	if( index >= 0 )
+	{
+		m_objects.Remove( index );
 	}
 }

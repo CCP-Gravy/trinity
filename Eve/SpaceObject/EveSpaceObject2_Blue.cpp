@@ -8,6 +8,7 @@ BLUE_DEFINE_INTERFACE( IEveSpaceObjectChild );
 BLUE_DEFINE_INTERFACE( IEveSpaceObject2 );
 BLUE_DEFINE_INTERFACE( IEveShadowCaster );
 BLUE_DEFINE_INTERFACE( IEveLightReceiver );
+BLUE_DEFINE_INTERFACE( IEveEffectChildrenOwner );
 BLUE_DEFINE_ABSTRACT( EveSpaceObject2 );
 
 #if BLUE_WITH_PYTHON
@@ -137,6 +138,7 @@ const Be::ClassInfo* EveSpaceObject2::ExposeToBlue()
 		MAP_INTERFACE( ITr2SecondaryLightSource )
 		MAP_INTERFACE( ITr2ImpostorSource )
 		MAP_INTERFACE( ITr2CurveSetOwner )
+		MAP_INTERFACE( IEveEffectChildrenOwner )
 
 		MAP_ATTRIBUTE( "name", m_name, "", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "dna", m_dna, "If created by the SOF, this is the DNA string", Be::READ | Be::PERSIST )

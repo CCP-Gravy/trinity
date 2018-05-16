@@ -72,6 +72,16 @@ bool EveChildQuad::Initialize()
 	return true;
 }
 
+const char* EveChildQuad::GetName() const
+{
+	return m_name.c_str();
+}
+
+void EveChildQuad::SetName( const char* name )
+{
+	m_name = BlueSharedString( name );
+}
+
 // --------------------------------------------------------------------------------
 // Description:
 //   Setup function to set data from outside, in this case just pass it to
