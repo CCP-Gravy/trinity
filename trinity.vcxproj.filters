@@ -445,6 +445,9 @@
     <ClInclude Include="Controllers\Tr2ControllerFloatVariable.h">
       <Filter>Source Files\Controllers</Filter>
     </ClInclude>
+    <ClInclude Include="Controllers\Tr2ControllerReference.h">
+      <Filter>Source Files\Controllers</Filter>
+    </ClInclude>
     <ClInclude Include="Controllers\Tr2StateMachine.h">
       <Filter>Source Files\Controllers</Filter>
     </ClInclude>
@@ -2045,6 +2048,12 @@
       <Filter>Source Files\Controllers</Filter>
     </ClCompile>
     <ClCompile Include="Controllers\Tr2ControllerFloatVariable_Blue.cpp">
+      <Filter>Source Files\Controllers</Filter>
+    </ClCompile>
+    <ClCompile Include="Controllers\Tr2ControllerReference.cpp">
+      <Filter>Source Files\Controllers</Filter>
+    </ClCompile>
+    <ClCompile Include="Controllers\Tr2ControllerReference_Blue.cpp">
       <Filter>Source Files\Controllers</Filter>
     </ClCompile>
     <ClCompile Include="Controllers\Tr2Controller_Blue.cpp">

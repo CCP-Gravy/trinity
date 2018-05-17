@@ -2616,6 +2616,7 @@
     <ClInclude Include="Controllers\Tr2Controller.h" />
     <ClInclude Include="Controllers\Tr2ControllerExpression.h" />
     <ClInclude Include="Controllers\Tr2ControllerFloatVariable.h" />
+    <ClInclude Include="Controllers\Tr2ControllerReference.h" />
     <ClInclude Include="Controllers\Tr2StateMachine.h" />
     <ClInclude Include="Controllers\Tr2StateMachineState.h" />
     <ClInclude Include="Controllers\Tr2StateMachineTransition.h" />
@@ -3154,6 +3155,8 @@
     <ClCompile Include="Controllers\Tr2ControllerExpression.cpp" />
     <ClCompile Include="Controllers\Tr2ControllerFloatVariable.cpp" />
     <ClCompile Include="Controllers\Tr2ControllerFloatVariable_Blue.cpp" />
+    <ClCompile Include="Controllers\Tr2ControllerReference.cpp" />
+    <ClCompile Include="Controllers\Tr2ControllerReference_Blue.cpp" />
     <ClCompile Include="Controllers\Tr2Controller_Blue.cpp" />
     <ClCompile Include="Controllers\Tr2StateMachine.cpp" />
     <ClCompile Include="Controllers\Tr2StateMachineState.cpp" />
