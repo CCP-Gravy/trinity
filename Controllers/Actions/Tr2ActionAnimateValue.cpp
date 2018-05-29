@@ -73,10 +73,6 @@ void Tr2ActionAnimateValue::Start( Tr2Controller& controller )
 
 void Tr2ActionAnimateValue::Stop( Tr2Controller& controller )
 {
-	if( !m_curve )
-	{
-		return;
-	}
 	controller.UnRegisterUpdateable( *this );
 }
 
