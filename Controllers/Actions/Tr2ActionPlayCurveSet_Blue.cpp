@@ -18,5 +18,6 @@ const Be::ClassInfo* Tr2ActionPlayCurveSet::ExposeToBlue()
 
 		MAP_ATTRIBUTE( "curveSetName", m_curveSetName, "Curve set name", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "rangeName", m_rangeName, "Name of the curve set time range (or empty to play the full curve set)", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "syncToRange", m_syncToRange, "Only transition out of owner state if curve set range has played full loop", Be::READWRITE | Be::PERSIST )
 	EXPOSURE_END()
 }

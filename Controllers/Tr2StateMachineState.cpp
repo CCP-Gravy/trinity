@@ -161,6 +161,14 @@ Tr2StateMachineState* Tr2StateMachineState::Update()
 	{
 		if( ( *it )->CanActivate() && ( *it )->GetDestination() )
 		{
+			for( auto ai = begin( m_actions ); ai != end( m_actions ); ++ai )
+			{
+				if( !( *ai )->CanTransition() )
+				{
+					return nullptr;
+				}
+			}
+
 			Stop();
 			if( m_isFinalizing )
 			{
