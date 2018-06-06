@@ -2621,6 +2621,7 @@
     <ClInclude Include="Controllers\Tr2StateMachineState.h" />
     <ClInclude Include="Controllers\Tr2StateMachineTransition.h" />
     <ClInclude Include="Controllers\Actions\ITr2ControllerAction.h" />
+    <ClInclude Include="Controllers\Actions\Tr2ActionAnimateCurveSet.h" />
     <ClInclude Include="Controllers\Actions\Tr2ActionAnimateValue.h" />
     <ClInclude Include="Controllers\Actions\Tr2ActionChildEffect.h" />
     <ClInclude Include="Controllers\Actions\Tr2ActionOverlay.h" />
@@ -3164,6 +3165,8 @@
     <ClCompile Include="Controllers\Tr2StateMachineTransition.cpp" />
     <ClCompile Include="Controllers\Tr2StateMachineTransition_Blue.cpp" />
     <ClCompile Include="Controllers\Tr2StateMachine_Blue.cpp" />
+    <ClCompile Include="Controllers\Actions\Tr2ActionAnimateCurveSet.cpp" />
+    <ClCompile Include="Controllers\Actions\Tr2ActionAnimateCurveSet_Blue.cpp" />
     <ClCompile Include="Controllers\Actions\Tr2ActionAnimateValue.cpp" />
     <ClCompile Include="Controllers\Actions\Tr2ActionAnimateValue_Blue.cpp" />
     <ClCompile Include="Controllers\Actions\Tr2ActionChildEffect.cpp" />

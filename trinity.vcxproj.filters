@@ -460,6 +460,9 @@
     <ClInclude Include="Controllers\Actions\ITr2ControllerAction.h">
       <Filter>Source Files\Controllers\Actions</Filter>
     </ClInclude>
+    <ClInclude Include="Controllers\Actions\Tr2ActionAnimateCurveSet.h">
+      <Filter>Source Files\Controllers\Actions</Filter>
+    </ClInclude>
     <ClInclude Include="Controllers\Actions\Tr2ActionAnimateValue.h">
       <Filter>Source Files\Controllers\Actions</Filter>
     </ClInclude>
@@ -2076,6 +2079,12 @@
     </ClCompile>
     <ClCompile Include="Controllers\Tr2StateMachine_Blue.cpp">
       <Filter>Source Files\Controllers</Filter>
+    </ClCompile>
+    <ClCompile Include="Controllers\Actions\Tr2ActionAnimateCurveSet.cpp">
+      <Filter>Source Files\Controllers\Actions</Filter>
+    </ClCompile>
+    <ClCompile Include="Controllers\Actions\Tr2ActionAnimateCurveSet_Blue.cpp">
+      <Filter>Source Files\Controllers\Actions</Filter>
     </ClCompile>
     <ClCompile Include="Controllers\Actions\Tr2ActionAnimateValue.cpp">
       <Filter>Source Files\Controllers\Actions</Filter>
