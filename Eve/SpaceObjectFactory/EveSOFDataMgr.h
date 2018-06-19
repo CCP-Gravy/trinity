@@ -219,7 +219,6 @@ public:
 		int boneIndex;
 		int meshIndex;
 		uint32_t glowColorType;
-		std::string shader;
 		std::map<BlueSharedString, TextureData> textures;
 		std::map<BlueSharedString, Vector4> parameters;
 		std::vector<uint32_t> indexBuffer;

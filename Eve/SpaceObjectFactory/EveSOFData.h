@@ -723,7 +723,6 @@ public:
 	EveSOFDataHullDecal::Usage m_usage;
 	Vector3 m_position, m_scaling;
 	Quaternion m_rotation;
-	std::string m_shader;
 	int m_boneIndex, m_meshIndex;
 	EveSOFDataFactionColorSet::ColorType m_glowColorType;
 	PEveSOFDataTextureVector m_textures;

@@ -492,7 +492,9 @@ EveSOFDataHullDecalSetItem::EveSOFDataHullDecalSetItem( IRoot* lockobj ) :
 	PARENTLOCK( m_textures ),
 	PARENTLOCK( m_parameters ),
 	PARENTLOCK( m_indexBuffer )
-{}
+{
+	m_indexBuffer.SetStructureDefinition( s_eveSOFDecalIndexDef );
+}
 
 EveSOFDataFactionVisibilityGroupSet::EveSOFDataFactionVisibilityGroupSet( IRoot* lockobj ) :
 	PARENTLOCK( m_visibilityGroups )

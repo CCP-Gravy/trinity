@@ -63,10 +63,10 @@ private:
 	void SetupPlaneSets( EveSpaceObject2Ptr obj, const EveSOFDNAPtr dna ) const;
 	void SetupSpriteLineSets( EveSpaceObject2Ptr obj, const EveSOFDNAPtr dna ) const;
 	void SetupHazeSets( EveSpaceObject2Ptr obj, const EveSOFDNAPtr dna ) const;
-	void SetupDecalSets( EveSpaceObject2Ptr obj, const EveSOFDNAPtr dna ) const;
 	void SetupChildrenAndAnimations( EveSpaceObject2Ptr obj, const EveSOFDNAPtr dna ) const;
 	void SetupInstancedMeshes( EveSpaceObject2Ptr newObj, EveSOFDNAPtr dna ) const;
 	void SetupDecals( EveSpaceObject2Ptr obj, const EveSOFDNAPtr dna ) const;
+	void SetupDecalSets( EveSpaceObject2Ptr obj, const EveSOFDNAPtr dna ) const;
 	void SetupModelCurves( EveSpaceObject2Ptr obj, const EveSOFDNAPtr dna ) const;
 	void SetupLocators( EveSpaceObject2Ptr obj, const EveSOFDNAPtr dna ) const;
 	void SetupEffects( EveSpaceObject2Ptr obj, const EveSOFDNAPtr dna ) const;

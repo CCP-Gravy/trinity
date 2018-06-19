@@ -660,81 +660,87 @@ void EveSOFDataMgr::GenerateHullData( HullData& hd, EveSOFDataHullPtr srcData ) 
 	EveSOFDataPatternPerHullPtr defaultPattern = srcData->m_defaultPattern;
 	// only one layer for the default hull one (yet...)
 	EveSOFUtils::GeneratePatternProjectionData( &hd.defaultPattern, defaultPattern ? defaultPattern->m_transformLayer1 : nullptr );
-
-	// hulldecals
-	hd.hullDecals.clear();
-	for( auto hdit = srcData->m_hullDecals.begin(); hdit != srcData->m_hullDecals.end(); ++hdit )
+	
+	if( srcData->m_useNewDecalSets )
 	{
-		EveSOFDataHullDecalPtr hullDecal = (*hdit);
-
-		HullDecalData hdd;
-		hdd.useLegacy = hullDecal->m_useLegacy;
-		hdd.visibilityGroup = GetVisibilityGroupHash( hullDecal->m_visibilityGroup );
-
-		hdd.usage = hullDecal->m_usage;
-		hdd.position = hullDecal->m_position;
-		hdd.rotation = hullDecal->m_rotation;
-		hdd.scaling = hullDecal->m_scaling;
-		hdd.groupIndex = hullDecal->m_groupIndex;
-		hdd.boneIndex = hullDecal->m_boneIndex;
-		hdd.meshIndex = hullDecal->m_meshIndex;
-		hdd.glowColorType = hullDecal->m_glowColorType;
-		hdd.indexBuffer.insert( hdd.indexBuffer.begin(), hullDecal->m_indexBuffer.begin(), hullDecal->m_indexBuffer.end() );
-		hdd.shader = hullDecal->m_shader;
-		for( auto hdtit = hullDecal->m_textures.begin(); hdtit != hullDecal->m_textures.end(); ++hdtit )
+		// hull decal sets
+		hd.hullDecalSets.clear();
+		for( auto hds = srcData->m_decalSets.begin(); hds != srcData->m_decalSets.end(); ++hds )
 		{
-			EveSOFDataTexturePtr textureData = (*hdtit);
+			EveSOFDataHullDecalSetPtr hullDecalSet = (*hds);
+			HullDecalSetData decalSetData;
+			decalSetData.visibilityGroup = GetVisibilityGroupHash( hullDecalSet->m_visibilityGroup );
+			decalSetData.items.clear();
 
-			TextureData td;
-			td.resFilePath = textureData->m_resFilePath;
-			hdd.textures[textureData->m_name] = td;
-		}
-		for( auto hdpit = hullDecal->m_parameters.begin(); hdpit != hullDecal->m_parameters.end(); ++hdpit )
-		{
-			EveSOFDataParameterPtr parameterData = (*hdpit);
+			for( auto hdsi = hullDecalSet->m_items.begin(); hdsi != hullDecalSet->m_items.end(); ++hdsi )
+			{
+				EveSOFDataHullDecalSetItemPtr itemPtr = (*hdsi);
+				HullDecalSetItemData itemData;
+				itemData.boneIndex = itemPtr->m_boneIndex;
+				itemData.glowColorType = itemPtr->m_glowColorType;
+				itemData.indexBuffer.insert( itemData.indexBuffer.begin(), itemPtr->m_indexBuffer.begin(), itemPtr->m_indexBuffer.end() );
+				itemData.meshIndex = itemPtr->m_meshIndex;
+				itemData.position = itemPtr->m_position;
+				itemData.rotation = itemPtr->m_rotation;
+				itemData.scaling = itemPtr->m_scaling;
+				itemData.usage = itemPtr->m_usage;
 
-			hdd.parameters[parameterData->m_name] = parameterData->m_value;
+				for( auto hdtit = itemPtr->m_textures.begin(); hdtit != itemPtr->m_textures.end(); ++hdtit )
+				{
+					EveSOFDataTexturePtr textureData = (*hdtit);
+
+					TextureData td;
+					td.resFilePath = textureData->m_resFilePath;
+					itemData.textures[textureData->m_name] = td;
+				}
+				for( auto hdpit = itemPtr->m_parameters.begin(); hdpit != itemPtr->m_parameters.end(); ++hdpit )
+				{
+					EveSOFDataParameterPtr parameterData = (*hdpit);
+
+					itemData.parameters[parameterData->m_name] = parameterData->m_value;
+				}
+				decalSetData.items.push_back( itemData );
+			}
+			hd.hullDecalSets.push_back( decalSetData );
 		}
-		hd.hullDecals.push_back( hdd );
 	}
-
-	// hull decal sets
-	hd.hullDecalSets.clear();
-	for( auto hds = srcData->m_decalSets.begin(); hds != srcData->m_decalSets.end(); ++hds )
+	else
 	{
-		EveSOFDataHullDecalSetPtr hullDecalSet = (*hds);
-		HullDecalSetData decalSetData;
-		decalSetData.visibilityGroup = GetVisibilityGroupHash( hullDecalSet->m_visibilityGroup );
-		decalSetData.items.clear();
-
-		for( auto hdsi = hullDecalSet->m_items.begin(); hdsi != hullDecalSet->m_items.end(); ++hdsi )
+		// hulldecals
+		hd.hullDecals.clear();
+		for( auto hdit = srcData->m_hullDecals.begin(); hdit != srcData->m_hullDecals.end(); ++hdit )
 		{
-			EveSOFDataHullDecalSetItemPtr itemPtr = (*hdsi);
-			HullDecalSetItemData itemData;
-			itemData.boneIndex = itemPtr->m_boneIndex;
-			itemData.glowColorType = itemPtr->m_glowColorType;
-			itemData.indexBuffer.insert( itemData.indexBuffer.begin(), itemPtr->m_indexBuffer.begin(), itemPtr->m_indexBuffer.end() );
-			itemData.meshIndex = itemPtr->m_meshIndex;
-			itemData.position = itemPtr->m_position;
-			itemData.rotation = itemPtr->m_rotation;
-			itemData.scaling = itemPtr->m_scaling;
-			itemData.shader = itemPtr->m_shader;
-			itemData.usage = itemPtr->m_usage;
+			EveSOFDataHullDecalPtr hullDecal = (*hdit);
 
-			for( auto hdtit = itemPtr->m_textures.begin(); hdtit != itemPtr->m_textures.end(); ++hdtit )
+			HullDecalData hdd;
+			hdd.useLegacy = hullDecal->m_useLegacy;
+			hdd.visibilityGroup = GetVisibilityGroupHash( hullDecal->m_visibilityGroup );
+
+			hdd.usage = hullDecal->m_usage;
+			hdd.position = hullDecal->m_position;
+			hdd.rotation = hullDecal->m_rotation;
+			hdd.scaling = hullDecal->m_scaling;
+			hdd.groupIndex = hullDecal->m_groupIndex;
+			hdd.boneIndex = hullDecal->m_boneIndex;
+			hdd.meshIndex = hullDecal->m_meshIndex;
+			hdd.glowColorType = hullDecal->m_glowColorType;
+			hdd.indexBuffer.insert( hdd.indexBuffer.begin(), hullDecal->m_indexBuffer.begin(), hullDecal->m_indexBuffer.end() );
+			hdd.shader = hullDecal->m_shader;
+			for( auto hdtit = hullDecal->m_textures.begin(); hdtit != hullDecal->m_textures.end(); ++hdtit )
 			{
 				EveSOFDataTexturePtr textureData = (*hdtit);
 
 				TextureData td;
 				td.resFilePath = textureData->m_resFilePath;
-				itemData.textures[textureData->m_name] = td;
+				hdd.textures[textureData->m_name] = td;
 			}
-			for( auto hdpit = itemPtr->m_parameters.begin(); hdpit != itemPtr->m_parameters.end(); ++hdpit )
+			for( auto hdpit = hullDecal->m_parameters.begin(); hdpit != hullDecal->m_parameters.end(); ++hdpit )
 			{
 				EveSOFDataParameterPtr parameterData = (*hdpit);
 
-				itemData.parameters[parameterData->m_name] = parameterData->m_value;
+				hdd.parameters[parameterData->m_name] = parameterData->m_value;
 			}
+			hd.hullDecals.push_back( hdd );
 		}
 	}
 
