@@ -399,6 +399,8 @@ protected:
 	void SelectMeshLevelOfDetail();
 	void GetBatchesFromOverlayVector( ITriRenderBatchAccumulator* batches, const Tr2PerObjectData* perObjectData, TriBatchType batchType );
 
+	bool GetBoneList( const granny_matrix_3x4*& bones, size_t& boneCount ) const;
+
 	virtual void UpdateWorldTransform( Be::Time time );
 	friend class EveShip2Builder;
 

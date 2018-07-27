@@ -114,7 +114,7 @@ bool EveBannerSet::Initialize()
 	return true;
 }
 
-void EveBannerSet::UpdateVisibility( const TriFrustum& frustum, const Matrix& parentTransform, const granny_matrix_3x4* bones, size_t boneCount )
+bool EveBannerSet::UpdateVisibility( const TriFrustum& frustum, const Matrix& parentTransform, const granny_matrix_3x4* bones, size_t boneCount )
 {
 	auto aabb = GetAabb( bones, boneCount );
 	aabb.Transform( parentTransform );
@@ -146,6 +146,7 @@ void EveBannerSet::UpdateVisibility( const TriFrustum& frustum, const Matrix& pa
 	{
 		m_isVisible = false;
 	}
+	return m_isVisible;
 }
 
 void EveBannerSet::GetBatches( ITriRenderBatchAccumulator* batches, TriBatchType batchType, const Tr2PerObjectData* perObjectData )

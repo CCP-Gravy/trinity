@@ -360,18 +360,9 @@ void EveSpaceObject2::UpdateSyncronous( EveUpdateContext& updateContext )
 		EveChildUpdateParams params;
 		params.spaceObjectParent = this;
 		params.childParent = nullptr;
-		params.boneCount = 0;
-		params.bones = nullptr;
 		params.isVisible = m_display && DisplayChildren();
 
-		if( m_animationUpdater && m_animationUpdater->IsInitialized() )
-		{
-			params.boneCount = size_t( m_animationUpdater->GetMeshBoneCount() );
-			if( params.boneCount )
-			{
-				params.bones = m_animationUpdater->GetMeshBoneMatrixList();
-			}
-		}
+		GetBoneList( params.bones, params.boneCount );
 
 		for( auto ecIt = m_effectChildren.begin(); ecIt != m_effectChildren.end(); ++ecIt )
 		{
@@ -477,18 +468,9 @@ void EveSpaceObject2::UpdateAsyncronous( EveUpdateContext& updateContext )
 		EveChildUpdateParams params;
 		params.spaceObjectParent = this;
 		params.childParent = nullptr;
-		params.boneCount = 0;
-		params.bones = nullptr;
 		params.isVisible = m_display && DisplayChildren();
 
-		if( m_animationUpdater && m_animationUpdater->IsInitialized() )
-		{
-			params.boneCount = size_t( m_animationUpdater->GetMeshBoneCount() );
-			if( params.boneCount )
-			{
-				params.bones = m_animationUpdater->GetMeshBoneMatrixList();
-			}
-		}
+		GetBoneList( params.bones, params.boneCount );
 
 		for( auto ecIt = m_effectChildren.begin(); ecIt != m_effectChildren.end(); ++ecIt )
 		{
@@ -759,24 +741,23 @@ void EveSpaceObject2::RenderDebugInfo( Tr2DebugRenderer& renderer )
 				auto rotation = locator.direction;
 				uint32_t color = 0x990088ff;
 
-				if( locator.boneIndex >= 0 && m_animationUpdater && m_animationUpdater->IsInitialized() )
-				{
-					size_t boneCount = size_t( m_animationUpdater->GetMeshBoneCount() );
-					if( boneCount )
-					{
-						if( locator.boneIndex < int( boneCount ) )
-						{
-							const granny_matrix_3x4* bones = m_animationUpdater->GetMeshBoneMatrixList();
-							Matrix boneTF = IdentityMatrix();
-							TriMatrixCopyFrom3x4( &boneTF, &bones[locator.boneIndex] );
-							position = XMVector3TransformCoord( position, boneTF );
+				size_t boneCount;
+				const granny_matrix_3x4* bones;
 
-							rotation = XMQuaternionMultiply( rotation, XMQuaternionRotationMatrix( boneTF ) );
-						}
-						else
-						{
-							color = 0x99ff4444;
-						}
+				if( locator.boneIndex >= 0 && GetBoneList( bones, boneCount ) )
+				{
+					if( locator.boneIndex < int( boneCount ) )
+					{
+						const granny_matrix_3x4* bones = m_animationUpdater->GetMeshBoneMatrixList();
+						Matrix boneTF = IdentityMatrix();
+						TriMatrixCopyFrom3x4( &boneTF, &bones[locator.boneIndex] );
+						position = XMVector3TransformCoord( position, boneTF );
+
+						rotation = XMQuaternionMultiply( rotation, XMQuaternionRotationMatrix( boneTF ) );
+					}
+					else
+					{
+						color = 0x99ff4444;
 					}
 				}
 
@@ -796,14 +777,7 @@ void EveSpaceObject2::RenderDebugInfo( Tr2DebugRenderer& renderer )
 	{
 		size_t boneCount = 0;
 		const granny_matrix_3x4* bones = nullptr;
-		if( m_animationUpdater && m_animationUpdater->IsInitialized() )
-		{
-			boneCount = size_t( m_animationUpdater->GetMeshBoneCount() );
-			if( boneCount )
-			{
-				bones = m_animationUpdater->GetMeshBoneMatrixList();
-			}
-		}
+		GetBoneList( bones, boneCount );
 
 		for( auto it = begin( m_graphicSets ); it != end( m_graphicSets ); ++it )
 		{
@@ -1328,6 +1302,22 @@ void EveSpaceObject2::UpdateVisibility( const TriFrustum& frustum, const Matrix&
 		}
 	}
 
+	if( !m_graphicSets.empty() )
+	{
+		size_t boneCount = 0;
+		const granny_matrix_3x4* bones = nullptr;
+		GetBoneList( bones, boneCount );
+
+		for( auto it = begin( m_graphicSets ); it != end( m_graphicSets ); ++it )
+		{
+			if( ( *it )->UpdateVisibility( frustum, m_worldTransform, bones, boneCount ) )
+			{
+				m_isMeshVisible = true;
+				m_isVisible = true;
+			}
+		}
+	}
+
 	Vector4 bounds;
 	if( DisplayChildren() )
 	{
@@ -1388,24 +1378,6 @@ void EveSpaceObject2::UpdateVisibility( const TriFrustum& frustum, const Matrix&
 			m_impostorMode = m_allowLodSelection;
 		}
 
-		if( !m_graphicSets.empty() )
-		{
-			size_t boneCount = 0;
-			const granny_matrix_3x4* bones = nullptr;
-			if( m_animationUpdater && m_animationUpdater->IsInitialized() )
-			{
-				boneCount = size_t( m_animationUpdater->GetMeshBoneCount() );
-				if( boneCount )
-				{
-					bones = m_animationUpdater->GetMeshBoneMatrixList();
-				}
-			}
-
-			for( auto it = begin( m_graphicSets ); it != end( m_graphicSets ); ++it )
-			{
-				( *it )->UpdateVisibility( frustum, m_worldTransform, bones, boneCount );
-			}
-		}
 	}
 
 	for( auto ecIt = m_effectChildren.begin(); ecIt != m_effectChildren.end(); ++ecIt )
@@ -1506,14 +1478,7 @@ void EveSpaceObject2::AddQuadsToQuadRenderer( const TriFrustum& frustum, Tr2Quad
 	}
 	size_t boneCount = 0;
 	const granny_matrix_3x4* bones = nullptr;
-	if( m_animationUpdater && m_animationUpdater->IsInitialized() )
-	{
-		boneCount = size_t( m_animationUpdater->GetMeshBoneCount() );
-		if( boneCount )
-		{
-			bones = m_animationUpdater->GetMeshBoneMatrixList();
-		}
-	}
+	GetBoneList( bones, boneCount );
 
 	for( auto it = m_spriteSets.begin(); it != m_spriteSets.end(); ++it )
 	{
@@ -3172,4 +3137,27 @@ std::map<std::string, float> EveSpaceObject2::GetControllerVariables() const
 	std::map<std::string, float> result;
 	result.insert( begin( m_controllerVariables ), end( m_controllerVariables ) );
 	return result;
+}
+
+bool EveSpaceObject2::GetBoneList( const granny_matrix_3x4*& bones, size_t& boneCount ) const
+{
+	if( m_animationUpdater && m_animationUpdater->IsInitialized() )
+	{
+		boneCount = size_t( m_animationUpdater->GetMeshBoneCount() );
+		if( boneCount )
+		{
+			bones = m_animationUpdater->GetMeshBoneMatrixList();
+			return true;
+		}
+		else
+		{
+			bones = nullptr;
+		}
+	}
+	else
+	{
+		boneCount = 0;
+		bones = nullptr;
+	}
+	return false;
 }

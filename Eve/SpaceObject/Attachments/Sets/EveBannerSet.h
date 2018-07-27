@@ -43,7 +43,7 @@ public:
 
 	virtual bool Initialize();
 
-	virtual void UpdateVisibility( const TriFrustum& frustum, const Matrix& parentTransform, const granny_matrix_3x4* bones, size_t boneCount );
+	virtual bool UpdateVisibility( const TriFrustum& frustum, const Matrix& parentTransform, const granny_matrix_3x4* bones, size_t boneCount );
 	virtual void GetBatches( ITriRenderBatchAccumulator* batches, TriBatchType batchType, const Tr2PerObjectData* perObjectData );
 
 	virtual void GetDebugOptions( Tr2DebugRendererOptions& options );
