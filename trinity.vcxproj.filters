@@ -717,7 +717,7 @@
     <ClInclude Include="Eve\SpaceObject\Attachments\Sets\EveSpriteSetItem.h">
       <Filter>Source Files\Eve\SpaceObject\Attachments\Sets</Filter>
     </ClInclude>
-    <ClInclude Include="Eve\SpaceObject\Attachments\Sets\IEveSpaceObjectChildSet.h">
+    <ClInclude Include="Eve\SpaceObject\Attachments\Sets\IEveSpaceObjectAttachment.h">
       <Filter>Source Files\Eve\SpaceObject\Attachments\Sets</Filter>
     </ClInclude>
     <ClInclude Include="Eve\SpaceObject\Children\EveChildBulletStorm.h">
