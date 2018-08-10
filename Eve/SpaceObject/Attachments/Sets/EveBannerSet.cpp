@@ -65,7 +65,8 @@ EveBannerItem::EveBannerItem()
 	rotation( 0, 0, 0, 1 ),
 	scaling( 1, 1, 1 ),
 	angleX( 0 ),
-	angleY( 0 )
+	angleY( 0 ),
+	reference( 0 )
 {
 }
 
