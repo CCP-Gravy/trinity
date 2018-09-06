@@ -35,6 +35,7 @@ const Be::ClassInfo* EveChildContainer::ExposeToBlue()
 		MAP_ATTRIBUTE( "observers", m_observers, "List of audio observers", Be::READ | Be::PERSIST )
 		MAP_ATTRIBUTE( "lights", m_lights, "List of dynamic lights", Be::READ | Be::PERSIST )
 		MAP_ATTRIBUTE( "controllers", m_controllers, "List of object controllers", Be::READ | Be::PERSIST )
+		MAP_ATTRIBUTE( "inheritProperties", m_inheritProperties, "Properties inherited from the parent ship when loaded through SOF", Be::READWRITE | Be::PERSIST )
 
 		MAP_METHOD_AND_WRAP( "RebuildLocalTransform", RebuildLocalTransform, "Rebuilds local transform." )
 

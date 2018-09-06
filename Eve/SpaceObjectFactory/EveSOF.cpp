@@ -1257,6 +1257,7 @@ void EveSOF::SetupChildrenAndAnimations( EveSpaceObject2Ptr obj, const EveSOFDNA
 		else if( p->QueryInterface( BlueInterfaceIID<IEveSpaceObjectChild>(), (void**)&effectChild, BEQI_SILENT ) )
 		{
 			effectChild->Setup( &childIt->scaling, &childIt->rotation, &childIt->translation, childIt->lowestLodVisible );
+			effectChild->SetInheritProperties( dna->GetColorSet() );
 			obj->AddToEffectChildrenList( effectChild );
 			if( childIt->id != -1 )
 			{

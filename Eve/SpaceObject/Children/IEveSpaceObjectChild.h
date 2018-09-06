@@ -46,6 +46,7 @@ BLUE_INTERFACE( IEveSpaceObjectChild ) : public IRoot
 
 	virtual void SetControllerVariable( const char* name, float value ) {};
 	virtual void StartControllers() {};
+	virtual void SetInheritProperties( const Color* colorSet ) {};
 };
 
 BLUE_DECLARE_IVECTOR( IEveSpaceObjectChild );

@@ -495,3 +495,12 @@ void EveChildContainer::GetWorldVelocity( Vector3& velocity ) const
 {
 	velocity = m_worldVelocity;
 }
+
+void EveChildContainer::SetInheritProperties( const Color* colorSet )
+{
+	if ( !m_inheritProperties )
+	{
+		m_inheritProperties.CreateInstance();
+	}
+	m_inheritProperties->SetProperties( colorSet );
+}

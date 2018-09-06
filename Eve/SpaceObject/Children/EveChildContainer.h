@@ -13,6 +13,7 @@
 #include "Tr2DebugRenderer.h"
 #include "TransformModifiers/IEveChildTransformModifier.h"
 #include "ITr2CurveSetOwner.h"
+#include "EveChildInheritProperties.h"
 
 BLUE_DECLARE( TriCurveSet );
 BLUE_DECLARE_VECTOR( TriCurveSet );
@@ -86,6 +87,7 @@ public:
 	void SetControllerVariable( const char* name, float value );
 	void StartControllers();
 	void GetWorldVelocity( Vector3& velocity ) const;
+	void SetInheritProperties( const Color* colorSet );
 
 	PIEveSpaceObjectChildVector m_objects;
 protected:
@@ -100,6 +102,7 @@ protected:
 	Vector3 m_worldVelocity;
 	bool m_display;
 	bool m_hideOnLowQuality;
+	EveChildInheritPropertiesPtr m_inheritProperties;
 };
 
 TYPEDEF_BLUECLASS( EveChildContainer );
