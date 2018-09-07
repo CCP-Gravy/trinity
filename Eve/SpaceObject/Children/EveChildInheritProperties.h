@@ -7,7 +7,7 @@
 #ifndef EveChildInheritProperties_H
 #define EveChildInheritProperties_H
 
-#include "Eve\SpaceObjectFactory\EveSOFData.h"
+#include "Eve/SpaceObjectFactory/EveSOFData.h"
 
 BLUE_CLASS( EveChildInheritProperties ) :
 	public IRoot

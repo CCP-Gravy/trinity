@@ -5,7 +5,7 @@
 //
 #include "StdAfx.h"
 #include "EveChildInheritProperties.h"
-#include "Eve\SpaceObjectFactory\EveSOFData.h"
+#include "Eve/SpaceObjectFactory/EveSOFData.h"
 
 BLUE_DEFINE( EveChildInheritProperties );
 
