@@ -1198,9 +1198,17 @@ const Color* EveSOFDNA::GetColorSet() const
 	return m_factionData->colorData.colors;
 }
 
+// --------------------------------------------------------------------------------
 const EveSOFDataMgr::LogoData* EveSOFDNA::GetLogo( size_t index ) const
 {
 	return &m_factionData->logoSetData.logos[index];
+}
+
+// --------------------------------------------------------------------------------
+const bool EveSOFDNA::HasLogoSet( size_t index ) const
+{
+	const EveSOFDataMgr::LogoData* logo = GetLogo( index );
+	return logo->textures.size() > 0;
 }
 
 // --------------------------------------------------------------------------------

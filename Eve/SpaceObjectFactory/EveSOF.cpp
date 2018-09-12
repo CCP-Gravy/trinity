@@ -1922,6 +1922,12 @@ void EveSOF::SetupDecalSets( EveSpaceObject2Ptr obj, const EveSOFDNAPtr dna ) co
 
 			for( auto hdsiit = hdsit->items.begin(); hdsiit != hdsit->items.end(); ++hdsiit )
 			{
+				// if we have a logo decal but the faction doesn't have a that logo in the logo set then we can skip this decal
+				if( hdsiit->usage == EveSOFDataHullDecal::USAGE_LOGO && !dna->HasLogoSet( hdsiit->logoType ) )
+				{
+					continue;
+				}
+
 				// create
 				EveSpaceObjectDecalPtr decal;
 				decal.CreateInstance();
