@@ -14,7 +14,11 @@ template <typename T>
 class Tr2LodResourceCache
 {
 public:
-	Tr2LodResourceCache() {};
+	Tr2LodResourceCache() :
+		m_resourceCache( nullptr )
+	{
+	};
+
 	~Tr2LodResourceCache() {};
 
 	void SetResource( Tr2LodResourcePtr resource )
@@ -25,13 +29,13 @@ public:
 
 	T* GetResource() const
 	{
-		if (m_resource)
+		if( m_resource )
 		{
 			IBlueResource *data = m_resource->GetResource();
-			if (data != static_cast<void*>(m_resourceCache))
+			if( data != static_cast<void*>( m_resourceCache ) )
 			{
 				// Not undefined behaviour as long as Tr2LodResourceCache is not created as a const object
-				const_cast<Tr2LodResourceCache*>(this)->m_resourceCache = dynamic_cast<T*>(data);
+				const_cast<Tr2LodResourceCache*>( this )->m_resourceCache = dynamic_cast<T*>( data );
 			}
 
 			return m_resourceCache;
