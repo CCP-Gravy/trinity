@@ -300,6 +300,9 @@ const Be::ClassInfo* EveSpaceObject2::ExposeToBlue()
 			Be::READ
 		)
 
+		MAP_ATTRIBUTE( "clipSphereFactor", m_clipSphereFactor, "Object's clip state", Be::READWRITE | Be::NOTIFY )
+		MAP_ATTRIBUTE( "clipSphereCenter", m_clipSphereCenter, "Object's clip sphere center", Be::READWRITE | Be::PERSIST )
+
 		MAP_ATTRIBUTE( "boundingSphereCenter", m_boundingSphereCenter, "The center of the minimum bounding sphere of the model in local coordinates", Be::READWRITE | Be::PERSIST )
 		
 		MAP_ATTRIBUTE( "boundingSphereRadius", m_boundingSphereRadius, "The radius of the minimum bounding sphere of the model", Be::READWRITE | Be::PERSIST )

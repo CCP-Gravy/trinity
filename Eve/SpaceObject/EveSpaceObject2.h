@@ -379,6 +379,10 @@ public:
 	void SetShaderOption( const BlueSharedString& name, const BlueSharedString& value ) override;
 
 	ITr2SoundEmitter* FindSoundEmitter( const char* name ) override;
+
+	/////////////////////////////////////////////////////////////////////////////////////
+	// clip sphere modification
+	void ResetClipSphereCenter();
 protected:
 	// LODing
 	void UnloadLodIfNeeded( Be::Time time );
@@ -431,6 +435,11 @@ protected:
 	Tr2Lod m_lodLevelWithChildren;
 
 	TriGeometryResPtr m_geometryResFromMesh;
+
+	/////////////////////////////////////////////////////////////////////////////////////
+	// dissolve
+	float m_clipSphereFactor;
+	Vector3 m_clipSphereCenter;
 
 	bool m_impostorMode;
 	// Set to true if the object is inside the frustum

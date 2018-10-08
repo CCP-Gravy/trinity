@@ -37,10 +37,6 @@ public:
 	bool Initialize() override;
 
 	/////////////////////////////////////////////////////////////////////////////////////
-	// INotify
-	bool OnModified( Be::Var* value ) override;
-
-	/////////////////////////////////////////////////////////////////////////////////////
 	// Overrides of EveSpaceObject2 implementations
 	void UpdateSyncronous( EveUpdateContext& updateContext ) override;
 	void UpdateAsyncronous( EveUpdateContext& updateContext ) override;
@@ -71,10 +67,6 @@ public:
 
 	void SetShaderOption(const BlueSharedString& name, const BlueSharedString& value) override;
 
-    /////////////////////////////////////////////////////////////////////////////////////
-	// clip sphere modification
-	void ResetClipSphereCenter();
-
 protected:
 	/////////////////////////////////////////////////////////////////////////////////////
 	// children
@@ -89,11 +81,6 @@ protected:
 	PEveTurretSetVector m_turretSets;
 	virtual const Matrix* GetTurretTransform( unsigned int turretSetIndex ) const;
 private:
-	/////////////////////////////////////////////////////////////////////////////////////
-	// dissolve
-	float m_clipSphereFactor;
-	Vector3 m_clipSphereCenter;
-
 	/////////////////////////////////////////////////////////////////////////////////////
 	// turrets
 	// ship-internal data on turret locators
