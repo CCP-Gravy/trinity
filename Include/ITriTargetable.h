@@ -39,6 +39,7 @@ BLUE_INTERFACE(ITriTargetable): IRoot
 	virtual bool UpdateImpact( Vector3& out, const Vector3& direction, int impactIndex ) = 0;
 	virtual bool GetImpactPosition( Vector3& out, int locator, const Vector3& posPrev, const Vector3& posNow, float epsilon ) = 0;
 	virtual bool HasImpactConfigurationShield() const = 0;
+	virtual void SetLastDamageLocatorHit( unsigned int locator ) {}
 };
 
 

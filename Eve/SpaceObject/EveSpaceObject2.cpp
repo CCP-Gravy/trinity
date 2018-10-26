@@ -2502,7 +2502,6 @@ void EveSpaceObject2::ClearImpactDamage()
 // -----------------------------------------------------------------------------
 int EveSpaceObject2::CreateImpact( int damageLocatorIndex, const Vector3& direction, float lifeTime, float size )
 {
-	m_lastDamageLocatorHit = damageLocatorIndex;
 	if( m_impactOverlay )
 	{
 		if( m_lodLevel > TR2_LOD_LOW )
@@ -2511,6 +2510,18 @@ int EveSpaceObject2::CreateImpact( int damageLocatorIndex, const Vector3& direct
 		}
 	}
 	return -1;
+}
+
+void EveSpaceObject2::SetLastDamageLocatorHit( unsigned int locator )
+{
+	if( locator > GetDamageLocatorCount() )
+	{
+		m_lastDamageLocatorHit = -1;
+	}
+	else
+	{
+		m_lastDamageLocatorHit = locator;
+	}
 }
 
 // -----------------------------------------------------------------------------

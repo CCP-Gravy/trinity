@@ -251,6 +251,7 @@ public:
 	float GetRadius() const;
 	int CreateImpact( int damageLocatorIndex, const Vector3& direction, float lifeTime, float size );
 	int CreateImpactFromPosition( const Vector3& position, const Vector3& direction, float lifeTime, float size );
+	void SetLastDamageLocatorHit( unsigned int locator );
 
 	bool UpdateImpact( Vector3& out, const Vector3& direction, int impactIndex );
 	bool GetImpactPosition( Vector3& out, int locator, const Vector3& posPrev, const Vector3& posNow, float epsilon );
