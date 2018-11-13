@@ -42,6 +42,28 @@ BLUE_REGISTER_ENUM_EX(
 	LODChooser, 
 	ENUM_REG_ENUM_OBJECT_ON_MODULE );
 
+
+Be::VarChooser ImpactBehaviourChooser[] =
+{
+	{
+		"DAMAGE_LOCATOR",
+		BeCast( ImpactBehaviour::DAMAGE_LOCATOR ),
+		""
+	},
+	{
+		"SHIELD_ELLIPSOID",
+		BeCast( ImpactBehaviour::SHIELD_ELLIPSOID ),
+		""
+	},
+	{
+		"CENTER",
+		BeCast( ImpactBehaviour::CENTER ),
+		""
+	},
+	{ 0 }
+};
+
+
 const Be::ClassInfo* EveTurretSet::ExposeToBlue()
 {
 	EXPOSURE_BEGIN( EveTurretSet, "" )
@@ -100,6 +122,7 @@ const Be::ClassInfo* EveTurretSet::ExposeToBlue()
 		MAP_ATTRIBUTE( "projectileMissBehaviour", m_projectileMissBehaviour, "Whether or not to use projectile properties when this turret misses", Be::READWRITE | Be::PERSIST )
 		
 		MAP_ATTRIBUTE( "impactSize", m_impactSize, "Size of impacts. No impact if size is 0 or less", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE_WITH_CHOOSER( "impactBehaviour", m_impactBehaviour, "What do we want to hit? ", Be::READWRITE | Be::NOTIFY | Be::PERSIST | Be::ENUM, ImpactBehaviourChooser )
 
 		MAP_ATTRIBUTE( "chooseRandomLocator", m_chooseRandomLocator, "Allow choosing a random locator instead of the closest one", Be::READWRITE | Be::PERSIST )
 

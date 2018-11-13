@@ -9,6 +9,7 @@
 
 #include "include/TriMath.h"
 #include "include/ITriTargetable.h"
+#include "IWorldPosition.h"
 
 // --------------------------------------------------------------------------------
 // Description:
@@ -19,6 +20,7 @@ EveTurretTarget::EveTurretTarget( IRoot* lockobj ) :
 	m_impactLength( -1.f ),
 	m_impactDelay( -1.f ),
 	m_impactID( -1 ),
+	m_impactBehaviour( ImpactBehaviour::DAMAGE_LOCATOR ),
 	m_targetPosition( 0.f, 0.f, 0.f ),
 	m_trackingPosition( 0.f, 0.f, 0.f ),
 	m_positionOld( 0.f, 0.f, 0.f ),
@@ -67,6 +69,12 @@ bool EveTurretTarget::SetTargetable( IRoot* object )
 		return false;
 	}
 
+	IWorldPositionPtr newTargetPos;
+	if( !object->QueryInterface( BlueInterfaceIID<IWorldPosition>(), (void**)&newTargetPos ) )
+	{
+		return false;
+	}
+
 	// only act on new targets
 	if( !m_object.IsEqualObject( newTarget ) )
 	{
@@ -74,6 +82,9 @@ bool EveTurretTarget::SetTargetable( IRoot* object )
 		// and trigger a fade
 		m_positionOld = m_trackingPosition;
 		m_positionOldInfluence = 1.f;
+
+		// set the position of the object
+		m_objectPos = newTargetPos;
 	}
 	return true;
 }
@@ -119,10 +130,14 @@ void EveTurretTarget::StartFireAtLocator( int l, float delay, float length, cons
 			// https://jira.ccpgames.com/browse/EVEDEV-4947
 			if( m_impactDelay == 0 )
 			{
-				m_object->GetDamageLocatorPosition( &m_targetPosition, m_locator, true );
-				Vector3 dirToSource( *source - m_targetPosition );
-				m_impactID = m_object->CreateImpact( m_locator, dirToSource, m_impactLength, m_impactSize );
-				m_impactDelay = -1.f;
+				GetImpactPosition( m_targetPosition, source );
+
+				if( m_impactBehaviour == ImpactBehaviour::DAMAGE_LOCATOR )
+				{
+					Vector3 dirToSource( *source - m_targetPosition );
+					m_impactID = m_object->CreateImpact( m_locator, dirToSource, m_impactLength, m_impactSize );
+					m_impactDelay = -1.f;
+				}
 			}			
 		}
 	}
@@ -145,6 +160,34 @@ void EveTurretTarget::StopFireAtLocator()
 
 // --------------------------------------------------------------------------------
 // Description:
+//   Gets the impact position based on some parameters 
+// --------------------------------------------------------------------------------
+
+void EveTurretTarget::GetImpactPosition( Vector3& out, const Vector3* source )
+{
+	if( m_object )
+	{
+		if( m_impactBehaviour == ImpactBehaviour::DAMAGE_LOCATOR )
+		{
+			m_object->GetDamageLocatorPosition( &out, m_locator, true );
+		}
+		else if( m_impactBehaviour == ImpactBehaviour::CENTER )
+		{
+			out = *m_objectPos->GetWorldPosition();
+		}
+		else if( m_impactBehaviour == ImpactBehaviour::SHIELD_ELLIPSOID )
+		{
+			if( !m_object->GetImpactPosition( out, m_locator, *source, *m_objectPos->GetWorldPosition(), 0 ) )
+			{
+				// handle when we are inside the shield ellipsoid
+				m_object->GetDamageLocatorPosition( &out, m_locator, true );
+			}
+		}
+	}
+}
+
+// --------------------------------------------------------------------------------
+// Description:
 //   Normal timing, will update the damage position incl target interpolation
 //   and keep a diretion vector to the source of the shooting
 // --------------------------------------------------------------------------------
@@ -153,7 +196,8 @@ void EveTurretTarget::Update( float deltaT, const Vector3* source )
 	if( m_object )
 	{
 		// update the position & diretion
-		m_object->GetDamageLocatorPosition( &m_targetPosition, m_locator, true );
+		GetImpactPosition( m_targetPosition, source );
+
 		Vector3 dirToSource( *source - m_targetPosition );
 
 		// update the miss position
@@ -173,20 +217,23 @@ void EveTurretTarget::Update( float deltaT, const Vector3* source )
 			m_positionMiss += direction * ( dist + 5000.f) * ( 1.f + 0.5f * m_randomMissDistanceOffset );
 		}
 
-		// update the impacts
-		if( m_impactID != -1 )
+		if( m_impactBehaviour == ImpactBehaviour::DAMAGE_LOCATOR )
 		{
-			m_object->UpdateImpact( m_targetPosition, dirToSource, m_impactID );
-		}
-
-		// what about delayed impact creation?
-		if( m_impactDelay > 0.f )
-		{
-			m_impactDelay -= deltaT;
-			if( m_impactDelay < 0.f )
+			// update the impacts
+			if( m_impactID != -1 )
 			{
-				m_impactID = m_object->CreateImpact( m_locator, dirToSource, m_impactLength, m_impactSize );
-				m_impactDelay = -1.f;
+				m_object->UpdateImpact( m_targetPosition, dirToSource, m_impactID );
+			}
+
+			// what about delayed impact creation?
+			if( m_impactDelay > 0.f && m_impactSize > 0.f )
+			{
+				m_impactDelay -= deltaT;
+				if( m_impactDelay < 0.f )
+				{
+					m_impactID = m_object->CreateImpact( m_locator, dirToSource, m_impactLength, m_impactSize );
+					m_impactDelay = -1.f;
+				}
 			}
 		}
 	}
@@ -280,11 +327,12 @@ int EveTurretTarget::FindRandomValidLocator( const Vector3& source, Vector3& pos
 // Description:
 //   Set the internal behaviour of the hit/miss functionality
 // --------------------------------------------------------------------------------
-void EveTurretTarget::SetBehaviour( bool laserMiss, bool projectileMiss, float impactSize)
+void EveTurretTarget::SetBehaviour( bool laserMiss, bool projectileMiss, float impactSize, ImpactBehaviour::Type impactBehaviour)
 {
 	m_laserMissBehaviour = laserMiss;
 	m_projectileMissBehaviour = projectileMiss;
 	m_impactSize = impactSize;
+	m_impactBehaviour = impactBehaviour;
 }
 
 // --------------------------------------------------------------------------------

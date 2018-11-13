@@ -8,8 +8,19 @@
 #ifndef EveTurretTarget_H
 #define EveTurretTarget_H
 
+namespace ImpactBehaviour {
+	
+	enum Type {
+		DAMAGE_LOCATOR,
+		SHIELD_ELLIPSOID,
+		CENTER
+	};
+
+}
+
 // forwards
 BLUE_DECLARE_INTERFACE( ITriTargetable );
+BLUE_DECLARE_INTERFACE( IWorldPosition );
 
 BLUE_CLASS( EveTurretTarget ) :
 	public IRoot
@@ -37,7 +48,7 @@ public:
 	void Update( float deltaT, const Vector3* source );
 
 	// hit/miss
-	void SetBehaviour( bool laserMiss, bool projectileMiss, float impactSize );
+	void SetBehaviour( bool laserMiss, bool projectileMiss, float impactSize, ImpactBehaviour::Type impactBehaviour );
 	bool GetShotMissed() const;
 	void SetShotMissed( bool missed );
 	double GetLastShotTime() const;
@@ -49,8 +60,11 @@ public:
 	bool ShowDestObject() const;
 
 private:
+	void GetImpactPosition( Vector3& out, const Vector3* source );
+
 	// data
 	ITriTargetablePtr m_object;
+	IWorldPositionPtr m_objectPos;
 	int m_locator;
 
 	// impacts
@@ -58,6 +72,7 @@ private:
 	float m_impactLength;
 	float m_impactSize;
 	int m_impactID;
+	ImpactBehaviour::Type m_impactBehaviour;
 
 	// actual target position and smoothing
 	Vector3 m_trackingPosition;

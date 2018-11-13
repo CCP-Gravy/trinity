@@ -12,6 +12,7 @@
 #include "include/ITriTargetable.h"
 #include "Tr2ShLightingManager.h"
 #include "Tr2GrannyAnimation.h"
+#include "EveTurretTarget.h"
 
 // needed for override
 #include "Tr2PerObjectData.h"
@@ -352,6 +353,7 @@ private:
 
 	// impacts
 	float m_impactSize;
+	ImpactBehaviour::Type m_impactBehaviour;
 
 	// tracking
 	float m_trackingInfluence;

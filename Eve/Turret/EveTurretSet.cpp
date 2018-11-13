@@ -110,7 +110,8 @@ EveTurretSet::EveTurretSet( IRoot* lockobj ) :
 	m_swarmID( 0 ),
 	m_parentShLighting( nullptr ),
 	m_possibleTurretDisplayAmount( 0 ),
-	m_chooseRandomLocator( true )
+	m_chooseRandomLocator( true ),
+	m_impactBehaviour( ImpactBehaviour::DAMAGE_LOCATOR )
 {
 	// 0
 	memset( &m_parentData, 0, sizeof( ParentData ) );
@@ -159,7 +160,7 @@ EveTurretSet::~EveTurretSet()
 bool EveTurretSet::Initialize()
 {
 	// pass down some user-defined data into sub-modules we don't save out
-	m_target->SetBehaviour( m_laserMissBehaviour, m_projectileMissBehaviour, m_impactSize );
+	m_target->SetBehaviour( m_laserMissBehaviour, m_projectileMissBehaviour, m_impactSize, m_impactBehaviour );
 
 	// geom path is here, so load it
 	InitializeGeometryResource();
@@ -183,9 +184,10 @@ bool EveTurretSet::OnModified( Be::Var* value )
 		// attached firing effect has changed -> relink!
 		InitializeFiringEffect();
 	}
-	else if( IsMatch( value, m_laserMissBehaviour ) || IsMatch( value, m_projectileMissBehaviour ) || IsMatch( value, m_impactSize ) )
+	else if( IsMatch( value, m_laserMissBehaviour ) || IsMatch( value, m_projectileMissBehaviour ) 
+		|| IsMatch( value, m_impactSize ) || IsMatch( value, m_impactBehaviour ))
 	{
-		m_target->SetBehaviour( m_laserMissBehaviour, m_projectileMissBehaviour, m_impactSize );
+		m_target->SetBehaviour( m_laserMissBehaviour, m_projectileMissBehaviour, m_impactSize, m_impactBehaviour );
 	}
 	else if( IsMatch( value, m_useDynamicBounds ) )
 	{
