@@ -72,6 +72,7 @@ public:
 	bool IsValid() const { return IsGood(); }
 	Tr2RenderContextEnum::TextureType GetType() const { return Tr2BitmapDimensions::GetType(); }
 	long UpdateSubresource( unsigned left, unsigned top, unsigned right, unsigned bottom, const void* source, unsigned sourcePitch );
+	void SetAverageColor( float red, float green, float blue, float alpha ) override;
 	const Tr2TextureAL* GetTexture() const;
 	
 	bool SetTextureFromRT( Tr2RenderTarget* renderTarget );

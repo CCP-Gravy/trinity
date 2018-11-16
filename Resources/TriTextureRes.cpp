@@ -546,6 +546,11 @@ long TriTextureRes::UpdateSubresource( unsigned left, unsigned top, unsigned rig
 	return E_FAIL;
 }
 
+void TriTextureRes::SetAverageColor( float red, float green, float blue, float alpha )
+{
+	m_averageColor = Color( red, green, blue, alpha );
+}
+
 // ---------------------------------------------------------------
 
 

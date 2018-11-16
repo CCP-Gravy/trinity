@@ -36,6 +36,7 @@ BLUE_INTERFACE(ITriTextureRes) :
 	virtual const char* GetName() const = 0;
 
 	virtual long UpdateSubresource( unsigned left, unsigned top, unsigned right, unsigned bottom, const void* source, unsigned sourcePitch ) { return -1; }
+	virtual void SetAverageColor( float red, float green, float blue, float alpha ) {}
 };
 
 
