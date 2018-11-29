@@ -516,8 +516,15 @@ void EveSpaceObject2::PrepareShaderData( EveUpdateContext& updateContext )
 	// dirt level of a spaceobject
 	m_spaceObjectShipData.z = m_dirtLevel;
 
-	m_psData.clipData = m_vsData.clipData = Vector4( m_clipSphereCenter + GetBoundingSphereCenter(), TriFloatSign( m_clipSphereFactor ) * m_clipSphereFactor * m_clipSphereFactor );
-	m_psData.miscData.x = TriFloatSign( m_clipSphereFactor );
+	// the m_clipSphereFactor goes from 0.0 to 1.0 and is the "amount" of visibility of this whole
+	// object: 0.0 = fully visible, 1.0 = invisible.
+	// the following formula calculates a special number to pass to the shader to help determine this
+	float normalizedBoundingRadius = GetBoundingSphereRadius() / (m_modelScale == 0 ? 1.f : m_modelScale);
+	float nearDist = std::max( 0.f, Length( m_clipSphereCenter ) - normalizedBoundingRadius );
+	float insideSpherePercentage = std::min( 1.f, Length( m_clipSphereCenter ) / normalizedBoundingRadius );
+	float disolveRadius = nearDist + m_clipSphereFactor * normalizedBoundingRadius * (1.f + insideSpherePercentage);
+	m_psData.clipData = m_vsData.clipData = Vector4( m_clipSphereCenter + GetBoundingSphereCenter(), TriFloatSign( disolveRadius ) * disolveRadius * disolveRadius );
+	m_psData.miscData.x = m_clipSphereFactor;
 }
 
 void EveSpaceObject2::GetDebugOptions( Tr2DebugRendererOptions& options )
