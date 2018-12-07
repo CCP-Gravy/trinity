@@ -108,6 +108,9 @@ public:
 	virtual float GetSortValue();
 	virtual Tr2PerObjectData* GetPerObjectData( ITriRenderBatchAccumulator* accumulator );
 
+	// copy init
+	void CopyFrom( EveSpaceObjectDecal *object );
+
 	// access
 	void GetRenderables( TriGeometryRes* geomRes, std::vector<ITr2Renderable*>& renderables, const ParentData* parentData );
 

@@ -305,6 +305,22 @@ void EveSpaceObjectDecal::SubmitGeometry( Tr2RenderContext& renderContext )
 	renderContext.DrawIndexedPrimitive( meshData->m_vertexCount, 0, m_decalPrimitiveCount );
 }
 
+void EveSpaceObjectDecal::CopyFrom( EveSpaceObjectDecal *object )
+{
+	m_display = object->m_display;
+	m_position = object->m_position;
+	m_rotation = object->m_rotation;
+	m_scaling = object->m_scaling;
+	m_parentBoneIndex = object->m_parentBoneIndex;
+	m_rebuildIndexBuffer = object->m_rebuildIndexBuffer;
+	m_decalPrimitiveCount = object->m_decalPrimitiveCount;
+	m_decalMatrix = object->m_decalMatrix;
+	m_invDecalMatrix = object->m_invDecalMatrix;
+	m_parentBoneMatrix = m_parentBoneMatrix;
+	m_decalEffect = object->m_decalEffect;
+	m_indices = object->m_indices;
+}
+
 // ------------------------------------------------------------------------------------------------------
 void EveSpaceObjectDecal::RenderDebugInfo( Tr2DebugRenderer& renderer, const Matrix& worldMatrix ) const
 {

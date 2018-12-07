@@ -51,6 +51,8 @@ public:
 	const Matrix* GetWorldTransform() const { return &m_worldTransform; }
 	void SetBoosterIntensity( float intensity );
 	void SetShaderData( const EveSpaceObjectVSData& vsData, const EveSpaceObjectPSData& psData );
+	void InitDecals( const PEveSpaceObjectDecalVector &decals );
+	void PushDecals( std::vector<ITr2Renderable*>& renderables, EveSpaceObjectDecal::ParentData &pd, Tr2GrannyAnimationPtr animationUpdater );
 	
 	/////////////////////////////////////////////////////////////////////////////////////
 	// ITr2Pickable
@@ -64,6 +66,7 @@ private:
 	Tr2EffectPtr m_shadowEffect;
 	BlueWeakRef<EveSwarm> m_owner;
 	Matrix m_worldTransform;
+	PEveSpaceObjectDecalVector m_decals;
 	
 	Tr2PersistentPerObjectData<EveSwarmRenderable> m_perObjectDataVs;
 	Tr2PersistentPerObjectData<EveSwarmRenderable> m_perObjectDataPs;

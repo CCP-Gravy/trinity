@@ -21,7 +21,8 @@
 #include "Eve/SpaceObject/Attachments/Sets/EveSpotlightSet.h"
 #include "Eve/Turret/EveTurretSet.h"
 
-EveSwarmRenderable::EveSwarmRenderable( IRoot* lockobj )
+EveSwarmRenderable::EveSwarmRenderable( IRoot* lockobj ) :
+PARENTLOCK( m_decals )
 {
 	memset( &m_psData, 0, sizeof( EveSpaceObjectPSData ) );
 	memset( &m_vsData, 0, sizeof( EveSpaceObjectVSData ) );
@@ -184,6 +185,40 @@ void EveSwarmRenderable::SetShaderData( const EveSpaceObjectVSData& vsData, cons
 	m_psData.shipData.y = psData.shipData.y;
 	m_psData.shipData.z = psData.shipData.z;
 	m_psData.shipData.w = psData.shipData.w;
+}
+
+void EveSwarmRenderable::InitDecals( const PEveSpaceObjectDecalVector &decals )
+{
+	for (EveSpaceObjectDecalVector::const_iterator it = decals.begin(); it != decals.end(); ++it)
+	{
+		EveSpaceObjectDecalPtr decal;
+		decal.CreateInstance();
+		decal->CopyFrom( *it );
+		
+		m_decals.Append( decal->GetRawRoot() );
+	}
+}
+
+void EveSwarmRenderable::PushDecals( std::vector<ITr2Renderable*>& renderables, EveSpaceObjectDecal::ParentData &pd, Tr2GrannyAnimationPtr animationUpdater )
+{
+	TriGeometryResPtr geometryRes = m_mesh->GetGeometryResource();
+
+	if( geometryRes )
+	{
+		pd.transform = m_worldTransform;
+
+		// run over every decal and update it
+		for (EveSpaceObjectDecalVector::const_iterator it = m_decals.begin(); it != m_decals.end(); ++it)
+		{
+			// tell the decal of animation, IF we have any
+			if (animationUpdater && animationUpdater->GetMeshBoneCount() && animationUpdater->IsInitialized())
+			{
+				(*it)->SetBoneMatrix( animationUpdater->GetMeshBoneMatrixList(), animationUpdater->GetMeshBoneCount() );
+			}
+			// now prep to get the renderables
+			(*it)->GetRenderables( geometryRes, renderables, &pd );
+		}
+	}
 }
 
 // --------------------------------------------------------------------------
@@ -656,7 +691,18 @@ void EveSwarm::PushRenderables( std::vector<ITr2Renderable*>& renderables )
 		renderables.push_back( *it );
 	}
 
-	PushChildrenAndDecalRenderables( renderables );
+	// are decals visible?
+	if (DisplayDecals() && m_mesh && m_isMeshVisible)
+	{
+		for (auto it = m_renderables.begin(); it != m_renderables.end(); it++)
+		{
+			// put together parent data for the decals
+			EveSpaceObjectDecal::ParentData pd;
+			FillDecalParentData( &pd );
+
+			(*it)->PushDecals( renderables, pd, m_animationUpdater );
+		}
+	}
 }
 
 
@@ -827,6 +873,7 @@ void EveSwarm::AddSwarmer()
 	EveSwarmRenderablePtr renderable;
 	renderable.CreateInstance();
 	renderable->InitializeRenderable( this, m_meshLod, m_shadowEffect );
+	renderable->InitDecals( m_decals );
 	m_renderables.Append( renderable->GetRawRoot() );
 	SwarmVehicle v;
 	v.position = m_worldPosition;
