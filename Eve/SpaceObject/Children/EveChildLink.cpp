@@ -22,7 +22,8 @@ EveChildLink::EveChildLink( IRoot* lockobj ) :
 	m_currentDirection( 0.f, 0.f, 1.f ),
 	m_currentDistance( 0.f ),
 	m_linkStrength( 0.f ),
-	m_linkBarrier( 1.f )
+	m_linkBarrier( 1.f ),
+	m_targetRadius( 0.5f )
 {
 }
 
@@ -111,8 +112,17 @@ void EveChildLink::UpdateAsyncronous( EveUpdateContext& updateContext, const Eve
 	Matrix linkRotationMat;
 	TriMatrixRotationArc( &linkRotationMat, &linkMeshDir, &m_currentDirection );
 
-	// link strength comes from distance vs. barrier 
-	m_linkStrength = Clamp( 1.0f - m_currentDistance / m_linkBarrier, 0.f, 1.f );
+	if( m_currentDistance <= m_targetRadius )
+	{
+		// we are always at 100% when we are within the source radius
+		m_linkStrength = 1.0;
+	}
+	else
+	{
+		// link strength comes from distance vs. barrier 
+		float div = abs(m_linkBarrier - m_targetRadius ) ;
+		m_linkStrength = Clamp( 1.0f - ( m_currentDistance - m_targetRadius ) / div, 0.f, 1.f );
+	}
 	
 	// need inverse rotation-only from worldmatrix
 	Matrix invRotationWorldMat;

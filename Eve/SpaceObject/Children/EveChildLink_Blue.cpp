@@ -20,6 +20,7 @@ const Be::ClassInfo* EveChildLink::ExposeToBlue()
 		MAP_ATTRIBUTE( "target", m_target, "Link source destiny ball", Be::READWRITE )
 		MAP_ATTRIBUTE( "linkStrength", m_linkStrength, "Normalized value indicating link strength", Be::READ )
 		MAP_ATTRIBUTE( "linkBarrier", m_linkBarrier, "Absolute barrier radius", Be::READWRITE )
+		MAP_ATTRIBUTE( "targetRadius", m_targetRadius, "The radius of the target, if we are within it then we are at 100% strength", Be::READWRITE )
 		MAP_ATTRIBUTE( "linkStrengthCurves", m_linkStrengthCurves, "", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "linkStrengthBindings", m_linkStrengthBindings, "", Be::READWRITE | Be::PERSIST )
 

@@ -41,6 +41,8 @@ private:
 	float m_linkStrength;
 	// where is the barrier
 	float m_linkBarrier;
+	// what is the radius of the target (at that point we are at 100% strength)
+	float m_targetRadius;
 
 	// this is the target
 	ITriVectorFunctionPtr m_target;
