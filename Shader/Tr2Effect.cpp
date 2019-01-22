@@ -1737,6 +1737,26 @@ void Tr2Effect::SetParameter( const BlueSharedString& name, float value )
 }
 
 // --------------------------------------------------------------------------------------
+void Tr2Effect::SetParameter( const BlueSharedString& name, const Vector4& value )
+{
+	auto existing = GetParameterByName( name.c_str() );
+	Tr2Vector4ParameterPtr param = BlueCastPtr( existing );
+
+	if( param )
+	{
+		param->SetValue( value );
+	}
+	else
+	{
+		param.CreateInstance();
+		param->m_name = name;
+		param->SetValue( value );
+		m_parameters.Append( param->GetRawRoot() );
+	}
+}
+
+
+// --------------------------------------------------------------------------------------
 void Tr2Effect::SetParameter( const BlueSharedString& name, const Matrix& matrix )
 {
 	auto existing = GetParameterByName( name.c_str() );

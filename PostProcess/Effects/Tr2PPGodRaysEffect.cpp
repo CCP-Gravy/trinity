@@ -103,7 +103,5 @@ void Tr2PPGodRaysEffect::Render(
 		Tr2Renderer::PushRenderTarget( *backBufferRT, renderContext );
 		Tr2Renderer::DrawTexture( *godRayRT, Vector2( 0, 0 ), Vector2( 1, 1 ) );
 		Tr2Renderer::PopRenderTarget( renderContext );
-
-
 	}
 }
