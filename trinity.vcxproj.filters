@@ -1118,6 +1118,9 @@
     <ClInclude Include="PostProcess\Tr2PostProcessManager.h">
       <Filter>Source Files\PostProcess</Filter>
     </ClInclude>
+    <ClInclude Include="PostProcess\Effects\Tr2PPGodRaysEffect.h">
+      <Filter>Source Files\PostProcess\Effects</Filter>
+    </ClInclude>
     <ClInclude Include="PostProcess\Effects\Tr2PPSignalLossEffect.h">
       <Filter>Source Files\PostProcess\Effects</Filter>
     </ClInclude>
@@ -3076,6 +3079,12 @@
     </ClCompile>
     <ClCompile Include="PostProcess\Tr2PostProcessManager_Blue.cpp">
       <Filter>Source Files\PostProcess</Filter>
+    </ClCompile>
+    <ClCompile Include="PostProcess\Effects\Tr2PPGodRaysEffect.cpp">
+      <Filter>Source Files\PostProcess\Effects</Filter>
+    </ClCompile>
+    <ClCompile Include="PostProcess\Effects\Tr2PPGodRaysEffect_Blue.cpp">
+      <Filter>Source Files\PostProcess\Effects</Filter>
     </ClCompile>
     <ClCompile Include="PostProcess\Effects\Tr2PPSignalLossEffect.cpp">
       <Filter>Source Files\PostProcess\Effects</Filter>
