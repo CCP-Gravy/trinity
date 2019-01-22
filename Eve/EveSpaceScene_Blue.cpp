@@ -655,6 +655,14 @@ const Be::ClassInfo* EveSpaceScene::ExposeToBlue()
 			"Impostor manager",
 			Be::READWRITE
 		)
+
+		MAP_ATTRIBUTE
+		(
+			"postProcessManager",
+			m_postProcessManager,
+			"Post Process Manager",
+			Be::READWRITE
+		)
     EXPOSURE_END()
 }
 

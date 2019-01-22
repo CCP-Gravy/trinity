@@ -18,6 +18,7 @@
 #include "EveUpdateContext.h"
 #include "Tr2QuadRenderer.h"
 #include "Tr2LightManager.h"
+#include "PostProcess/Tr2PostProcessManager.h"
 
 class TriProjection;
 class TriView;
@@ -63,6 +64,7 @@ BLUE_DECLARE_VECTOR( Tr2ExternalParameter );
 BLUE_DECLARE( Tr2ImpostorManager );
 BLUE_DECLARE( Tr2DebugRenderer );
 BLUE_DECLARE( EveEffectRoot2 );
+BLUE_DECLARE( Tr2PostProcessManager );
 
 enum TAASampling { TAA_NONE=0, TAA_RANDOM=1, TAA_2X=2, TAA_3X=3, TAA_4X=4 };
 
@@ -536,6 +538,8 @@ private:
 	EveEffectRoot2Ptr m_cameraAttachmentParent;
 
 	IRoot* GetCameraAttachments() const;
+
+	Tr2PostProcessManagerPtr m_postProcessManager;
 };
 
 TYPEDEF_BLUECLASS( EveSpaceScene );
