@@ -655,7 +655,7 @@ void EveMissileWarhead::UpdatePerObjectBuffer( Tr2RenderContextEnum::ShaderType 
 
 void EveMissileWarhead::RenderDebugInfoFromParent( Tr2DebugRenderer& renderer, Matrix transform )
 {
-	srand( (uint32_t) this );
+	srand( static_cast<unsigned int>( reinterpret_cast<size_t>( this )));
 	uint32_t color = 0xff000000 + rand() % 0x00ffffff;
 	renderer.DrawLine( this, transform.GetTranslation(), *this->GetWorldPosition(), color );
 	renderer.DrawLine( this, *this->GetWorldPosition(), TransformCoord( m_currentEndOffset, transform ), 0xff999999 );
