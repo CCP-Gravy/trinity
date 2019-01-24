@@ -10,6 +10,7 @@
 #include "include/TriMath.h"
 #include "TriValueBinding.h"
 #include "Eve/EveUpdateContext.h"
+#include "Utilities/BoundingSphere.h"
 
 // --------------------------------------------------------------------------------
 // Description:
@@ -151,6 +152,16 @@ void EveChildLink::UpdateAsyncronous( EveUpdateContext& updateContext, const Eve
 	}
 	m_vsData.worldTransform = Transpose( finalWorldMat );
 	m_vsData.worldTransformLast = Transpose( linkRotationMat );
+}
+
+
+bool EveChildLink::GetBoundingSphere( Vector4& sphere, BoundingSphereQuery query ) const
+{
+	// place the sphere in the center of the link
+	sphere = Vector4( m_currentDirection, 1.0 ) * m_currentDistance / 2.0f;
+
+	BoundingSphereTransform( m_worldTransform, sphere );
+	return true;
 }
 
 // --------------------------------------------------------------------------------

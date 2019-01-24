@@ -32,6 +32,8 @@ public:
 	void GetLocalToWorldTransform( Matrix& transform ) const;
 	void ChangeLOD( Tr2Lod lod ) {};
 	void GetLights( Tr2LightManager& lightManager ) const {};
+	bool GetBoundingSphere( Vector4& sphere, BoundingSphereQuery query ) const;
+
 
 private:
 	// what's it pointing at?
