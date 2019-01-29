@@ -56,6 +56,12 @@ float GetAutoClamppedTangent( float prevTime, float prevValue, float time, float
 	}
 
 	float valueDiff = std::abs( prevValue - nextValue );
+
+	if( valueDiff == 0 )
+	{
+		return 0;
+	}
+
 	float keyDistance = std::abs( value - prevValue ) / valueDiff;
 	keyDistance = std::min( 1.f, std::min( keyDistance, 1 - keyDistance ) * 6 );
 
