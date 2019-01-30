@@ -1694,35 +1694,28 @@ void EveSOF::SetupLights( EveSpaceObject2Ptr spaceObject, const EveSOFDNAPtr dna
 			for( auto hlsi = hls->items.begin(); hlsi != hls->items.end(); ++hlsi )
 			{
 				auto lightSet = *hlsi;
-				
-				if( lightSet.texturePath.length() != 0 )
+				Tr2PointLightPtr pointLight;
+				if( !lightSet.texturePath.empty() )
 				{
-					Tr2TexturedPointLightPtr pointLight;
-					pointLight.CreateInstance();
-					pointLight->m_position = lightSet.position;
-					pointLight->m_radius = lightSet.radius;
-					pointLight->m_innerRadius = lightSet.innerRadius;
-					pointLight->m_brightness = lightSet.brightness;
-					pointLight->m_noiseAmplitude = lightSet.noiseAmplitude;
-					pointLight->m_noiseFrequency = lightSet.noiseFrequency;
-					pointLight->m_noiseOctaves = lightSet.noiseOctaves;
-					pointLight->SetTexturePath( lightSet.texturePath );
-					spaceObject->AddLight( pointLight );
+					Tr2TexturedPointLightPtr texuredPointLight;
+					texuredPointLight.CreateInstance();
+					texuredPointLight->SetTexturePath( lightSet.texturePath );
+					pointLight = texuredPointLight;
 				}
 				else
 				{
-					Tr2PointLightPtr pointLight;
 					pointLight.CreateInstance();
-					pointLight->m_position = lightSet.position;
-					pointLight->m_radius = lightSet.radius;
-					pointLight->m_innerRadius = lightSet.innerRadius;
-					pointLight->m_color = dna->GetColorSet()[lightSet.lightColor];
-					pointLight->m_brightness = lightSet.brightness;
-					pointLight->m_noiseAmplitude = lightSet.noiseAmplitude;
-					pointLight->m_noiseFrequency = lightSet.noiseFrequency;
-					pointLight->m_noiseOctaves = lightSet.noiseOctaves;
-					spaceObject->AddLight( pointLight );
 				}
+
+				pointLight->m_position = lightSet.position;
+				pointLight->m_radius = lightSet.radius;
+				pointLight->m_innerRadius = lightSet.innerRadius;
+				pointLight->m_color = dna->GetColorSet()[lightSet.lightColor];
+				pointLight->m_brightness = lightSet.brightness;
+				pointLight->m_noiseAmplitude = lightSet.noiseAmplitude;
+				pointLight->m_noiseFrequency = lightSet.noiseFrequency;
+				pointLight->m_noiseOctaves = lightSet.noiseOctaves;
+				spaceObject->AddLight( pointLight );
 			}
 		}
 
