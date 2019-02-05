@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Created:		January 2019
+// Created:	January 2019
 // Copyright:	CCP 2019
 //
 
@@ -8,10 +8,12 @@
 #ifndef Tr2PostProcess2_H
 #define Tr2PostProcess2_H
 
+#include "Tr2PostProcessRenderInfo.h"
+#include "Shader/Tr2Effect.h"
 #include "Effects/Tr2PPSignalLossEffect.h"
 #include "Effects/Tr2PPGodRaysEffect.h"
 
-
+BLUE_DECLARE( Tr2Effect );
 BLUE_DECLARE( Tr2PPSignalLossEffect );
 BLUE_DECLARE( Tr2PPGodRaysEffect );
 
@@ -24,13 +26,13 @@ public:
 	Tr2PostProcess2( IRoot* lockobj = NULL );
 	~Tr2PostProcess2();
 
-	Tr2PPSignalLossEffectPtr GetSignalLoss() { return m_signalLoss; }
-	Tr2PPGodRaysEffectPtr GetGodRays() { return m_godRays; }
-
+	void Render( Tr2RenderContext& renderContext, Tr2PostProcessRenderInfo* renderInfo );
 
 private:
 	Tr2PPSignalLossEffectPtr m_signalLoss;
 	Tr2PPGodRaysEffectPtr m_godRays;
+
+	Tr2EffectPtr m_tonemappingEffect;
 
 };
 TYPEDEF_BLUECLASS( Tr2PostProcess2 );

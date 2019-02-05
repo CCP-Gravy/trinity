@@ -37,7 +37,6 @@ Tr2PPGodRaysEffect::~Tr2PPGodRaysEffect()
 {
 }
 
-
 bool Tr2PPGodRaysEffect::OnModified( Be::Var* value )
 {
 	if( IsMatch( value, m_noiseTexturePath ) )
@@ -62,46 +61,46 @@ bool Tr2PPGodRaysEffect::OnModified( Be::Var* value )
 }
 
 
-void Tr2PPGodRaysEffect::Render( 
-	Tr2RenderContext& renderContext, 
-	Tr2RenderTarget* downSampleRT, 
-	Tr2RenderTarget* godRayRT, 
-	Tr2RenderTarget* backBufferRT, 
-	Tr2ShaderBuffer* m_psData )
+void Tr2PPGodRaysEffect::Render( Tr2RenderContext& renderContext, Tr2PostProcessRenderInfo* renderInfo )
 {
-	if( m_intensity > 0 )
+	if( !IsActive() )
 	{
-		// Downsample 
-		m_psData->ApplyBuffer( renderContext );
-		Tr2Renderer::PushRenderTarget( *downSampleRT, renderContext );
-
-		HRESULT hr = renderContext.Clear( Tr2RenderContextEnum::CLEARFLAGS_TARGET, 0x00000000, 1.0, 0 );
-		if( !SUCCEEDED( hr ) )
-		{
-			CCP_LOGERR( "Godray depth clear failed" );
-		}
-		Tr2Renderer::DrawScreenQuad( m_downSampleEffect );
-		Tr2Renderer::PopRenderTarget( renderContext );
-
-		// God rays
-		Tr2Renderer::PushRenderTarget( *godRayRT, renderContext );
-		hr = renderContext.Clear( Tr2RenderContextEnum::CLEARFLAGS_TARGET, 0x00000000, 1.0, 0 );
-
-		if( !SUCCEEDED( hr ) )
-		{
-			CCP_LOGERR( "Godray clear failed" );
-		}
-		m_effect->StartUpdate();
-		m_effect->SetParameter( BlueSharedString( "DepthMap" ), downSampleRT );
-		m_effect->EndUpdate();
-
-		Tr2Renderer::DrawScreenQuad( m_effect );
-		Tr2Renderer::PopRenderTarget( renderContext );
-		
-		// Blit
-		renderContext.m_esm.ApplyStandardStates( Tr2EffectStateManager::RM_ALPHA_ADDITIVE );
-		Tr2Renderer::PushRenderTarget( *backBufferRT, renderContext );
-		Tr2Renderer::DrawTexture( *godRayRT, Vector2( 0, 0 ), Vector2( 1, 1 ) );
-		Tr2Renderer::PopRenderTarget( renderContext );
+		return;
 	}
+	auto shaderBuffer = renderInfo->GetShaderBuffer();
+	auto downSampleRT = renderInfo->GetRt1Buffer();
+	auto godRayRT = renderInfo->GetRt2Buffer();
+	auto backBufferRT = renderInfo->GetSourceBuffer();
+
+	// Downsample 
+	renderInfo->GetShaderBuffer()->ApplyBuffer( renderContext );
+	Tr2Renderer::PushRenderTarget( *downSampleRT, renderContext );
+
+	HRESULT hr = renderContext.Clear( Tr2RenderContextEnum::CLEARFLAGS_TARGET, 0x00000000, 1.0, 0 );
+	if( !SUCCEEDED( hr ) )
+	{
+		CCP_LOGERR( "Godray depth clear failed" );
+	}
+	Tr2Renderer::DrawScreenQuad( m_downSampleEffect );
+	Tr2Renderer::PopRenderTarget( renderContext );
+
+	// God rays
+	Tr2Renderer::PushRenderTarget( *godRayRT, renderContext );
+	hr = renderContext.Clear( Tr2RenderContextEnum::CLEARFLAGS_TARGET, 0x00000000, 1.0, 0 );
+
+	if( !SUCCEEDED( hr ) )
+	{
+		CCP_LOGERR( "Godray clear failed" );
+	}
+	m_effect->StartUpdate();
+	m_effect->SetParameter( BlueSharedString( "DepthMap" ), downSampleRT );
+	m_effect->EndUpdate();
+
+	Tr2Renderer::DrawScreenQuad( m_effect );
+	Tr2Renderer::PopRenderTarget( renderContext );
+		
+	// Blit
+	Tr2Renderer::PushRenderTarget( *backBufferRT, renderContext );
+	Tr2Renderer::DrawTexture( *godRayRT, Vector2( 0, 0 ), Vector2( 1, 1 ) );
+	Tr2Renderer::PopRenderTarget( renderContext );
 }

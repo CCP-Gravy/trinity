@@ -1,0 +1,140 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+// Created:		January 2019
+// Copyright:	CCP 2019
+//
+
+#include "StdAfx.h"
+#include "Tr2PostProcessRenderInfo.h"
+
+
+Tr2PostProcessRenderInfo::Tr2PostProcessRenderInfo( IRoot* lockobj )
+{
+	m_rt1.CreateInstance();
+	m_rt1->m_name = "PostProcess RT1";
+
+	m_rt2.CreateInstance();
+	m_rt2->m_name = "PostProcess RT2";
+
+	m_sourceBufferCopy.CreateInstance();
+	m_sourceBufferCopy->m_name = "Source Copy";
+
+	m_accumulationBuffer.CreateInstance();
+	m_accumulationBuffer->m_name = "PostProcess Accumulation";
+
+	m_velocityBuffer.CreateInstance();
+	m_velocityBuffer->m_name = "PostProcess Velocity";
+
+	m_distortionBuffer.CreateInstance();
+	m_distortionBuffer->m_name = "PostProcess Distrotion";
+
+	m_black.CreateInstance();
+	m_black->m_name = "Black";
+	m_black->Create( 4, 4, 1, Tr2RenderContextEnum::PIXEL_FORMAT_B8G8R8A8_UNORM );
+	
+	m_exposure.CreateInstance();
+	m_exposure->Create( 8, Tr2RenderContextEnum::PIXEL_FORMAT_R32_FLOAT, Tr2RenderContextEnum::USAGE_CPU_WRITE );
+
+	m_histogram.CreateInstance();
+	m_histogram->Create( 65, Tr2RenderContextEnum::PIXEL_FORMAT_R32_UINT, Tr2RenderContextEnum::USAGE_CPU_WRITE );
+}
+
+
+Tr2PostProcessRenderInfo::~Tr2PostProcessRenderInfo()
+{
+	if( m_rt1->IsValid() )
+	{
+		m_rt1->Destroy();
+	}
+	if( m_rt2->IsValid() )
+	{
+		m_rt2->Destroy();
+	}
+	if( m_accumulationBuffer->IsValid() )
+	{
+		m_accumulationBuffer->Destroy();
+	}
+	if( m_velocityBuffer->IsValid() )
+	{
+		m_velocityBuffer->Destroy();
+	}
+	if( m_distortionBuffer->IsValid() )
+	{
+		m_distortionBuffer->Destroy();
+	}
+	if( m_black->IsValid() )
+	{
+		m_black->Destroy();
+	}
+
+	if( m_sourceBufferCopy && m_sourceBufferCopy->IsValid() )
+	{
+		m_sourceBufferCopy->Destroy();
+	}
+}
+
+
+bool Tr2PostProcessRenderInfo::OnModified( Be::Var* value )
+{
+	if( IsMatch( value, m_sourceBuffer ) )
+	{
+		CopySourceTo( m_rt1, 0.5f );
+		CopySourceTo( m_rt2, 0.5f );
+		m_sourceBufferCopy->Create(
+			uint32_t( float( m_sourceBuffer->GetWidth() ) ),
+			uint32_t( float( m_sourceBuffer->GetHeight() ) ),
+			1,
+			m_sourceBuffer->GetFormat(),
+			1,
+			0 );
+	}
+	return true;
+}
+
+
+void Tr2PostProcessRenderInfo::CopySourceTo( Tr2RenderTarget* renderTarget, float sizeScale )
+{
+	if( renderTarget->IsValid() )
+	{
+		renderTarget->Destroy();
+	}
+
+	if( m_sourceBuffer )
+	{
+		renderTarget->Create(
+			uint32_t( float( m_sourceBuffer->GetWidth() ) * sizeScale ),
+			uint32_t( float( m_sourceBuffer->GetHeight() ) * sizeScale ),
+			m_sourceBuffer->GetMipCount(),
+			m_sourceBuffer->GetFormat(),
+			m_sourceBuffer->GetMsaaType(),
+			m_sourceBuffer->GetMsaaQuality() );
+	}
+}
+
+
+void Tr2PostProcessRenderInfo::CreateBuffers( uint32_t width, uint32_t height )
+{
+
+	if( m_accumulationBuffer->IsValid() )
+	{
+		m_accumulationBuffer->Destroy();
+	}
+	if( m_velocityBuffer->IsValid() )
+	{
+		m_velocityBuffer->Destroy();
+	}
+	if( m_distortionBuffer->IsValid() )
+	{
+		m_distortionBuffer->Destroy();
+	}
+
+	// TODO - this could break in dx9
+	m_accumulationBuffer->Create( width, height, 1, Tr2RenderContextEnum::PIXEL_FORMAT_R11G11B10_FLOAT );
+	m_velocityBuffer->Create( width, height, 1, Tr2RenderContextEnum::PIXEL_FORMAT_R16G16_FLOAT, 8U, 0U );
+	m_distortionBuffer->Create( width, height, 1, Tr2RenderContextEnum::PIXEL_FORMAT_B8G8R8A8_UNORM, 1 );
+}
+
+void Tr2PostProcessRenderInfo::SetPerFrameData( Tr2ShaderBuffer* shaderBuffer )
+{
+	m_shaderBuffer = shaderBuffer;
+}

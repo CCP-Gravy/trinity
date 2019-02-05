@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Created:		January 2019
+// Created:	January 2019
 // Copyright:	CCP 2019
 //
 
@@ -17,6 +17,7 @@ const Be::ClassInfo* Tr2PostProcess2::ExposeToBlue()
 
 		MAP_ATTRIBUTE( "signalLoss", m_signalLoss, "Accesses the Signal loss", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "godRays", m_godRays, "Accesses the God Rays effect", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "toneMappingEffect", m_tonemappingEffect, "Accesses the tone mapping effect", Be::READWRITE )
 
     EXPOSURE_END()
 }

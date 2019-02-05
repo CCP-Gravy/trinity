@@ -1737,6 +1737,18 @@ void Tr2Effect::SetParameter( const BlueSharedString& name, float value )
 }
 
 // --------------------------------------------------------------------------------------
+void Tr2Effect::SetParameter( const BlueSharedString& name, const Vector2& value )
+{
+	SetParameter( name, Vector4( value.x, value.y, 0.0, 0.0 ) );
+}
+
+// --------------------------------------------------------------------------------------
+void Tr2Effect::SetParameter( const BlueSharedString& name, const Vector3& value )
+{
+	SetParameter( name, Vector4( value, 0.0 ) );
+}
+
+// --------------------------------------------------------------------------------------
 void Tr2Effect::SetParameter( const BlueSharedString& name, const Vector4& value )
 {
 	auto existing = GetParameterByName( name.c_str() );

@@ -21,7 +21,8 @@ const Be::ClassInfo* Tr2PPGodRaysEffect::ExposeToBlue()
 
 		MAP_ATTRIBUTE( "downsampleEffect", m_downSampleEffect, "The noise texture to use", Be::READWRITE )
 		MAP_ATTRIBUTE( "effect", m_effect, "The noise texture to use", Be::READWRITE )
+	
+	EXPOSURE_CHAINTO( Tr2PPEffect )
 
-	EXPOSURE_END()
 }
 

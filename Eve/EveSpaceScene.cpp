@@ -1985,7 +1985,7 @@ void EveSpaceScene::EndRender( Tr2RenderContext& renderContext )
 
 	if( m_postProcessManager )
 	{
-		m_postProcessManager->Render( m_postProcessPSBuffer, renderContext );
+		m_postProcessManager->Render( renderContext, m_postProcessPSBuffer );
 	}
 
 	if( m_visualizerEffects[m_visualizeMethod].type == VisualizerEffect::FULL_SCREEN_QUAD_OVERLAY )

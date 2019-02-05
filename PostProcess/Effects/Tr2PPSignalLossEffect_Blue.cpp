@@ -13,11 +13,11 @@ BLUE_DEFINE( Tr2PPSignalLossEffect );
 const Be::ClassInfo* Tr2PPSignalLossEffect::ExposeToBlue()
 {
 	EXPOSURE_BEGIN( Tr2PPSignalLossEffect, "" )
-		MAP_INTERFACE( IRoot )
+		MAP_INTERFACE( INotify )
 
-		MAP_ATTRIBUTE( "strength", m_strength, "The strength of the signal loss", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "strength", m_strength, "The strength of the signal loss", Be::READWRITE | Be::PERSIST | Be::NOTIFY )
 		
-	EXPOSURE_END()
+	EXPOSURE_CHAINTO( Tr2PPEffect )
 
 }
 

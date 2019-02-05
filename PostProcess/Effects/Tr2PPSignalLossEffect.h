@@ -11,9 +11,13 @@
 
 #include "StdAfx.h"
 #include "Shader/Tr2Effect.h"
+#include "PostProcess/Effects/Tr2PPEffect.h"
+#include "PostProcess/Tr2PostProcessRenderInfo.h"
+
 
 BLUE_CLASS( Tr2PPSignalLossEffect ) :
-	public IRoot
+	public Tr2PPEffect,
+	public INotify
 {
 public:
 	EXPOSE_TO_BLUE();
@@ -21,7 +25,15 @@ public:
 	Tr2PPSignalLossEffect( IRoot* lockobj = NULL );
 	~Tr2PPSignalLossEffect();
 	
-	void Render( Tr2RenderContext& renderContext );
+	void Render( Tr2RenderContext& renderContext, Tr2PostProcessRenderInfo* renderInfo );
+	
+	//////////////////////////////////////////////////////////////////////////
+	// INotify
+	virtual bool OnModified( Be::Var* value );
+
+	//////////////////////////////////////////////////////////////////////////
+	// Tr2PPEffect
+	bool IsActive() override;
 
 private:
 	float m_strength;
