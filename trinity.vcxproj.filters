@@ -1118,6 +1118,15 @@
     <ClInclude Include="PostProcess\Tr2PostProcessManager.h">
       <Filter>Source Files\PostProcess</Filter>
     </ClInclude>
+    <ClInclude Include="PostProcess\Tr2PostProcessRenderInfo.h">
+      <Filter>Source Files\PostProcess</Filter>
+    </ClInclude>
+    <ClInclude Include="PostProcess\Effects\Tr2PPBloomEffect.h">
+      <Filter>Source Files\PostProcess\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="PostProcess\Effects\Tr2PPEffect.h">
+      <Filter>Source Files\PostProcess\Effects</Filter>
+    </ClInclude>
     <ClInclude Include="PostProcess\Effects\Tr2PPGodRaysEffect.h">
       <Filter>Source Files\PostProcess\Effects</Filter>
     </ClInclude>
@@ -3079,6 +3088,24 @@
     </ClCompile>
     <ClCompile Include="PostProcess\Tr2PostProcessManager_Blue.cpp">
       <Filter>Source Files\PostProcess</Filter>
+    </ClCompile>
+    <ClCompile Include="PostProcess\Tr2PostProcessRenderInfo.cpp">
+      <Filter>Source Files\PostProcess</Filter>
+    </ClCompile>
+    <ClCompile Include="PostProcess\Tr2PostProcessRenderInfo_Blue.cpp">
+      <Filter>Source Files\PostProcess</Filter>
+    </ClCompile>
+    <ClCompile Include="PostProcess\Effects\Tr2PPBloomEffect.cpp">
+      <Filter>Source Files\PostProcess\Effects</Filter>
+    </ClCompile>
+    <ClCompile Include="PostProcess\Effects\Tr2PPBloomEffect_Blue.cpp">
+      <Filter>Source Files\PostProcess\Effects</Filter>
+    </ClCompile>
+    <ClCompile Include="PostProcess\Effects\Tr2PPEffect.cpp">
+      <Filter>Source Files\PostProcess\Effects</Filter>
+    </ClCompile>
+    <ClCompile Include="PostProcess\Effects\Tr2PPEffect_Blue.cpp">
+      <Filter>Source Files\PostProcess\Effects</Filter>
     </ClCompile>
     <ClCompile Include="PostProcess\Effects\Tr2PPGodRaysEffect.cpp">
       <Filter>Source Files\PostProcess\Effects</Filter>

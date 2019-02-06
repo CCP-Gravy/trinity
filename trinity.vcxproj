@@ -2840,6 +2840,9 @@
     <ClInclude Include="Particle\Tr2StaticEmitter.h" />
     <ClInclude Include="PostProcess\Tr2PostProcess2.h" />
     <ClInclude Include="PostProcess\Tr2PostProcessManager.h" />
+    <ClInclude Include="PostProcess\Tr2PostProcessRenderInfo.h" />
+    <ClInclude Include="PostProcess\Effects\Tr2PPBloomEffect.h" />
+    <ClInclude Include="PostProcess\Effects\Tr2PPEffect.h" />
     <ClInclude Include="PostProcess\Effects\Tr2PPGodRaysEffect.h" />
     <ClInclude Include="PostProcess\Effects\Tr2PPSignalLossEffect.h" />
     <ClInclude Include="RenderJob\ITriRenderStep.h" />
@@ -3498,6 +3501,12 @@
     <ClCompile Include="PostProcess\Tr2PostProcess2_Blue.cpp" />
     <ClCompile Include="PostProcess\Tr2PostProcessManager.cpp" />
     <ClCompile Include="PostProcess\Tr2PostProcessManager_Blue.cpp" />
+    <ClCompile Include="PostProcess\Tr2PostProcessRenderInfo.cpp" />
+    <ClCompile Include="PostProcess\Tr2PostProcessRenderInfo_Blue.cpp" />
+    <ClCompile Include="PostProcess\Effects\Tr2PPBloomEffect.cpp" />
+    <ClCompile Include="PostProcess\Effects\Tr2PPBloomEffect_Blue.cpp" />
+    <ClCompile Include="PostProcess\Effects\Tr2PPEffect.cpp" />
+    <ClCompile Include="PostProcess\Effects\Tr2PPEffect_Blue.cpp" />
     <ClCompile Include="PostProcess\Effects\Tr2PPGodRaysEffect.cpp" />
     <ClCompile Include="PostProcess\Effects\Tr2PPGodRaysEffect_Blue.cpp" />
     <ClCompile Include="PostProcess\Effects\Tr2PPSignalLossEffect.cpp" />
