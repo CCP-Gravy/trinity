@@ -7,7 +7,7 @@
 #include "StdAfx.h"
 #include "Tr2PPEffect.h"
 
-Tr2PPEffect::Tr2PPEffect( IRoot* lockobj ) {
+Tr2PPEffect::Tr2PPEffect( IRoot* lockobj ) : m_display(true) {
 
 }
 
