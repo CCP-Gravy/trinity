@@ -269,7 +269,8 @@ BLUE_DEFINE( EveSOFDataHullPlaneSet );
 Be::VarChooser EveSOFDataHullPlaneSetUsageChooser[] =
 {
 	{ "Standard", BeCast( EveSOFDataHullPlaneSet::USAGE_STANDARD ), "Standard planeset" },
-	{ "Video", BeCast( EveSOFDataHullPlaneSet::USAGE_VIDEO ), "Video planeset" },
+	{ "SpaceVideo", BeCast( EveSOFDataHullPlaneSet::USAGE_SPACE_VIDEO ), "Space Video planeset" },
+	{ "HangarVideo", BeCast( EveSOFDataHullPlaneSet::USAGE_HANGAR_VIDEO ), "Hangar Video planeset" },
 	{ "Haze", BeCast( EveSOFDataHullPlaneSet::USAGE_HAZE ), "Fake haze planeset" },
 	{ 0 }
 };

@@ -767,9 +767,13 @@ void EveSOF::SetupPlaneSets( EveSpaceObject2Ptr obj, const EveSOFDNAPtr dna ) co
 				angularFadeOut = 1.f;
 				effectResPath = planeSetData->skinned ? "res:/graphics/effect/managed/space/spaceobject/fx/skinned_planeglow.fx" : "res:/graphics/effect/managed/space/spaceobject/fx/planeglow.fx";
 				break;
-			case EveSOFDataHullPlaneSet::USAGE_VIDEO:
+			case EveSOFDataHullPlaneSet::USAGE_SPACE_VIDEO:
 				effectResPath = planeSetData->skinned ? "res:/graphics/effect/managed/space/spaceobject/fx/skinned_planehologram.fx" : "res:/graphics/effect/managed/space/spaceobject/fx/planehologram.fx";
 				imageMapResPath = "dynamic:/inspacevideos";
+				break;
+			case EveSOFDataHullPlaneSet::USAGE_HANGAR_VIDEO:
+				effectResPath = planeSetData->skinned ? "res:/graphics/effect/managed/space/spaceobject/fx/skinned_planehologram.fx" : "res:/graphics/effect/managed/space/spaceobject/fx/planehologram.fx";
+				imageMapResPath = "dynamic:/hangarvideos";
 				break;
 			}
 

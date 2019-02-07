@@ -412,7 +412,8 @@ public:
 	enum Usage
 	{
 		USAGE_STANDARD = 0,
-		USAGE_VIDEO = 2,
+		USAGE_SPACE_VIDEO = 2,
+		USAGE_HANGAR_VIDEO = 3,
 		USAGE_HAZE = 5,
 	};
 
