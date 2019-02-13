@@ -6,7 +6,6 @@
 
 #include "StdAfx.h"
 #include "Tr2PPGodRaysEffect.h"
-#include "Tr2Renderer.h"
 
 
 Tr2PPGodRaysEffect::Tr2PPGodRaysEffect( IRoot* lockobj ) :
@@ -20,5 +19,11 @@ Tr2PPGodRaysEffect::Tr2PPGodRaysEffect( IRoot* lockobj ) :
 
 Tr2PPGodRaysEffect::~Tr2PPGodRaysEffect()
 {
+}
+
+
+bool Tr2PPGodRaysEffect::IsActive()
+{
+	return m_display && m_intensity > 0.0f;
 }
 

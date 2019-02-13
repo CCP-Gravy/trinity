@@ -14,13 +14,14 @@
 #include "Effects/Tr2PPGodRaysEffect.h"
 #include "Effects/Tr2PPBloomEffect.h"
 #include "Effects/Tr2PPDynamicExposureEffect.h"
+#include "Effects/Tr2PPFilmGrainEffect.h"
 
 BLUE_DECLARE( Tr2Effect );
 BLUE_DECLARE( Tr2PPSignalLossEffect );
 BLUE_DECLARE( Tr2PPGodRaysEffect );
 BLUE_DECLARE( Tr2PPBloomEffect );
 BLUE_DECLARE( Tr2PPDynamicExposureEffect );
-
+BLUE_DECLARE( Tr2PPFilmGrainEffect );
 
 BLUE_CLASS( Tr2PostProcess2 ) :
 	public IRoot
@@ -35,12 +36,14 @@ public:
 	Tr2PPGodRaysEffectPtr GetGodRays() { return m_godRays; }
 	Tr2PPBloomEffectPtr GetBloom() { return m_bloom; }
 	Tr2PPDynamicExposureEffectPtr GetDynamicExposure() { return m_dynamicExposure; }
+	Tr2PPFilmGrainEffectPtr GetFilmGrain() { return m_filmGrain; }
 
 private:
 	Tr2PPSignalLossEffectPtr m_signalLoss;
 	Tr2PPGodRaysEffectPtr m_godRays;
 	Tr2PPBloomEffectPtr m_bloom;
 	Tr2PPDynamicExposureEffectPtr m_dynamicExposure;
+	Tr2PPFilmGrainEffectPtr m_filmGrain;
 };
 TYPEDEF_BLUECLASS( Tr2PostProcess2 );
 

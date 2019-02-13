@@ -112,6 +112,7 @@ TriStepResult TriStepRenderPostProcess::Execute( Be::Time realTime, Be::Time sim
 	Tr2PPBloomEffect* bloom = nullptr;
 	Tr2PPSignalLossEffect* signalLoss= nullptr;
 	Tr2PPDynamicExposureEffectPtr dynamicExposure = nullptr;
+	Tr2PPFilmGrainEffectPtr filmGrain = nullptr;
 
 	if( postProcess != nullptr )
 	{
@@ -120,6 +121,7 @@ TriStepResult TriStepRenderPostProcess::Execute( Be::Time realTime, Be::Time sim
 		{
 		case HIGH:
 			godrays = postProcess->GetGodRays();
+			filmGrain = postProcess->GetFilmGrain();
 #if TRINITY_PLATFORM != TRINITY_DIRECTX9
 			dynamicExposure = postProcess->GetDynamicExposure();
 #endif
@@ -159,6 +161,8 @@ TriStepResult TriStepRenderPostProcess::Execute( Be::Time realTime, Be::Time sim
 		RenderBloom( renderContext, bloom );
 	}
 
+	ProcessFilmGrain( filmGrain );
+
 	Tr2Renderer::DrawTexture( m_tonemappingEffect, Vector2( 0, 0 ), Vector2( 1, 1 ) );
 	
 	if( ProcessSignalLoss( signalLoss ) )
@@ -175,69 +179,69 @@ TriStepResult TriStepRenderPostProcess::Execute( Be::Time realTime, Be::Time sim
 
 bool TriStepRenderPostProcess::ProcessBloom( Tr2PPBloomEffect* bloom )
 {
-	if( bloom && ( m_bloomHighPassFilter == nullptr || m_bloomHorizontalBlur == nullptr || m_bloomVerticalBlur == nullptr ) )
+	if( bloom && bloom->IsActive() )
 	{
-		m_bloomHighPassFilter.CreateInstance();
-		m_bloomHighPassFilter->StartUpdate();
-		m_bloomHighPassFilter->SetEffectPathName( "res:/Graphics/Effect/Managed/Space/PostProcess/HighPassFilter.fx" );
-		m_bloomHighPassFilter->SetParameter( BlueSharedString( "LuminanceThreshold" ), bloom->m_luminanceThreshold );
-		m_bloomHighPassFilter->SetParameter( BlueSharedString( "LuminanceScale" ), bloom->m_luminanceScale );
-		m_bloomHighPassFilter->SetParameter( BlueSharedString( "ExposureDependency" ), bloom->m_exposureDependency );
-		m_bloomHighPassFilter->EndUpdate();
+		if( m_bloomHighPassFilter == nullptr || m_bloomHorizontalBlur == nullptr || m_bloomVerticalBlur == nullptr )
+		{
+			m_bloomHighPassFilter.CreateInstance();
+			m_bloomHighPassFilter->StartUpdate();
+			m_bloomHighPassFilter->SetEffectPathName( "res:/Graphics/Effect/Managed/Space/PostProcess/HighPassFilter.fx" );
+			m_bloomHighPassFilter->SetParameter( BlueSharedString( "LuminanceThreshold" ), bloom->m_luminanceThreshold );
+			m_bloomHighPassFilter->SetParameter( BlueSharedString( "LuminanceScale" ), bloom->m_luminanceScale );
+			m_bloomHighPassFilter->SetParameter( BlueSharedString( "ExposureDependency" ), bloom->m_exposureDependency );
+			m_bloomHighPassFilter->EndUpdate();
 
-		m_bloomHorizontalBlur.CreateInstance();
-		m_bloomHorizontalBlur->StartUpdate();
-		m_bloomHorizontalBlur->SetEffectPathName( "res:/Graphics/Effect/Managed/Space/PostProcess/BlurBig.fx" );
-		m_bloomHorizontalBlur->EndUpdate();
+			m_bloomHorizontalBlur.CreateInstance();
+			m_bloomHorizontalBlur->StartUpdate();
+			m_bloomHorizontalBlur->SetEffectPathName( "res:/Graphics/Effect/Managed/Space/PostProcess/BlurBig.fx" );
+			m_bloomHorizontalBlur->EndUpdate();
 
-		m_bloomVerticalBlur.CreateInstance();
-		m_bloomVerticalBlur->StartUpdate();
-		m_bloomVerticalBlur->SetEffectPathName( "res:/Graphics/Effect/Managed/Space/PostProcess/BlurBig.fx" );
-		m_bloomVerticalBlur->SetParameter( BlueSharedString( "Direction" ), Vector2( 0, 1 ) );
-		m_bloomVerticalBlur->EndUpdate();
+			m_bloomVerticalBlur.CreateInstance();
+			m_bloomVerticalBlur->StartUpdate();
+			m_bloomVerticalBlur->SetEffectPathName( "res:/Graphics/Effect/Managed/Space/PostProcess/BlurBig.fx" );
+			m_bloomVerticalBlur->SetParameter( BlueSharedString( "Direction" ), Vector2( 0, 1 ) );
+			m_bloomVerticalBlur->EndUpdate();
 
-		m_tonemappingEffect->StartUpdate();
-		m_tonemappingEffect->SetParameter( BlueSharedString( "BloomBrightness" ), bloom->m_bloomBrightness );
-		m_tonemappingEffect->SetParameter( BlueSharedString( "GrimeWeight" ), bloom->m_grimeWeight );
-		m_tonemappingEffect->AddResourceTexture2D( BlueSharedString( "GrimePath" ), bloom->m_grimePath.c_str() );
-		m_tonemappingEffect->SetParameter( BlueSharedString( "BlitCurrent" ), m_renderInfo->GetRt1Buffer() );
+			m_tonemappingEffect->StartUpdate();
+			m_tonemappingEffect->SetParameter( BlueSharedString( "BloomBrightness" ), bloom->m_bloomBrightness );
+			m_tonemappingEffect->SetParameter( BlueSharedString( "GrimeWeight" ), bloom->m_grimeWeight );
+			m_tonemappingEffect->AddResourceTexture2D( BlueSharedString( "GrimePath" ), bloom->m_grimePath.c_str() );
+			m_tonemappingEffect->SetParameter( BlueSharedString( "BlitCurrent" ), m_renderInfo->GetRt1Buffer() );
 
-		m_tonemappingEffect->EndUpdate();
+			m_tonemappingEffect->EndUpdate();
 
-		bloom->SetDirty( false );
+			bloom->SetDirty( false );
+		}
+		else if( bloom->IsDirty() )
+		{
+			m_bloomHighPassFilter->StartUpdate();
+			m_bloomHighPassFilter->SetParameter( BlueSharedString( "LuminanceThreshold" ), bloom->m_luminanceThreshold );
+			m_bloomHighPassFilter->SetParameter( BlueSharedString( "LuminanceScale" ), bloom->m_luminanceScale );
+			m_bloomHighPassFilter->SetParameter( BlueSharedString( "ExposureDependency" ), bloom->m_exposureDependency );
+			m_bloomHighPassFilter->EndUpdate();
+
+			m_tonemappingEffect->StartUpdate();
+			m_tonemappingEffect->SetParameter( BlueSharedString( "BloomBrightness" ), bloom->m_bloomBrightness );
+			m_tonemappingEffect->SetParameter( BlueSharedString( "GrimeWeight" ), bloom->m_grimeWeight );
+
+			TriTextureParameter* resource = dynamic_cast< TriTextureParameter* >( m_godrayEffect->GetResourceByName( "GrimePath" ) );
+			resource->SetResourcePath( bloom->m_grimePath.c_str() );
+
+			m_tonemappingEffect->EndUpdate();
+
+			bloom->SetDirty( false );
+		}
 
 	}
 	else if( bloom == nullptr )
 	{
-		if( m_bloomHighPassFilter != nullptr || m_bloomHorizontalBlur != nullptr || m_bloomVerticalBlur != nullptr )
-		{
-			m_bloomHighPassFilter = nullptr;
-			m_bloomHorizontalBlur = nullptr;
-			m_bloomVerticalBlur = nullptr;
-		}
+		m_bloomHighPassFilter = nullptr;
+		m_bloomHorizontalBlur = nullptr;
+		m_bloomVerticalBlur = nullptr;
+		
 		m_tonemappingEffect->StartUpdate();
 		m_tonemappingEffect->SetParameter( BlueSharedString( "BlitCurrent" ), m_renderInfo->GetBlackBuffer() );
 		m_tonemappingEffect->EndUpdate();
-	}
-
-	if( bloom && bloom->IsDirty() )
-	{
-		m_bloomHighPassFilter->StartUpdate();
-		m_bloomHighPassFilter->SetParameter( BlueSharedString( "LuminanceThreshold" ), bloom->m_luminanceThreshold );
-		m_bloomHighPassFilter->SetParameter( BlueSharedString( "LuminanceScale" ), bloom->m_luminanceScale );
-		m_bloomHighPassFilter->SetParameter( BlueSharedString( "ExposureDependency" ), bloom->m_exposureDependency );
-		m_bloomHighPassFilter->EndUpdate();
-
-		m_tonemappingEffect->StartUpdate();
-		m_tonemappingEffect->SetParameter( BlueSharedString( "BloomBrightness" ), bloom->m_bloomBrightness );
-		m_tonemappingEffect->SetParameter( BlueSharedString( "GrimeWeight" ), bloom->m_grimeWeight );
-		
-		TriTextureParameter* resource = dynamic_cast< TriTextureParameter* >( m_godrayEffect->GetResourceByName( "GrimePath" ) );
-		resource->SetResourcePath( bloom->m_grimePath.c_str() );
-		
-		m_tonemappingEffect->EndUpdate();
-
-		bloom->SetDirty( false );
 	}
 
 	return bloom != nullptr && bloom->IsActive();
@@ -293,46 +297,45 @@ void TriStepRenderPostProcess::RenderBloom( Tr2RenderContext& renderContext, Tr2
 
 bool TriStepRenderPostProcess::ProcessGodRays( Tr2PPGodRaysEffect* godrays )
 {
-	if( godrays && ( m_godRayDownSampleEffect == nullptr || m_godrayEffect == nullptr ) )
+	if( godrays && godrays->IsActive() )
 	{
-		m_godRayDownSampleEffect.CreateInstance();
-		m_godRayDownSampleEffect->StartUpdate();
-		m_godRayDownSampleEffect->SetEffectPathName( "res:/Graphics/Effect/Managed/Space/PostProcess/DownsampleDepth.fx" );
-		m_godRayDownSampleEffect->EndUpdate();
-
-		m_godrayEffect.CreateInstance();
-		m_godrayEffect->StartUpdate();
-		m_godrayEffect->SetEffectPathName( "res:/Graphics/Effect/Managed/Space/PostProcess/Godrays.fx" );
-		m_godrayEffect->SetParameter( BlueSharedString( "Color" ), godrays->m_godRayColor );
-		m_godrayEffect->SetParameter( BlueSharedString( "Intensity" ), Vector4(godrays->m_intensity, 0.0f, 1.0f, 1.0f ) );
-		m_godrayEffect->SetParameter( BlueSharedString( "grFactors" ), godrays->grFactors );
-		m_godrayEffect->AddResourceTexture2D( BlueSharedString( "NoiseTexMap" ), godrays->m_noiseTexturePath.c_str() );
-		m_godrayEffect->SetParameter( BlueSharedString( "DepthMap" ), m_renderInfo->GetRt1Buffer() );
-		m_godrayEffect->EndUpdate();
-		godrays->SetDirty( false );
-	}
-	else if( godrays == nullptr )
-	{
-		if( m_bloomHighPassFilter != nullptr || m_bloomHorizontalBlur != nullptr || m_bloomVerticalBlur != nullptr )
+		if( m_godRayDownSampleEffect == nullptr || m_godrayEffect == nullptr )
 		{
-			m_bloomHighPassFilter = nullptr;
-			m_bloomHorizontalBlur = nullptr;
-			m_bloomVerticalBlur = nullptr;
+			m_godRayDownSampleEffect.CreateInstance();
+			m_godRayDownSampleEffect->StartUpdate();
+			m_godRayDownSampleEffect->SetEffectPathName( "res:/Graphics/Effect/Managed/Space/PostProcess/DownsampleDepth.fx" );
+			m_godRayDownSampleEffect->EndUpdate();
+
+			m_godrayEffect.CreateInstance();
+			m_godrayEffect->StartUpdate();
+			m_godrayEffect->SetEffectPathName( "res:/Graphics/Effect/Managed/Space/PostProcess/Godrays.fx" );
+			m_godrayEffect->SetParameter( BlueSharedString( "Color" ), godrays->m_godRayColor );
+			m_godrayEffect->SetParameter( BlueSharedString( "Intensity" ), Vector4(godrays->m_intensity, 0.0f, 1.0f, 1.0f ) );
+			m_godrayEffect->SetParameter( BlueSharedString( "grFactors" ), godrays->grFactors );
+			m_godrayEffect->AddResourceTexture2D( BlueSharedString( "NoiseTexMap" ), godrays->m_noiseTexturePath.c_str() );
+			m_godrayEffect->SetParameter( BlueSharedString( "DepthMap" ), m_renderInfo->GetRt1Buffer() );
+			m_godrayEffect->EndUpdate();
+			godrays->SetDirty( false );
+		}
+		else if( godrays->IsDirty() )
+		{
+			m_godrayEffect->StartUpdate();
+			m_godrayEffect->SetParameter( BlueSharedString( "Color" ), godrays->m_godRayColor );
+			m_godrayEffect->SetParameter( BlueSharedString( "Intensity" ), Vector4( godrays->m_intensity, 0.0f, 1.0f, 1.0f ) );
+			m_godrayEffect->SetParameter( BlueSharedString( "grFactors" ), godrays->grFactors );
+
+			TriTextureParameter* resource = dynamic_cast< TriTextureParameter* >( m_godrayEffect->GetResourceByName( "NoiseTexMap" ) );
+			resource->SetResourcePath( godrays->m_noiseTexturePath.c_str() );
+
+			m_godrayEffect->EndUpdate();
+			godrays->SetDirty( false );
 		}
 	}
-
-	if( godrays && godrays->IsDirty() )
-	{
-		m_godrayEffect->StartUpdate();
-		m_godrayEffect->SetParameter( BlueSharedString( "Color" ), godrays->m_godRayColor );
-		m_godrayEffect->SetParameter( BlueSharedString( "Intensity" ), Vector4( godrays->m_intensity, 0.0f, 1.0f, 1.0f ) );
-		m_godrayEffect->SetParameter( BlueSharedString( "grFactors" ), godrays->grFactors );
-
-		TriTextureParameter* resource = dynamic_cast< TriTextureParameter* >( m_godrayEffect->GetResourceByName( "NoiseTexMap" ) );
-		resource->SetResourcePath( godrays->m_noiseTexturePath.c_str() );
-
-		m_godrayEffect->EndUpdate();
-		godrays->SetDirty( false );
+	else if( godrays == nullptr )
+	{		
+		m_bloomHighPassFilter = nullptr;
+		m_bloomHorizontalBlur = nullptr;
+		m_bloomVerticalBlur = nullptr;
 	}
 
 	return godrays != nullptr && godrays->IsActive();
@@ -372,30 +375,30 @@ void TriStepRenderPostProcess::RenderGodRays( Tr2RenderContext& renderContext, T
 
 bool TriStepRenderPostProcess::ProcessSignalLoss( Tr2PPSignalLossEffect* signalLoss )
 {
-	if( signalLoss && m_signalLossEffect == nullptr )
+	if( signalLoss && signalLoss->IsActive() )
 	{
-		m_signalLossEffect.CreateInstance();
-		m_signalLossEffect->StartUpdate();
-		m_signalLossEffect->SetEffectPathName( "res:/Graphics/Effect/Managed/Space/PostProcess/SignalLoss.fx" );
-		m_signalLossEffect->SetParameter( BlueSharedString( "NoiseStrength" ), signalLoss->m_strength );
-		m_signalLossEffect->EndUpdate();
-		signalLoss->SetDirty( false );
+		if( m_signalLossEffect == nullptr )
+		{
+			m_signalLossEffect.CreateInstance();
+			m_signalLossEffect->StartUpdate();
+			m_signalLossEffect->SetEffectPathName( "res:/Graphics/Effect/Managed/Space/PostProcess/SignalLoss.fx" );
+			m_signalLossEffect->SetParameter( BlueSharedString( "NoiseStrength" ), signalLoss->m_strength );
+			m_signalLossEffect->EndUpdate();
+			signalLoss->SetDirty( false );
+		}
+		else if( signalLoss->IsDirty() )
+		{
+			m_signalLossEffect->StartUpdate();
+			m_signalLossEffect->SetParameter( BlueSharedString( "NoiseStrength" ), signalLoss->m_strength );
+			m_signalLossEffect->EndUpdate();
+			signalLoss->SetDirty( false );
+		}
 	}
 	else if( signalLoss == nullptr )
 	{
-		if( m_signalLossEffect != nullptr )
-		{
-			m_signalLossEffect = nullptr;
-		}
+		m_signalLossEffect = nullptr;
 	}
 
-	if( signalLoss && signalLoss->IsDirty() )
-	{
-		m_signalLossEffect->StartUpdate();
-		m_signalLossEffect->SetParameter( BlueSharedString( "NoiseStrength" ), signalLoss->m_strength );
-		m_signalLossEffect->EndUpdate();
-		signalLoss->SetDirty( false );
-	}
 	return signalLoss != nullptr && signalLoss->IsActive();
 }
 
@@ -549,5 +552,33 @@ void TriStepRenderPostProcess::RenderDynamicExposure( Tr2RenderContext& renderCo
 
 	// Measure histogram
 	Tr2Renderer::RunComputeShader( m_dynamicExposureMeasureExposureShader, 1, 1, 1, renderContext );
+}
 
+
+void TriStepRenderPostProcess::ProcessFilmGrain( Tr2PPFilmGrainEffect* filmGrain )
+{
+	if( filmGrain && filmGrain->IsActive() )
+	{
+		if( filmGrain->IsDirty() )
+		{
+			// we only need to update the tonemapping buffer
+			m_tonemappingEffect->StartUpdate();
+			m_tonemappingEffect->SetParameter( BlueSharedString( "GrainIntensity" ),filmGrain->m_intensity );
+			m_tonemappingEffect->SetParameter( BlueSharedString( "ColoredGrain" ), filmGrain->m_colored );
+			m_tonemappingEffect->SetParameter( BlueSharedString( "GrainColorAmount" ), filmGrain->m_colorAmount );
+			m_tonemappingEffect->SetParameter( BlueSharedString( "GrainSize" ), filmGrain->m_grainSize );
+			m_tonemappingEffect->SetParameter( BlueSharedString( "GrainLuminanceExponent" ), filmGrain->m_luminanceExponent );
+			// TODO replace with an option
+			m_tonemappingEffect->SetParameter( BlueSharedString( "FilmGrain" ), 1.0f );
+			m_tonemappingEffect->EndUpdate();
+
+			filmGrain->SetDirty( false );
+		}
+	}
+	else {
+		// TODO replace with an option
+		m_tonemappingEffect->StartUpdate();
+		m_tonemappingEffect->SetParameter( BlueSharedString( "FilmGrain" ), 0.0f );
+		m_tonemappingEffect->EndUpdate();
+	}
 }

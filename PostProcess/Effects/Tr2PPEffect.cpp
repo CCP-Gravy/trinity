@@ -20,10 +20,7 @@ Tr2PPEffect::~Tr2PPEffect( ) {
 
 bool Tr2PPEffect::OnModified( Be::Var* value )
 {
-	if( !IsMatch( value, m_display ) ) 
-	{
-		m_isDirty = true;
-	}
+	m_isDirty = true;
 	return true;
 }
 

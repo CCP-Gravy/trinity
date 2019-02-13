@@ -62,7 +62,7 @@ private:
 	Tr2EffectPtr m_signalLossEffect;
 
 	// dynamic exposure
-	bool ProcessDynamicExposure( Tr2PPDynamicExposureEffect* signalLoss );
+	bool ProcessDynamicExposure( Tr2PPDynamicExposureEffect* dynamicExposure );
 	void RenderDynamicExposure( Tr2RenderContext& renderContext, Tr2PPDynamicExposureEffect* dynamicExposure );
 	Tr2GpuBufferPtr m_localHistograms;
 	Tr2GpuBufferPtr m_histogram;
@@ -74,7 +74,9 @@ private:
 	Tr2EffectPtr m_dynamicExposureMergeHistogramShader;
 	Tr2EffectPtr m_dynamicExposureMeasureExposureShader;
 
-
+	// film grain
+	void ProcessFilmGrain( Tr2PPFilmGrainEffect* filmGrain );
+	
 	// tonemapping
 	Tr2EffectPtr m_tonemappingEffect;
 	EveSpaceScenePtr m_scene;

@@ -6,7 +6,6 @@
 
 #include "StdAfx.h"
 #include "Tr2PPBloomEffect.h"
-#include "Tr2Renderer.h"
 
 
 Tr2PPBloomEffect::Tr2PPBloomEffect( IRoot* lockobj ) :

@@ -6,7 +6,6 @@
 
 #include "StdAfx.h"
 #include "Tr2PPSignalLossEffect.h"
-#include "Tr2Renderer.h"
 
 
 Tr2PPSignalLossEffect::Tr2PPSignalLossEffect( IRoot* lockobj ) :

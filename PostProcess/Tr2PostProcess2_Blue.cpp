@@ -19,6 +19,7 @@ const Be::ClassInfo* Tr2PostProcess2::ExposeToBlue()
 		MAP_ATTRIBUTE( "godRays", m_godRays, "Accesses the God Rays effect", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "bloom", m_bloom, "Accesses the bloom effect", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "dynamicExposure", m_dynamicExposure, "Accesses the dynamic exposure effect", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "filmGrain", m_filmGrain, "Accesses the film grain effect", Be::READWRITE | Be::PERSIST )
 
     EXPOSURE_END()
 }
