@@ -4,9 +4,9 @@
 #include "TriFrustum.h"
 #include "TriDevice.h"
 #include "EveUpdateContext.h"
+#include "Curves/TriCurveSet.h"
 
 const float EvePlanet::SCALE = 1000000.0f;
-static int s_evePlanetTextureQuality = 0;
 
 // Temporary variables, should be set by whatever module controls fov
 const float FOV_MIN = 0.65f;
@@ -17,17 +17,15 @@ extern float g_eveSpaceSceneVisibilityThreshold;
 
 EvePlanet::EvePlanet( IRoot* lockobj ) :
 	PARENTLOCK( m_observers ),
+	PARENTLOCK( m_effectChildren ),
+	PARENTLOCK( m_curveSets ),
 	m_display( true ),
 	m_update( true ),
-	m_needResources( false ),
 	m_renderScale( SCALE ),
-	m_scaling( 1.0f ),
-	m_radius( 1.0f ),
+	m_scaling( 1.0f ),	
 	m_estimatedPixelDiameter( 0.f ),
 	m_estimatedMaxPixelDiameter( 0.f ),
-	m_currentTextureSize( 0 ),
-	m_requiredTextureSize( 0 ),
-	m_warpMode( false ),
+	m_currentLod( TR2_LOD_UNSPECIFIED ),
 	m_albedoColor( 0, 0, 0, 0 ),
 	m_emissiveColor( 0, 0, 0, 0 )
 {
@@ -48,166 +46,100 @@ void EvePlanet::UnregisterSecondaryLightSource( Tr2ShLightingManager& manager )
 	manager.UnregisterSecondaryLightSource( &m_worldTransform.GetTranslation() );
 }
 
-// --------------------------------------------------------------------------------
-// Description:
-//   Main update method called every frame. Here we do all sorts of things: get
-//   the position/orientation of the underlying ball and the target ball. Update
-//   the meshes and call the python callback to bake new resources, if necessary!
-// Arguments:
-//   time - current game time
-// --------------------------------------------------------------------------------
+void EvePlanet::UpdateEffectChildren( EveUpdateContext& updateContext, Matrix &worldTransform )
+{
+	if (!m_effectChildren.empty())
+	{
+		EveChildUpdateParams params;
+		params.spaceObjectParent = nullptr;
+		params.childParent = nullptr;
+		params.boneCount = 0;
+		params.bones = nullptr;
+		params.isVisible = m_display && m_currentLod > TR2_LOD_LOW;
+		params.localToWorldTransform = CalculatePlanetScaleTransform( worldTransform );
+
+		for ( auto it = m_effectChildren.begin(); it != m_effectChildren.end(); ++it )
+		{
+			(*it)->UpdateAsyncronous( updateContext, params );
+			(*it)->UpdateSyncronous( updateContext, params );
+		}
+	}
+}
+
 void EvePlanet::Update( EveUpdateContext& updateContext )
 {
 	if( !m_update )
 	{
 		return;
 	}
-	
-	if ( m_pythonResourceCallback )
-	{
-		if(m_needResources)
-		{
-			m_currentTextureSize = m_requiredTextureSize;
-			if( !m_pythonResourceCallback.CallVoid( 1, m_requiredTextureSize ) )
-			{
-#if BLUE_WITH_PYTHON
-				PyOS->PyFlushError("EvePlanet resource preparation(allocate) callback failed");
-#endif
-			}
-		}
-		else if(!m_needResources/* && !m_warpMode*/)
-		{
-			m_currentTextureSize = 0;
-			if( !m_pythonResourceCallback.CallVoid( 0 ) )
-			{
-#if BLUE_WITH_PYTHON
-				PyOS->PyFlushError("EvePlanet resource preparation(free) callback failed");
-#endif
-			}
-		}
-	}
 
 	// update position and rotation from ball
 	Quaternion rotation( 0.f, 0.f, 0.f, 1.f );
 	Vector3 translation( 0.f, 0.f, 0.f );
-	Be::Time time = updateContext.GetTime();
+	const auto time = updateContext.GetTime();
 
-	if( m_ballPosition )
+	if( m_ballPosition != nullptr )
 	{
 		m_ballPosition->Update( &translation, time );
 	}
 
-	if( m_ballRotation )
+	if( m_ballRotation != nullptr )
 	{
 		m_ballRotation->Update( &rotation, time );
 	}
 
-	// calculate worldmatrix
-	Vector3 scale( m_scaling, m_scaling, m_scaling );
+	auto scale = Vector3( m_scaling, m_scaling, m_scaling );
+
 	m_worldTransform = TransformationMatrix( scale, rotation, translation );
 
-	// update models	
-	if( m_highDetail )
-	{
-		m_highDetail->Update( updateContext );
-	}
-	if( m_zOnlyModel )
-	{
-		m_zOnlyModel->Update( updateContext );
-	}
+	UpdateEffectChildren( updateContext, m_worldTransform);
 
-	TriObserverLocalVector::iterator observersEnd = m_observers.end();
-	for( TriObserverLocalVector::iterator it = m_observers.begin(); it != observersEnd; ++it )
+	for (auto it = m_curveSets.begin(); it != m_curveSets.end(); ++it)
 	{
-		(*it)->Update( m_worldTransform );
+		(*it)->Update( time, time );
 	}
 }
 
+Matrix EvePlanet::CalculatePlanetScaleTransform( const Matrix& worldTransform ) const
+{
+	const auto planetScaleTransform = ScalingMatrix( 1.f / m_renderScale, 1.f / m_renderScale, 1.f / m_renderScale );
+	return worldTransform * planetScaleTransform;
+}
 
 void EvePlanet::UpdateVisibility( const TriFrustum& frustum, const Matrix& parentTransform )
 {
-	Matrix planetScaleTransform = ScalingMatrix( 1.f / m_renderScale, 1.f / m_renderScale, 1.f / m_renderScale );
-
-	Matrix scaledTransform = m_worldTransform * planetScaleTransform;
+	const auto scaledTransform = CalculatePlanetScaleTransform( m_worldTransform );
 	
 	// pixel diameters, also for the max possible
-	m_estimatedPixelDiameter = EstimatePixelDiameterPos( (const Vector3*)&scaledTransform._41, 1.f / Tr2Renderer::GetProjectionTransform()._11, m_renderScale );
-	m_estimatedMaxPixelDiameter = EstimatePixelDiameterPos( (const Vector3*)&scaledTransform._41, tanf( FOV_MIN / 2.f ), m_renderScale );
+	m_estimatedPixelDiameter = EstimatePixelDiameterPos( reinterpret_cast<const Vector3*>( &scaledTransform._41 ), 1.f / Tr2Renderer::GetProjectionTransform()._11, m_renderScale );
+	m_estimatedMaxPixelDiameter = EstimatePixelDiameterPos( reinterpret_cast<const Vector3*>( &scaledTransform._41 ), tanf( FOV_MIN / 2.f ), m_renderScale );
 
-	// update model visibility	
-	if( m_highDetail )
+	for (auto it = m_effectChildren.begin(); it != m_effectChildren.end(); ++it)
 	{
-		m_highDetail->UpdateVisibility( frustum, scaledTransform );
+		(*it)->UpdateVisibility( frustum, scaledTransform, m_currentLod );
 	}
 }
-
 
 void EvePlanet::UpdateZOnlyVisibility( const TriFrustum& frustum )
 {
-	if( m_zOnlyModel )
+	if( nullptr != m_zOnlyModel )
 	{
-		m_zOnlyModel->UpdateVisibility( frustum, m_worldTransform );
+		m_zOnlyModel->UpdateVisibility( frustum, m_worldTransform, m_currentLod );
 	}
 }
+
 
 const Vector3* EvePlanet::GetWorldPosition()
 {
-	return (Vector3*)&m_worldTransform._41;
+	return reinterpret_cast<Vector3*>( &m_worldTransform._41 );
 }
 
-void EvePlanet::ReleaseResources( TriStorage s )
-{
-	if( s & TRISTORAGE_VIDEOMEMORY )
-	{
-		// Textures should be created in default memory, so we need to mark them as not ready at this point.
-		m_needResources = false;
-	}
-}
 
 bool EvePlanet::OnPrepareResources()
 {
-	s_evePlanetTextureQuality = gTriDev->GetMipLevelSkipCount();
 	return true;
 }
 
-// --------------------------------------------------------------------------------
-// Description:
-//   Set the required texture size based on the pixel diameter.
-// Arguments:
-//   maxDiameter - maximum pixel diameter
-// Return value:
-//   Returns texture size
-// --------------------------------------------------------------------------------
-int EvePlanet::CalcRequiredTextureSize( float maxDiameter )
-{
-	int size = 32;
-
-	if( maxDiameter > 1024.f )
-	{
-		size = 2048;
-	}
-	else if( maxDiameter > 512.f )
-	{
-		size = 1024;
-	}
-	else if( maxDiameter > 256.f )
-	{
-		size = 512;
-	}
-	else if( maxDiameter > 128.f )
-	{
-		size = 256;
-	}
-	else if( maxDiameter > 64.f )
-	{
-		size = 128;
-	}
-	else if( maxDiameter > 32.f )
-	{
-		size = 64;
-	}
-	return size >> s_evePlanetTextureQuality;
-}
 
 // --------------------------------------------------------------------------------
 // Description:
@@ -222,11 +154,12 @@ int EvePlanet::CalcRequiredTextureSize( float maxDiameter )
 float EvePlanet::EstimatePixelDiameterPos( const Vector3* scaledPlanetCenter, float tanFOV, float scale ) const
 {
 	// calc distance
-	Vector3 d( *scaledPlanetCenter - Tr2Renderer::GetViewPosition() );
-	float depth = Length( d );
+	const auto d( *scaledPlanetCenter - Tr2Renderer::GetViewPosition() );
+	const auto depth = Length( d );
 
 	return EstimatePixelDiameterDist( depth, tanFOV, scale );
 }
+
 
 // --------------------------------------------------------------------------------
 // Description:
@@ -239,10 +172,10 @@ float EvePlanet::EstimatePixelDiameterPos( const Vector3* scaledPlanetCenter, fl
 // --------------------------------------------------------------------------------
 float EvePlanet::EstimatePixelDiameterDist( float scaledDistance, float tanFOV, float scale ) const
 {
-	float halfWidthProjection = Tr2Renderer::GetViewport().width * 0.5f / tanFOV;
+	const auto halfWidthProjection = Tr2Renderer::GetViewport().width * 0.5f / tanFOV;
 
 	// get radius od 
-	float radius = m_radius / scale;
+	const auto radius = m_radius / scale;
 
 	// clamp values close to zero and below
 	const float epsilon = 1e-5f;
@@ -256,32 +189,8 @@ float EvePlanet::EstimatePixelDiameterDist( float scaledDistance, float tanFOV, 
 		return 0.0f;
 	}
 
-	float ratio = radius / scaledDistance;
+	const auto ratio = radius / scaledDistance;
 	return ratio * halfWidthProjection * 2.0f;
-}
-
-void EvePlanet::PrepareForWarp(float minDist, const Vector3& dest)
-{
-	m_warpMode = true;
-
-	float distEstimatedMinSize = EstimatePixelDiameterDist( minDist / m_renderScale, 1.f / Tr2Renderer::GetProjectionTransform()._11, m_renderScale );
-
-	if( distEstimatedMinSize > GetVisibilityThreshold() )
-	{
-		if ( distEstimatedMinSize > GetMediumDetailThreshold() )
-		{
-			m_requiredTextureSize = CalcRequiredTextureSize( distEstimatedMinSize );
-		}
-		else
-		{
-			m_requiredTextureSize = 64 >> s_evePlanetTextureQuality; // probably need better decision making here
-		}
-	}
-}
-
-void EvePlanet::WarpStopped()
-{
-	m_warpMode = false;
 }
 
 void EvePlanet::GetZOnlyRenderables( std::vector<ITr2Renderable*>& renderables )
@@ -290,10 +199,10 @@ void EvePlanet::GetZOnlyRenderables( std::vector<ITr2Renderable*>& renderables )
 	{
 		return;
 	}
-
-	if( m_zOnlyModel )
+	
+	if( nullptr != m_zOnlyModel )
 	{
-		m_zOnlyModel->GetRenderables( renderables, nullptr );
+		m_zOnlyModel->GetRenderables( renderables );
 	}
 }
 
@@ -303,26 +212,33 @@ void EvePlanet::GetRenderables( std::vector<ITr2Renderable*>& renderables )
 	{
 		return;
 	}
-	
-	if(!m_warpMode)
-	{
-		m_requiredTextureSize = CalcRequiredTextureSize( m_estimatedMaxPixelDiameter );
-		if ( m_estimatedMaxPixelDiameter < GetVisibilityThreshold() )
-		{
-			m_needResources = false;
-		}
-	}
 
 	// visible at all?
 	if ( m_estimatedPixelDiameter > GetVisibilityThreshold() )
 	{
-		// visible, so resources are needed after all
-		m_needResources = true;
-
-		// use EveTransform's/Tr2Mesh's inbuild low-detail mechanism
-		if( m_highDetail )
+		if( m_currentLod != TR2_LOD_HIGH)
 		{
-			m_highDetail->GetRenderables( renderables );
+			m_currentLod = TR2_LOD_HIGH;
+			for (auto it = m_effectChildren.begin(); it != m_effectChildren.end(); ++it)
+			{
+				(*it)->ChangeLOD( m_currentLod );
+			}
+		}
+		
+		for (auto ecIt = m_effectChildren.begin(); ecIt != m_effectChildren.end(); ++ecIt)
+		{
+			if ( (*ecIt) != m_zOnlyModel)
+			{
+				(*ecIt)->GetRenderables( renderables );
+			}
+		}
+	}
+	else if ( m_currentLod != TR2_LOD_LOW )
+	{
+		m_currentLod = TR2_LOD_LOW;
+		for (auto it = m_effectChildren.begin(); it != m_effectChildren.end(); ++it)
+		{
+			(*it)->ChangeLOD( m_currentLod );
 		}
 	}
 }
@@ -421,6 +337,3 @@ bool EvePlanet::HasImpactConfigurationShield() const
 {
 	return false;
 }
-
-
-

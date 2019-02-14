@@ -1,15 +1,11 @@
 #include "StdAfx.h"
 #include "EveChildMesh.h"
-
-#include "Tr2MeshArea.h"
 #include "Tr2MeshBase.h"
 #include "TriFrustum.h"
-
 #include "Eve/SpaceObject/EveSpaceObject2.h"
 #include "Eve/EveTransform.h"
-#include "Resources/TriGeometryRes.h"
 #include "Utilities/BoundingSphere.h"
-#include "Tr2InstancedMesh.h"
+#include "Tr2MeshLod.h"
 
 
 extern float g_eveSpaceSceneLODFactor;
@@ -68,10 +64,10 @@ void EveChildMesh::UpdateVisibility( const TriFrustum& frustum, const Matrix& pa
 		return;
 	}
 	Vector4 boundingSphere;
+
 	if( GetBoundingSphere( boundingSphere ) )
 	{
 		m_currentScreenSize = frustum.GetPixelSizeAccross( &boundingSphere );
-
 		m_isVisible = m_currentScreenSize >= m_minScreenSize * g_eveSpaceSceneLODFactor;
 	}
 	else
@@ -150,7 +146,7 @@ Tr2PerObjectData* EveChildMesh::GetPerObjectData( ITriRenderBatchAccumulator* ac
 
 		if( !perObjectData )
 		{
-			return NULL;
+			return nullptr;
 		}
 
 		perObjectData->m_world = m_vsData.worldTransform;
@@ -161,7 +157,7 @@ Tr2PerObjectData* EveChildMesh::GetPerObjectData( ITriRenderBatchAccumulator* ac
 	Tr2PerObjectDataWithPersistentBuffers<EveChildMesh>* perObjectData = accumulator->Allocate<Tr2PerObjectDataWithPersistentBuffers<EveChildMesh>>();
 	if( !perObjectData )
 	{
-		return NULL;
+		return nullptr;
 	}
 	perObjectData->Initialize( this, &m_perObjectDataVs, &m_perObjectDataPs );
 
@@ -200,21 +196,21 @@ void EveChildMesh::UpdateAsyncronous( EveUpdateContext& updateContext, const Eve
 	m_perObjectDataPs.InvalidateBufferData();
 
 	Matrix localToWorldTransform;
-	if( params.childParent )
+	
+	if( nullptr != params.childParent )
 	{
 		params.childParent->GetLocalToWorldTransform( localToWorldTransform );
-		m_vsData.worldTransformLast = Transpose( m_worldTransform );
 	}
-	else if ( params.spaceObjectParent )
+	else if( nullptr != params.spaceObjectParent )
 	{
 		params.spaceObjectParent->GetLocalToWorldTransform( localToWorldTransform );
 		params.spaceObjectParent->GetPerObjectStructs( m_vsData, m_psData );
-		m_vsData.worldTransformLast = Transpose( m_worldTransform );
 	}
 	else 
 	{
-		return;
+		localToWorldTransform = params.localToWorldTransform;
 	}
+	m_vsData.worldTransformLast = Transpose( m_worldTransform );
 
 	UpdateTransform( localToWorldTransform );
 	for( auto it = m_transformModifiers.begin(); it != m_transformModifiers.end(); it++ )
@@ -233,6 +229,18 @@ void EveChildMesh::UpdateSyncronous( EveUpdateContext& updateContext, const EveC
 void EveChildMesh::GetLocalToWorldTransform( Matrix& transform ) const
 {
 	transform = m_worldTransform;
+}
+
+void EveChildMesh::ChangeLOD( Tr2Lod lod )
+{
+	if( m_mesh == nullptr )
+	{
+		return;
+	}
+	if ( Tr2MeshLodPtr meshLod = BlueCastPtr( m_mesh ) )
+	{
+		meshLod->SelectLod( lod );
+	}
 }
 
 void EveChildMesh::SetMesh( Tr2MeshBase* mesh )

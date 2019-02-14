@@ -114,11 +114,14 @@ void EveEffectRoot2::UpdateSyncronous( EveUpdateContext& updateContext )
 
 	if( !m_effectChildren.empty() )
 	{
+		Matrix worldTransform;
+		GetLocalToWorldTransform( worldTransform );
 		EveChildUpdateParams params;
 		params.spaceObjectParent = this;
 		params.childParent = nullptr;
 		params.boneCount = 0;
 		params.bones = nullptr;
+		params.localToWorldTransform = worldTransform;
 		params.isVisible = m_display;
 
 		for( auto ecIt = m_effectChildren.begin(); ecIt != m_effectChildren.end(); ++ecIt )
@@ -143,11 +146,14 @@ void EveEffectRoot2::UpdateAsyncronous( EveUpdateContext& updateContext )
 
 	if( !m_effectChildren.empty() )
 	{
+		Matrix worldTransform;
+		GetLocalToWorldTransform( worldTransform );
 		EveChildUpdateParams params;
 		params.spaceObjectParent = this;
 		params.childParent = nullptr;
 		params.boneCount = 0;
 		params.bones = nullptr;
+		params.localToWorldTransform = worldTransform;
 		params.isVisible = m_display;
 
 		for( auto ecIt = m_effectChildren.begin(); ecIt != m_effectChildren.end(); ++ecIt )

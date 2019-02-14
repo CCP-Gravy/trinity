@@ -356,9 +356,12 @@ void EveSpaceObject2::UpdateSyncronous( EveUpdateContext& updateContext )
 	// trigger syncronous update of attachements here
 	if( !m_effectChildren.empty() )
 	{
+		Matrix worldTransform;
+		GetLocalToWorldTransform( worldTransform );
 		EveChildUpdateParams params;
 		params.spaceObjectParent = this;
 		params.childParent = nullptr;
+		params.localToWorldTransform = worldTransform;
 		params.isVisible = m_display && DisplayChildren();
 
 		GetBoneList( params.bones, params.boneCount );
@@ -470,9 +473,12 @@ void EveSpaceObject2::UpdateAsyncronous( EveUpdateContext& updateContext )
 	
 	if( !m_effectChildren.empty() )
 	{
+		Matrix worldTransform;
+		GetLocalToWorldTransform( worldTransform );
 		EveChildUpdateParams params;
 		params.spaceObjectParent = this;
 		params.childParent = nullptr;
+		params.localToWorldTransform = worldTransform;
 		params.isVisible = m_display && DisplayChildren();
 
 		GetBoneList( params.bones, params.boneCount );

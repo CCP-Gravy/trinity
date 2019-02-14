@@ -44,6 +44,7 @@ public:
 	void SetGeometryResource( Tr2LodResource* lodResource );
 
 	virtual bool GetBoundingBox( Vector3& min, Vector3& max ) const;
+	virtual bool GetBoundingSphere( Vector4& sphere );
 
 protected:
 	Tr2LodResourcePtr m_geometryRes;

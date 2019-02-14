@@ -18,6 +18,7 @@ struct EveChildUpdateParams
 	size_t boneCount;
 	const granny_matrix_3x4* bones;
 	bool isVisible;
+	Matrix localToWorldTransform;
 };
 
 BLUE_INTERFACE( IEveSpaceObjectChild ) : public IRoot

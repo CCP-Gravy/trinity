@@ -9,6 +9,7 @@
 #include "include/ITriTargetable.h"
 #include "TriObserverLocal.h"
 #include "Tr2ShLightingManager.h"
+#include "SpaceObject/Children/EveChildMesh.h"
 
 BLUE_DECLARE( EvePlanet );
 BLUE_DECLARE( EveUpdateContext );
@@ -39,24 +40,20 @@ public:
 
 	static const float SCALE;
 
-	//////////////////////////////////////////////////////////////////////////////////////
 	// IInitialize
 	bool Initialize();
 
-	//////////////////////////////////////////////////////////////////////////////////////
 	// ITriDeviceResource
-	void ReleaseResources( TriStorage s );
+	void ReleaseResources( TriStorage s ){};
 
-	/////////////////////////////////////////////////////////////////////////////////////
 	// IWorldPosition
 	virtual const Vector3* GetWorldPosition();
 
-	/////////////////////////////////////////////////////////////////////////////////////
 	// ITr2SecondaryLightSource
 	virtual void RegisterSecondaryLightSource( Tr2ShLightingManager& );
 	virtual void UnregisterSecondaryLightSource( Tr2ShLightingManager& );
+	void UpdateEffectChildren( EveUpdateContext& updateContext, Matrix& worldTransform );
 
-	/////////////////////////////////////////////////////////////////////////////////////
 	// ITriTargetable
 	unsigned int GetDamageLocatorCount() const;
 	int GetClosestDamageLocatorIndex( const Vector3* position );
@@ -71,6 +68,7 @@ public:
 	bool HasImpactConfigurationShield() const;
 
 private:
+	Matrix CalculatePlanetScaleTransform( const Matrix& worldTransform ) const;
 	bool OnPrepareResources();
 
 	// get global loding thresholds
@@ -84,22 +82,10 @@ private:
 	// calc current texture size
 	int CalcRequiredTextureSize( float maxDiameter );
 
-	// resource updates
-	bool RequiresResourceProcessing() const;
-
 	std::string m_name;
 
 	bool m_display;
 	bool m_update;
-
-	bool m_needResources;			
-
-	bool m_warpMode;
-
-	int m_currentTextureSize;		// Heightmap texture size being used for this planet
-	int m_requiredTextureSize;		// Heightmap texture size the planet needs
-
-	BlueScriptCallback m_pythonResourceCallback;
 
 	float m_estimatedPixelDiameter;
 	float m_estimatedMaxPixelDiameter;
@@ -116,14 +102,14 @@ private:
 	Color m_albedoColor;
 	Color m_emissiveColor;
 
-	EveTransformPtr m_highDetail;
-	EveTransformPtr m_zOnlyModel;
+	PIEveSpaceObjectChildVector m_effectChildren;
+	PTriCurveSetVector m_curveSets;
 	
 	// PlacementObservers
 	PTriObserverLocalVector m_observers;
 
-	void PrepareForWarp(float minDist, const Vector3& dest);
-	void WarpStopped();
+	Tr2Lod m_currentLod;
+	EveChildMeshPtr m_zOnlyModel;
 };
 
 TYPEDEF_BLUECLASS( EvePlanet );

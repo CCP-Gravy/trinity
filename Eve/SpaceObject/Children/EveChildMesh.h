@@ -46,7 +46,7 @@ public:
 	void UpdateSyncronous( EveUpdateContext& updateContext, const EveChildUpdateParams& params );
 	void UpdateAsyncronous( EveUpdateContext& updateContext, const EveChildUpdateParams& params );
 	void GetLocalToWorldTransform( Matrix& transform ) const;
-	void ChangeLOD( Tr2Lod lod ) {};
+	void ChangeLOD( Tr2Lod lod ) override;
 	void GetLights( Tr2LightManager& lightManager ) const {};
 	virtual void Setup( const Vector3* scale, const Quaternion* rotation, const Vector3* translation, Tr2Lod lowestLodVisible );
 	bool IsAlwaysOn() const;

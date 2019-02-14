@@ -19,6 +19,15 @@ const Be::ClassInfo* EvePlanet::ExposeToBlue()
 			"",
 			Be::READWRITE | Be::PERSIST
 		)
+
+		MAP_ATTRIBUTE
+		(
+			"worldMatrix",
+			m_worldTransform,
+			"",
+			Be::READ
+		)
+
 		MAP_ATTRIBUTE
 		(
 			"display",
@@ -70,12 +79,21 @@ const Be::ClassInfo* EvePlanet::ExposeToBlue()
 		)
 
 		MAP_ATTRIBUTE
-		( 
-			"highDetail", 
-			m_highDetail, 
-			"Object used for rendering planet in high detail", 
-			Be::READWRITE | Be::PERSIST 
+		(
+			"effectChildren",
+			m_effectChildren,
+			"Any effect children on planet",
+			Be::READ | Be::PERSIST
 		)
+
+		MAP_ATTRIBUTE
+		(
+			"curveSets",
+			m_curveSets,
+			"Curve sets",
+			Be::READ | Be::PERSIST
+		)
+
 		MAP_ATTRIBUTE
 		(    
 			"translationCurve",
@@ -92,68 +110,12 @@ const Be::ClassInfo* EvePlanet::ExposeToBlue()
 			Be::READWRITE | Be::PERSIST
 		)
 
-#if BLUE_WITH_PYTHON
-		MAP_ATTRIBUTE
-		(
-			"resourceCallback", 
-			m_pythonResourceCallback, 
-			"A callback function that generates any resources that need lazy loading",
-			Be::READWRITE
-		)
-#endif
-
-
-		MAP_METHOD_AND_WRAP
-		(
-			"PrepareForWarp",
-			PrepareForWarp,
-			":param minDist: minimal distance\n"
-			":param dest: destination position"
-		)
-
-		MAP_METHOD_AND_WRAP
-		(
-			"WarpStopped",
-			WarpStopped,
-			""
-		)
-
-		MAP_ATTRIBUTE 
-		(
-			"zOnlyModel",
-			m_zOnlyModel,
-			"A model that is used to write to the z-buffer only",
-			Be::READWRITE | Be::PERSIST
-		)
-
 		MAP_ATTRIBUTE
 		( 
 			"observers", 
 			m_observers, 
 			"Observers for pushing data between modules every frame. Currently used to push locator data out to the audio2 module.",
 			Be::READ | Be::PERSIST
-		)
-
-		MAP_ATTRIBUTE
-		(
-			"requiredTextureSize",
-			m_requiredTextureSize,
-			"",
-			Be::READ
-		)
-		MAP_ATTRIBUTE
-		(
-			"currentTextureSize",
-			m_currentTextureSize,
-			"",
-			Be::READ
-		)
-		MAP_ATTRIBUTE
-		(
-			"warping",
-			m_warpMode,
-			"",
-			Be::READ
 		)
 
 		MAP_ATTRIBUTE
@@ -171,7 +133,14 @@ const Be::ClassInfo* EvePlanet::ExposeToBlue()
 			"",
 			Be::READ
 		)
-		
 
+		MAP_ATTRIBUTE 
+		(
+			"zOnlyModel",
+			m_zOnlyModel,
+			"A model that is used to write to the z-buffer only",
+			Be::READWRITE | Be::PERSIST
+		)
+		
     EXPOSURE_END()
 }
