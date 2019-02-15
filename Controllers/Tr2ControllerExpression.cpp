@@ -37,6 +37,26 @@ namespace
 		return s_stateMachine ? s_stateMachine->GetStateRunTime() : 0;
 	}
 
+	float CurveSetTime( const char* name )
+	{
+		ITr2CurveSetOwnerPtr csOwner = BlueCastPtr( s_owner );
+		if( !csOwner )
+		{
+			return 0;
+		}
+		if( auto slash = strchr( name, '/' ) )
+		{
+			std::string csName = name;
+			std::string rangeName = csName.substr( slash - name + 1 );
+			csName = csName.substr( 0, slash - name );
+			return csOwner->GetRangeDuration( csName, rangeName );
+		}
+		else
+		{
+			return csOwner->GetCurveSetDuration( name );
+		}
+	}
+
 	float AnimationTime( const char* name )
 	{
 		EveSpaceObject2Ptr spaceObject = BlueCastPtr( s_owner );
@@ -56,25 +76,11 @@ namespace
 		}
 		return animation->Duration;
 	}
-
-	float CurveSetTime( const char* name )
+	
+	float Random( float min, float max)
 	{
-		ITr2CurveSetOwnerPtr csOwner = BlueCastPtr( s_owner );
-		if( !csOwner )
-		{
-			return 0;
-		}
-		if( auto slash = strchr( name, '/' ) )
-		{
-			std::string csName = name;
-			std::string rangeName = csName.substr( slash - name + 1 );
-			csName = csName.substr( 0, slash - name );
-			return csOwner->GetRangeDuration( csName, rangeName );
-		}
-		else
-		{
-			return csOwner->GetCurveSetDuration( name );
-		}
+		float result = min + rand() % int( max - min );
+		return result;
 	}
 
 	float IsAnimationPlaying( const char* layerName )
@@ -180,6 +186,8 @@ std::string Tr2ControllerExpression::CreateParser( const char* expression, Modif
 	m_expressionParser.DefineFun( "CurveSetTime", CurveSetTime, false );
 	m_expressionParser.DefineFun( "ShipSpeed", ShipSpeed, false );
 	m_expressionParser.DefineFun( "ShipMaxSpeed", ShipMaxSpeed, false );
+	m_expressionParser.DefineFun( "Random", Random, false );
+
 	if( modifyParser )
 	{
 		( *modifyParser )( m_expressionParser );
@@ -254,4 +262,5 @@ void Tr2ControllerExpression::GetExpressionTermInfo( std::vector<Tr2ExpressionTe
 	info.push_back( Tr2ExpressionTermInfo::StringFunction( "Controller", "IsAnimationPlaying", "name", "return 1 if the geometry animation in the given layer is playing; 0 otheriwise" ) );
 	info.push_back( Tr2ExpressionTermInfo::Function( "Controller", "ShipSpeed", "owning ship speed" ) );
 	info.push_back( Tr2ExpressionTermInfo::Function( "Controller", "ShipMaxSpeed", "owning ship maximum speed" ) );
+	info.push_back( Tr2ExpressionTermInfo::Function( "Controller", "Random", "min", "max", "returns a random from 'min'-'max-1' " ) );
 }
