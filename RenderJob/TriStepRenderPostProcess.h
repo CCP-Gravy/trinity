@@ -106,11 +106,19 @@ private:
 
 	// tonemapping
 	Tr2EffectPtr m_tonemappingEffect;
+	bool m_filmGrainEnabled;
+	bool m_desaturateEnabled;
+	bool m_fadeEnabled;
+	bool m_lutEnabled;
+	bool m_vignetteEnabled;
+	
 	EveSpaceScenePtr m_scene;
 	Tr2PostProcessRenderInfoPtr m_renderInfo;
 
+
     // General
 	PostProcessingQuality m_quality;
+
 };
 
 TYPEDEF_BLUECLASS( TriStepRenderPostProcess );
