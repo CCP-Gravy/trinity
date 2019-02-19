@@ -161,6 +161,7 @@ void EveMobile::UpdateTurretsAsyncronous( EveUpdateContext& updateContext )
 
 void EveMobile::SetShaderOption( const BlueSharedString& name, const BlueSharedString& value )
 {
+	EveSpaceObject2::SetShaderOption( name, value );
 	for ( auto it = m_turretSets.begin(); m_turretSets.end() != it; ++it )
 	{
 		( *it )->SetShaderOption( name, value );

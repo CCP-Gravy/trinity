@@ -351,7 +351,7 @@ void EveSOF::SetupMesh( EveSpaceObject2Ptr obj, const EveSOFDNAPtr dna, Inherita
 	{
 		size_t cntr = 0;
 		cntr += FillMeshAreaVector( lodResPerTexture, mesh->GetAreas( TRIBATCHTYPE_OPAQUE ), TRIBATCHTYPE_OPAQUE, dna, hullIdx, meshIndexOffset, &inheritableTextures );
-		cntr += FillMeshAreaVector( lodResPerTexture, mesh->GetAreas( TRIBATCHTYPE_DECAL ), TRIBATCHTYPE_DECAL, dna, hullIdx, meshIndexOffset, nullptr );
+		cntr += FillMeshAreaVector( lodResPerTexture, mesh->GetAreas( TRIBATCHTYPE_OPAQUE ), TRIBATCHTYPE_DECAL, dna, hullIdx, meshIndexOffset, nullptr );
 		cntr += FillMeshAreaVector( lodResPerTexture, mesh->GetAreas( TRIBATCHTYPE_TRANSPARENT ), TRIBATCHTYPE_TRANSPARENT, dna, hullIdx, meshIndexOffset, nullptr );
 		cntr += FillMeshAreaVector( lodResPerTexture, mesh->GetAreas( TRIBATCHTYPE_ADDITIVE ), TRIBATCHTYPE_ADDITIVE, dna, hullIdx, meshIndexOffset, nullptr );
 		cntr += FillMeshAreaVector( lodResPerTexture, mesh->GetAreas( TRIBATCHTYPE_DISTORTION ), TRIBATCHTYPE_DISTORTION, dna, hullIdx, meshIndexOffset, nullptr );
@@ -359,7 +359,6 @@ void EveSOF::SetupMesh( EveSpaceObject2Ptr obj, const EveSOFDNAPtr dna, Inherita
 	}
 
 	// some areas need an accompanying depth area
-	GenerateDepthFromAreaVector( mesh, mesh->GetAreas( TRIBATCHTYPE_DECAL ), dna );
 	GenerateDepthFromAreaVector( mesh, mesh->GetAreas( TRIBATCHTYPE_TRANSPARENT ), dna );
 
 	// register all used lodresource objects with the new mesh
@@ -379,7 +378,7 @@ void EveSOF::SetupMesh( EveSpaceObject2Ptr obj, const EveSOFDNAPtr dna, Inherita
 void EveSOF::GenerateDepthFromAreaVector( Tr2MeshLodPtr mesh, const Tr2MeshAreaVector* meshAreaVector, const EveSOFDNAPtr dna ) const
 {
 	Tr2MeshAreaVector* depthAreas = mesh->GetAreas( TRIBATCHTYPE_DEPTH );
-	if( depthAreas )
+	if( depthAreas ) 
 	{
 		for( auto srcMeshArea = meshAreaVector->begin(); srcMeshArea != meshAreaVector->end(); ++srcMeshArea )
 		{
@@ -432,6 +431,22 @@ size_t EveSOF::FillMeshAreaVector( std::map<std::string, Tr2LodResourcePtr>& lod
 		Tr2EffectPtr newShader;
 		newShader.CreateInstance();
 		newShader->StartUpdate();
+
+		switch( areaType )
+		{
+		case TRIBATCHTYPE_DECAL:
+			newShader->SetOption( BlueSharedString( "SPACE_OBJECT_TRANSPARENCY" ), BlueSharedString( "SOT_CLIP" ) );
+			break;
+		case TRIBATCHTYPE_TRANSPARENT:
+			newShader->SetOption( BlueSharedString( "SPACE_OBJECT_TRANSPARENCY" ), BlueSharedString( "SOT_TRANSPARENT" ) );
+			break;
+		case TRIBATCHTYPE_OPAQUE:
+			newShader->SetOption( BlueSharedString( "SPACE_OBJECT_TRANSPARENCY" ), BlueSharedString( "SOT_OPAQUE" ) );
+			break;
+		default:
+			break;
+		}
+
 
 		// construct res path of the shader
 		newShader->SetEffectPathName( dna->GetCompleteShaderPath( area->shader.c_str() ).c_str() );
@@ -503,6 +518,16 @@ size_t EveSOF::FillMeshAreaVector( std::map<std::string, Tr2LodResourcePtr>& lod
 
 		// pattern textures
 		size_t patternLayerCount = dna->GetPatternLayerCount();
+
+		if( patternLayerCount )
+		{
+			newShader->SetOption( BlueSharedString( "SPACE_OBJECT_PPT_ENABLED" ), BlueSharedString( "SOPPT_ENABLED" ) );
+		}
+		else
+		{
+			newShader->SetOption( BlueSharedString( "SPACE_OBJECT_PPT_ENABLED" ), BlueSharedString( "SOPPT_DISABLED" ) );
+		}
+
 		for( size_t i = 0; i < patternLayerCount; ++i )
 		{
 			const EveSOFDataMgr::PatternLayerData* patternLayerData = dna->GetPatternLayerData( i );

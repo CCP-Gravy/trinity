@@ -168,6 +168,7 @@ EveSpaceObject2::EveSpaceObject2( IRoot* lockobj ) :
 	m_isVisible( false ),
 	m_isMeshVisible( false ),
 	m_clipSphereFactor( 0.f ),
+	m_oldClipSphereFactor( 0.f ),
 	m_clipSphereCenter( 0.f, 0.f, 0.f ),
 	m_localAabbMin( 0.f, 0.f, 0.f ),
 	m_localAabbMax( 0.f, 0.f, 0.f ),
@@ -1655,6 +1656,13 @@ bool EveSpaceObject2::OnModified( Be::Var* val )
 	}
 	else if( IsMatch( val, m_clipSphereFactor ) )
 	{
+		bool clipping = m_clipSphereFactor != 0;
+		bool oldClipping = m_oldClipSphereFactor != 0;
+		if( clipping != oldClipping )
+		{
+			SetShaderOption( BlueSharedString( "SPACE_OBJECT_CLIPPING" ), clipping ? BlueSharedString( "SOC_ENABLED" ) : BlueSharedString( "SOC_DISABLED" ) );
+		}
+		m_oldClipSphereFactor = m_clipSphereFactor;
 		SetControllerVariable( "ClipSphereFactor", m_clipSphereFactor );
 	}
 	return true;
@@ -3082,6 +3090,11 @@ void EveSpaceObject2::SetShaderOption( const BlueSharedString& name, const BlueS
 	else if ( nullptr != m_meshLod )
 	{
 		m_meshLod->SetShaderOption( name, value );
+	}
+
+	if( m_shadowEffect )
+	{
+		m_shadowEffect->SetOption( name, value );
 	}
 
 	for ( auto it = m_overlayEffects.begin(); it != m_overlayEffects.end(); ++it )

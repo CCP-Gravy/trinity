@@ -451,6 +451,7 @@ protected:
 	/////////////////////////////////////////////////////////////////////////////////////
 	// dissolve
 	float m_clipSphereFactor;
+	float m_oldClipSphereFactor;
 	Vector3 m_clipSphereCenter;
 
 	bool m_impostorMode;
