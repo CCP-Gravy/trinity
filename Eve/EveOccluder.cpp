@@ -12,7 +12,6 @@
 #include "EveTransform.h"
 #include "include/TriMath.h"
 
-static const char* OCCLUDER_ACTUAL_EFFECT_PATH = "res:/Graphics/Effect/Managed/Space/SpecialFX/lensflares/LensflareOccluderA.fx";
 
 // --------------------------------------------------------------------------------
 // Description:
@@ -32,10 +31,6 @@ EveOccluder::EveOccluder( IRoot* lockobj ) :
 	// create batch accumulator for rendering occlusion sprites
 	TriPoolAllocator* allocator = Tr2Renderer::GetPoolAllocator();
 	m_batches = CCP_NEW( "EveOccluder/m_batches" ) TriRenderBatchAccumulator<EffectKeyGenerator>( allocator );
-
-	// create shaders for occlusion rendering
-	m_actualEffect.CreateInstance();
-	m_actualEffect->SetEffectPathName( OCCLUDER_ACTUAL_EFFECT_PATH );
 
 	PrepareResources();
 }
@@ -157,7 +152,7 @@ void EveOccluder::RunQuery( Tr2RenderContext& renderContext, const TriFrustum& f
 
 
 	// prepare batches for rendering
-	renderContext.m_esm.ApplyStandardStates( Tr2EffectStateManager::RM_DECAL );
+	renderContext.m_esm.ApplyStandardStates( Tr2EffectStateManager::RM_OPAQUE );
 	// collect renderables from sprite, so we can pass the parent transform and EveTransform handles
 	// all of the view update for us
 	std::vector<ITr2Renderable*> renderables;
@@ -173,7 +168,7 @@ void EveOccluder::RunQuery( Tr2RenderContext& renderContext, const TriFrustum& f
 	for( std::vector<ITr2Renderable*>::iterator it = renderables.begin(); it != renderables.end(); ++it )
 	{
 		Tr2PerObjectData* objectData = (*it)->GetPerObjectData( m_batches );
-		(*it)->GetBatches( m_batches, TRIBATCHTYPE_DECAL, objectData );
+		(*it)->GetBatches( m_batches, TRIBATCHTYPE_OPAQUE, objectData );
 	}
 	m_batches->Finalize();
 
@@ -181,7 +176,7 @@ void EveOccluder::RunQuery( Tr2RenderContext& renderContext, const TriFrustum& f
 	if( issueQueries )
 	{
 		CR_RETURN( m_totalQuery.Begin( renderContext ) );
-		renderContext.RenderBatches( m_batches );
+		renderContext.RenderBatches( m_batches, BlueSharedString( "TotalQuery" ) );
 		CR_RETURN( m_totalQuery.End( renderContext ) );
 		m_isTotalQueryIssued = true;
 	}
@@ -189,7 +184,7 @@ void EveOccluder::RunQuery( Tr2RenderContext& renderContext, const TriFrustum& f
 	if( issueQueries )
 	{
 		CR_RETURN( m_actualQuery.Begin( renderContext ) );
-		renderContext.RenderBatchesWithOverride( m_batches, m_actualEffect );
+		renderContext.RenderBatches( m_batches, BlueSharedString( "ActualQuery" ) );
 		CR_RETURN( m_actualQuery.End( renderContext ) );
 		m_isActualQueryIssued = true;
 	}

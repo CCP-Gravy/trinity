@@ -15,7 +15,7 @@
 class TriFrustum;
 BLUE_DECLARE( EveTransform );
 BLUE_DECLARE_VECTOR( EveTransform );
-BLUE_DECLARE( Tr2Effect );
+
 
 // --------------------------------------------------------------------------------
 // Description:
@@ -69,9 +69,6 @@ private:
 	// dx query objects
 	Tr2OcclusionQueryAL m_totalQuery;
 	Tr2OcclusionQueryAL m_actualQuery;
-
-	// shader to render the 2d sprite
-	Tr2EffectPtr m_actualEffect;
 
 	// a vector with all the sprites this occluder is using
 	PEveTransformVector m_sprites;
