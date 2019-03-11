@@ -1,0 +1,60 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+// Created:		January 2019
+// Copyright:	CCP 2019
+//
+
+#pragma once
+
+#include "Tr2DeviceResource.h"
+
+BLUE_DECLARE( Tr2Effect );
+BLUE_DECLARE( Tr2TextureReference );
+BLUE_DECLARE( Tr2RenderTarget );
+BLUE_DECLARE( TriTextureRes );
+
+BLUE_CLASS( Tr2ReflectionProbe ) :
+	public INotify,
+	public Tr2DeviceResource
+{
+public:
+	EXPOSE_TO_BLUE();
+
+	Tr2ReflectionProbe( IRoot* lockobj = NULL );
+	~Tr2ReflectionProbe();
+
+	void ReleaseResources( TriStorage s );
+	bool OnPrepareResources();
+
+	bool IsValid();
+	void InitRenderPass( Tr2RenderContext &renderContext );
+	void StartRenderFace( unsigned face, Tr2RenderContext &renderContext );
+	void EndRenderFace( unsigned face, Tr2RenderContext &renderContext );
+	void EndRenderPass( Tr2RenderContext &renderContext );
+
+	TriTextureResPtr GetReflection();
+	void SetPosition( Vector3 position );
+
+	bool OnModified( Be::Var* value );
+
+private:
+	void Filter( Tr2RenderContext &renderContext );
+
+	bool m_initialized;
+	Vector3 m_position;
+	int m_intermediateSize;
+
+	TriTextureResPtr m_outputTexture;
+	Tr2RenderTargetPtr m_renderTarget;
+	Tr2RenderTargetPtr m_renderTargetCube;
+	Tr2TextureAL m_stencilMap;
+
+	Tr2EffectPtr m_preFilterEffect;
+	Tr2EffectPtr m_filterEffect;
+	Tr2RenderTargetPtr m_preFilterTarget;
+	Tr2RenderTargetPtr m_postFilterTarget;
+
+	bool m_prevCullInversion;
+};
+
+TYPEDEF_BLUECLASS( Tr2ReflectionProbe );

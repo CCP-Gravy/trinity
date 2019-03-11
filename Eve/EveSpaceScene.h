@@ -64,6 +64,7 @@ BLUE_DECLARE_VECTOR( Tr2ExternalParameter );
 BLUE_DECLARE( Tr2ImpostorManager );
 BLUE_DECLARE( Tr2DebugRenderer );
 BLUE_DECLARE( EveEffectRoot2 );
+BLUE_DECLARE( Tr2ReflectionProbe );
 
 enum TAASampling { TAA_NONE=0, TAA_RANDOM=1, TAA_2X=2, TAA_3X=3, TAA_4X=4 };
 
@@ -216,7 +217,8 @@ protected:
 
 		// MiscData
 		float Time;
-		Vector2 Unused;
+		float UseReflectionProbe;
+		float Unused;
 		float GammaBrightness;
 	};
 	double m_viewProjectLastD[16];
@@ -541,6 +543,7 @@ private:
 	IRoot* GetCameraAttachments() const;
 
 	Tr2PostProcess2Ptr m_postProcess;
+	Tr2ReflectionProbePtr m_reflectionProbe;
 };
 
 TYPEDEF_BLUECLASS( EveSpaceScene );

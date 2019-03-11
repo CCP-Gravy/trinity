@@ -413,6 +413,14 @@ const Be::ClassInfo* EveSpaceScene::ExposeToBlue()
 		)
 		MAP_ATTRIBUTE
 		(
+			"reflectionProbe",
+			m_reflectionProbe,
+			"Reflection probe for the scene.\n"
+			":jessica-group: Lighting",
+			Be::READWRITE | Be::PERSIST | Be::NOTIFY
+		)
+		MAP_ATTRIBUTE
+		(
 			"depthTexture",
 			m_depthMap,
 			".",

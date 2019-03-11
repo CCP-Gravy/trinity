@@ -33,6 +33,7 @@
 #include "Tr2ImpostorManager.h"
 #include "Tr2DebugRenderer.h"
 #include "EveEffectRoot2.h"
+#include "Tr2ReflectionProbe.h"
 
 using namespace Tr2RenderContextEnum;
 
@@ -1807,6 +1808,30 @@ void EveSpaceScene::RenderMainPass( Tr2RenderContext& renderContext )
 
 	renderContext.AddGpuMarker( __FUNCTION__ );
 
+	if( m_reflectionProbe && m_reflectionProbe->IsValid() )
+	{
+		m_reflectionProbe->SetPosition( Tr2Renderer::GetViewPosition() );
+		m_reflectionProbe->InitRenderPass( renderContext );
+
+		for( unsigned i = 0; i < 6; i++ )
+		{
+			m_reflectionProbe->StartRenderFace( i, renderContext );
+
+			PopulatePerFramePSData( m_perFramePS );
+			PopulatePerFrameVSData( m_perFrameVS );
+			ApplyPerFrameData( renderContext );
+
+			RenderBackgroundPass( renderContext );
+
+			m_reflectionProbe->EndRenderFace( i, renderContext );
+		}
+
+		m_reflectionProbe->EndRenderPass( renderContext );
+		PopulatePerFramePSData( m_perFramePS );
+		PopulatePerFrameVSData( m_perFrameVS );
+		ApplyPerFrameData( renderContext );
+	}
+
 	if( m_hasDepthPass )
 	{
 		renderContext.SetReadOnlyDepth( true );
@@ -2253,6 +2278,7 @@ void EveSpaceScene::PopulatePerFramePSData( PerFramePSData &data )
 	data.ViewportSize.y = Tr2Renderer::GetDeviceViewport().m_height;
 
 	data.Time = Tr2Renderer::GetAnimationTime();
+	data.UseReflectionProbe = ( m_reflectionProbe && m_reflectionProbe->IsValid() ) ? 1.f : 0.f;
 	if( m_shadowMap )
 	{
 		data.ShadowMapSettings = m_shadowMap->GetShadowMapSettings();
@@ -2274,7 +2300,11 @@ void EveSpaceScene::PopulatePerFramePSData( PerFramePSData &data )
 bool EveSpaceScene::Initialize()
 {
 	// the environment cubemap aka the nebula
-	if( m_envMapHandle )
+	if( m_reflectionProbe && m_reflectionProbe->IsValid() )
+	{
+		m_envMapTextureRes = m_reflectionProbe->GetReflection();
+	}
+	else if( m_envMapHandle )
 	{
 		BeResMan->GetResource( m_envMapResPath.c_str(), "", BlueInterfaceIID<TriTextureRes>(), (void**)&m_envMapTextureRes );
 	}
@@ -2316,10 +2346,14 @@ bool EveSpaceScene::Initialize()
 
 bool EveSpaceScene::OnModified( Be::Var* value )
 {
-	if( IsMatch( value, m_envMapResPath ) )
+	if( IsMatch( value, m_reflectionProbe ) || IsMatch(value, m_envMapResPath) )
 	{
 		m_envMapTextureRes.Unlock();
-		if( !m_envMapResPath.empty() )
+		if( m_reflectionProbe && m_reflectionProbe->IsValid() )
+		{
+			m_envMapTextureRes = m_reflectionProbe->GetReflection();
+		}
+		else if( !m_envMapResPath.empty() )
 		{
 			BeResMan->GetResource( m_envMapResPath.c_str(), "", BlueInterfaceIID<TriTextureRes>(), (void**)&m_envMapTextureRes );
 		}
