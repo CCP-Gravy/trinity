@@ -8,22 +8,20 @@
 #include "Tr2Light.h"
 #include "Include/TriMath.h"
 
-LightData::LightData()
+LightData::LightData() :
+	position( 0, 0, 0 ),
+	color( 0, 0, 0, 1 ),
+	brightness( 0.0f ),
+	noiseAmplitude( 0.0f ),
+	noiseFrequency( 1.0f ),
+	noiseOctaves( 1 ),
+	radius( 0.0f ),
+	innerRadius( 0.0f ),
+	rotation( 0.0f, 0.0f, 0.0f, 1.0f ),
+	length( 0.0f ),
+	angle( 0.0f ),
+	texturePath( L"" )
 {
-	position = Vector3( 0, 0, 0 );
-	color = Color( 0, 0, 0, 1 );
-	brightness = 0.0f;
-	noiseAmplitude = 0.0f;
-	noiseFrequency = 1.0f;
-	noiseOctaves = 1;
-
-	radius = 0.0f;
-	innerRadius = 0.0f;
-
-	rotation = Quaternion( 0, 0, 0, 1);
-	length = 0.0f;
-
-	texturePath = L"";
 }
 
 
