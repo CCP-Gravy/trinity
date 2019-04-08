@@ -467,6 +467,11 @@ void EveMobile::RebuildTurretPositions()
 			}
 		}
 
+		if( m_clipSphereFactor != 0 )
+		{
+			( *it )->SetShaderOption( BlueSharedString( "SPACE_OBJECT_CLIPPING" ), BlueSharedString( "SOC_ENABLED" ) );
+		}
+
 		if ( turretInName )
 		{
 			// For _turret_ locators we use the slot number to get a unique
@@ -474,7 +479,6 @@ void EveMobile::RebuildTurretPositions()
 			// fall back to using _turret_ locators.
 			locatorNumber = (*it)->GetSlotNumber();
 		}
-
 
 		char ln = '0' + locatorNumber;
 		std::string locatorBase = name + ln;
