@@ -54,7 +54,7 @@ void Tr2Light::AddLight( Tr2LightManager& lightManager, CXMMATRIX transform, flo
 		float noise = float( PerlinNoise1D( TimeAsDouble( BeOS->GetCurrentFrameTime() - m_startTime ) * m_lightData.noiseFrequency, 2.f, 2.f, m_lightData.noiseOctaves ) );
 		brightness *= ( ( noise + 1.0f ) / 2.0f ) * m_lightData.noiseAmplitude;
 	}
-	data.color = reinterpret_cast<Vector3&>(m_lightData.color * brightness);
+	data.color = ( Vector4( m_lightData.color ) * brightness ).GetXYZ();
 	data.radius = m_lightData.radius * scale;
 	data.innerRadius = m_lightData.innerRadius * scale;
 	data.position = Vector3( XMVector3TransformCoord( m_lightData.position, transform ) );
