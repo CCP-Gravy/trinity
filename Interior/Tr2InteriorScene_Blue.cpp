@@ -415,7 +415,7 @@ const Be::ClassInfo* Tr2InteriorScene::ExposeToBlue()
 		MAP_ATTRIBUTE( "sunDirection", m_sunDirection, "Sun direction", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "ambientColor", m_ambientColor, "Scene Ambient color", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "curveSets", m_curveSets, "", Be::READ )
-		MAP_ATTRIBUTE(" lightRenderTargets", m_lightRenderTargets, "Spotlight Shadow Maps", Be::READ )
+		MAP_ATTRIBUTE( "lightRenderTargets", m_lightRenderTargets, "Spotlight Shadow Maps", Be::READ )
 
 		MAP_ATTRIBUTE( "backgroundEffect", m_backgroundEffect, "The effect used to render the background behind any objects", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE_WITH_CHOOSER( "backgroundCubemapPath", m_backgroundCubeMapPath, "The path used to load the background environment map", Be::READWRITE | Be::PERSIST | Be::NOTIFY, TriTextureChooser )
