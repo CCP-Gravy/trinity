@@ -584,6 +584,15 @@ void EveCamera::CapPitchAndYaw()
 // -------------------------------------------------------------
 void EveCamera::CalculateProjectionMatrix( Matrix* mat, float aspectRatio, float fov, float offsetX, float offsetY, float front, float back, TriProjection* projection )
 {
+	if( !aspectRatio || isinf( aspectRatio ) || isnan( aspectRatio ) )
+	{
+		aspectRatio = 1;
+	}
+	if( !fov || isinf( fov ) || isnan( fov ) )
+	{
+		fov = 1;
+	}
+
 	// TODO: update TriProjection to do all this for us, having the aspect ratio correction as a value on the
 	// TriProjection itself rather than transmogrifying the matrix here.
 	float dX = aspectRatio * front * tan( fov / 2 );
