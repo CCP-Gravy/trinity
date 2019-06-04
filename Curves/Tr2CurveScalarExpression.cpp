@@ -10,6 +10,7 @@
 #include "TbbStub.h"
 #include "TriSettingsRegistrar.h"
 #include "Tr2ExpressionTermInfo.h"
+#include <random>
 
 bool g_expressionCurveFakeRandom = false;
 TRI_REGISTER_SETTING( "expressionCurveFakeRandom", g_expressionCurveFakeRandom );
@@ -41,7 +42,11 @@ namespace
 
 	float RandomHash( float a, float b, float x )
 	{
-		return ( ( b - a ) * float( ( CcpHashFNV1( &x, sizeof( x ), CcpHashFNV1( s_currentCurve.back(), sizeof( s_currentCurve.back() ) ) ) & 0xfffff ) / float( 0xfffff ) ) ) + a;
+		std::seed_seq::result_type seeds[] = { *reinterpret_cast<std::seed_seq::result_type*>( &x ), reinterpret_cast<std::seed_seq::result_type>( s_currentCurve.back() ) };
+		std::seed_seq seq( std::begin( seeds ), std::end( seeds ) );
+		std::default_random_engine e1( seq );
+		std::uniform_real_distribution<float> d( a, b );
+		return d( e1 );
 	}
 
 	// --------------------------------------------------------------------------------

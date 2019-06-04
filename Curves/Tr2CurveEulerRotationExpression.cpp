@@ -8,6 +8,7 @@
 #include "Tr2CurveEulerRotationExpression.h"
 #include "Tr2ExpressionTermInfo.h"
 #include "include/TriMath.h"
+#include <random>
 
 extern bool g_expressionCurveFakeRandom;
 
@@ -38,7 +39,11 @@ namespace
 
 	float RandomHash( float a, float b, float x )
 	{
-		return ( ( b - a ) * float( ( CcpHashFNV1( &x, sizeof( x ), CcpHashFNV1( s_currentCurve.back(), sizeof( s_currentCurve.back() ) ) ) & 0xfffff ) / float( 0xfffff ) ) ) + a;
+		std::seed_seq::result_type seeds[] = { *reinterpret_cast<std::seed_seq::result_type*>( &x ), reinterpret_cast<std::seed_seq::result_type>( s_currentCurve.back() ) };
+		std::seed_seq seq( std::begin( seeds ), std::end( seeds ) );
+		std::default_random_engine e1( seq );
+		std::uniform_real_distribution<float> d( a, b );
+		return d( e1 );
 	}
 
 	// --------------------------------------------------------------------------------
@@ -85,6 +90,7 @@ Tr2CurveEulerRotationExpression::Tr2CurveEulerRotationExpression( IRoot* lockobj
 		parser.DefineFun( "randconst", &RandomConstant, false );
 		parser.DefineFun( "random", &Random, false );
 		parser.DefineFun( "randconst", &RandomConstant, false );
+		parser.DefineFun( "randhash", &RandomHash, false );
 		parser.DefineFun( "input", &Input, false );
 		parser.DefineFun( "inputAt", &InputAt, false );
 		parser.DefineFun( "clamp", &TriClamp, false );
