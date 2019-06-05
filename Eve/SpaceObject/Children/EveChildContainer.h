@@ -103,8 +103,22 @@ public:
 
 	ITr2SoundEmitter* FindSoundEmitter( const char* name ) override;
 
+	enum DisplayQualityModifier
+	{
+		SHADER_ALL = 5,
+		SHADER_HIGHMID = 3,
+		SHADER_LOWMID = 1,
+		SHADER_HIGH = 4,
+		SHADER_MED = 2,
+		SHADER_LOW = 0,
+	};
+
 	PIEveSpaceObjectChildVector m_objects;
+
 protected:
+
+	bool IsRendering() const;
+
 	BlueSharedString m_name;
 	PTriCurveSetVector m_curveSets;
 	PTriObserverLocalVector m_observers;
@@ -116,6 +130,8 @@ protected:
 	Vector3 m_worldVelocity;
 	bool m_display;
 	bool m_hideOnLowQuality;
+	DisplayQualityModifier m_displayFilter;
+
 	bool m_isAlwaysOn;
 	EveChildInheritPropertiesPtr m_inheritProperties;
 	Origin m_origin;

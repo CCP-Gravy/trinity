@@ -15,8 +15,21 @@ Be::VarChooser EveSpaceObjectChildOriginChooser[] =
 };
 BLUE_REGISTER_ENUM_EX( "EveSpaceObjectChildOrigin", IEveSpaceObjectChild::Origin, EveSpaceObjectChildOriginChooser, ENUM_REG_ENUM_OBJECT_ON_MODULE );
 
+Be::VarChooser EveChildContainerDataSetShaderChooser[] =
+{
+	{ "None", BeCast(EveChildContainer::SHADER_ALL), "Visible to users with all shader settings" },
+	{ "Med + High", BeCast(EveChildContainer::SHADER_HIGHMID), "Visible for users with shader settings on Medium or High" },
+	{ "Low + Med", BeCast(EveChildContainer::SHADER_LOWMID), "Visible for users with shader settings on Low or Medium" },
+	{ "High", BeCast(EveChildContainer::SHADER_HIGH), "Only visible for users with shader settings on High" },
+	{ "Medium", BeCast(EveChildContainer::SHADER_MED), "Only visible for users with shader settings on Medium" },
+	{ "Low", BeCast(EveChildContainer::SHADER_LOW), "Only visible for users with shader settings on Low" },
+	{ 0 }
+};
+BLUE_REGISTER_ENUM_EX("SetShader", EveChildContainer::DisplayQualityModifier, EveChildContainerDataSetShaderChooser, ENUM_REG_ENUM_OBJECT_ON_MODULE);
+
 
 BLUE_DEFINE( EveChildContainer );
+
 
 const Be::ClassInfo* EveChildContainer::ExposeToBlue()
 {
@@ -37,6 +50,9 @@ const Be::ClassInfo* EveChildContainer::ExposeToBlue()
 		MAP_ATTRIBUTE( "curveSets", m_curveSets, "", Be::READ | Be::PERSIST )
 		MAP_ATTRIBUTE( "hideOnLowQuality", m_hideOnLowQuality, "Disables all childs in this container on low quality mode.", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "alwaysOn", m_isAlwaysOn, "If false this will be hidden if a spaceobjects activation strength < 0.5. If True then it is always on.", Be::READWRITE | Be::PERSIST )
+
+		MAP_ATTRIBUTE_WITH_CHOOSER("displayFilter", m_displayFilter, "Choose the shader quality settings for users you'd like to display childs to", Be::READWRITE | Be::PERSIST | Be::ENUM, EveChildContainerDataSetShaderChooser )
+		MAP_PROPERTY_READONLY("isRendering", IsRendering, "Are the current childs being rendered with the current filter and shader settings")
 
 		MAP_ATTRIBUTE( "translation", m_translation, "", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "rotation", m_rotation, "", Be::READWRITE | Be::PERSIST )

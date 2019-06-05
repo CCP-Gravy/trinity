@@ -26,6 +26,7 @@ EveChildContainer::EveChildContainer( IRoot* lockobj ) :
 	PARENTLOCK( m_transformModifiers ),
 	PARENTLOCK( m_controllers ),
 	m_controllerVariables( "EveChildContainer::m_controllerVariables" ),
+	m_displayFilter( SHADER_ALL ),
 	m_worldVelocity( 0, 0, 0 ),
 	m_display( true ),
 	m_hideOnLowQuality( false ),
@@ -91,6 +92,42 @@ bool EveChildContainer::IsAlwaysOn() const
 }
 
 
+// use: Check if the childs should be rendered on the current shader settings
+bool EveChildContainer::IsRendering() const
+{
+
+	TR2SHADERMODEL settings = Tr2Renderer::GetShaderModel();
+
+	if( settings == TR2SM_AUTHORING )
+	{
+		return true;
+	}
+
+	switch( m_displayFilter )
+	{
+		case SHADER_LOW:
+			return settings == TR2SM_3_0_LO;
+			break;
+		case SHADER_LOWMID:
+			return settings <= TR2SM_3_0_HI;
+			break;
+		case SHADER_MED:
+			return settings == TR2SM_3_0_HI;
+			break;
+		case SHADER_HIGHMID:
+			return settings >= TR2SM_3_0_HI;
+			break;
+		case SHADER_HIGH:
+			return settings == TR2SM_3_0_DEPTH;
+			break;
+		case SHADER_ALL:
+			return true;
+			break;
+	}
+	return false;
+}
+
+
 const char* EveChildContainer::GetName() const
 {
 	return m_name.c_str();
@@ -107,7 +144,8 @@ void EveChildContainer::UpdateVisibility( const TriFrustum& frustum, const Matri
 	{
 		return;
 	}
-	if( m_hideOnLowQuality && Tr2Renderer::IsLowQuality() )
+
+	if( ( m_hideOnLowQuality && Tr2Renderer::IsLowQuality() ) || !IsRendering() )
 	{
 		return;
 	}
@@ -124,7 +162,7 @@ void EveChildContainer::GetRenderables( std::vector<ITr2Renderable*>& renderable
 	{
 		return;
 	}
-	if( m_hideOnLowQuality && Tr2Renderer::IsLowQuality() )
+	if( ( m_hideOnLowQuality && Tr2Renderer::IsLowQuality() ) || !IsRendering() )
 	{
 		return;
 	}
@@ -137,7 +175,7 @@ void EveChildContainer::GetRenderables( std::vector<ITr2Renderable*>& renderable
 
 bool EveChildContainer::GetBoundingSphere( Vector4& sphere, BoundingSphereQuery query ) const
 {
-	if( m_hideOnLowQuality && Tr2Renderer::IsLowQuality() )
+	if( ( m_hideOnLowQuality && Tr2Renderer::IsLowQuality() ) || !IsRendering() )
 	{
 		return false;
 	}
@@ -169,7 +207,7 @@ void EveChildContainer::AddQuadsToQuadRenderer( const TriFrustum& frustum, Tr2Qu
 	{
 		return;
 	}
-	if( m_hideOnLowQuality && Tr2Renderer::IsLowQuality() )
+	if( ( m_hideOnLowQuality && Tr2Renderer::IsLowQuality() ) || !IsRendering() )
 	{
 		return;
 	}
@@ -181,7 +219,7 @@ void EveChildContainer::AddQuadsToQuadRenderer( const TriFrustum& frustum, Tr2Qu
 
 void EveChildContainer::UpdateSyncronous( EveUpdateContext& updateContext, const EveChildUpdateParams& params )
 {
-	if( m_hideOnLowQuality && Tr2Renderer::IsLowQuality() )
+	if( ( m_hideOnLowQuality && Tr2Renderer::IsLowQuality() ) || !IsRendering() )
 	{
 		return;
 	}
@@ -206,7 +244,7 @@ void EveChildContainer::UpdateSyncronous( EveUpdateContext& updateContext, const
 
 void EveChildContainer::UpdateAsyncronous( EveUpdateContext& updateContext, const EveChildUpdateParams& params )
 {
-	if( m_hideOnLowQuality && Tr2Renderer::IsLowQuality() )
+	if( ( m_hideOnLowQuality && Tr2Renderer::IsLowQuality() ) || !IsRendering() )
 	{
 		return;
 	}
@@ -256,7 +294,7 @@ void EveChildContainer::GetLocalToWorldTransform( Matrix& transform ) const
 
 void EveChildContainer::ChangeLOD( Tr2Lod lod )
 {
-	if( m_hideOnLowQuality && Tr2Renderer::IsLowQuality() )
+	if( ( m_hideOnLowQuality && Tr2Renderer::IsLowQuality() ) || !IsRendering() )
 	{
 		return;
 	}
@@ -273,7 +311,7 @@ void EveChildContainer::GetLights( Tr2LightManager& lightManager ) const
 	{
 		return;
 	}
-	if( m_hideOnLowQuality && Tr2Renderer::IsLowQuality() )
+	if( ( m_hideOnLowQuality && Tr2Renderer::IsLowQuality() ) || !IsRendering() )
 	{
 		return;
 	}
@@ -297,7 +335,7 @@ void EveChildContainer::SetOrigin( Origin origin )
 
 void EveChildContainer::PlayCurveSet( const std::string& name, const std::string& rangeName )
 {
-	if( m_hideOnLowQuality && Tr2Renderer::IsLowQuality() )
+	if( ( m_hideOnLowQuality && Tr2Renderer::IsLowQuality() ) || !IsRendering() )
 	{
 		return;
 	}
@@ -345,7 +383,7 @@ void EveChildContainer::StopAllCurveSets()
 
 void EveChildContainer::StopCurveSet( const std::string& name )
 {
-	if( m_hideOnLowQuality && Tr2Renderer::IsLowQuality() )
+	if( ( m_hideOnLowQuality && Tr2Renderer::IsLowQuality() ) || !IsRendering() )
 	{
 		return;
 	}
@@ -387,7 +425,7 @@ void EveChildContainer::UpdateCurveSet( const std::string& name, Be::Time time )
 
 float EveChildContainer::GetCurveSetDuration( const std::string& name ) const
 {
-	if( m_hideOnLowQuality && Tr2Renderer::IsLowQuality() )
+	if( ( m_hideOnLowQuality && Tr2Renderer::IsLowQuality() ) || !IsRendering() )
 	{
 		return 0.f;
 	}
@@ -414,7 +452,7 @@ float EveChildContainer::GetCurveSetDuration( const std::string& name ) const
 
 float EveChildContainer::GetRangeDuration( const std::string& name, const std::string& rangeName ) const
 {
-	if( m_hideOnLowQuality && Tr2Renderer::IsLowQuality() )
+	if( ( m_hideOnLowQuality && Tr2Renderer::IsLowQuality() ) || !IsRendering() )
 	{
 		return 0.f;
 	}
