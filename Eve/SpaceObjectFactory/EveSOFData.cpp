@@ -466,6 +466,16 @@ EveSOFDataHullHazeSetItem::EveSOFDataHullHazeSetItem( IRoot* lockobj ) :
 	m_boosterGainInfluence( false )
 {}
 
+EveSOFDataHullBannerLight::EveSOFDataHullBannerLight( IRoot* ) 
+	:m_radiusMultiplier( 1 ),
+	m_brightness( 1 ),
+	m_innerRadiusMultiplier( 0.3 ),
+	m_noiseAmplitude( 0 ),
+	m_noiseFrequency( 1 ),
+	m_noiseOctaves( 1 ),
+	m_saturation( 1 )
+{}
+
 EveSOFDataHullBanner::EveSOFDataHullBanner( IRoot* )
 	:m_usage( VERTICAL_BANNER ),
 	m_visibilityGroup( "primary" ),
@@ -477,6 +487,7 @@ EveSOFDataHullBanner::EveSOFDataHullBanner( IRoot* )
 	m_boneIndex( -1 ),
 	m_maintainAspectRatio( true )
 {
+	m_lightOverride.CreateInstance();
 }
 
 float EveSOFDataHullBanner::GetTargetAspectRatio() const

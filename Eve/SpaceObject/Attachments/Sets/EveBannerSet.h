@@ -14,6 +14,8 @@
 
 BLUE_DECLARE( Tr2Effect );
 BLUE_DECLARE_VECTOR( Tr2LodResource );
+BLUE_DECLARE( Tr2Light );
+BLUE_DECLARE_VECTOR( Tr2Light );
 
 
 struct EveBannerItem
@@ -55,6 +57,7 @@ public:
 	void AddBanner( const EveBannerItem& banner );
 	void SetEffect( Tr2Effect* effect );
 	void AddLodResource( Tr2LodResource* resource );
+	void AddLight( Tr2Light* light );
 	void SetKey( int32_t key );
 	void Rebuild();
 
@@ -64,8 +67,11 @@ public:
 	int32_t GetReference( size_t index ) const;
 
 	static float GetBannerAspectRatio( const EveBannerItem& banner );
-	Color GetLightColor() const;
+
 	void GetLights( Tr2LightManager& lightManager, const Matrix& parentTransform ) const;
+	Color GetSaturatedLightColor() const;
+	void SetLightColorSaturation(float saturation);
+
 protected:
 	virtual void ReleaseResources( TriStorage s );
 	virtual bool OnPrepareResources();
@@ -97,6 +103,9 @@ private:
 	Tr2Lod m_lod;
 	float m_maxBannerRadius;
 
+	PTr2LightVector m_lights;
+	float m_colorSaturation;
+	
 	bool m_display;
 	bool m_isPickable;
 	bool m_isVisible;

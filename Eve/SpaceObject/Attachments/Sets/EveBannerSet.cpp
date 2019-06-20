@@ -14,6 +14,7 @@
 #include "Utilities/BoundingSphere.h"
 #include "Utilities/MatrixUtils.h"
 #include "Resources/TriTextureRes.h"
+#include "Lights/Tr2Light.h"
 
 
 namespace
@@ -96,13 +97,15 @@ struct EveBannerSet::Vertex
 EveBannerSet::EveBannerSet( IRoot* lockobj )
 	:PARENTLOCK( m_banners ),
 	PARENTLOCK( m_associatedResources ),
+	PARENTLOCK( m_lights ),
 	m_key( 0 ),
 	m_vertexDeclaration( Tr2EffectStateManager::UNINITIALIZED_DECLARATION ),
 	m_lod( TR2_LOD_UNSPECIFIED ),
 	m_maxBannerRadius( 0 ),
 	m_display( true ),
 	m_isPickable( false ),
-	m_isVisible( true )
+	m_isVisible( true ),
+	m_colorSaturation( 1 )
 {
 	m_banners.SetStructureDefinition( s_bannerStructureDef );
 	m_banners.SetDefaultValue( &s_defaultBannerItem );
@@ -249,22 +252,9 @@ void EveBannerSet::RenderDebugInfo( Tr2DebugRenderer& renderer, const Matrix& pa
 	}
 	if( renderer.HasOption( this, "Lights" ) )
 	{
-		Color c = GetLightColor();
-		if( c.a == 0.0f )
+		for( auto l = begin( m_lights ); l != end( m_lights ); ++l )
 		{
-			return;
-		}
-
-		uint32_t index = 0;
-
-		for( auto it = m_banners.begin(); it != m_banners.end(); ++it, ++index )
-		{
-			float scale = max( it->scaling.x, max( it->scaling.y, it->scaling.z ) );
-
-			Tr2DebugObjectReference ref = Tr2DebugObjectReference( m_banners.GetRawRoot(), index );
-			renderer.DrawSphere( ref, parentTransform, it->position, scale * 2, 10, Tr2DebugRenderer::Solid, Tr2DebugColor( 0x66ffffff, 0x22ffffff ) );
-			renderer.DrawSphere( ref, parentTransform, it->position, scale, 10, Tr2DebugRenderer::Solid, Tr2DebugColor( 0x99ffffff, 0x22ffffff ) );
-
+			( *l )->RenderDebugInfo( renderer, parentTransform );
 		}
 	}
 }
@@ -290,6 +280,11 @@ void EveBannerSet::SetEffect( Tr2Effect* effect )
 void EveBannerSet::SetKey( int32_t key )
 {
 	m_key = key;
+}
+
+void EveBannerSet::AddLight( Tr2Light* light )
+{
+	m_lights.Append( light );
 }
 
 void EveBannerSet::AddLodResource( Tr2LodResource* resource )
@@ -409,21 +404,41 @@ void EveBannerSet::Rebuild()
 	}
 }
 
-Color EveBannerSet::GetLightColor() const
+Color EveBannerSet::GetSaturatedLightColor() const
 {
-	if( m_associatedResources.empty() ) {
+	if( m_associatedResources.empty() )
+	{
 		return Color( 0.0, 0.0, 0.0, 0.0 );
 	}
 
-	Tr2LodResource* r = const_cast<Tr2LodResource*>(m_associatedResources[0]);
+	Tr2LodResource* r = const_cast< Tr2LodResource* >( m_associatedResources[0] );
 	if( r->GetResource() == nullptr )
 	{
 		return Color( 0.0, 0.0, 0.0, 0.0 );
 	}
-	TriTextureRes* resource = static_cast<TriTextureRes*>(r->GetResource());
+
+	TriTextureRes* resource = static_cast< TriTextureRes* >( r->GetResource() );
 
 	Color c = resource->GetAverageColor();
-	return Color(c.r * c.a, c.g * c.a, c.b * c.a, c.a);	
+
+	Color c2 = Color( c.r * c.a, c.g * c.a, c.b * c.a, c.a );
+	
+	if( m_colorSaturation == 1.f )
+	{
+		return c2;
+	} 
+
+	// intencity (the magic numbers are values based on how strongly our eyes perceive each color)
+	float i = ( c2.r * 0.299f ) + ( c2.g * 0.587f ) + (c2.b * 0.114f);
+
+	Color finalC = Lerp( Color(i,i,i,i), c2, max( 0.0f, m_colorSaturation ) );
+
+	return  finalC;
+}
+
+void EveBannerSet::SetLightColorSaturation(float saturation )
+{
+	m_colorSaturation = saturation;
 }
 
 void EveBannerSet::GetLights( Tr2LightManager& lightManager, const Matrix& parentTransform ) const
@@ -432,16 +447,18 @@ void EveBannerSet::GetLights( Tr2LightManager& lightManager, const Matrix& paren
 	{
 		return;
 	}
-	Color c = GetLightColor();
+
+	Color c = GetSaturatedLightColor();
+
 	if( c.a == 0.0f )
 	{
 		return;
 	}
 
-	for( auto b = m_banners.begin(); b != m_banners.end(); ++b ) 
+	for( auto b = m_lights.begin(); b != m_lights.end(); ++b )
 	{
-		float scale = max( b->scaling.x, max( b->scaling.y, b->scaling.z ) );
-		lightManager.AddPointLight( TransformCoord( b->position, parentTransform ), scale * 2, c, scale / 3.0f);
+		( *b )->ChangeLightColor( c );
+		( *b )->AddLight( lightManager, parentTransform, 1.0f );
 	}
 }
 

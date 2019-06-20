@@ -53,6 +53,7 @@ public:
 	Tr2Light( IRoot* lockobj = nullptr );
 	void AddLight( Tr2LightManager& lightManager, CXMMATRIX transform, float scale );
 	void GetLight( Vector3& position, float& radius, Color& color );
+	void ChangeLightColor( Color c );
 
 	virtual void Update();
 	virtual void RenderDebugInfo( Tr2DebugRenderer& renderer, const Matrix& worldMatrix );

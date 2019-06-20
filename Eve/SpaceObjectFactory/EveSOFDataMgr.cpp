@@ -683,6 +683,15 @@ void EveSOFDataMgr::GenerateHullData( HullData& hd, EveSOFDataHullPtr srcData ) 
 		hbsid.item.bone = sourceBanner->m_boneIndex;
 		hbsid.item.reference = bannerIndex++;
 		hbsid.visibilityGroup = CcpHashFNV1( visGroupName.c_str(), visGroupName.size() );
+		// lights
+		hbsid.bannerLight.radiusMultiplier = sourceBanner->m_lightOverride->m_radiusMultiplier;
+		hbsid.bannerLight.brightness = sourceBanner->m_lightOverride->m_brightness;
+		hbsid.bannerLight.innerRadiusMultiplier = sourceBanner->m_lightOverride->m_innerRadiusMultiplier;
+		hbsid.bannerLight.noiseAmplitude = sourceBanner->m_lightOverride->m_noiseAmplitude;
+		hbsid.bannerLight.noiseFrequency = sourceBanner->m_lightOverride->m_noiseFrequency;
+		hbsid.bannerLight.noiseOctaves = sourceBanner->m_lightOverride->m_noiseOctaves;
+		hbsid.bannerLight.saturation = sourceBanner->m_lightOverride->m_saturation;
+
 		set->items.push_back( hbsid );
 	}
 

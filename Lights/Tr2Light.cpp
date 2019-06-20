@@ -39,6 +39,11 @@ void Tr2Light::SetLightData( LightData& baseData )
 	m_lightData = baseData;
 }
 
+void Tr2Light::ChangeLightColor( Color c )
+{
+	m_lightData.color = c;
+}
+
 void Tr2Light::AddLight( Tr2LightManager& lightManager, CXMMATRIX transform, float scale )
 {
 	if( m_isDynamic )

@@ -183,9 +183,21 @@ public:
 		std::vector<HullHazeSetItemData> items;
 	};
 
+	struct HullBannerSetItemLightData
+	{
+		float radiusMultiplier;
+		float brightness;
+		float innerRadiusMultiplier;
+		float noiseAmplitude;
+		float noiseFrequency;
+		int noiseOctaves;
+		float saturation;
+	};
+
 	struct HullBannerSetItemData
 	{
 		EveBannerItem item;
+		HullBannerSetItemLightData bannerLight;
 		uint32_t visibilityGroup;
 	};
 

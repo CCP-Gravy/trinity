@@ -484,6 +484,54 @@ Be::VarChooser EveSOFDataHullBannerUsageChooser[] =
 };
 BLUE_REGISTER_ENUM_EX( "HullBannerUsage", EveSOFDataHullBanner::Usage, EveSOFDataHullBannerUsageChooser, ENUM_REG_ENUM_OBJECT_ON_MODULE );
 
+BLUE_DEFINE( EveSOFDataHullBannerLight );
+const Be::ClassInfo* EveSOFDataHullBannerLight::ExposeToBlue()
+{
+	EXPOSURE_BEGIN( EveSOFDataHullBannerLight, "" )
+		MAP_ATTRIBUTE(
+			"brightness",
+			m_brightness,
+			"A multiplier for the light's brightness\n"
+			":jessica-group: Light",
+			Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE(
+			"radiusMultiplier",
+			m_radiusMultiplier,
+			"Multiplier for the size of the light \n"
+			":jessica-group: Light",
+			Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE(
+			"innerRadiusMultiplier",
+			m_innerRadiusMultiplier,
+			"A multiplier for the light's inner radius based on it's scaling mod (default is 1/3 of the outer radius)\n"
+			":jessica-group: Light",
+			Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE(
+			"noiseAmplitude",
+			m_noiseAmplitude,
+			"Brightness noise amplitude\n"
+			":jessica-group: Noise",
+			Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE(
+			"noiseFrequency",
+			m_noiseFrequency,
+			"Brightness noise frequency\n"
+			":jessica-group: Noise",
+			Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE(
+			"noiceOctaves",
+			m_noiseOctaves,
+			"Brightness turbulance octives\n"
+			":jessica-group: Noise",
+			Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE(
+			"saturation",
+			m_saturation,
+			"color saturation for banner lights \n"
+			":jessica-group: ColorMix",
+			Be::READWRITE | Be::PERSIST )
+	EXPOSURE_END()
+}
 
 BLUE_DEFINE( EveSOFDataHullBanner );
 const Be::ClassInfo* EveSOFDataHullBanner::ExposeToBlue()
@@ -502,6 +550,10 @@ const Be::ClassInfo* EveSOFDataHullBanner::ExposeToBlue()
 		MAP_PROPERTY( "angleX", GetAngleX, SetAngleX, "Horizontal curve angle" )
 		MAP_ATTRIBUTE( "angleY", m_angleY, "", Be::PERSISTONLY )
 		MAP_PROPERTY( "angleY", GetAngleY, SetAngleY, "Vertical curve angle" )
+
+		MAP_ATTRIBUTE( "lightOverride", m_lightOverride, "", Be::READ | Be::PERSIST )
+
+		
 		MAP_ATTRIBUTE( "boneIndex", m_boneIndex, ":jessica-widget: boneindex", Be::READWRITE | Be::PERSIST )
 
 		MAP_ATTRIBUTE( "maintainAspectRatio", m_maintainAspectRatio, "Maintain UV aspect ratio when manipulating a banner", Be::READWRITE )

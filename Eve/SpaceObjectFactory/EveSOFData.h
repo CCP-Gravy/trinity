@@ -562,6 +562,25 @@ TYPEDEF_BLUECLASS( EveSOFDataHullHazeSet );
 BLUE_DECLARE_VECTOR( EveSOFDataHullHazeSet );
 
 
+BLUE_CLASS( EveSOFDataHullBannerLight ) :
+	public IRoot
+{
+public:
+	EXPOSE_TO_BLUE();
+	EveSOFDataHullBannerLight( IRoot* lockobj = nullptr );
+
+	float m_radiusMultiplier;
+	float m_brightness;
+	float m_innerRadiusMultiplier;
+	float m_noiseAmplitude;
+	float m_noiseFrequency;
+	int   m_noiseOctaves;
+	float m_saturation;
+};
+TYPEDEF_BLUECLASS( EveSOFDataHullBannerLight );
+BLUE_DECLARE_VECTOR( EveSOFDataHullBannerLight );
+
+
 BLUE_CLASS( EveSOFDataHullBanner ) :
 	public IRoot
 {
@@ -621,6 +640,7 @@ public:
 
 	Vector3 m_position, m_scaling;
 	Quaternion m_rotation;
+	EveSOFDataHullBannerLightPtr m_lightOverride;
 
 	float m_angleX;
 	float m_angleY;

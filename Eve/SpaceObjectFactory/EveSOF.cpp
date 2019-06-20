@@ -1070,6 +1070,30 @@ void EveSOF::SetupBannerSets( EveSpaceObject2Ptr obj, const EveSOFDNAPtr dna ) c
 				}
 
 				bannerSet->AddBanner( itemData.item );
+				// create the light
+				Tr2PointLightPtr light;
+				light.CreateInstance();
+
+				LightData data;
+				data.position = itemData.item.position;
+
+				float rad = itemData.bannerLight.radiusMultiplier *
+					max( itemData.item.scaling.x, max( itemData.item.scaling.y, itemData.item.scaling.z ) );
+				float innerRad = ( rad * itemData.bannerLight.innerRadiusMultiplier );
+				data.radius = rad;
+				data.innerRadius = innerRad;
+				
+				data.color = Color( 0.0, 0.0, 0.0, 0.0 );
+				data.brightness = itemData.bannerLight.brightness;
+				data.noiseAmplitude = itemData.bannerLight.noiseAmplitude;
+				data.noiseFrequency = itemData.bannerLight.noiseFrequency;
+				data.noiseOctaves = itemData.bannerLight.noiseOctaves;
+
+				light->SetLightData( data );
+				bannerSet->AddLight( light );
+
+				bannerSet->SetLightColorSaturation( itemData.bannerLight.saturation );
+
 			}
 
 			if( !bannerSet )
