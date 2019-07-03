@@ -182,10 +182,6 @@ void TriDevice::ApplicationActivated( ApplicationActivation activated )
 		}
 		else
 		{
-			if( renderContext.m_swapChain )
-			{
-				CR( renderContext.m_swapChain->SetFullscreenState( FALSE, nullptr ) );
-			}
 			ShowWindow( mHwnd, SW_MINIMIZE );
 		}
 	}
