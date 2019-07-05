@@ -421,9 +421,20 @@ void Tr2InstancedMesh::GetBatches( ITriRenderBatchAccumulator* batches,
 	{
 		return;
 	}
-	if( GetInstanceGeometryResource() == nullptr && ( m_instanceCount == nullptr || !m_instanceCount->GetGpuBuffer( 0 ) ) )
+	if( m_instanceCount )
 	{
-		return;
+		if( !m_instanceCount->GetGpuBuffer( 0 ) )
+		{
+			return;
+		}
+	}
+	else
+	{
+		auto instanceGeometryResource = GetInstanceGeometryResource();
+		if( !instanceGeometryResource || !instanceGeometryResource->GetInstanceBufferVertexCount( m_instanceMeshIndex ) )
+		{
+			return;
+		}
 	}
 	bool rebuild = m_vertexDeclaration == Tr2EffectStateManager::UNINITIALIZED_DECLARATION;
 	if( !rebuild )
