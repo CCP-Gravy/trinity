@@ -3151,6 +3151,7 @@
     <ClInclude Include="Include\ITr2InstanceData.h" />
     <ClInclude Include="Include\ITr2Interior.h" />
     <ClInclude Include="Include\ITr2MultiPassScene.h" />
+    <ClInclude Include="Include\ITr2NamedPredicate.h" />
     <ClInclude Include="Include\ITr2Scene.h" />
     <ClInclude Include="Include\ITr2SoundEmitter.h" />
     <ClInclude Include="Include\ITr2Updateable.h" />
@@ -3249,6 +3250,7 @@
     <ClInclude Include="RenderJob\TriStepPopRenderTarget.h" />
     <ClInclude Include="RenderJob\TriStepPopViewport.h" />
     <ClInclude Include="RenderJob\TriStepPopViewTransform.h" />
+    <ClInclude Include="RenderJob\TriStepPredicated.h" />
     <ClInclude Include="RenderJob\TriStepPresentSwapChain.h" />
     <ClInclude Include="RenderJob\TriStepPushDepthStencil.h" />
     <ClInclude Include="RenderJob\TriStepPushProjection.h" />
@@ -3962,6 +3964,8 @@
     <ClCompile Include="RenderJob\TriStepPopViewport_Blue.cpp" />
     <ClCompile Include="RenderJob\TriStepPopViewTransform.cpp" />
     <ClCompile Include="RenderJob\TriStepPopViewTransform_Blue.cpp" />
+    <ClCompile Include="RenderJob\TriStepPredicated.cpp" />
+    <ClCompile Include="RenderJob\TriStepPredicated_Blue.cpp" />
     <ClCompile Include="RenderJob\TriStepPresentSwapChain.cpp" />
     <ClCompile Include="RenderJob\TriStepPresentSwapChain_Blue.cpp" />
     <ClCompile Include="RenderJob\TriStepPushDepthStencil.cpp" />
