@@ -10,7 +10,9 @@
 
 #include "TriSettingsRegistrar.h"
 bool g_emulateDriverReset = false;
+bool g_fixFullscreenBehaviorForOldWindows = false;
 TRI_REGISTER_SETTING( "emulateDriverReset",		g_emulateDriverReset );
+TRI_REGISTER_SETTING( "fixFullscreenBehaviorForOldWindows", g_fixFullscreenBehaviorForOldWindows );
 
 CCP_STATS_DECLARED_ELSEWHERE( presentTime );
 
@@ -182,6 +184,12 @@ void TriDevice::ApplicationActivated( ApplicationActivation activated )
 		}
 		else
 		{
+#if defined( WIN32 )
+			if( g_fixFullscreenBehaviorForOldWindows && renderContext.m_swapChain )
+			{
+				CR( renderContext.m_swapChain->SetFullscreenState( FALSE, nullptr ) );
+			}
+#endif
 			ShowWindow( mHwnd, SW_MINIMIZE );
 		}
 	}
