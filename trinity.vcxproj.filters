@@ -944,6 +944,9 @@
     <ClInclude Include="Include\ITr2MultiPassScene.h">
       <Filter>Source Files\Include</Filter>
     </ClInclude>
+    <ClInclude Include="Include\ITr2NamedPredicate.h">
+      <Filter>Source Files\Include</Filter>
+    </ClInclude>
     <ClInclude Include="Include\ITr2Scene.h">
       <Filter>Source Files\Include</Filter>
     </ClInclude>
@@ -1236,6 +1239,9 @@
       <Filter>Source Files\RenderJob</Filter>
     </ClInclude>
     <ClInclude Include="RenderJob\TriStepPopViewTransform.h">
+      <Filter>Source Files\RenderJob</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderJob\TriStepPredicated.h">
       <Filter>Source Files\RenderJob</Filter>
     </ClInclude>
     <ClInclude Include="RenderJob\TriStepPresentSwapChain.h">
@@ -3363,6 +3369,12 @@
       <Filter>Source Files\RenderJob</Filter>
     </ClCompile>
     <ClCompile Include="RenderJob\TriStepPopViewTransform_Blue.cpp">
+      <Filter>Source Files\RenderJob</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderJob\TriStepPredicated.cpp">
+      <Filter>Source Files\RenderJob</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderJob\TriStepPredicated_Blue.cpp">
       <Filter>Source Files\RenderJob</Filter>
     </ClCompile>
     <ClCompile Include="RenderJob\TriStepPresentSwapChain.cpp">
