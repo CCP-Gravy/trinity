@@ -104,13 +104,11 @@ private:
 
 
 EveChildBehaviorSystem::EveChildBehaviorSystem( IRoot* lockobj ) :
-	m_stride( 12 * sizeof( float ) ),
-	m_vertexCount( 1 ),
-	m_maxVelocity( 100 ),
-	m_maxForce( 50.f ),
-	m_display( true ),
 	PARENTLOCK( m_behaviorGroups ),
 	PARENTLOCK( m_splineTunnels ),
+	m_stride( 12 * sizeof( float ) ),
+	m_vertexCount( 1 ),
+	m_display( true ),
 	m_needToPassInVertexFunction( true )
 {
 	m_behaviorGroups.SetNotify( this );
@@ -555,12 +553,12 @@ void EveChildBehaviorSystem::Draw( TriBehaviorSystemInstancingBatch* batch, Tr2R
 // ITr2DebugRenderable
 void EveChildBehaviorSystem::GetDebugOptions( Tr2DebugRendererOptions& options )
 {
+	options.insert( "splineTunnels" );
+
 	for ( auto it = begin( m_behaviorGroups ); it != end( m_behaviorGroups ); ++it )
 	{
 		(*it)->GetDebugOptions( options );
 	}
-
-	options.insert( "splineTunnels" );
 }
 
 void EveChildBehaviorSystem::RenderDebugInfo( Tr2DebugRenderer& renderer )
@@ -569,6 +567,7 @@ void EveChildBehaviorSystem::RenderDebugInfo( Tr2DebugRenderer& renderer )
 	{
 		(*it)->RenderDebugInfo( renderer, EveChildTransform::m_worldTransform );
 	}
+
 	if (renderer.HasOption( this, "splineTunnels" ))
 	{
 		for (auto it = begin( m_splineTunnels ); it != end( m_splineTunnels ); ++it)

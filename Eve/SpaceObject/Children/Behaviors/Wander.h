@@ -12,18 +12,16 @@ public:
 	Wander( IRoot* lockobj = nullptr );
 	~Wander();
 
-	virtual void CalculateBehavior(DroneAgent& agent, const float deltaTime , BehaviorGroup& sys, EveChildBehaviorSystem& system );
+	virtual void CalculateBehavior( std::vector<DroneAgent>& agents, const float deltaTime, BehaviorGroup& sys, EveChildBehaviorSystem& system );
 
 	void RenderDebugInfo( Tr2DebugRenderer& renderer, Vector3 agentPos );
 
 private:
-	float m_circleDistance;
-	float m_circleRadius;
+	float m_freq;
 	float m_weightWander;	//priority of behavior
-	Vector3 m_wanderForce;
 
-	float m_xPoint, m_yPoint;
-	Vector3 m_Tc, m_centerOfCircle, m_desiredVector;
+	//debugging purposes
+	float rand1, rand2, rand3;
 };
 
 TYPEDEF_BLUECLASS( Wander );

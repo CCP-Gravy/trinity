@@ -103,6 +103,7 @@ private:
 	// ITr2DebugRenderable
 	virtual void GetDebugOptions( Tr2DebugRendererOptions& options );
 	virtual void RenderDebugInfo( Tr2DebugRenderer& renderer );
+	
 	void UpdateTunnelRegistry();
 
 	/////////////////////////////////////////////////////////////////////////////////////
@@ -118,11 +119,6 @@ private:
 
 	EveSpaceObjectPSData m_psData;
 	EveSpaceObjectVSData m_vsData;
-
-
-	//Steering behavior characteristics, this could actually go under the vehicle struct
-	float m_maxVelocity;
-	float m_maxForce;
 
 	bool m_display;
 	bool m_isVisible;

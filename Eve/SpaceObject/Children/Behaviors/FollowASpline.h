@@ -14,7 +14,7 @@ public:
 	FollowASpline( IRoot* lockobj = nullptr );
 	~FollowASpline();
 
-	virtual void CalculateBehavior( DroneAgent& agent, const float deltaTime , BehaviorGroup& group , EveChildBehaviorSystem& system );
+	virtual void CalculateBehavior( std::vector<DroneAgent>& agents, const float deltaTime , BehaviorGroup& group , EveChildBehaviorSystem& system );
 	void RenderDebugInfo( Tr2DebugRenderer& renderer, Vector3 agentPos );
 
 private:

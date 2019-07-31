@@ -8,6 +8,10 @@
 #include "Resources/TriGeometryRes.h"
 
 BehaviorGroup::BehaviorGroup( IRoot* lockobj ) :
+	PARENTLOCK( m_behaviors ),
+	PARENTLOCK( m_volumes ),
+	PARENTLOCK( m_exclusionVolumes ),
+	PARENTLOCK( m_locatorSets ),
 	m_vertexDeclarationHandle( Tr2EffectStateManager::UNINITIALIZED_DECLARATION ),
 	m_count( 0 ),
 	m_display( true ),
@@ -16,16 +20,16 @@ BehaviorGroup::BehaviorGroup( IRoot* lockobj ) :
 	m_changeBufferVertexCount( nullptr ),
 	m_scale( Vector3( 1, 1, 1 ) ),
 	m_spriteScale( Vector3( 7.0, 7.0, 7.0 ) ),
-	PARENTLOCK( m_behaviors ),
-	PARENTLOCK( m_volumes ),
-	PARENTLOCK( m_exclusionVolumes ),
 	m_currentScreenSize( 0.0 ),
 	m_renderThreshold( 1.0 ),
 	m_blendScreenSizeMin( 5.0 ),
 	m_blendScreenSizeMax( 15.0 ),
 	m_xfadeValue( 1.0 ),
 	m_boundingSphereCenter( 0.f, 0.f, 0.f ),
-	m_boundingSphereRadius( 5.f )
+	m_boundingSphereRadius( 5.f ),
+	m_blendRangeMax( 1000 ), // LOD system
+	m_blendRangeMin( 500 ),
+	m_blendRangeValue( 1.0 )
 {
 }
 
@@ -201,22 +205,21 @@ Vector3 BehaviorGroup::RemoveAgentPrivate()
 void BehaviorGroup::UpdateAgents(const float dt, EveChildBehaviorSystem& system )
 {
 	//Calculate the behaviors
-	for ( auto agent = m_agents.begin(); agent != m_agents.end(); ++agent )
+	for (auto behavior = m_behaviors.begin(); behavior != m_behaviors.end(); ++behavior)
 	{
-		for ( auto behavior = m_behaviors.begin(); behavior != m_behaviors.end(); ++behavior )
-		{
-			//Rather send a list of all agents and in each behavior loop over them and apply the behavior
-			(*behavior)->CalculateBehavior( *agent, dt, *this , system);
-		}
+		//Rather send a list of all agents and in each behavior loop over them and apply the behavior
+		(*behavior)->CalculateBehavior( m_agents, dt, *this , system);
 	}
 	//Move the agents based on the behaviors and update LOD factor
 	for ( auto agent = m_agents.begin(); agent != m_agents.end(); ++agent )
 	{
 		agent->lifetime += dt;
-		agent->velocity = ClampLength( agent->velocity + agent->acceleration * dt, m_maxVelocity );
+		agent->velocity = agent->velocity + agent->acceleration;
+		agent->velocity = ClampLength( agent->velocity, m_maxVelocity );
+		agent->position = agent->position + agent->velocity * dt;
+		
 		agent->acceleration = Vector3( 0, 0, 0 );
-		agent->position += agent->velocity * dt;
-
+		
 		static const Vector3 zAxis( 0.f, 0.f, 1.f );
 		TriQuaternionRotationArc( &agent->rotation, &zAxis, &agent->velocity );
 	}
@@ -387,6 +390,22 @@ void BehaviorGroup::CreateVertexDeclaration()
 	m_vertexDeclarationHandle = 0;
 }
 
+// --------------------------------------------------------------------------------
+// Description:
+//   Try to find the specified locator set and return a pointer to it
+// --------------------------------------------------------------------------------
+const LocatorStructureList* BehaviorGroup::GetLocatorsForSet( const BlueSharedString& setName ) const
+{
+	for (auto it = m_locatorSets.cbegin(); it != m_locatorSets.cend(); ++it)
+	{
+		if ((*it)->HasName( setName ))
+		{
+			return (*it)->GetLocators();
+		}
+	}
+	return nullptr;
+}
+
 /////////////////////////////////////////////////////////////////////////////////////
 // ITr2DebugRenderable
 void BehaviorGroup::GetDebugOptions( Tr2DebugRendererOptions& options )
@@ -395,6 +414,7 @@ void BehaviorGroup::GetDebugOptions( Tr2DebugRendererOptions& options )
 	options.insert( "Volumes" );
 	options.insert( "ExclusionVolumes" );
 	options.insert( "Bounding Sphere" );
+	options.insert( "Locators" );
 }
 
 float BehaviorGroup::GetBoundingSphereRadius()
@@ -429,11 +449,39 @@ void BehaviorGroup::RenderDebugInfo( Tr2DebugRenderer& renderer, Matrix& parentW
 		}
 	}
 
-	if ( renderer.HasOption( this, "Bounding Sphere" ) )
+	if (renderer.HasOption( this, "Bounding Sphere" ))
 	{
-		for ( auto agent = m_agents.begin(); agent != m_agents.end(); ++agent ) {
+		for (auto agent = m_agents.begin(); agent != m_agents.end(); ++agent) 
+		{
 			renderer.DrawSphere( this, TranslationMatrix( agent->position ) * parentWorldLocation, m_boundingSphereRadius, 8, Tr2DebugRenderer::Wireframe, 0xffff00ff );
 		}
 	}
 
+	if (renderer.HasOption( this, "Locators" ))
+	{
+		float boundingSphereRadius = 100.f;
+		float modelScale = 10;
+		for (auto it = m_locatorSets.begin(); it != m_locatorSets.end(); ++it)
+		{
+			const LocatorStructureList& locators = (*(*it)->GetLocators());
+			for (size_t i = 0; i < locators.size(); ++i)
+			{
+				auto& locator = locators[i];
+				auto position = locator.position;
+				auto rotation = locator.direction;
+				uint32_t color = 0x990088ff;
+
+				renderer.DrawSphereArrow(
+					Tr2DebugObjectReference( &locators, uint32_t( i ) ),
+					Vector3( XMVector3TransformCoord( position, parentWorldLocation ) ),
+					Vector3( XMVector3TransformNormal( Vector3( 0, 1, 0 ), Matrix( XMMatrixRotationQuaternion( rotation ) ) * parentWorldLocation ) ),
+					boundingSphereRadius * modelScale / 50.f,
+					8,
+					Tr2DebugRenderer::Lit,
+					color );
+
+			}
+		}
+	}
 }
+

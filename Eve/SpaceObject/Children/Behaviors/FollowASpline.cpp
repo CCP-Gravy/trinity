@@ -14,8 +14,9 @@ FollowASpline::~FollowASpline()
 }
 
 
-void FollowASpline::CalculateBehavior( DroneAgent& agent, const float deltaTime, BehaviorGroup& group, EveChildBehaviorSystem& system )
+void FollowASpline::CalculateBehavior( std::vector<DroneAgent>& agents, const float deltaTime, BehaviorGroup& group, EveChildBehaviorSystem& system )
 {
+	/*
 	auto tunnels = system.GetTunnels();
 	m_desiredVector = Vector3(0,0,0 );
 	float rampingForce = 1;
@@ -130,7 +131,7 @@ void FollowASpline::CalculateBehavior( DroneAgent& agent, const float deltaTime,
 	m_pullForce = Normalize( m_desiredVector );
 	m_pullForce *= m_behaviorWeight * rampingForce;
 	agent.acceleration += m_pullForce;
-
+	*/
 }
 
 void FollowASpline::RenderDebugInfo( Tr2DebugRenderer& renderer, Vector3 agentPos )

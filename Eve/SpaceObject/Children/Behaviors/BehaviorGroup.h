@@ -5,6 +5,7 @@
 #include "Eve/SpaceObject/Children/EveChildBehaviorSystem.h"
 #include <functional>
 #include "TriFrustum.h"
+#include "Eve/SpaceObject/Utils/EveLocatorSets.h"
 
 struct DroneAgent
 {
@@ -21,7 +22,12 @@ struct DroneAgent
 		isVisible( false ),
 		screenSize( 0.f ),
 		tunnelLock( -1 ),
-		tunnelPoint( 0 )
+		tunnelPoint( 0 ),
+		seekWeight( 100.f ),
+		deliverWeight( 0.f ),
+		arrived( true ),
+		avoidanceWeight( 75.f ),
+		lastAcceleration( 0, 0, 0 )
 	{}
 
 	float mass;
@@ -39,6 +45,22 @@ struct DroneAgent
 	// SplineTunnels
 	int tunnelLock;
 	int tunnelPoint;
+
+	//This will need to be moved to an extra attribute array
+	float seekWeight;
+	float deliverWeight;
+	bool arrived;
+	float avoidanceWeight;
+	Vector3 lastAcceleration;
+};
+
+struct BehaviorProperties
+{
+	BehaviorProperties() :
+		target( 0, 0, 0 )
+	{}
+
+	Vector3 target;
 };
 
 struct ITr2Renderable;
@@ -51,6 +73,8 @@ BLUE_DECLARE_INTERFACE( IBehavior );
 BLUE_DECLARE_IVECTOR( IBehavior );
 BLUE_DECLARE_INTERFACE( IEveVolume );
 BLUE_DECLARE_IVECTOR( IEveVolume );
+BLUE_DECLARE( EveLocatorSets );
+BLUE_DECLARE_VECTOR( EveLocatorSets );
 
 
 BLUE_CLASS( BehaviorGroup ) :
@@ -97,6 +121,16 @@ public:
 
 	bool m_display;
 	bool IsGroupVisible();
+	float m_estimatedPixelDiameter;
+
+	// locators
+	const LocatorStructureList* GetLocatorsForSet( const BlueSharedString& setName ) const;
+	PEveLocatorSetsVector m_locatorSets;
+
+	// Behavior data, public so behaviors can use it
+	BehaviorProperties m_behavior;
+
+	PIEveVolumeVector m_exclusionVolumes;
 
 private:
 	void ToggleMesh();
@@ -116,14 +150,17 @@ private:
 	PIEveVolumeVector m_volumes;
 	PIBehaviorVector m_behaviors;
 	std::vector<DroneAgent> m_agents;
-	PIEveVolumeVector m_exclusionVolumes;
 	unsigned int m_spriteVertexDeclarationHandle;
 	unsigned int m_vertexDeclarationHandle;
 	std::function<void()> m_changeBufferVertexCount;
 
-	//Steering behavior characteristics, this could actually go under the vehicle struct
+	// Steering behavior characteristics, this could actually go under the vehicle struct
 	float m_maxVelocity;
 
+	// Blend range
+	float m_blendRangeMax; // Effectively the distance threshold
+	float m_blendRangeMin; // The distance where a drone should stop having a mesh and be fully rendered as a light.
+	float m_blendRangeValue; // Normalized 0.0 - 1.0 from blendRangeMin to blendRangeMax;
 	// Crossfade blend range
 	float m_currentScreenSize;  // READONLY attribute to show artist what the current agent screen size
 	float m_renderThreshold;	// Do not render group if all agents have a screen size below this threshold.
@@ -132,7 +169,6 @@ private:
 	float m_xfadeValue;			// Normalized 0.0 - 1.0 from m_pixelSizeMin to m_pixelSizeMax;
 
 	void UpdateCurrentScreenSize();
-
 
 	// Bounding sphere
 	Vector3 m_boundingSphereCenter;
