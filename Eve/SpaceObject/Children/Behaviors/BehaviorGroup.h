@@ -2,6 +2,7 @@
 
 #include "Tr2DebugRenderer.h"
 #include "Eve/Volume/IEveVolume.h"
+#include "Eve/SpaceObject/Children/EveChildBehaviorSystem.h"
 #include <functional>
 #include "TriFrustum.h"
 
@@ -18,7 +19,9 @@ struct DroneAgent
 		xfade( 0.f ),
 		id( 0 ),
 		isVisible( false ),
-		screenSize( 0.f )
+		screenSize( 0.f ),
+		tunnelLock( -1 ),
+		tunnelPoint( 0 )
 	{}
 
 	float mass;
@@ -32,11 +35,16 @@ struct DroneAgent
 	int id;
 	bool isVisible; // Don't render agents off-screen
 	float screenSize;
+	
+	// SplineTunnels
+	int tunnelLock;
+	int tunnelPoint;
 };
 
 struct ITr2Renderable;
 
 BLUE_DECLARE( BehaviorGroup );
+BLUE_DECLARE( EveChildBehaviorSystem );
 BLUE_DECLARE( Tr2Mesh );
 BLUE_DECLARE( TriGeometryRes );
 BLUE_DECLARE_INTERFACE( IBehavior );
@@ -56,6 +64,7 @@ public:
 	/////////////////////////////////////////////////////////////////////////////////////
 	// ITr2DebugRenderable
 	virtual void GetDebugOptions( Tr2DebugRendererOptions& options );
+	float GetBoundingSphereRadius();
 	virtual void RenderDebugInfo( Tr2DebugRenderer& renderer, Matrix& parentWorldLocation );
 
 	void UpdateVisibility( const TriFrustum& frustum, const Matrix& parentTransform );
@@ -77,7 +86,7 @@ public:
 	void ReleaseCachedData( BlueAsyncRes* );
 	void RebuildCachedData( BlueAsyncRes* );
 	void SetGroupIndexIndicator( int index );
-	void UpdateAgents( const float deltaTime );
+	void UpdateAgents(const float dt, EveChildBehaviorSystem& system);
 	void ProcessLOD( DroneAgent& agent );
 	void SetBlendRange( float min, float max );
 	unsigned int GetVertexDeclarationHandle() const;

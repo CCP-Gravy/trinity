@@ -15,7 +15,7 @@ Wander::~Wander()
 {
 }
 
-void Wander::CalculateBehavior(DroneAgent& agent, const float deltaTime, BehaviorGroup& sys )
+void Wander::CalculateBehavior(DroneAgent& agent, const float deltaTime, BehaviorGroup& sys, EveChildBehaviorSystem& system )
 {	
 	/*Find the center of circle in front of agent
 				

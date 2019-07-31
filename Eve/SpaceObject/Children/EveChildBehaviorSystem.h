@@ -2,8 +2,8 @@
 #ifndef EveChildBehaviorSystem_H
 #define EveChildBehaviorSystem_H
 
-#include "Include/ITr2InstanceData.h"
 #include "Behaviors/BehaviorGroup.h"
+#include "Behaviors/SplineTunnelGroup.h"
 #include "Tr2DeviceResource.h"
 #include "IEveSpaceObjectChild.h"
 #include "EveChildTransform.h"
@@ -12,6 +12,8 @@
 #include "Eve/SpaceObject/EveSpaceObject2.h"
 
 BLUE_DECLARE( EveChildBehaviorSystem );
+BLUE_DECLARE( SplineTunnelGroup );
+BLUE_DECLARE_VECTOR( SplineTunnelGroup );
 BLUE_DECLARE( BehaviorGroup );
 BLUE_DECLARE_VECTOR( BehaviorGroup );
 
@@ -66,6 +68,7 @@ public:
 	void GetLights( Tr2LightManager& lightManager ) const;
 
 	void ChangeBufferVertexCount();
+	std::vector<SplineTunnel> GetTunnels() const;
 
 	/////////////////////////////////////////////////////////////////////////////////////
 	// ITr2InstanceData
@@ -85,17 +88,22 @@ public:
 	void Draw( TriBehaviorSystemInstancingBatch*, Tr2RenderContext& renderContext, int count, unsigned int vertexDecl,
 			  int groupIndex, bool isSpriteBatch );
 
+	void tempDebugTunnelsDEV();
+
 private:
 
 	bool OnPrepareResources();
 	void PassInVertexesToBehaviorGroups();
+	void PassInTunnelFunctionsToBehaviorGroups();
 	char* m_name;
 	bool m_needToPassInVertexFunction;
+	bool m_needToPassInTunnelFunction;
 
 	/////////////////////////////////////////////////////////////////////////////////////
 	// ITr2DebugRenderable
 	virtual void GetDebugOptions( Tr2DebugRendererOptions& options );
 	virtual void RenderDebugInfo( Tr2DebugRenderer& renderer );
+	void UpdateTunnelRegistry();
 
 	/////////////////////////////////////////////////////////////////////////////////////
 	// EveChildBehaviorSystem
@@ -105,11 +113,12 @@ private:
 						 const Tr2PerObjectData* perObjectData,
 						 Tr2MeshPtr mesh, BehaviorGroup* group, bool isSpriteBatch );
 
-	std::vector<DroneAgent> m_agents;
+	//std::vector<DroneAgent> m_agents;
 	std::vector<uint32_t> m_offsets;
 
 	EveSpaceObjectPSData m_psData;
 	EveSpaceObjectVSData m_vsData;
+
 
 	//Steering behavior characteristics, this could actually go under the vehicle struct
 	float m_maxVelocity;
@@ -125,6 +134,8 @@ private:
 	// Number of instances
 	unsigned m_vertexCount;
 
+	PSplineTunnelGroupVector m_splineTunnels;
+	std::vector<SplineTunnel> m_tunnels;
 	PBehaviorGroupVector m_behaviorGroups;
 };
 

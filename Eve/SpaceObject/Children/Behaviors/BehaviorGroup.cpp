@@ -1,7 +1,6 @@
 
 #include "StdAfx.h"
 #include "BehaviorGroup.h"
-#include "Eve/EveUpdateContext.h"
 #include "include/TriMath.h"
 #include "IBehavior.h"
 #include "Tr2InstancedMesh.h"
@@ -199,7 +198,7 @@ Vector3 BehaviorGroup::RemoveAgentPrivate()
 	return v.position;
 }
 
-void BehaviorGroup::UpdateAgents( const float dt )
+void BehaviorGroup::UpdateAgents(const float dt, EveChildBehaviorSystem& system )
 {
 	//Calculate the behaviors
 	for ( auto agent = m_agents.begin(); agent != m_agents.end(); ++agent )
@@ -207,7 +206,7 @@ void BehaviorGroup::UpdateAgents( const float dt )
 		for ( auto behavior = m_behaviors.begin(); behavior != m_behaviors.end(); ++behavior )
 		{
 			//Rather send a list of all agents and in each behavior loop over them and apply the behavior
-			(*behavior)->CalculateBehavior( *agent, dt, *this );
+			(*behavior)->CalculateBehavior( *agent, dt, *this , system);
 		}
 	}
 	//Move the agents based on the behaviors and update LOD factor
@@ -215,7 +214,7 @@ void BehaviorGroup::UpdateAgents( const float dt )
 	{
 		agent->lifetime += dt;
 		agent->velocity = ClampLength( agent->velocity + agent->acceleration * dt, m_maxVelocity );
-		//agent->acceleration = Vector3( 0, 0, 0 );
+		agent->acceleration = Vector3( 0, 0, 0 );
 		agent->position += agent->velocity * dt;
 
 		static const Vector3 zAxis( 0.f, 0.f, 1.f );
@@ -397,6 +396,12 @@ void BehaviorGroup::GetDebugOptions( Tr2DebugRendererOptions& options )
 	options.insert( "ExclusionVolumes" );
 	options.insert( "Bounding Sphere" );
 }
+
+float BehaviorGroup::GetBoundingSphereRadius()
+{
+	return m_boundingSphereRadius;
+}
+
 
 void BehaviorGroup::RenderDebugInfo( Tr2DebugRenderer& renderer, Matrix& parentWorldLocation )
 {

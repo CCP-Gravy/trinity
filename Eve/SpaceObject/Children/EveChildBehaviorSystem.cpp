@@ -2,7 +2,6 @@
 #include "EveChildBehaviorSystem.h"
 #include "Eve/EveUpdateContext.h"
 #include "TriRenderBatch.h"
-#include "Behaviors/IBehavior.h"
 #include "Tr2Mesh.h"
 #include "Resources/TriGeometryRes.h"
 
@@ -111,9 +110,11 @@ EveChildBehaviorSystem::EveChildBehaviorSystem( IRoot* lockobj ) :
 	m_maxForce( 50.f ),
 	m_display( true ),
 	PARENTLOCK( m_behaviorGroups ),
+	PARENTLOCK( m_splineTunnels ),
 	m_needToPassInVertexFunction( true )
 {
 	m_behaviorGroups.SetNotify( this );
+	m_splineTunnels.SetNotify( this );
 	PrepareResources();
 }
 
@@ -161,6 +162,36 @@ void EveChildBehaviorSystem::OnListModified( long event, ssize_t key, ssize_t ke
 				handler->InitializeGeometryResource();
 			}
 			else m_needToPassInVertexFunction = true; //this is for when this file is loaded but the groups have yet to be loaded
+			break;
+		default:
+			break;
+		}
+	}
+	if (theList == &m_splineTunnels)
+	{
+		switch ( event & BELIST_EVENTMASK )
+		{
+		case BELIST_INSERTED:
+			if (SplineTunnelGroupPtr handler = BlueCastPtr( value ))
+			{
+				std::function<void( void )> f = std::bind( &EveChildBehaviorSystem::UpdateTunnelRegistry, this );
+				handler->SetSystemTunnelFunctionReference( f );
+			}
+			break;
+		case BELIST_REMOVED:
+			if (SplineTunnelGroupPtr handler = BlueCastPtr( value ))
+			{
+				std::function<void( void )> f = std::bind( &EveChildBehaviorSystem::UpdateTunnelRegistry, this );
+				handler->SetSystemTunnelFunctionReference( f );
+			}
+			break;
+		case BELIST_LOADFINISHED:
+			if (SplineTunnelGroupPtr handler = BlueCastPtr( value ))
+			{
+				std::function<void( void )> f = std::bind( &EveChildBehaviorSystem::UpdateTunnelRegistry, this );
+				handler->SetSystemTunnelFunctionReference( f );
+			}
+			else m_needToPassInTunnelFunction = true; //this is for when this file is loaded but the groups have yet to be loaded
 			break;
 		default:
 			break;
@@ -245,7 +276,18 @@ void EveChildBehaviorSystem::PassInVertexesToBehaviorGroups()
 		(*it)->InitializeGeometryResource();
 	}
 	m_needToPassInVertexFunction = false;
-	ChangeBufferVertexCount();
+}
+
+// A Simple function to handle cases where a behavior system is loaded along with all it's children from a single file
+// The onListNotify takes care of all other cases (like when just a new behavior group is loaded)
+void EveChildBehaviorSystem::PassInTunnelFunctionsToBehaviorGroups()
+{
+	for (auto it = begin( m_splineTunnels ); it != end( m_splineTunnels ); ++it)
+	{
+		std::function<void( void )> f = std::bind( &EveChildBehaviorSystem::UpdateTunnelRegistry, this );
+		(*it)->SetSystemTunnelFunctionReference( f );
+	}
+	m_needToPassInTunnelFunction = false;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -254,7 +296,10 @@ void EveChildBehaviorSystem::UpdateSyncronous( EveUpdateContext& updateContext, 
 {
 	UpdateAgents( updateContext.GetDeltaT() );
 
-	if ( m_needToPassInVertexFunction ) PassInVertexesToBehaviorGroups();
+	// might be a better way to get these initialized but Iinitialize doesn't work
+	// since these need to be called after children are initialized so basicly a single frame later...
+	if (m_needToPassInVertexFunction) PassInVertexesToBehaviorGroups();
+	if (m_needToPassInTunnelFunction) PassInTunnelFunctionsToBehaviorGroups();
 
 	USE_MAIN_THREAD_RENDER_CONTEXT();
 	UpdateBuffer( renderContext );
@@ -272,7 +317,7 @@ void EveChildBehaviorSystem::UpdateAgents( const float dt )
 {
 	for ( auto it = begin( m_behaviorGroups ); it != end( m_behaviorGroups ); ++it )
 	{
-		(*it)->UpdateAgents( dt );
+		( *it )->UpdateAgents( dt, *this );
 	}
 }
 
@@ -514,6 +559,8 @@ void EveChildBehaviorSystem::GetDebugOptions( Tr2DebugRendererOptions& options )
 	{
 		(*it)->GetDebugOptions( options );
 	}
+
+	options.insert( "splineTunnels" );
 }
 
 void EveChildBehaviorSystem::RenderDebugInfo( Tr2DebugRenderer& renderer )
@@ -521,6 +568,49 @@ void EveChildBehaviorSystem::RenderDebugInfo( Tr2DebugRenderer& renderer )
 	for ( auto it = begin( m_behaviorGroups ); it != end( m_behaviorGroups ); ++it )
 	{
 		(*it)->RenderDebugInfo( renderer, EveChildTransform::m_worldTransform );
+	}
+	if (renderer.HasOption( this, "splineTunnels" ))
+	{
+		for (auto it = begin( m_splineTunnels ); it != end( m_splineTunnels ); ++it)
+		{
+			(*it)->RenderDebugInfo( renderer, EveChildTransform::m_worldTransform );
+		}
+	}
+}
+
+void EveChildBehaviorSystem::tempDebugTunnelsDEV()
+{
+	for (auto tunnel = m_tunnels.begin(); tunnel != m_tunnels.end(); ++tunnel)
+	{
+		CCP_LOGWARN( "next Tunnel id: %i \n", (*tunnel).tunnelID );
+		auto pnts = (*tunnel).splinePoints;
+		int i = 0;
+		for (auto point = pnts.begin(); point != pnts.end(); ++point)
+		{
+			i++;
+			CCP_LOGWARN( "next point, P%i p: %f %f %f r: %f %f %f \n ", i, point->pos.x, point->pos.y, point->pos.z, point->rot.x, point->rot.y, point->rot.z );
+		}
+	}
+}
+
+std::vector<SplineTunnel> EveChildBehaviorSystem::GetTunnels() const
+{
+	return m_tunnels;
+}
+
+void EveChildBehaviorSystem::UpdateTunnelRegistry()
+{
+	m_tunnels.clear();
+	int id = 0;
+	for (auto it = begin( m_splineTunnels ); it != end( m_splineTunnels ); ++it)
+	{
+		auto group = (*it)->GetTunnels();
+		for (auto tunnel = begin( group ); tunnel != end( group ); ++tunnel)
+		{
+			(*tunnel).tunnelID = id;
+			id++;
+			m_tunnels.push_back(*tunnel);
+		}
 	}
 }
 

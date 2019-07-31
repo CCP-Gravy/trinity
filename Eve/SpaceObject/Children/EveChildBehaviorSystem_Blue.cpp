@@ -1,6 +1,5 @@
 #include "StdAfx.h"
 #include "EveChildBehaviorSystem.h"
-#include "Behaviors/BehaviorGroup.h"
 
 BLUE_DEFINE( EveChildBehaviorSystem );
 const Be::ClassInfo* EveChildBehaviorSystem::ExposeToBlue()
@@ -20,7 +19,11 @@ const Be::ClassInfo* EveChildBehaviorSystem::ExposeToBlue()
 		MAP_ATTRIBUTE( "useSRT", m_useSRT, "Should local transform be built from scaling, rotation and translation attributes.", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "staticTransform", m_staticTransform, "Does local transform need to be rebuilt every frame.", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "behaviorGroups", m_behaviorGroups, "", Be::READ | Be::PERSIST )
-
+		MAP_ATTRIBUTE( "splineTunnels", m_splineTunnels, "", Be::READ | Be::PERSIST | Be::NOTIFY )
+		
+	
+		MAP_METHOD_AND_WRAP( "debugPoints", tempDebugTunnelsDEV,
+			" \n:jessica-placement: TOOLBAR\n:jessica-icon: far-dev\n" )
 
 	EXPOSURE_END()
 }

@@ -12,7 +12,7 @@ public:
 	Wander( IRoot* lockobj = nullptr );
 	~Wander();
 
-	virtual void CalculateBehavior(DroneAgent& agent, const float deltaTime , BehaviorGroup& sys );
+	virtual void CalculateBehavior(DroneAgent& agent, const float deltaTime , BehaviorGroup& sys, EveChildBehaviorSystem& system );
 
 	void RenderDebugInfo( Tr2DebugRenderer& renderer, Vector3 agentPos );
 

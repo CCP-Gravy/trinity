@@ -1,7 +1,6 @@
 #include "StdAfx.h"
 #include "Wander.h"
 
-BLUE_DEFINE_INTERFACE( IBehavior );
 
 BLUE_DEFINE( Wander );
 
