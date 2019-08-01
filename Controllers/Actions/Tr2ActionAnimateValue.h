@@ -44,6 +44,8 @@ public:
 	std::vector<Tr2ExpressionTermInfoPtr> GetExpressionTermInfo() const;
 private:
 	bool IsAttrExpressionValid( const char* attributeName ) const;
+	void LinkDestination( const Tr2Controller& controller );
+	bool HasDelayedBinding() const;
 
 	Tr2BindingPoint m_destination;
 	std::string m_value;
@@ -53,6 +55,7 @@ private:
 
 	Be::Time m_startTime;
 	const Tr2Controller* m_controller;
+	bool m_delayBinding;
 };
 
 TYPEDEF_BLUECLASS( Tr2ActionAnimateValue );
