@@ -12,7 +12,6 @@ BehaviorGroup::BehaviorGroup( IRoot* lockobj ) :
 	PARENTLOCK( m_behaviors ),
 	PARENTLOCK( m_volumes ),
 	PARENTLOCK( m_exclusionVolumes ),
-	PARENTLOCK( m_locatorSets ),
 	m_vertexDeclarationHandle( Tr2EffectStateManager::UNINITIALIZED_DECLARATION ),
 	m_count( 0 ),
 	m_display( true ),
@@ -497,22 +496,6 @@ void BehaviorGroup::CreateVertexDeclaration()
 	m_vertexDeclarationHandle = 0;
 }
 
-// --------------------------------------------------------------------------------
-// Description:
-//   Try to find the specified locator set and return a pointer to it
-// --------------------------------------------------------------------------------
-const LocatorStructureList* BehaviorGroup::GetLocatorsForSet( const BlueSharedString& setName ) const
-{
-	for (auto it = m_locatorSets.cbegin(); it != m_locatorSets.cend(); ++it)
-	{
-		if ((*it)->HasName( setName ))
-		{
-			return (*it)->GetLocators();
-		}
-	}
-	return nullptr;
-}
-
 /////////////////////////////////////////////////////////////////////////////////////
 // ITr2DebugRenderable
 void BehaviorGroup::GetDebugOptions( Tr2DebugRendererOptions& options )
@@ -566,6 +549,14 @@ void BehaviorGroup::RenderDebugInfo( Tr2DebugRenderer& renderer, Matrix& parentW
 		}
 	}
 
+	if( renderer.HasOption( this, "Locators" ) )
+	{
+		for( auto group = m_behaviors.begin(); group != m_behaviors.end(); ++group )
+		{
+			( *group )->RenderDebugInfo( renderer, m_agents, parentWorldLocation );
+		}
+	}
+
 	if (renderer.HasOption( this, "Bounding Sphere" ))
 	{
 		for (auto agent = m_agents.begin(); agent != m_agents.end(); ++agent) 
@@ -611,33 +602,5 @@ void BehaviorGroup::RenderDebugInfo( Tr2DebugRenderer& renderer, Matrix& parentW
 	{
 		m_collectForces = false;
 	}
-
-	if (renderer.HasOption( this, "Locators" ))
-	{
-		float boundingSphereRadius = 100.f;
-		float modelScale = 10;
-		for (auto it = m_locatorSets.begin(); it != m_locatorSets.end(); ++it)
-		{
-			const LocatorStructureList& locators = (*(*it)->GetLocators());
-			for (size_t i = 0; i < locators.size(); ++i)
-			{
-				auto& locator = locators[i];
-				auto position = locator.position;
-				auto rotation = locator.direction;
-				uint32_t color = 0x990088ff;
-
-				renderer.DrawSphereArrow(
-					Tr2DebugObjectReference( &locators, uint32_t( i ) ),
-					Vector3( XMVector3TransformCoord( position, parentWorldLocation ) ),
-					Vector3( XMVector3TransformNormal( Vector3( 0, 1, 0 ), Matrix( XMMatrixRotationQuaternion( rotation ) ) * parentWorldLocation ) ),
-					boundingSphereRadius * modelScale / 50.f,
-					8,
-					Tr2DebugRenderer::Lit,
-					color );
-
-			}
-		}
-	}
-
 }
 

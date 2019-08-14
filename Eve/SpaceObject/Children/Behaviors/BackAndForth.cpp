@@ -1,12 +1,12 @@
 #include "StdAfx.h"
 #include "BackAndForth.h"
 #include "include/TriMath.h"
-#include "BehaviorGroup.h"
 
 const BlueSharedString DELIVER_LOCATOR_SET_NAME( "deliver" );
 const BlueSharedString SEEK_LOCATOR_SET_NAME( "seek" );
 
 BackAndForth::BackAndForth( IRoot* lockobj ) :
+	PARENTLOCK( m_locatorSets ),
 	m_arrivedRadius( 50.f ),
 	m_slowDownRadius( 200.f ),
 	m_backAndForthWeight( 100.f )
@@ -39,7 +39,7 @@ std::vector<Vector3> BackAndForth::CalculateBehavior( std::vector<DroneAgent>& a
 			if (data->seek)
 			{
 				//Get all locators under the "seek" locatorSet
-				auto seekLocators = group.GetLocatorsForSet( SEEK_LOCATOR_SET_NAME );
+				auto seekLocators = GetLocatorsForSet( SEEK_LOCATOR_SET_NAME );
 				if (seekLocators != NULL)
 				{
 					m_rand = TriRandInt( 0, (int)seekLocators->size() );
@@ -50,7 +50,7 @@ std::vector<Vector3> BackAndForth::CalculateBehavior( std::vector<DroneAgent>& a
 			else if (data->deliver)
 			{
 				//Get all locators under the "deliver" locatorSet
-				auto deliverLocators = group.GetLocatorsForSet( DELIVER_LOCATOR_SET_NAME );
+				auto deliverLocators = GetLocatorsForSet( DELIVER_LOCATOR_SET_NAME );
 				if (deliverLocators != NULL)
 				{
 					m_rand = TriRandInt( 0, (int)deliverLocators->size() );
@@ -89,4 +89,58 @@ std::vector<Vector3> BackAndForth::CalculateBehavior( std::vector<DroneAgent>& a
 
 void BackAndForth::RenderDebugInfo(Tr2DebugRenderer& renderer, std::vector<DroneAgent>& agents, Matrix& parentWorldLocation)
 {
+	float boundingSphereRadius = 100.f;
+	float modelScale = 10;
+	for( auto it = m_locatorSets.begin(); it != m_locatorSets.end(); ++it )
+	{
+		const LocatorStructureList& locators = ( *( *it )->GetLocators() );
+		for( size_t i = 0; i < locators.size(); ++i )
+		{
+			auto& locator = locators[i];
+			auto position = locator.position;
+			auto rotation = locator.direction;
+			uint32_t color = 0x990088ff;
+
+			renderer.DrawSphereArrow(
+				Tr2DebugObjectReference( &locators, uint32_t( i ) ),
+				Vector3( XMVector3TransformCoord( position, parentWorldLocation ) ),
+				Vector3( XMVector3TransformNormal( Vector3( 0, 1, 0 ), Matrix( XMMatrixRotationQuaternion( rotation ) ) * parentWorldLocation ) ),
+				boundingSphereRadius * modelScale / 50.f,
+				8,
+				Tr2DebugRenderer::Lit,
+				color );
+		}
+	}
+}
+
+// --------------------------------------------------------------------------------
+// Description:
+//   Try to find the specified locator set and return a pointer to it
+// --------------------------------------------------------------------------------
+const LocatorStructureList* BackAndForth::GetLocatorsForSet( const BlueSharedString& setName ) const
+{
+	for( auto it = m_locatorSets.cbegin(); it != m_locatorSets.cend(); ++it )
+	{
+		if( ( *it )->HasName( setName ) )
+		{
+			return ( *it )->GetLocators();
+		}
+	}
+	return nullptr;
+}
+
+
+void BackAndForth::AddLocatorSet()
+{
+	EveLocatorSetsPtr seekSet;
+	seekSet.CreateInstance();
+	seekSet->Set( "seek", NULL, 0 );
+	
+	EveLocatorSetsPtr deliverSet;
+	deliverSet.CreateInstance();
+	deliverSet->Set( "deliver", NULL, 0 );
+
+	m_locatorSets.Append( seekSet );
+	m_locatorSets.Append( deliverSet );
+	
 }

@@ -3,7 +3,7 @@
 #define BackAndForth_H
 #include "Eve/SpaceObject/Children/EveChildBehaviorSystem.h"
 #include "IBehavior.h"
-
+#include "Eve/SpaceObject/Utils/EveLocatorSets.h"
 
 struct BackAndForthData
 {
@@ -28,7 +28,6 @@ public:
 	BackAndForth( IRoot* lockobj = nullptr );
 	~BackAndForth();
 
-
 	virtual size_t GetScratchMemorySize() const;
 	virtual void InitializeScratch( const DroneAgent& drone, void* scratchMemory );
 
@@ -41,6 +40,11 @@ private:
 	float m_slowDownRadius;
 	int m_rand;
 	float m_backAndForthWeight;
+
+	//Locators
+	const LocatorStructureList* GetLocatorsForSet( const BlueSharedString& setName ) const;
+	PEveLocatorSetsVector m_locatorSets;
+	void AddLocatorSet();
 };
 
 TYPEDEF_BLUECLASS( BackAndForth );

@@ -5,7 +5,6 @@
 #include "Eve/SpaceObject/Children/EveChildBehaviorSystem.h"
 #include <functional>
 #include "TriFrustum.h"
-#include "Eve/SpaceObject/Utils/EveLocatorSets.h"
 #include "KDdroneManagementTree.h"
 
 
@@ -51,8 +50,6 @@ BLUE_DECLARE_INTERFACE( IBehavior );
 BLUE_DECLARE_IVECTOR( IBehavior );
 BLUE_DECLARE_INTERFACE( IEveVolume );
 BLUE_DECLARE_IVECTOR( IEveVolume );
-BLUE_DECLARE( EveLocatorSets );
-BLUE_DECLARE_VECTOR( EveLocatorSets );
 BLUE_DECLARE( KDdroneManagementTree );
 
 BLUE_CLASS( BehaviorGroup ) :
@@ -117,9 +114,6 @@ public:
 	bool IsGroupVisible();
 	float m_estimatedPixelDiameter;
 
-	// locators
-	const LocatorStructureList* GetLocatorsForSet( const BlueSharedString& setName ) const;
-	PEveLocatorSetsVector m_locatorSets;
 	PIEveVolumeVector m_exclusionVolumes;
 
 private:
