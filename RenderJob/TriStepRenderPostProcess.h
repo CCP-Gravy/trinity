@@ -109,7 +109,8 @@ private:
 	bool m_fadeEnabled;
 	bool m_lutEnabled;
 	bool m_vignetteEnabled;
-	
+	bool m_sceneDirty;
+
 	EveSpaceScenePtr m_scene;
 	Tr2PostProcessRenderInfoPtr m_renderInfo;
 

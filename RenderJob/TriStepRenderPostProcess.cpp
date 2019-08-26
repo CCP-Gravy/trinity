@@ -18,7 +18,8 @@ TriStepRenderPostProcess::TriStepRenderPostProcess(IRoot* lockobj) :
 	m_fadeEnabled(false),
 	m_filmGrainEnabled(false),
 	m_lutEnabled(false),
-	m_vignetteEnabled(false)
+	m_vignetteEnabled(false),
+	m_sceneDirty( false )
 {
 	m_renderInfo.CreateInstance();
 	m_tonemappingEffect.CreateInstance();
@@ -73,6 +74,7 @@ void TriStepRenderPostProcess::py__init__(EveSpaceScene* scene, Tr2RenderTarget*
 	}
 
 	m_scene = scene;
+	m_sceneDirty = true;
 	m_scene->SetupTAA(m_velocityBuffer, 0, TAA_NONE);
 
 	m_renderInfo->SetSourceBuffer(source);
@@ -90,6 +92,13 @@ void TriStepRenderPostProcess::py__init__(EveSpaceScene* scene, Tr2RenderTarget*
 	m_tonemappingEffect->EndUpdate();
 }
 
+void SetDirtyIfNotNull(Tr2PPEffect *effect)
+{
+	if (nullptr != effect)
+	{
+		effect->SetDirty(true);
+	}
+}
 
 TriStepResult TriStepRenderPostProcess::Execute(Be::Time realTime, Be::Time simTime, Tr2RenderContext& renderContext)
 {
@@ -154,6 +163,22 @@ TriStepResult TriStepRenderPostProcess::Execute(Be::Time realTime, Be::Time simT
 	Tr2Renderer::PushRenderTarget(renderContext);
 	Tr2Renderer::PushDepthStencilBuffer(nullDS, renderContext);
 
+	if(m_sceneDirty)
+	{
+		SetDirtyIfNotNull(godrays);
+		SetDirtyIfNotNull(bloom);
+		SetDirtyIfNotNull(signalLoss);
+		SetDirtyIfNotNull(dynamicExposure);
+		SetDirtyIfNotNull(filmGrain);
+		SetDirtyIfNotNull(desaturate);
+		SetDirtyIfNotNull(fade);
+		SetDirtyIfNotNull(lut);
+		SetDirtyIfNotNull(vignette);
+		SetDirtyIfNotNull(fog);
+		SetDirtyIfNotNull(taa);
+		m_sceneDirty = false;
+	}
+
 	if (ProcessFog(fog))
 	{
 		RenderFog(renderContext, fog);
@@ -202,7 +227,6 @@ TriStepResult TriStepRenderPostProcess::Execute(Be::Time realTime, Be::Time simT
 
 	Tr2Renderer::PopDepthStencilBuffer(renderContext);
 	Tr2Renderer::PopRenderTarget(renderContext);
-
 	return RS_OK;
 }
 
