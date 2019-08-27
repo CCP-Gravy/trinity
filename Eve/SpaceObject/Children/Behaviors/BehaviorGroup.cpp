@@ -96,7 +96,6 @@ void BehaviorGroup::InitializeGeometryResource()
 {
 	//to make resource load correctly they must be regenerated for this instance
 	m_agents.clear();
-	m_scratchData.clear();
 	for( auto it = begin( m_scratchData ); it != end( m_scratchData ); ++it )
 	{
 		it->clear();
@@ -568,6 +567,7 @@ void BehaviorGroup::GetDebugOptions( Tr2DebugRendererOptions& options )
 	options.insert( "Locators" );
 	options.insert( "DebugBehaviors" );
 	options.insert( "BehaviorVisionRanges" );
+	options.insert( "Wander" );
 }
 
 float BehaviorGroup::GetBoundingSphereRadius()
