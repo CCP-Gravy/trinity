@@ -264,7 +264,7 @@ namespace
 	// Helper function to reduce nesting in f: ServerTimeGreaterThan() and ServerTimeLessThan()
 	float CompareTimeFloats(float arg, float arg2)
 	{
-		if ( arg != -1 )
+		if ( arg != -1 && arg2 != -1 )
 		{
 			if ( arg2 > arg )
 			{
@@ -298,7 +298,7 @@ namespace
 		return 1;
 	}
 
-	float ServerTimeLessThan( float year, float month, float day, float hour, float minute, float second )
+	float ServerTimeLessThanOrEqual( float year, float month, float day, float hour, float minute, float second )
 	{
 		float ret = -1;
 
@@ -369,7 +369,7 @@ std::string Tr2ControllerExpression::CreateParser( const char* expression, Modif
 	m_expressionParser.DefineFun( "ServerSecond", GetServerSecond, false );
 	m_expressionParser.DefineFun( "ServerTimePhase", TimePhase, false );
 	m_expressionParser.DefineFun( "ServerTimeGreaterThan", ServerTimeGreaterThan, false );
-	m_expressionParser.DefineFun( "ServerTimeLessThan", ServerTimeLessThan, false );
+	m_expressionParser.DefineFun( "ServerTimeLessThanOrEqual", ServerTimeLessThanOrEqual, false );
 
 
 	if( modifyParser )
