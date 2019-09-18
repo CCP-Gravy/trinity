@@ -147,11 +147,6 @@ const LocatorStructureList* BackAndForth::GetLocatorsForSet( const BlueSharedStr
 	return nullptr;
 }
 
-float BackAndForth::GetBehaviorSearchRadius()
-{
-	return -1;
-}
-
 void BackAndForth::AddLocatorSet()
 {
 	EveLocatorSetsPtr seekSet;

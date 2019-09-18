@@ -73,11 +73,6 @@ std::vector<Vector3> Inertia::CalculateBehavior(std::vector<DroneAgent>& agents,
 	return noNeedToReturnForces;
 }
 
-float Inertia::GetBehaviorSearchRadius()
-{
-	return -1;
-}
-
 void Inertia::RenderDebugInfo(Tr2DebugRenderer& renderer, std::vector<DroneAgent>& agents, Matrix& parentWorldLocation)
 {
 }

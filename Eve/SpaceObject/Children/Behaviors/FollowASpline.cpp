@@ -187,6 +187,15 @@ void FollowASpline::InitializeScratch( const DroneAgent& drone, void* scratchMem
 std::vector<Vector3> FollowASpline::CalculateBehavior(std::vector<DroneAgent>& agents, void* scratchData, const float deltaTime,
                                                       BehaviorGroup& group, EveChildBehaviorSystem& system, const std::vector<std::vector<DroneAgent*>>& dronesInSearchRadius)
 {
+	if ( m_frameCounter >= m_framesBetweenUpdates )
+	{
+		m_frameCounter = 0;
+	}
+	else
+	{
+		m_frameCounter++;
+	}
+
 	std::vector<Vector3> forceVectors;
 	if ( m_frameCounter == 0 )
 	{
@@ -305,19 +314,6 @@ void FollowASpline::ReassignTunnelIDsAndAddSystemTunnels( EveChildBehaviorSystem
 	}
 
 	m_shouldReassignTunnelIDs = false;
-}
-
-float FollowASpline::GetBehaviorSearchRadius()
-{
-	if ( m_frameCounter >= m_framesBetweenUpdates )
-	{
-		m_frameCounter = 0;
-	}
-	else
-	{
-		m_frameCounter++;
-	}
-	return -1;
 }
 
 void FollowASpline::RenderDebugInfo( Tr2DebugRenderer& renderer, std::vector<DroneAgent>& agents, Matrix& parentWorldLocation )

@@ -356,11 +356,6 @@ void ProcessLifetime::ReassignTunnelIDsAndAddSystemTunnels( EveChildBehaviorSyst
 	m_shouldReassignTunnelIDs = false;
 }
 
-float ProcessLifetime::GetBehaviorSearchRadius()
-{
-	return -1;
-}
-
 void ProcessLifetime::RenderDebugInfo( Tr2DebugRenderer& renderer, std::vector<DroneAgent>& agents, Matrix& parentWorldLocation )
 {
 	if ( renderer.HasOption( this, "splineTunnels" ) )

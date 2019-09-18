@@ -50,11 +50,6 @@ std::vector<Vector3> CollisionAvoidance::CalculateBehavior( std::vector<DroneAge
 	return forceVectors;
 }
 
-float CollisionAvoidance::GetBehaviorSearchRadius()
-{
-	return -1;
-}
-
 void CollisionAvoidance::RenderDebugInfo( Tr2DebugRenderer& renderer, std::vector<DroneAgent>& agents, Matrix& parentWorldLocation )
 {
 }

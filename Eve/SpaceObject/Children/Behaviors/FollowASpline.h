@@ -38,7 +38,6 @@ public:
 	bool OnModified(Be::Var* value);
 	void OnListModified( long event, ssize_t key, ssize_t key2, IRoot* value, const IList* theList );
 	void RenderDebugInfo(Tr2DebugRenderer& renderer, std::vector<DroneAgent>& agents, Matrix& parentWorldLocation);
-	float GetBehaviorSearchRadius();
 private:
 	float ProcessTunnelEntrances(DroneAgent& agent, const std::vector<SplineTunnel*>& tunnels, FollowASplineData* data);
 	void ProcessAssignedTunnel(DroneAgent& agent, const std::vector<SplineTunnel*>& tunnels, BehaviorGroup& group, FollowASplineData* data);

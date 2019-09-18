@@ -56,11 +56,6 @@ std::vector<Vector3> InclusionVolume::CalculateBehavior(std::vector<DroneAgent>&
 	return returnForces;
 }
 
-float InclusionVolume::GetBehaviorSearchRadius()
-{
-		return -1;
-}
-
 void InclusionVolume::RenderDebugInfo(Tr2DebugRenderer& renderer, std::vector<DroneAgent>& agents, Matrix& parentWorldLocation)
 {
 	if ( renderer.HasOption( this, "ExclusionVolumes" ) )

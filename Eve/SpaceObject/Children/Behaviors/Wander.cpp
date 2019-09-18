@@ -64,11 +64,6 @@ std::vector<Vector3> Wander::CalculateBehavior(std::vector<DroneAgent>& agents, 
 	return forceVectors;
 }
 
-float Wander::GetBehaviorSearchRadius()
-{
-	return -1;
-}
-
 void Wander::RenderDebugInfo( Tr2DebugRenderer& renderer, std::vector<DroneAgent>& agents, Matrix& parentWorldLocation )
 {
 	if( renderer.HasOption( this, "Wander" ) )

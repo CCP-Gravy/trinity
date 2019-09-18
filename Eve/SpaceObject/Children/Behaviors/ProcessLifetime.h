@@ -44,7 +44,6 @@ public:
 	virtual std::vector<Vector3> CalculateBehavior(std::vector<DroneAgent>& agents, void* scratchData, const float deltaTime,
 	                                               BehaviorGroup& sys, EveChildBehaviorSystem& system, const std::vector<std::vector<DroneAgent*>>& dronesInSearchRadius);
 	void RenderDebugInfo(Tr2DebugRenderer& renderer, std::vector<DroneAgent>& agents, Matrix& parentWorldLocation);
-	float GetBehaviorSearchRadius();
 	
 private:
 	void FindASpawnPoint( DroneAgent& agent, ProcessLifetimeData* data );
