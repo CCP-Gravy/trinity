@@ -268,7 +268,7 @@ bool TriStepRenderPostProcess::ProcessBloom(Tr2PPBloomEffect* bloom)
 			m_tonemappingEffect->StartUpdate();
 			m_tonemappingEffect->SetParameter(BlueSharedString("BloomBrightness"), bloom->m_bloomBrightness);
 			m_tonemappingEffect->SetParameter(BlueSharedString("GrimeWeight"), bloom->m_grimeWeight);
-			m_tonemappingEffect->AddResourceTexture2D(BlueSharedString("GrimePath"), bloom->m_grimePath.c_str());
+			m_tonemappingEffect->AddResourceTexture2D(BlueSharedString("Grime"), bloom->m_grimePath.c_str());
 			m_tonemappingEffect->SetParameter(BlueSharedString("BlitCurrent"), m_renderInfo->GetRt1Buffer());
 
 			m_tonemappingEffect->EndUpdate();
@@ -287,7 +287,7 @@ bool TriStepRenderPostProcess::ProcessBloom(Tr2PPBloomEffect* bloom)
 			m_tonemappingEffect->SetParameter(BlueSharedString("BloomBrightness"), bloom->m_bloomBrightness);
 			m_tonemappingEffect->SetParameter(BlueSharedString("GrimeWeight"), bloom->m_grimeWeight);
 
-			TriTextureParameter* resource = dynamic_cast<TriTextureParameter*>(m_tonemappingEffect->GetResourceByName("GrimePath"));
+			TriTextureParameter* resource = dynamic_cast<TriTextureParameter*>(m_tonemappingEffect->GetResourceByName("Grime"));
 			resource->SetResourcePath(bloom->m_grimePath.c_str());
 
 			m_tonemappingEffect->EndUpdate();
