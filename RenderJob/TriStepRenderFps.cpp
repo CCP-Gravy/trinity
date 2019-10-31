@@ -5,6 +5,50 @@
 #include "TriViewport.h"
 #include "blue/Include/Wine.h"
 
+#ifdef _WIN32
+#include <ctime>
+
+EXTERN_C IMAGE_DOS_HEADER __ImageBase;
+char timeString[9];
+char dateString[11];
+
+struct tm GetUnixBuildTime()
+{
+	const IMAGE_NT_HEADERS* nt_header = (const IMAGE_NT_HEADERS*)( (char*)&__ImageBase + __ImageBase.e_lfanew );
+	__time64_t t = nt_header->FileHeader.TimeDateStamp;
+	struct tm ptm;
+	_gmtime64_s(&ptm, &t);
+
+	return ptm;
+}
+
+const char* GetTime()
+{
+	struct tm ptm = GetUnixBuildTime();
+	strftime( timeString, sizeof( timeString ), "%H:%M:%S", &ptm );
+	return timeString;
+}
+
+const char* GetDate()
+{
+	struct tm ptm = GetUnixBuildTime();
+	strftime( dateString, sizeof( dateString ), "%Y-%m-%d", &ptm );
+	return dateString;
+}
+
+#else
+
+const char* GetTime()
+{
+	return __TIME__;
+}
+
+const char* GetDate()
+{
+	return __DATE__;
+}
+#endif
+
 TriStepRenderFps::TriStepRenderFps( IRoot* lockobj ) : 
 	m_averageFPS( 0 ),
 	m_sumFPSValues( 0 ),
@@ -118,24 +162,41 @@ TriStepResult TriStepRenderFps::Execute( Be::Time realTime, Be::Time simTime, Tr
 	uint64_t counter = Tr2Renderer::GetCurrentFrameCounter();
 	int dpCount = m_dpCount ? int( m_dpCount->GetValue() ) : 0;
 	std::string str =
-		"platform: %10s\n"
-		"type:     %10s\n"
-		"bitness:  %10s\n"
-		"toolset:  %10s\n"
-		"frame:    %10.0lld\n"
-		"fps:      %10.2f\n"
-		"ms:       %10.2f\n"
-		"dp:       %10.0d";
+		"Build Date: %10s\n"
+		"Build Time: %10s\n"
+		"  Platform: %10s\n"
+		"      Type: %10s\n"
+		"   Bitness: %10s\n"
+		"   Toolset: %10s\n"
+		"     Frame: %10.0lld\n"
+		"       FPS: %10.2f\n"
+		"        MS: %10.2f\n"
+		"Draw Calls: %10.0d";
 
 	if( Wine::IsWine() )
 	{
-		str += "\nwine:     %10s";
+		str += "\n      Wine: %10s";
 	}
 
-	const int bufferSize = 256; // Make sure to increase this as necessary
+	const int bufferSize = 512; // Make sure to increase this as necessary
 	char fpsBuffer[bufferSize];
 
-	sprintf_s( fpsBuffer, str.c_str(), TRINITY_PLATFORM_NAME, type, bitcount, toolset, counter, m_averageFPS, m_averageMSPerFrame, dpCount, Wine::GetWineVersion() );
+	sprintf_s
+	(
+		fpsBuffer,
+		str.c_str(),
+		GetDate(),
+		GetTime(),
+		TRINITY_PLATFORM_NAME,
+		type,
+		bitcount,
+		toolset,
+		counter,
+		m_averageFPS,
+		m_averageMSPerFrame,
+		dpCount,
+		Wine::GetWineVersion()
+	);
 
 	uint32_t flags = 0;
 	if( m_alignRight )
