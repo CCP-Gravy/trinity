@@ -722,7 +722,7 @@ void Tr2InteriorScene::RenderShadows(Tr2RenderContext& renderContext)
 
 		float fov = light->m_coneAlphaOuter * TRI_PI / 90.0f;
 		lightProjection->PerspectiveFov(fov, 1.0, 0.1, light->m_radius);
-		lightView->SetLookAtPosition(light->m_position, light->m_position + light->m_coneDirection, Vector3(0.0, 1.0, 0.0));
+		lightView->SetLookAtPosition(light->m_position, light->m_position + light->m_coneDirection, Vector3(0.0, 0.0, 1.0));
 
 		// Fit the light's projection matrix to the character's frustum area to maximize shadowmap usage.
 		if (m_optimizeShadows)
