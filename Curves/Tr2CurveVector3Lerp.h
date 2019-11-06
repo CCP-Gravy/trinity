@@ -15,6 +15,7 @@ BLUE_CLASS( Tr2CurveVector3Lerp ) :
 {
 public:
 	Tr2CurveVector3Lerp( IRoot* lockobj = nullptr );
+	~Tr2CurveVector3Lerp();
 
 	EXPOSE_TO_BLUE();
 
@@ -39,7 +40,7 @@ private:
 
 	float m_curveStartTime;
 
-	ITriVectorFunction* m_curve;
+	ITriVectorFunctionPtr m_curve;
 
 };
 

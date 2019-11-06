@@ -25,6 +25,8 @@ Tr2ObjectFollowCurveKey::Tr2ObjectFollowCurveKey( IRoot* lockobj ) :
 
 Tr2ObjectFollowCurveKey::~Tr2ObjectFollowCurveKey()
 {
+	m_object = nullptr;
+	m_locator = nullptr;
 }
 
 const float Tr2ObjectFollowCurveKey::GetTime()

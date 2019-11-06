@@ -16,6 +16,7 @@ Tr2FollowCurve::Tr2FollowCurve( IRoot* lockobj ) :
 
 Tr2FollowCurve::~Tr2FollowCurve( )
 {
+	m_keys.Clear();
 }
 
 void Tr2FollowCurve::UpdateValue( double time )
@@ -25,17 +26,29 @@ void Tr2FollowCurve::UpdateValue( double time )
 
 void Tr2FollowCurve::OnListModified( long event, ssize_t key, ssize_t key2, IRoot* value, const IList* list )
 {
-	std::stable_sort(
-		m_keys.begin(),
-		m_keys.end(),
-		[]( ITr2FollowCurveKey* k0, ITr2FollowCurveKey* k1 ) { return k0->GetTime() < k1->GetTime(); } );
+	if( list == &m_keys )
+	{
+		switch( event & BELIST_EVENTMASK )
+		{
+		case BELIST_REMOVED:
+		case BELIST_INSERTED:
+			std::stable_sort(
+				m_keys.begin(),
+				m_keys.end(),
+				[]( ITr2FollowCurveKey* k0, ITr2FollowCurveKey* k1 ) { return k0->GetTime() < k1->GetTime(); } );
+			break;
+		default:
+			break;
+		}
+	}
+	
 }
 
 Vector3 Tr2FollowCurve::GetValue( double time ) const
 {
 	ITr2FollowCurveKey* currentKey = nullptr;
 	ITr2FollowCurveKey* nextKey = nullptr;
-
+	Vector3 value = Vector3();
 	for( auto key = begin( m_keys ); key != end( m_keys ); ++key )
 	{
 		auto k = *key;
@@ -50,14 +63,16 @@ Vector3 Tr2FollowCurve::GetValue( double time ) const
 
 	if( nextKey && currentKey ) 
 	{
-		return GetSegmentValue( float( time ), *currentKey, *nextKey );
+		value = GetSegmentValue( float( time ), *currentKey, *nextKey );
 	}
-	if( currentKey )
+	else if( currentKey )
 	{
-		return currentKey->GetValue();
+		value = currentKey->GetValue();
 	}
 
-	return Vector3( 0.0, 0.0, 0.0 );
+	currentKey = nullptr;
+	nextKey = nullptr;
+	return value;
 }
 
 Vector3 Tr2FollowCurve::GetSegmentValue( float time, ITr2FollowCurveKey& k0, ITr2FollowCurveKey& k1 ) const

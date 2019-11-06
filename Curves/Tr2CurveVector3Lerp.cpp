@@ -10,10 +10,14 @@
 
 Tr2CurveVector3Lerp::Tr2CurveVector3Lerp( IRoot* lockobj ):
 	m_curveStartTime( 1.0 ),
-	m_initialValue( 0, 0, 0 ),
-	m_curve( nullptr )
+	m_initialValue( 0, 0, 0 )
 {
 	m_currentValue = m_initialValue;
+}
+
+Tr2CurveVector3Lerp::~Tr2CurveVector3Lerp()
+{
+	m_curve = nullptr;
 }
 
 void Tr2CurveVector3Lerp::UpdateValue( double time )
@@ -24,9 +28,11 @@ void Tr2CurveVector3Lerp::UpdateValue( double time )
 
 Vector3 Tr2CurveVector3Lerp::GetValue( double time ) const
 {
-	Vector3 v;
+	Vector3 v = m_initialValue;
 	if( m_curve == nullptr )
+	{
 		return v;
+	}
 
 	if( time < m_curveStartTime && m_curveStartTime > 0.0 )
 	{
