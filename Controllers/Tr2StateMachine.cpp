@@ -16,6 +16,19 @@ Tr2StateMachine::Tr2StateMachine( IRoot* lockobj )
 	m_stateStartTime( 0 )
 {
 	m_states.SetNotify( this );
+	BeOS->RegisterForSimTimeRebase( this );
+}
+
+Tr2StateMachine::~Tr2StateMachine()
+{
+	BeOS->UnregisterForSimTimeRebase( this );
+}
+
+void Tr2StateMachine::OnSimClockRebase( Be::Time oldTime, Be::Time newTime )
+{
+	Be::Time diff = newTime - oldTime;
+	m_startTime += diff;
+	m_stateStartTime += diff;
 }
 
 void Tr2StateMachine::OnListModified( long event, ssize_t key, ssize_t key2, IRoot* value, const IList* list )

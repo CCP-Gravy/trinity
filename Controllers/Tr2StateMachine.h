@@ -14,16 +14,20 @@ BLUE_DECLARE_VECTOR( Tr2StateMachineState );
 
 BLUE_CLASS( Tr2StateMachine ) :
 	public IListNotify,
+	public ISimTimeRebaseNotify,
 	public INotify
 {
 public:
 	Tr2StateMachine( IRoot* lockobj = nullptr );
+	~Tr2StateMachine();
 
 	EXPOSE_TO_BLUE();
 
 	virtual void OnListModified( long event, ssize_t key, ssize_t key2, IRoot* value, const IList* list );
 
 	virtual bool OnModified( Be::Var* value );
+
+	virtual void OnSimClockRebase( Be::Time oldTime, Be::Time newTime );
 
 	void Link( Tr2Controller& controller );
 	void Unlink();
