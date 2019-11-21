@@ -2999,6 +2999,7 @@
     <ClInclude Include="Controllers\Actions\ITr2ControllerAction.h" />
     <ClInclude Include="Controllers\Actions\Tr2ActionAnimateCurveSet.h" />
     <ClInclude Include="Controllers\Actions\Tr2ActionAnimateValue.h" />
+    <ClInclude Include="Controllers\Actions\Tr2ActionBindRTPC.h" />
     <ClInclude Include="Controllers\Actions\Tr2ActionCallback.h" />
     <ClInclude Include="Controllers\Actions\Tr2ActionChildEffect.h" />
     <ClInclude Include="Controllers\Actions\Tr2ActionOverlay.h" />
@@ -3027,13 +3028,13 @@
     <ClInclude Include="Curves\Tr2CurveVector3Expression.h" />
     <ClInclude Include="Curves\Tr2CurveVector3Lerp.h" />
     <ClInclude Include="Curves\Tr2DistanceTracker.h" />
+    <ClInclude Include="Curves\Tr2FollowCurve.h" />
+    <ClInclude Include="Curves\Tr2FollowCurveKey.h" />
     <ClInclude Include="Curves\Tr2GrannyEventTrack.h" />
     <ClInclude Include="Curves\Tr2GrannyTrack.h" />
     <ClInclude Include="Curves\Tr2GrannyTransformTrack.h" />
     <ClInclude Include="Curves\Tr2GrannyVector3Curve.h" />
     <ClInclude Include="Curves\Tr2GrannyVectorTrack.h" />
-    <ClInclude Include="Curves\Tr2FollowCurve.h" />
-    <ClInclude Include="Curves\Tr2FollowCurveKey.h" />
     <ClInclude Include="Curves\Tr2QuaternionLerpCurve.h" />
     <ClInclude Include="Curves\Tr2RotationAdapter.h" />
     <ClInclude Include="Curves\Tr2ScalarExprKeyCurve.h" />
@@ -3176,6 +3177,7 @@
     <ClInclude Include="Include\ITr2AudioEmitter.h" />
     <ClInclude Include="Include\ITr2BoundingBox.h" />
     <ClInclude Include="Include\ITr2DebugRenderer.h" />
+    <ClInclude Include="Include\ITr2DebugRenderer2.h" />
     <ClInclude Include="Include\ITr2GpuBuffer.h" />
     <ClInclude Include="Include\ITr2InstanceData.h" />
     <ClInclude Include="Include\ITr2Interior.h" />
@@ -3616,6 +3618,8 @@
     <ClCompile Include="Controllers\Actions\Tr2ActionAnimateCurveSet_Blue.cpp" />
     <ClCompile Include="Controllers\Actions\Tr2ActionAnimateValue.cpp" />
     <ClCompile Include="Controllers\Actions\Tr2ActionAnimateValue_Blue.cpp" />
+    <ClCompile Include="Controllers\Actions\Tr2ActionBindRTPC.cpp" />
+    <ClCompile Include="Controllers\Actions\Tr2ActionBindRTPC_Blue.cpp" />
     <ClCompile Include="Controllers\Actions\Tr2ActionCallback.cpp" />
     <ClCompile Include="Controllers\Actions\Tr2ActionCallback_Blue.cpp" />
     <ClCompile Include="Controllers\Actions\Tr2ActionChildEffect.cpp" />
@@ -3670,6 +3674,10 @@
     <ClCompile Include="Curves\Tr2CurveVector3_Blue.cpp" />
     <ClCompile Include="Curves\Tr2DistanceTracker.cpp" />
     <ClCompile Include="Curves\Tr2DistanceTracker_Blue.cpp" />
+    <ClCompile Include="Curves\Tr2FollowCurve.cpp" />
+    <ClCompile Include="Curves\Tr2FollowCurveKey.cpp" />
+    <ClCompile Include="Curves\Tr2FollowCurveKey_Blue.cpp" />
+    <ClCompile Include="Curves\Tr2FollowCurve_Blue.cpp" />
     <ClCompile Include="Curves\Tr2GrannyEventTrack.cpp" />
     <ClCompile Include="Curves\Tr2GrannyEventTrack_Blue.cpp" />
     <ClCompile Include="Curves\Tr2GrannyTrack.cpp" />
@@ -3680,10 +3688,6 @@
     <ClCompile Include="Curves\Tr2GrannyVector3Curve_Blue.cpp" />
     <ClCompile Include="Curves\Tr2GrannyVectorTrack.cpp" />
     <ClCompile Include="Curves\Tr2GrannyVectorTrack_Blue.cpp" />
-    <ClCompile Include="Curves\Tr2FollowCurve.cpp" />
-    <ClCompile Include="Curves\Tr2FollowCurve_Blue.cpp" />
-    <ClCompile Include="Curves\Tr2FollowCurveKey.cpp" />
-    <ClCompile Include="Curves\Tr2FollowCurveKey_Blue.cpp" />
     <ClCompile Include="Curves\Tr2QuaternionLerpCurve.cpp" />
     <ClCompile Include="Curves\Tr2QuaternionLerpCurve_Blue.cpp" />
     <ClCompile Include="Curves\Tr2RotationAdapter.cpp" />

@@ -180,6 +180,14 @@ Tr2StateMachineState* Tr2StateMachineState::Update()
 	return nullptr;
 }
 
+void Tr2StateMachineState::RebaseSimTime( Be::Time diff )
+{
+	for( auto action = m_actions.begin(); action != m_actions.end(); ++action )
+	{
+		( *action )->RebaseSimTime( diff );
+	}
+}
+
 Tr2StateMachineState* Tr2StateMachineState::GetNextState() const
 {
 	for( auto it = begin( m_transitions ); it != end( m_transitions ); ++it )

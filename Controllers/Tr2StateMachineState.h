@@ -33,6 +33,8 @@ public:
 	void Stop();
 	Tr2StateMachineState* Update();
 
+	void RebaseSimTime( Be::Time diff );
+
 	const std::string& GetName() const;
 	const Tr2StateMachine* GetStateMachine() const;
 private:

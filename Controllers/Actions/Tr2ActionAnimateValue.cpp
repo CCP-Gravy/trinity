@@ -83,6 +83,12 @@ void Tr2ActionAnimateValue::Stop( Tr2Controller& controller )
 	controller.UnRegisterUpdateable( *this );
 }
 
+void Tr2ActionAnimateValue::RebaseSimTime( Be::Time diff )
+{
+	m_startTime += diff;
+	m_lastSimTime += diff;
+}
+
 void Tr2ActionAnimateValue::Update( Be::Time realTime, Be::Time simTime )
 {
 	m_lastSimTime = simTime;

@@ -65,6 +65,12 @@ void Tr2ActionAnimateCurveSet::Stop( Tr2Controller& controller )
 	controller.UnRegisterUpdateable( *this );
 }
 
+void Tr2ActionAnimateCurveSet::RebaseSimTime( Be::Time diff )
+{
+	m_startTime += diff;
+	m_lastSimTime += diff;
+}
+
 void Tr2ActionAnimateCurveSet::Update( Be::Time realTime, Be::Time simTime )
 {
 	m_lastSimTime = simTime;

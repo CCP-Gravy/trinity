@@ -19,6 +19,8 @@ public:
 
 	virtual void Start( Tr2Controller& controller );
 	virtual void Stop( Tr2Controller& controller );
+	virtual void RebaseSimTime( Be::Time diff );
+
 	virtual bool CanTransition() const;
 
 	virtual void Update( Be::Time realTime, Be::Time simTime );

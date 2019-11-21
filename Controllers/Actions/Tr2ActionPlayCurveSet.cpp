@@ -49,6 +49,12 @@ void Tr2ActionPlayCurveSet::Stop( Tr2Controller& controller )
 	}
 }
 
+void Tr2ActionPlayCurveSet::RebaseSimTime( Be::Time diff )
+{
+	m_startTime += diff;
+	m_prevTime += diff;
+}
+
 bool Tr2ActionPlayCurveSet::CanTransition() const
 {
 	if( !m_syncToRange || m_duration <= 0 )

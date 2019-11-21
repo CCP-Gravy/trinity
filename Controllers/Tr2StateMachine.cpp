@@ -29,6 +29,11 @@ void Tr2StateMachine::OnSimClockRebase( Be::Time oldTime, Be::Time newTime )
 	Be::Time diff = newTime - oldTime;
 	m_startTime += diff;
 	m_stateStartTime += diff;
+
+	for( auto state = m_states.begin(); state != m_states.end(); ++state )
+	{
+		(*state)->RebaseSimTime(diff);
+	}
 }
 
 void Tr2StateMachine::OnListModified( long event, ssize_t key, ssize_t key2, IRoot* value, const IList* list )

@@ -27,6 +27,8 @@ public:
 	virtual void Unlink();
 	virtual void Start( Tr2Controller& controller );
 	virtual void Stop( Tr2Controller& controller );
+	virtual void RebaseSimTime( Be::Time diff );
+
 
 	virtual void Update( Be::Time realTime, Be::Time simTime );
 
