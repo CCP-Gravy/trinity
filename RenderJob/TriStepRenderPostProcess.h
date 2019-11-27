@@ -13,6 +13,8 @@
 #include "Tr2RenderTarget.h"
 #include "PostProcess/Tr2PostProcessRenderInfo.h"
 
+BLUE_DECLARE( Tr2PPFidelityFXEffect );
+
 
 // -------------------------------------------------------------
 // Description:
@@ -71,6 +73,11 @@ private:
 	Tr2EffectPtr m_dynamicExposureCreateHistogramShader;
 	Tr2EffectPtr m_dynamicExposureMergeHistogramShader;
 	Tr2EffectPtr m_dynamicExposureMeasureExposureShader;
+
+	// fidelityFX
+	bool ProcessFidelityFX( Tr2RenderContext& renderContext, Tr2PPFidelityFXEffect* fx );
+	void RenderFidelityFX( Tr2RenderContext& renderContext, Tr2PPFidelityFXEffect* fx );
+	Tr2EffectPtr m_fidelityFXShader;
 
 	// fog
 	bool ProcessFog( Tr2PPFogEffect* fog );

@@ -52,6 +52,8 @@ public:
 	Tr2RenderTarget* GetRt1Buffer() { return m_rt1; };
 	Tr2RenderTarget* GetRt2Buffer() { return m_rt2; };
 	Tr2RenderTarget* GetBlackBuffer() { return m_black; };
+	Tr2RenderTarget* GetFidelityInputBuffer();
+	Tr2RenderTarget* GetFidelityOutputBuffer();
 
 
 private:
@@ -66,6 +68,9 @@ private:
 	Tr2RenderTargetPtr m_rt2;
 
 	Tr2RenderTargetPtr m_black;
+
+	Tr2RenderTargetPtr m_fidelityInputRT;
+	Tr2RenderTargetPtr m_fidelityOutputRT;
 };
 
 TYPEDEF_BLUECLASS( Tr2PostProcessRenderInfo );

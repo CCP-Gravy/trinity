@@ -22,6 +22,12 @@ Tr2PostProcessRenderInfo::Tr2PostProcessRenderInfo( IRoot* lockobj )
 	m_black.CreateInstance();
 	m_black->m_name = "Black";
 	m_black->Create( 4, 4, 1, Tr2RenderContextEnum::PIXEL_FORMAT_B8G8R8A8_UNORM );
+
+	m_fidelityInputRT.CreateInstance();
+	m_fidelityInputRT->m_name = "FidelityFX Input SRV RT";
+
+	m_fidelityOutputRT.CreateInstance();
+	m_fidelityOutputRT->m_name = "FidelityFX Output UAV RT";
 }
 
 
@@ -38,6 +44,14 @@ Tr2PostProcessRenderInfo::~Tr2PostProcessRenderInfo()
 	if( m_black->IsValid() )
 	{
 		m_black->Destroy();
+	}
+	if( m_fidelityInputRT->IsValid() )
+	{
+		m_fidelityInputRT->Destroy();
+	}
+	if( m_fidelityOutputRT->IsValid() )
+	{
+		m_fidelityOutputRT->Destroy();
 	}
 
 	if( m_sourceBufferCopy && m_sourceBufferCopy->IsValid() )
@@ -74,6 +88,15 @@ void Tr2PostProcessRenderInfo::SetSourceBuffer( Tr2RenderTarget* sourceBuffer )
 		m_sourceBuffer->GetFormat(),
 		1,
 		0 );
+
+	if( m_fidelityInputRT->IsValid() )
+	{
+		m_fidelityInputRT->Destroy();
+	}
+	if( m_fidelityOutputRT->IsValid() )
+	{
+		m_fidelityOutputRT->Destroy();
+	}
 }
 
 
@@ -96,3 +119,36 @@ void Tr2PostProcessRenderInfo::CopySourceTo( Tr2RenderTarget* renderTarget, floa
 	}
 }
 
+Tr2RenderTarget* Tr2PostProcessRenderInfo::GetFidelityInputBuffer()
+{
+	auto source = GetSourceBufferCopy();
+	if( source && !m_fidelityInputRT->IsValid() )
+	{
+		m_fidelityInputRT->Create(
+			source->GetWidth(),
+			source->GetHeight(),
+			1,
+			source->GetFormat() );
+	}
+
+	return m_fidelityInputRT;
+}
+
+
+Tr2RenderTarget* Tr2PostProcessRenderInfo::GetFidelityOutputBuffer()
+{
+	auto source = GetSourceBufferCopy();
+	if( source && !m_fidelityOutputRT->IsValid() )
+	{
+		m_fidelityOutputRT->Create(
+			source->GetWidth(),
+			source->GetHeight(),
+			1,
+			source->GetFormat(),
+			source->GetMsaaType(),
+			source->GetMsaaQuality(),
+			Tr2RenderContextEnum::EX_BIND_UNORDERED_ACCESS );
+	}
+
+	return m_fidelityOutputRT;
+}
