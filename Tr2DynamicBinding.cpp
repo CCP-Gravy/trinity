@@ -189,6 +189,7 @@ Tr2DynamicBinding::Tr2DynamicBinding( IRoot* lockobj ) :
 
 Tr2DynamicBinding::~Tr2DynamicBinding()
 {
+	BeOS->UnregisterForSimTimeRebase( this );
 	m_owner = nullptr;
 	Unlink();
 }
