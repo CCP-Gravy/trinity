@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "followASpline.h"
+#include "Formation.h"
 
 FollowASpline::FollowASpline( IRoot* lockobj ) :
 	PARENTLOCK( m_splineTunnels ),
@@ -94,11 +95,12 @@ float FollowASpline::ProcessTunnelEntrances( DroneAgent& agent, const std::vecto
 }
 
 
-void FollowASpline::ProcessAssignedTunnel( DroneAgent& agent, const std::vector<SplineTunnel*>& tunnels, BehaviorGroup& group, FollowASplineData* data )
+bool FollowASpline::ProcessAssignedTunnel(DroneAgent& agent, const std::vector<SplineTunnel*>& tunnels,
+                                          BehaviorGroup& group, FollowASplineData* data)
 {
 	if( data->tunnelLock > static_cast< int >(tunnels.size()))
 	{
-		return;
+		return false;
 	}
 
 	auto t = tunnels.at( data->tunnelLock );
@@ -139,6 +141,7 @@ void FollowASpline::ProcessAssignedTunnel( DroneAgent& agent, const std::vector<
 		{
 			data->tunnelLock = -1;
 			data->tunnelPoint = 0;
+			return true;
 		}
 	}
 	else
@@ -163,6 +166,7 @@ void FollowASpline::ProcessAssignedTunnel( DroneAgent& agent, const std::vector<
 		if ((lengthFromShip - group.GetBoundingSphereRadius()) < (t->cylWidth)/1.5)
 		{
 			data->tunnelPoint++;
+			return true;
 		}
 
 		//rework into cylinder collision
@@ -170,8 +174,10 @@ void FollowASpline::ProcessAssignedTunnel( DroneAgent& agent, const std::vector<
 		{
 			data->tunnelLock = -1;
 			data->tunnelPoint = 0;
+			return true;
 		}
 	}
+	return false;
 }
 
 size_t FollowASpline::GetScratchMemorySize() const
@@ -223,7 +229,15 @@ std::vector<Vector3> FollowASpline::CalculateBehavior(std::vector<DroneAgent>& a
 			// tunnelLock can change in ProcessTunnelEntrances so if->else is not equivalent
 			if ( data->tunnelLock != -1 )
 			{
-				ProcessAssignedTunnel( *drone, m_privateTunnels, group, data );
+				if( ProcessAssignedTunnel( *drone, m_privateTunnels, group, data ) )
+				{
+					// If process returns true we update all the drones as a unit and skip if they are in a Formation
+					if( CheckForAndUpdateFormation( agents, group, scratchData, data->tunnelLock, data->tunnelPoint ) )
+					{
+						// If process returns true all drones have been updated so we break
+						break;
+					}
+				}
 			}
 
 			if ( m_desiredVector == Vector3( 0, 0, 0 ) )
@@ -261,6 +275,30 @@ std::vector<Vector3> FollowASpline::CalculateBehavior(std::vector<DroneAgent>& a
 		}
 	}
 	return forceVectors;
+}
+
+bool FollowASpline::CheckForAndUpdateFormation( std::vector<DroneAgent>& agents, BehaviorGroup& group, void* scratchData, int tunnel, int tunnelPoint )
+{
+	IBehavior* formationBH = group.GetBehaviorByName( "Formation" );
+
+	if( formationBH )
+	{
+		auto form = dynamic_cast<Formation*> ( formationBH );
+		if( form )
+		{
+			if( form->InFormation() )
+			{
+				auto dataPointer = static_cast<FollowASplineData*>( scratchData );
+				for( auto agent = agents.begin(); agent != agents.end(); ++agent, dataPointer++ )
+				{
+					dataPointer->tunnelLock = tunnel;
+					dataPointer->tunnelPoint = tunnelPoint;
+				}
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 void FollowASpline::UpdateTunnelRegistry()

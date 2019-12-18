@@ -3124,6 +3124,7 @@
     <ClInclude Include="Eve\SpaceObject\Children\Behaviors\DroneAvoidance.h" />
     <ClInclude Include="Eve\SpaceObject\Children\Behaviors\EveKDdroneManagementTree.h" />
     <ClInclude Include="Eve\SpaceObject\Children\Behaviors\FollowASpline.h" />
+    <ClInclude Include="Eve\SpaceObject\Children\Behaviors\Formation.h" />
     <ClInclude Include="Eve\SpaceObject\Children\Behaviors\IBehavior.h" />
     <ClInclude Include="Eve\SpaceObject\Children\Behaviors\InclusionVolume.h" />
     <ClInclude Include="Eve\SpaceObject\Children\Behaviors\Inertia.h" />
@@ -3846,6 +3847,8 @@
     <ClCompile Include="Eve\SpaceObject\Children\Behaviors\EveKDdroneManagementTree_Blue.cpp" />
     <ClCompile Include="Eve\SpaceObject\Children\Behaviors\FollowASpline.cpp" />
     <ClCompile Include="Eve\SpaceObject\Children\Behaviors\FollowASpline_Blue.cpp" />
+    <ClCompile Include="Eve\SpaceObject\Children\Behaviors\Formation.cpp" />
+    <ClCompile Include="Eve\SpaceObject\Children\Behaviors\Formation_Blue.cpp" />
     <ClCompile Include="Eve\SpaceObject\Children\Behaviors\InclusionVolume.cpp" />
     <ClCompile Include="Eve\SpaceObject\Children\Behaviors\InclusionVolume_Blue.cpp" />
     <ClCompile Include="Eve\SpaceObject\Children\Behaviors\Inertia.cpp" />

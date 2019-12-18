@@ -35,6 +35,13 @@ public:
 		return PROCESS_FIRST;
 	}
 
+	virtual std::string GetBehaviorName()
+	{
+		return "unnamed";
+	}
+
+	virtual void Reset(){}
+
 	// This function should apply a force to the acceleration and return an array with pos and force vector for each agent
 	virtual std::vector<Vector3> CalculateBehavior(std::vector<DroneAgent>& agents, void* scratchData, const float deltaTime,
 	                                               BehaviorGroup& sys, EveChildBehaviorSystem& system, const std::vector<std::vector<DroneAgent*>>& dronesInSearchRadius) = 0;

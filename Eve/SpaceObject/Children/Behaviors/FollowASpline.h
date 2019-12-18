@@ -38,11 +38,13 @@ public:
 	bool OnModified(Be::Var* value);
 	void OnListModified( long event, ssize_t key, ssize_t key2, IRoot* value, const IList* theList );
 	void RenderDebugInfo( ITr2DebugRenderer2& renderer, std::vector<DroneAgent>& agents, Matrix& parentWorldLocation);
+	
 private:
 	float ProcessTunnelEntrances(DroneAgent& agent, const std::vector<SplineTunnel*>& tunnels, FollowASplineData* data);
-	void ProcessAssignedTunnel(DroneAgent& agent, const std::vector<SplineTunnel*>& tunnels, BehaviorGroup& group, FollowASplineData* data);
-	void UpdateTunnelRegistry();
+	bool ProcessAssignedTunnel(DroneAgent& agent, const std::vector<SplineTunnel*>& tunnels, BehaviorGroup& group, FollowASplineData* data);
+	bool CheckForAndUpdateFormation( std::vector<DroneAgent>& agents, BehaviorGroup& group, void* scratchData, int tunnel, int tunnelPoint );
 	void ReassignTunnelIDsAndAddSystemTunnels( EveChildBehaviorSystem& system );
+	void UpdateTunnelRegistry();
 
 	PSplineTunnelGroupVector m_splineTunnels;
 	std::vector<SplineTunnel*> m_privateTunnels;

@@ -48,6 +48,7 @@ public:
 	// ITr2DebugRenderable
 	virtual void GetDebugOptions( Tr2DebugRendererOptions& options );
 	float GetBoundingSphereRadius();
+	EveKDdroneManagementTreePtr GetKDTree();
 	virtual void RenderDebugInfo( ITr2DebugRenderer2& renderer, Matrix& parentWorldLocation );
 
 	void UpdateVisibility( const TriFrustum& frustum, const Matrix& parentTransform );
@@ -57,10 +58,12 @@ public:
 	Tr2MeshPtr GetMesh() const;
 	Tr2MeshPtr GetSpriteMesh() const;
 
+	float GetMaxVelocity() const;
 	void AddAgent();
 	size_t GetSize();
 	unsigned int GetCount();
 	void CreateAgentTree();
+	IBehavior* GetBehaviorByName(std::string name);
 	void SetMeshToggle( bool toggle );
 	void RemoveAgent();
 	Vector3 RemoveSpecificAgent(int index);

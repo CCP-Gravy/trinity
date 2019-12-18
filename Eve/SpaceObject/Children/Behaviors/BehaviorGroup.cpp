@@ -110,6 +110,11 @@ void BehaviorGroup::InitializeGeometryResource()
 	const int t = m_count;
 	m_count = 0;
 	SetCount( t );
+
+	for( auto it = begin( m_behaviors ); it != end( m_behaviors ); ++it )
+	{
+		( *it )->Reset();
+	}
 }
 
 void BehaviorGroup::SetVertexFunctionReferance( const std::function<void( void )> &F )
@@ -140,6 +145,19 @@ void BehaviorGroup::CreateAgentTree()
 	}
 	m_tree->CreateTree( m_agents, m_behaviors.size());
 }
+
+IBehavior* BehaviorGroup::GetBehaviorByName(std::string name)
+{
+	for( auto behavior = m_behaviors.begin(); behavior != m_behaviors.end(); ++behavior )
+	{
+		if( name == ( *behavior )->GetBehaviorName() )
+		{
+			return *behavior;
+		}
+	}
+	return nullptr;
+}
+
 
 void BehaviorGroup::SortBehaviorIndexes()
 {
@@ -174,6 +192,11 @@ Tr2MeshPtr BehaviorGroup::GetMesh() const
 Tr2MeshPtr BehaviorGroup::GetSpriteMesh() const
 {
 	return m_spriteMesh;
+}
+
+float BehaviorGroup::GetMaxVelocity() const
+{
+	return m_maxVelocity;
 }
 
 unsigned int BehaviorGroup::GetVertexDeclarationHandle() const
@@ -593,11 +616,17 @@ void BehaviorGroup::GetDebugOptions( Tr2DebugRendererOptions& options )
 	options.insert( "BehaviorVisionRanges" );
 	options.insert( "Wander" );
 	options.insert( "LocatorRadius" );
+	options.insert( "Formation" );
 }
 
 float BehaviorGroup::GetBoundingSphereRadius()
 {
 	return m_boundingSphereRadius;
+}
+
+EveKDdroneManagementTreePtr BehaviorGroup::GetKDTree()
+{
+	return m_tree;
 }
 
 
@@ -630,6 +659,9 @@ void BehaviorGroup::RenderDebugInfo( ITr2DebugRenderer2& renderer, Matrix& paren
 
 	if( m_TEMPDEBUGVECTORTOFINDCLOSEDRONES != Vector3(0,0,0)) // TODO remove, gona leave it here for a while to debug interaction with BHgroups
 	{
+		renderer.DrawSphere( this, TranslationMatrix( m_TEMPDEBUGVECTORTOFINDCLOSEDRONES ) * parentWorldLocation,
+				100, 6, Tr2DebugRenderer::Wireframe, 0xffee11ff );
+
 		DroneAgent* p = m_tree->FindClosestAgent( m_TEMPDEBUGVECTORTOFINDCLOSEDRONES );
 		if( p != nullptr )
 			renderer.DrawSphere( this, TranslationMatrix( ( p->position ) ) * parentWorldLocation,
