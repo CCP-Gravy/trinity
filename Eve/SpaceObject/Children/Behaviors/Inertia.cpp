@@ -39,7 +39,6 @@ std::vector<Vector3> Inertia::CalculateBehavior(std::vector<DroneAgent>& agents,
 		auto lastAccelLength = Length( *data );
 		auto accelNormalized = Normalize( agent->acceleration );
 		auto accelLength = Length( agent->acceleration );
-		agent->target = agent->acceleration;
 
 		if ( LengthSq( lastAccelNormalized ) != 0 && m_maxRotationSpeed > 0 )
 		{
@@ -57,7 +56,6 @@ std::vector<Vector3> Inertia::CalculateBehavior(std::vector<DroneAgent>& agents,
 				TriVectorRotateQuaternion( &agent->acceleration, &lastAccelNormalized, &quat);
 			}
 
-			
 			// TODO this might need to be modified to act more naturally when forces flip directions i.e. bounce of walls
 			// or activate thrusters etc since length of lastAccel and Accel might be equal but the change is actually accel x2
 			 agent->acceleration = Normalize(agent->acceleration) * Lerp(lastAccelLength, accelLength,
