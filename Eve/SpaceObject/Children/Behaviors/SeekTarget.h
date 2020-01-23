@@ -47,6 +47,8 @@ public:
 private:
 	Vector3 GetRandomPosition( int rand );
 	Vector3 GetLocatorDirection( int rand );
+	void SetArrivedRadius();
+	void SetSlowDownRadius();
 
 	bool m_exit;
 	float m_behaviorWeight;

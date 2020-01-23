@@ -4,7 +4,7 @@
 
 SeekTarget::SeekTarget( IRoot* lockobj ) :
 	m_behaviorWeight( 20.f ),
-	m_arrivedRadius( 10.f ),
+	m_arrivedRadius( 0.f ),
 	m_slowDownRadius( 0.f ),
 	m_exit( false ),
 	m_target( nullptr ),
@@ -52,6 +52,16 @@ std::vector<Vector3> SeekTarget::CalculateBehavior( std::vector<DroneAgent>& age
 	auto data = static_cast<LocatorData*>( scratchData );
 	for( auto agent = agents.begin(); agent != agents.end(); ++agent, ++data )
 	{
+		if( m_arrivedRadius == 0.f )
+		{
+			SetArrivedRadius();
+		}
+
+		if( m_slowDownRadius == 0.f )
+		{
+			SetSlowDownRadius();
+		}
+
 		// If drone does not have a picked locator, then pick one
 		if( agent->target == Vector3( 0, 0, 0 ) )
 		{
@@ -143,12 +153,21 @@ void SeekTarget::SetExit( bool value )
 	m_exit = value;
 }
 
+void SeekTarget::SetArrivedRadius()
+{
+	m_arrivedRadius = m_target->GetRadius() / 3;
+}
+
+void SeekTarget::SetSlowDownRadius()
+{
+	m_slowDownRadius = m_target->GetRadius() / 2;
+}
+
 Vector3 SeekTarget::GetRandomPosition( int rand )
 {
 	Vector3 targetPositionWS;
 	// Get a damage locator in world position
 	m_target->GetDamageLocatorPosition( &targetPositionWS, rand, true );
-	m_slowDownRadius = m_arrivedRadius * 2;
 
 	return targetPositionWS;
 }
@@ -165,7 +184,8 @@ void SeekTarget::RenderDebugInfo( ITr2DebugRenderer2& renderer, std::vector<Dron
 {
 	if( renderer.HasOption( this, "droneDebug" ) )
 	{
-		renderer.DrawSphere( this, m_debugLocator, m_arrivedRadius, 16, Tr2DebugRenderer::Wireframe, 0xffffffff );
-		renderer.DrawSphere( this, m_arrivalPoint, 5, 16, Tr2DebugRenderer::Wireframe, 0xff0000ff );
+		renderer.DrawSphere( this, m_arrivalPoint, m_arrivedRadius, 8, Tr2DebugRenderer::Wireframe, 0xffffffff );
+		renderer.DrawSphere( this, m_arrivalPoint, 5, 8, Tr2DebugRenderer::Wireframe, 0xff0000ff );
+		renderer.DrawSphere( this, m_arrivalPoint, m_slowDownRadius, 8, Tr2DebugRenderer::Wireframe, 0xffcc11ff );
 	}
 }
