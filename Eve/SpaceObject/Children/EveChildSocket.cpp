@@ -57,8 +57,10 @@ bool EveChildSocket::AddParameterForExternal( Tr2ExternalParameter& externalPara
 {
 	auto destination = externalParam.GetDestinationEntry();
 	if ( !destination || !externalParam.IsValid() )
+	{
 		CCP_LOGWARN( "EveChildSocket: destinationObject is not set for one of the plug's external parameters." );
 		return false;
+	}
 
 	EveSocketParameterBindingBasePtr ptr;
 	switch ( destination->mType )
