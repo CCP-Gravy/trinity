@@ -227,7 +227,7 @@ void EveChildLineSet::GenerateManagedPoints()
 				Y = pow( sin( locOnCircle ), 2.f ) * m_circleRadius * m_circleDistort.y + pow( cos( locOnCircle ), 2.f ) * m_circleRadius * m_circleDistort.w;
 			}
 			float Z = sin( locOnCircle )*m_circleRadius * m_circleDistort.z;
-			m_managedPoints.emplace_back( X, Y, Z );
+			m_managedPoints.emplace_back( Vector3( X, Y, Z) );
 		}
 	}
 	else
@@ -266,7 +266,7 @@ void EveChildLineSet::GenerateManagedPointsForCurve()
 			float Y = ( 1 - LoC ) * ( 1 - LoC ) * m_point1.y + 2 * ( 1 - LoC ) * LoC * m_bezierPoint.y + LoC * LoC * m_point2.y;
 			float Z = ( 1 - LoC ) * ( 1 - LoC ) * m_point1.z + 2 * ( 1 - LoC ) * LoC * m_bezierPoint.z + LoC * LoC * m_point2.z;
 
-			m_managedPoints.emplace_back( X, Y, Z );
+			m_managedPoints.emplace_back( Vector3( X, Y, Z ) );
 		}
 	}
 	else
