@@ -1096,6 +1096,15 @@ void Tr2CurveLineSet::ClearLines()
 
 // -------------------------------------------------------------
 // Description:
+//   Modify if batches should be additive
+// -------------------------------------------------------------
+void Tr2CurveLineSet::SetAdditiveFlag( bool b )
+{
+	m_additive = b;
+}
+
+// -------------------------------------------------------------
+// Description:
 //   Creates render batches for line set.
 // Arguments:
 //   batches - Render batch accumulator

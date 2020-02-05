@@ -5,8 +5,6 @@
 //
 
 #pragma once
-#ifndef EveChildLineSet_H
-#define EveChildLineSet_H
 
 #include "IEveSpaceObjectChild.h"
 #include "EveChildTransform.h"
@@ -14,18 +12,18 @@
 #include "TriRenderBatch.h"
 #include "Tr2Mesh.h"
 #include "Eve/SpaceObject/EveSpaceObject2.h"
+#include "Tr2PerObjectData.h"
 #include "Eve/UI/EveCurveLineSet.h"
 
 class ChildLineSetInstancingBatch;
 
-BLUE_CLASS(EveChildLineSet) :
+BLUE_CLASS( EveChildLineSet ) :
 	public IInitialize,
 	public IEveSpaceObjectChild,
 	public Tr2DeviceResource,
 	public ITr2Renderable,
 	public EveChildTransform,
 	public INotify,
-	public IListNotify,
 	public ITr2DebugRenderable
 {
 public:
@@ -39,46 +37,36 @@ public:
 	bool Initialize() override;
 
 	//////////////////////////////////////////////////////////////////////////////////////
-	// IListNotify
-	void OnListModified( long event, ssize_t key, ssize_t key2, IRoot* value, const IList* list ) override;
-
-	//////////////////////////////////////////////////////////////////////////////////////
-	// IListNotify
+	// INotify
 	bool OnModified( Be::Var* value ) override;
 
 	//////////////////////////////////////////////////////////////////////////////////////
 	// IEveSpaceObjectChild
+	const char* GetName() const;
+	void SetName( const char* name );
+	
 	void SetShaderOption( const BlueSharedString& name, const BlueSharedString& value ) override;
 	bool IsAlwaysOn() const override;
 	void Setup( const Vector3* scale, const Quaternion* rotation, const Vector3* translation, Tr2Lod lowestLodVisible );
-	
-	const char* GetName() const;
-	void SetName( const char* name );
+	void GetLights( Tr2LightManager& lightManager ) const {};
+	void GetLocalToWorldTransform( Matrix& transform ) const;
+	void AddQuadsToQuadRenderer( const TriFrustum& frustum, Tr2QuadRenderer& quadRenderer ) const {};
+	bool GetBoundingSphere( Vector4& sphere, BoundingSphereQuery query = EVE_BOUNDS_NORMAL ) const;
+	void UpdateVisibility( const TriFrustum& frustum, const Matrix& parentTransform, Tr2Lod parentLod );
+	void GetRenderables( std::vector<ITr2Renderable*>& renderables );
+	void RegisterWithQuadRenderer( Tr2QuadRenderer& quadRenderer ) {};
 
 	/////////////////////////////////////////////////////////////////////////////////////
 	// Tr2DeviceResource
-	void GetLights( Tr2LightManager& lightManager ) const {};
-	void UpdateVisibility( const TriFrustum& frustum, const Matrix& parentTransform, Tr2Lod parentLod );
-	void GetRenderables( std::vector<ITr2Renderable*>& renderables );
-	bool GetBoundingSphere( Vector4& sphere, BoundingSphereQuery query=EVE_BOUNDS_NORMAL ) const;
-	void GetLocalToWorldTransform( Matrix& transform ) const;
 	void ReleaseResources( TriStorage s ) {};
 	bool OnPrepareResources();
-	bool HasTransparentBatches();
-	float GetSortValue() { return 0.f; };
-	void UpdateBuffer( Tr2RenderContext& renderContext );
-	void CreateSpriteVertexDeclaration();
-	Tr2MeshPtr GetMesh() const;
 
-	void Draw(ChildLineSetInstancingBatch* batch, Tr2RenderContext& renderContext);
-	
-	//quad
-	void RegisterWithQuadRenderer( Tr2QuadRenderer& quadRenderer ) {};
-	void AddQuadsToQuadRenderer( const TriFrustum& frustum, Tr2QuadRenderer& quadRenderer ) const {};
+	/////////////////////////////////////////////////////////////////////////////////////
+	// ITr2Renderable
 	Tr2PerObjectData* GetPerObjectData( ITriRenderBatchAccumulator* accumulator );
-
-
 	virtual void GetBatches( ITriRenderBatchAccumulator* batches, TriBatchType batchType, const Tr2PerObjectData* perObjectData );
+	bool HasTransparentBatches();
+
 	
 	/////////////////////////////////////////////////////////////////////////////////////
 	// update
@@ -97,21 +85,24 @@ public:
 
 	/////////////////////////////////////////////////////////////////////////////////////
 	// EveChildLineSet
-	
+	// 
+	Tr2MeshPtr GetMesh() const;
 	float GetOwnerMaxSpeed() const;
-	
+	void CreateSpriteVertexDeclaration();
+	float GetSortValue() { return 0.f; };
+	void UpdateBuffer( Tr2RenderContext& renderContext );
+	void Draw( ChildLineSetInstancingBatch* batch, Tr2RenderContext& renderContext );
 
-	enum lineSetType { ObjectRender, LineRender, Both };
-	enum lineSetObjType { Circle, BezierCurve };
+	enum lineSetType { OBJECT_RENDER, LINE_RENDER, BOTH };
+	enum lineSetObjType { CIRCLE, BEZIER_CURVE };
 	
 private:
 
-	void GenerateManagedPointsForCurve();
 	void InitializeLineSet();
-	void InitializeLineSetForCurves();
 	void GenerateManagedPoints();
+	void InitializeLineSetForCurves();
+	void GenerateManagedPointsForCurve();
 
-	
 	BlueSharedString m_name;
 	Vector3 m_worldVelocity;
 	float m_ownerMaxSpeed;
@@ -121,29 +112,26 @@ private:
 	// circle attributes
 	float m_circleRadius;
 	int m_numSegments;
-	Vector3 m_circleCenter;
-
 	Vector4 m_circleDistort;
+	float m_completeness;
 	
 	EveCurveLineSetPtr m_lineSet;
 	lineSetType m_type;
 	lineSetObjType m_objType;
 	std::vector<Vector3> m_managedPoints;
-	float m_completeness;
-
+	
 	//lines
 	float m_lineWidth;
-	Vector4 m_color1;
-	Vector4 m_color2;
-
+	Vector4 m_baseColor;
+	Vector4 m_animColor;
+	bool m_additiveBatch;
+	
 	//obj
 	bool m_billboardObject;
 	
-	// Instance data as vertex buffer
+	// Instance data
 	Tr2BufferAL m_vertexBuffer;
-	//number of locations in memory between successive elements
 	unsigned const m_stride;
-	// Number of instances
 	unsigned m_vertexCount;
 
 	Tr2MeshPtr m_mesh;
@@ -167,5 +155,3 @@ private:
 };
 
 TYPEDEF_BLUECLASS( EveChildLineSet );
-
-#endif

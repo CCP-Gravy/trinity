@@ -10,21 +10,20 @@
 
 Be::VarChooser LineSetTypeChooser[] =
 {
-	{ "ObjectRender", BeCast( EveChildLineSet::ObjectRender ), "sprites or other objects are rendered at each segment" },
-	{ "LineRender", BeCast( EveChildLineSet::LineRender ), "to author simple vfx circles" },
-	{ "Both", BeCast( EveChildLineSet::Both ), "Both of the above" },
+	{ "ObjectRender", BeCast( EveChildLineSet::OBJECT_RENDER ), "sprites or other objects are rendered at each segment" },
+	{ "LineRender", BeCast( EveChildLineSet::LINE_RENDER ), "To render a 3dLine shader between the points" },
+	{ "Both", BeCast( EveChildLineSet::BOTH ), "Both of the above" },
 	{ 0 }
 };
 BLUE_REGISTER_ENUM_EX( "LineSetTypes", EveChildLineSet::lineSetType, LineSetTypeChooser, ENUM_REG_ENUM_OBJECT_ON_MODULE );
 
 Be::VarChooser LineSetObjTypeChooser[] =
 {
-	{ "Circle", BeCast( EveChildLineSet::Circle ), "to author simple vfx circles" },
-	{ "BezierCurve", BeCast( EveChildLineSet::BezierCurve ), "to author simple vfx curves" },
+	{ "Circle", BeCast( EveChildLineSet::CIRCLE ), "to author simple vfx circles" },
+	{ "BezierCurve", BeCast( EveChildLineSet::BEZIER_CURVE ), "to author simple vfx curves" },
 	{ 0 }
 };
 BLUE_REGISTER_ENUM_EX( "LineSetObjTypes", EveChildLineSet::lineSetObjType, LineSetObjTypeChooser, ENUM_REG_ENUM_OBJECT_ON_MODULE );
-
 
 BLUE_DEFINE(EveChildLineSet);
 
@@ -34,19 +33,19 @@ const Be::ClassInfo* EveChildLineSet::ExposeToBlue()
 		MAP_INTERFACE( EveChildLineSet )
 		MAP_INTERFACE( IEveSpaceObjectChild )
 		MAP_INTERFACE( IInitialize )
-		MAP_INTERFACE( IListNotify )
 		MAP_INTERFACE( INotify )
 		MAP_INTERFACE( ITr2Renderable )
 
 		MAP_ATTRIBUTE( "name", m_name, "", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "display", m_display, "", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "alwaysOn", m_isAlwaysOn, "If false this will be hidden if a spaceobjects activation strength < 0.5. If True then it is always on.", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "translation", m_translation, "", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "rotation", m_rotation, "", Be::READWRITE | Be::PERSIST )
+		
 
 		MAP_ATTRIBUTE_WITH_CHOOSER( "objectType", m_objType, "", Be::READWRITE | Be::PERSIST | Be::ENUM | Be::NOTIFY, LineSetObjTypeChooser )
 		MAP_ATTRIBUTE_WITH_CHOOSER( "renderType", m_type, "", Be::READWRITE | Be::PERSIST | Be::ENUM | Be::NOTIFY, LineSetTypeChooser )
 
-		MAP_ATTRIBUTE( "circleCenter", m_circleCenter, "the circle's center\n"":jessica-group: Circle", Be::READWRITE | Be::PERSIST | Be::NOTIFY )
 		MAP_ATTRIBUTE( "circleRadius", m_circleRadius, "the circle's radius\n"":jessica-group: Circle", Be::READWRITE | Be::PERSIST | Be::NOTIFY )
 		MAP_ATTRIBUTE( "circleDistort", m_circleDistort, "use this if you want to author an elipsoid or bend the circle in 3d space (.y and .w -> curvature) (.x and .z -> distort on x/z-axis)\n"":jessica-group: Circle", Be::READWRITE | Be::PERSIST | Be::NOTIFY )
 		MAP_ATTRIBUTE( "numSegments", m_numSegments, "nuber of segments that the circle is split up into\n:jessica-group: Circle", Be::READWRITE | Be::PERSIST | Be::NOTIFY )
@@ -59,10 +58,11 @@ const Be::ClassInfo* EveChildLineSet::ExposeToBlue()
 		
 	
 		MAP_ATTRIBUTE( "lineWidth", m_lineWidth, "thickness of the circle's line\n:jessica-group: LineRender", Be::READWRITE | Be::PERSIST | Be::NOTIFY )
-		MAP_ATTRIBUTE( "BaseColor", m_color1, "color for lines\n:jessica-group: LineRender", Be::READWRITE | Be::PERSIST | Be::NOTIFY )
-		MAP_ATTRIBUTE( "AnimColor", m_color2, "color for lines\n:jessica-group: LineRender", Be::READWRITE | Be::PERSIST | Be::NOTIFY )
+		MAP_ATTRIBUTE( "baseColor", m_baseColor, "color for lines\n:jessica-group: LineRender", Be::READWRITE | Be::PERSIST | Be::NOTIFY )
+		MAP_ATTRIBUTE( "animColor", m_animColor, "color for lines\n:jessica-group: LineRender", Be::READWRITE | Be::PERSIST | Be::NOTIFY )
+		MAP_ATTRIBUTE( "additiveBatches", m_additiveBatch, "Control for how the curveSet is rendered\n:jessica-group: LineRender", Be::READWRITE | Be::PERSIST | Be::NOTIFY )
 		MAP_ATTRIBUTE( "scrollSpeed", m_scrollSpeed, "controls the animation speed of the anim texture\n:jessica-group: LineRender", Be::READWRITE | Be::PERSIST | Be::NOTIFY )
-		MAP_ATTRIBUTE( "animSegmenting", m_scrollSegmenting, "size of each animated portion\n:jessica-group: LineRender", Be::READWRITE | Be::PERSIST | Be::NOTIFY )
+		MAP_ATTRIBUTE( "scrollSegmenting", m_scrollSegmenting, "size of each animated portion\n:jessica-group: LineRender", Be::READWRITE | Be::PERSIST | Be::NOTIFY )
 
 		
 		MAP_ATTRIBUTE( "objectScale", m_objectScale, "increase/decrease the size of the mesh render\n:jessica-group: ObjectRenderer", Be::READWRITE | Be::PERSIST )

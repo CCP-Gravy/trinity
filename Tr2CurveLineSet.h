@@ -96,6 +96,8 @@ public:
 		m_pickEffect = shader;
 	}
 
+	void SetAdditiveFlag( bool b );
+
 protected:
 	// line types (straight, curved, sphered, ...)
 	enum LineType
