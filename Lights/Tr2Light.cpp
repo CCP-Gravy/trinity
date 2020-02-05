@@ -71,11 +71,13 @@ void Tr2Light::AddLight( Tr2LightManager& lightManager, CXMMATRIX transform, flo
 	data.position = Vector3( XMVector3TransformCoord( m_lightData.position, transform ) );
 	float outerAngle = 2.0f + cos(TRI_2PI * m_lightData.outerAngle / 360.0f); // we do this so we always have a direction, if we have a spotlight
 
+	Matrix lightRotation;
 	switch( m_type )
 	{
 	case SPOT_LIGHT:
 		// rotate the direction
-		data.direction = Transform( Vector4( 0.0, 0.0, -outerAngle, 0.0 ), RotationMatrix( m_lightData.rotation ) * transform ).GetXYZ();
+		lightRotation = RotationMatrix( Normalize( m_lightData.rotation * RotationQuaternion( transform ) ) );
+		data.direction = Transform( Vector4( 0.0, 0.0, -outerAngle, 0.0 ), lightRotation ).GetXYZ();
 		data.innerAngle = cos(TRI_2PI * m_lightData.innerAngle / 360.0f);
 		break;
 	default:
