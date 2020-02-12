@@ -1662,11 +1662,11 @@ void EveSpaceScene::RenderBackgroundPass( Tr2RenderContext& renderContext )
 
 	renderContext.AddGpuMarker( __FUNCTION__ );
 
+	Matrix orgViewMatrix = SetupPlanetViewMatrix();
+
 	// Update planet LODs and render planets
 	TriFrustum frustum;
 	frustum.DeriveFrustum( &Tr2Renderer::GetViewTransform(), &Tr2Renderer::GetViewPosition(), &Tr2Renderer::GetProjectionTransform(), gTriDev->mViewport );
-
-	Matrix orgViewMatrix = SetupPlanetViewMatrix();
 
 	for ( auto it = m_planets.begin(); it != m_planets.end(); ++it )
 	{
