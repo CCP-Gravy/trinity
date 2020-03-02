@@ -88,7 +88,6 @@ void EveEffectRoot2::OnListModified( long event, ssize_t key, ssize_t key2, IRoo
 				{
 					child->SetControllerVariable( it->first.c_str(), it->second );
 				}
-				child->StartControllers();
 			}
 			break;
 		default:
