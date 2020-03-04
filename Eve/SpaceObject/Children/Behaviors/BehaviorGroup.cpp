@@ -288,6 +288,10 @@ float BehaviorGroup::AllTheSame()
 // The function without arguments to be called from the UI
 void BehaviorGroup::RemoveAgent()
 {
+	if( m_agents.size() <= 0 )
+	{
+		return;
+	}
 	// Removes the last agent
 	RemoveSpecificAgent( m_count - 1 );
 
