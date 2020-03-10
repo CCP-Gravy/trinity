@@ -43,20 +43,15 @@ public:
 
 	/////////////////////////////////////////////////////////////////////////////////////
 	// BehaviorGroup
-	void CreateAgentTree();
 	void AddAgent();
 	void RemoveAgent();
 	void RemoveSpecificAgent( int index );
-	void RemoveAgentsByCount( int count );
-	void ReleaseCachedData( BlueAsyncRes* );
-	void RebuildCachedData( BlueAsyncRes* );
-	void CreateVertexDeclaration();
 	void Update( EveUpdateContext& updateContext );
 	void UpdateAgents( const float dt, EveChildBehaviorSystem& system );
-	void ProcessLOD( DroneAgent& agent );
-	void CreateSpriteVertexDeclaration();
 	float AllTheSame();
 	bool IsGroupVisible();
+	void CreateVertexDeclaration();
+	void CreateSpriteVertexDeclaration();
 
 	// Getters
 	size_t GetSize();
@@ -72,10 +67,8 @@ public:
 	void GetRenderables( std::vector<ITr2Renderable*>& renderables );
 
 	// Setters
-	void SetMeshToggle( bool toggle );
 	void SetCount( int count );
 	void SetGroupIndexIndicator( int index );
-	void SetBlendRange( float min, float max );
 	void SetVertexFunctionReferance( const std::function<void( void )>& F );
 
 	// Variables
@@ -96,11 +89,15 @@ public:
 private:
 	/////////////////////////////////////////////////////////////////////////////////////
 	// BehaviorGroup
+	void CreateAgentTree();
 	void AddAgentPrivate();
 	void AddAgentsByCount( int count );
+	void RemoveAgentsByCount( int count );
 	void UpdateCurrentScreenSize();
 	void ToggleMesh();
 	void SortBehaviorIndexes();
+	void ReleaseCachedData( BlueAsyncRes* );
+	void RebuildCachedData( BlueAsyncRes* );
 
 	// Variables
 	BlueSharedString m_behaviorGroupName; 	// name to identify group
