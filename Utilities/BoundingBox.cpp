@@ -514,8 +514,8 @@ bool IntersectAxisAlignedBoxRay( const Vector3& minBounds, const Vector3& maxBou
 	XMVECTOR smallerIntersection = XMVectorMin( t0, t1 );
 	XMVECTOR biggerIntersection = XMVectorMax( t0, t1);
 
-	float minT = max( smallerIntersection.m128_f32[0], max( smallerIntersection.m128_f32[1], smallerIntersection.m128_f32[2] ) );
-	float maxT = min( biggerIntersection.m128_f32[0], min( biggerIntersection.m128_f32[1], biggerIntersection.m128_f32[2] ) );
+	float minT = max( XMVectorGetX( smallerIntersection ), max( XMVectorGetY( smallerIntersection ), XMVectorGetZ( smallerIntersection ) ) );
+	float maxT = min( XMVectorGetX( biggerIntersection ), min( XMVectorGetY( biggerIntersection ), XMVectorGetZ( biggerIntersection ) ) );
 
 	intersection = rayOrigin + minT * rayDir;
 	return minT < maxT;
