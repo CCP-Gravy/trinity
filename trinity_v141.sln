@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27703.2042
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29728.190
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "trinity", "trinity_v141.vcxproj", "{BEB47D8C-1734-4A73-91CE-D405F5468B08}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -57,6 +57,8 @@ Global
 		ReleaseGLES2_27|x64 = ReleaseGLES2_27|x64
 		ReleaseGLES2|Win32 = ReleaseGLES2|Win32
 		ReleaseGLES2|x64 = ReleaseGLES2|x64
+		ReleaseSTUB_27|Win32 = ReleaseSTUB_27|Win32
+		ReleaseSTUB_27|x64 = ReleaseSTUB_27|x64
 		ReleaseSTUB|Win32 = ReleaseSTUB|Win32
 		ReleaseSTUB|x64 = ReleaseSTUB|x64
 	EndGlobalSection
@@ -145,6 +147,10 @@ Global
 		{BEB47D8C-1734-4A73-91CE-D405F5468B08}.ReleaseGLES2|Win32.Build.0 = ReleaseGLES2|Win32
 		{BEB47D8C-1734-4A73-91CE-D405F5468B08}.ReleaseGLES2|x64.ActiveCfg = ReleaseGLES2|Win32
 		{BEB47D8C-1734-4A73-91CE-D405F5468B08}.ReleaseGLES2|x64.Build.0 = ReleaseGLES2|Win32
+		{BEB47D8C-1734-4A73-91CE-D405F5468B08}.ReleaseSTUB_27|Win32.ActiveCfg = ReleaseStub_27|Win32
+		{BEB47D8C-1734-4A73-91CE-D405F5468B08}.ReleaseSTUB_27|Win32.Build.0 = ReleaseStub_27|Win32
+		{BEB47D8C-1734-4A73-91CE-D405F5468B08}.ReleaseSTUB_27|x64.ActiveCfg = ReleaseStub_27|x64
+		{BEB47D8C-1734-4A73-91CE-D405F5468B08}.ReleaseSTUB_27|x64.Build.0 = ReleaseStub_27|x64
 		{BEB47D8C-1734-4A73-91CE-D405F5468B08}.ReleaseSTUB|Win32.ActiveCfg = ReleaseStub|Win32
 		{BEB47D8C-1734-4A73-91CE-D405F5468B08}.ReleaseSTUB|Win32.Build.0 = ReleaseStub|Win32
 		{BEB47D8C-1734-4A73-91CE-D405F5468B08}.ReleaseSTUB|x64.ActiveCfg = ReleaseStub|x64
@@ -233,6 +239,10 @@ Global
 		{0556322D-6639-4545-5650-F93498443165}.ReleaseGLES2|Win32.Build.0 = Release_GLES2|Win32
 		{0556322D-6639-4545-5650-F93498443165}.ReleaseGLES2|x64.ActiveCfg = Release_GLES2|x64
 		{0556322D-6639-4545-5650-F93498443165}.ReleaseGLES2|x64.Build.0 = Release_GLES2|x64
+		{0556322D-6639-4545-5650-F93498443165}.ReleaseSTUB_27|Win32.ActiveCfg = Release_Stub|Win32
+		{0556322D-6639-4545-5650-F93498443165}.ReleaseSTUB_27|Win32.Build.0 = Release_Stub|Win32
+		{0556322D-6639-4545-5650-F93498443165}.ReleaseSTUB_27|x64.ActiveCfg = Release_Stub|x64
+		{0556322D-6639-4545-5650-F93498443165}.ReleaseSTUB_27|x64.Build.0 = Release_Stub|x64
 		{0556322D-6639-4545-5650-F93498443165}.ReleaseSTUB|Win32.ActiveCfg = Release_Stub|Win32
 		{0556322D-6639-4545-5650-F93498443165}.ReleaseSTUB|Win32.Build.0 = Release_Stub|Win32
 		{0556322D-6639-4545-5650-F93498443165}.ReleaseSTUB|x64.ActiveCfg = Release_Stub|x64
@@ -321,6 +331,10 @@ Global
 		{82BC94E8-0F17-33C6-2A7D-D8E7375A221E}.ReleaseGLES2|Win32.Build.0 = Release|Win32
 		{82BC94E8-0F17-33C6-2A7D-D8E7375A221E}.ReleaseGLES2|x64.ActiveCfg = Release|x64
 		{82BC94E8-0F17-33C6-2A7D-D8E7375A221E}.ReleaseGLES2|x64.Build.0 = Release|x64
+		{82BC94E8-0F17-33C6-2A7D-D8E7375A221E}.ReleaseSTUB_27|Win32.ActiveCfg = Release|Win32
+		{82BC94E8-0F17-33C6-2A7D-D8E7375A221E}.ReleaseSTUB_27|Win32.Build.0 = Release|Win32
+		{82BC94E8-0F17-33C6-2A7D-D8E7375A221E}.ReleaseSTUB_27|x64.ActiveCfg = Release|x64
+		{82BC94E8-0F17-33C6-2A7D-D8E7375A221E}.ReleaseSTUB_27|x64.Build.0 = Release|x64
 		{82BC94E8-0F17-33C6-2A7D-D8E7375A221E}.ReleaseSTUB|Win32.ActiveCfg = Release|Win32
 		{82BC94E8-0F17-33C6-2A7D-D8E7375A221E}.ReleaseSTUB|Win32.Build.0 = Release|Win32
 		{82BC94E8-0F17-33C6-2A7D-D8E7375A221E}.ReleaseSTUB|x64.ActiveCfg = Release|x64
