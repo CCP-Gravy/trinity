@@ -53,6 +53,54 @@ bool EveStretch3::Initialize()
 	return true;
 }
 
+void EveStretch3::RunOnComponents( std::function<void( IEveSpaceObjectChild* )> func ) const 
+{
+	if( m_sourceObject )
+	{
+		func( m_sourceObject );
+	}
+
+	if( m_destObject )
+	{
+		func( m_destObject );
+	}
+
+	if( m_stretchObject )
+	{
+		func( m_stretchObject );
+	}
+
+	if( m_moveObject )
+	{
+		func( m_moveObject );
+	}
+}
+
+float EveStretch3::RunOnComponentsGetMax( std::function<float( IEveSpaceObjectChild* )> func ) const
+{
+	float ret = -1.f;
+	if( m_sourceObject )
+	{
+		ret = max( ret, func( m_sourceObject ) );
+	}
+
+	if( m_destObject )
+	{
+		ret = max( ret, func( m_destObject ) );
+	}
+
+	if( m_stretchObject )
+	{
+		ret = max( ret, func( m_stretchObject ) );
+	}
+
+	if( m_moveObject )
+	{
+		ret = max( ret, func( m_moveObject ) );
+	}
+	return ret;
+}
+
 bool EveStretch3::OnModified( Be::Var* value )
 {
 	if( IsMatch( value, m_stretchObject ) )
@@ -290,25 +338,7 @@ void EveStretch3::GetRenderables( std::vector<ITr2Renderable*>& renderables, Tr2
 		return;
 	}
 
-	if( m_sourceObject )
-	{
-		m_sourceObject->GetRenderables( renderables );
-	}
-
-	if( m_destObject )
-	{
-		m_destObject->GetRenderables( renderables );
-	}
-
-	if( m_stretchObject )
-	{
-		m_stretchObject->GetRenderables( renderables );
-	}
-
-	if( m_moveObject )
-	{
-		m_moveObject->GetRenderables( renderables );
-	}
+	RunOnComponents( [&renderables]( IEveSpaceObjectChild* c ) { c->GetRenderables( renderables ); } );
 }
 
 void EveStretch3::SetDisplay( bool display )
@@ -403,45 +433,23 @@ void EveStretch3::GetLights( Tr2LightManager& lightManager ) const
 		return;
 	}
 
-	if( m_sourceObject )
-	{
-		m_sourceObject->GetLights( lightManager );
-	}
-
-	if( m_destObject )
-	{
-		m_destObject->GetLights( lightManager );
-	}
-
-	if( m_stretchObject )
-	{
-		m_stretchObject->GetLights( lightManager );
-	}
-	
-	if( m_moveObject )
-	{
-		m_moveObject->GetLights( lightManager );;
-	}
+	RunOnComponents( [&lightManager]( IEveSpaceObjectChild* c ) { c->GetLights( lightManager ); } );
 }
+
+void EveStretch3::GetBindingRoots( std::unordered_map<std::string, IRoot*>& variables )
+{
+	ITr2ControllerOwner::GetBindingRoots( variables );
+
+	variables["Source"] = m_sourceObject;
+	variables["Dest"] = m_destObject;
+	variables["Stretch"] = m_stretchObject;
+	variables["Move"] = m_moveObject;
+}
+
 
 void EveStretch3::SetControllerVariable( const char* name, float value )
 {
-	if( m_sourceObject )
-	{
-		m_sourceObject->SetControllerVariable( name, value );
-	}
-	if( m_destObject )
-	{
-		m_destObject->SetControllerVariable( name, value );
-	}
-	if( m_stretchObject )
-	{
-		m_stretchObject->SetControllerVariable( name, value );
-	}
-	if( m_moveObject )
-	{
-		m_moveObject->SetControllerVariable( name, value );
-	}
+	RunOnComponents( [name, value]( IEveSpaceObjectChild* c ) { c->SetControllerVariable( name, value ); } );
 
 	for( auto it = begin( m_controllers ); it != end( m_controllers ); ++it )
 	{
@@ -452,23 +460,7 @@ void EveStretch3::SetControllerVariable( const char* name, float value )
 
 void EveStretch3::HandleControllerEvent( const char* name )
 {
-
-	if( m_sourceObject )
-	{
-		m_sourceObject->HandleControllerEvent( name );
-	}
-	if( m_destObject )
-	{
-		m_destObject->HandleControllerEvent( name );
-	}
-	if( m_stretchObject )
-	{
-		m_stretchObject->HandleControllerEvent( name );
-	}
-	if( m_moveObject )
-	{
-		m_moveObject->HandleControllerEvent( name );
-	}
+	RunOnComponents( [name]( IEveSpaceObjectChild* c ) { c->HandleControllerEvent( name ); } );
 
 	for( auto it = begin( m_controllers ); it != end( m_controllers ); ++it )
 	{
@@ -478,22 +470,7 @@ void EveStretch3::HandleControllerEvent( const char* name )
 
 void EveStretch3::StartControllers()
 {
-	if( m_sourceObject )
-	{
-		m_sourceObject->StartControllers( );
-	}
-	if( m_destObject )
-	{
-		m_destObject->StartControllers( );
-	}
-	if( m_stretchObject )
-	{
-		m_stretchObject->StartControllers( );
-	}
-	if( m_moveObject )
-	{
-		m_moveObject->StartControllers();
-	}
+	RunOnComponents( []( IEveSpaceObjectChild* c ) { c->StartControllers(); } );
 
 	for( auto it = begin( m_controllers ); it != end( m_controllers ); ++it )
 	{
@@ -504,42 +481,12 @@ void EveStretch3::StartControllers()
 
 void EveStretch3::RegisterWithQuadRenderer( Tr2QuadRenderer& quadRenderer )
 {
-	if( m_sourceObject )
-	{
-		m_sourceObject->RegisterWithQuadRenderer( quadRenderer );
-	}
-	if( m_destObject )
-	{
-		m_destObject->RegisterWithQuadRenderer( quadRenderer );
-	}
-	if( m_stretchObject )
-	{
-		m_stretchObject->RegisterWithQuadRenderer( quadRenderer );
-	}
-	if( m_moveObject )
-	{
-		m_moveObject->RegisterWithQuadRenderer( quadRenderer );
-	}
+	RunOnComponents( [&quadRenderer]( IEveSpaceObjectChild* c ) { c->RegisterWithQuadRenderer( quadRenderer ); } );
 }
 
 void EveStretch3::AddQuadsToQuadRenderer( const TriFrustum& frustum, Tr2QuadRenderer& quadRenderer )
 {
-	if( m_sourceObject )
-	{
-		m_sourceObject->AddQuadsToQuadRenderer( frustum, quadRenderer );
-	}
-	if( m_destObject )
-	{
-		m_destObject->AddQuadsToQuadRenderer( frustum, quadRenderer );
-	}
-	if( m_stretchObject )
-	{
-		m_stretchObject->AddQuadsToQuadRenderer( frustum, quadRenderer );
-	}
-	if( m_moveObject )
-	{
-		m_moveObject->AddQuadsToQuadRenderer( frustum, quadRenderer );
-	}
+	RunOnComponents( [&frustum, &quadRenderer]( IEveSpaceObjectChild* c ) { c->AddQuadsToQuadRenderer( frustum, quadRenderer ); } );
 }
 
 void EveStretch3::UpdateModelCenterWorldPosition( Vector3& position, Be::Time t )
@@ -562,4 +509,162 @@ void EveStretch3::GetLocalToWorldTransform( Matrix& transform ) const
 void EveStretch3::SetDestObjectScale( float scale ) 
 {
 	m_destObjectScale = scale; 
+}
+
+void EveStretch3::GetDebugOptions( Tr2DebugRendererOptions& options )
+{
+	options.insert( "Lights" );
+	RunOnComponents( [&options]( IEveSpaceObjectChild* c ) { 
+		auto debugRenderable = dynamic_cast< ITr2DebugRenderable* >( c );
+		if( debugRenderable )
+		{
+			debugRenderable->GetDebugOptions( options );
+		}
+	} );
+}
+
+void EveStretch3::RenderDebugInfo( ITr2DebugRenderer2& renderer )
+{
+	if( !m_display )
+	{
+		return;
+	}
+	RunOnComponents( [&renderer]( IEveSpaceObjectChild* c ) {
+		auto debugRenderable = dynamic_cast< ITr2DebugRenderable* >( c );
+		if( debugRenderable )
+		{
+			debugRenderable->RenderDebugInfo( renderer );
+		}
+	} );
+}
+
+void EveStretch3::PlayCurveSet( const std::string& name, const std::string& rangeName )
+{
+	if( !m_display )
+	{
+		return;
+	}
+
+	for( auto it = m_curveSets.begin(); it != m_curveSets.end(); it++ )
+	{
+		if( ( *it )->GetName() == name )
+		{
+			if( rangeName.empty() )
+			{
+				( *it )->ResetTimeRange();
+				( *it )->Play();
+			}
+			else
+			{
+				( *it )->PlayTimeRange( rangeName.c_str() );
+			}
+		}
+	}
+
+	RunOnComponents( [name, rangeName]( IEveSpaceObjectChild* c ) {
+		auto curveSetOwner = dynamic_cast< ITr2CurveSetOwner* >( c );
+		if( curveSetOwner )
+		{
+			curveSetOwner->PlayCurveSet( name, rangeName );
+		}
+	} );
+}
+
+void EveStretch3::StopCurveSet( const std::string& name )
+{
+	if( !m_display )
+	{
+		return;
+	}
+
+	for( auto it = m_curveSets.begin(); it != m_curveSets.end(); it++ )
+	{
+		if( ( *it )->GetName() == name )
+		{
+			( *it )->Stop();
+		}
+	}
+
+	RunOnComponents( [name]( IEveSpaceObjectChild* c ) {
+		auto curveSetOwner = dynamic_cast< ITr2CurveSetOwner* >( c );
+		if( curveSetOwner )
+		{
+			curveSetOwner->StopCurveSet( name );
+		}
+	} );
+}
+
+void EveStretch3::UpdateCurveSet( const std::string& name, Be::Time time )
+{
+	for( auto it = m_curveSets.begin(); it != m_curveSets.end(); it++ )
+	{
+		if( ( *it )->GetName() == name )
+		{
+			( *it )->Update( time, time );
+		}
+	}
+	
+	RunOnComponents( [name, time]( IEveSpaceObjectChild* c ) {
+		auto curveSetOwner = dynamic_cast< ITr2CurveSetOwner* >( c );
+		if( curveSetOwner )
+		{
+			curveSetOwner->UpdateCurveSet( name, time );
+		}
+	} );
+
+}
+
+float EveStretch3::GetCurveSetDuration( const std::string& name ) const
+{
+	if( !m_display )
+	{
+		return 0.f;
+	}
+
+	float maxDuration = 0.f;
+	for( auto it = m_curveSets.begin(); it != m_curveSets.end(); it++ )
+	{
+		if( ( *it )->GetName() == name )
+		{
+			maxDuration = max( maxDuration, ( *it )->GetMaxCurveDuration() );
+		}
+	}
+	float componentMax = RunOnComponentsGetMax( [name]( IEveSpaceObjectChild* c )-> float {
+		auto curveSetOwner = dynamic_cast< ITr2CurveSetOwner* >( c );
+		if( curveSetOwner )
+		{
+			return curveSetOwner->GetCurveSetDuration( name );
+		}
+		return 0.0f;
+	} );
+
+	return max(maxDuration, componentMax);
+}
+
+float EveStretch3::GetRangeDuration( const std::string& name, const std::string& rangeName ) const
+{
+	if( !m_display )
+	{
+		return 0.f;
+	}
+
+	float maxDuration = 0.f;
+	for( auto it = m_curveSets.begin(); it != m_curveSets.end(); it++ )
+	{
+		if( ( *it )->GetName() == name )
+		{
+			maxDuration = max( maxDuration, ( *it )->GetRangeDuration( rangeName.c_str() ) );
+		}
+	}
+
+	float componentMax = RunOnComponentsGetMax( [name, rangeName]( IEveSpaceObjectChild* c ) -> float {
+		auto curveSetOwner = dynamic_cast< ITr2CurveSetOwner* >( c );
+		if( curveSetOwner )
+		{
+			return curveSetOwner->GetRangeDuration( name, rangeName );
+		}
+		return 0.0f;
+	} );
+
+	return max(maxDuration, componentMax);
 }

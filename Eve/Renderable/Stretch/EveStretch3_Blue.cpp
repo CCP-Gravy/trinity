@@ -6,9 +6,9 @@
 
 #include "StdAfx.h"
 #include "EveStretch3.h"
-#include "TriFloat.h"
 
 BLUE_DEFINE( EveStretch3 );
+BLUE_DEFINE_INTERFACE( ITr2DebugRenderable );
 
 const Be::ClassInfo* EveStretch3::ExposeToBlue()
 {
@@ -51,7 +51,7 @@ const Be::ClassInfo* EveStretch3::ExposeToBlue()
 			"source",        
 			m_source,
 			"", 
-			Be::READWRITE | Be::NOTIFY
+			Be::READWRITE | Be::PERSIST | Be::NOTIFY
 		)		
 
 		MAP_ATTRIBUTE
@@ -59,7 +59,7 @@ const Be::ClassInfo* EveStretch3::ExposeToBlue()
 			"dest",        
 			m_dest,
 			"", 
-			Be::READWRITE | Be::NOTIFY
+			Be::READWRITE | Be::PERSIST | Be::NOTIFY
 		)
 
 		MAP_ATTRIBUTE

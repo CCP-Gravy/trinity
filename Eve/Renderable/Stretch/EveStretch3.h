@@ -7,6 +7,8 @@
 #pragma once
 #include "Eve/IEveFiringEffectElement.h"
 #include "Eve/IEveSpaceObject2.h"
+#include "Tr2DebugRenderer.h"
+#include "ITr2CurveSetOwner.h"
 #include "Controllers/ITr2ControllerOwner.h"
 
 BLUE_DECLARE( EveStretch3 );
@@ -24,11 +26,13 @@ BLUE_DECLARE_VECTOR( TriCurveSet );
 
 BLUE_CLASS( EveStretch3 ):
 	public IEveFiringEffectElement,
+	public ITr2DebugRenderable,
 	public IEveSpaceObject2,
 	public ITr2ControllerOwner,
 	public INotify,
 	public IListNotify,
-	public IInitialize
+	public IInitialize,
+	public ITr2CurveSetOwner
 {
 public:
     EXPOSE_TO_BLUE();
@@ -60,6 +64,7 @@ public:
 	virtual void SetControllerVariable( const char* name, float value );
 	virtual void HandleControllerEvent( const char* name );
 	virtual void StartControllers();
+	virtual void GetBindingRoots( std::unordered_map<std::string, IRoot*>& variables );
 
 	/////////////////////////////////////////////////////////////////////////////////////
 	// INotify
@@ -68,6 +73,19 @@ public:
 	//////////////////////////////////////////////////////////////////////////
 	// IListNotify
 	void OnListModified( long event, ssize_t key, ssize_t key2, IRoot* value, const IList* theList ) override;
+
+	/////////////////////////////////////////////////////////////////////////////////////
+	// ITr2DebugRenderable
+	void GetDebugOptions( Tr2DebugRendererOptions& options );
+	void RenderDebugInfo( ITr2DebugRenderer2& renderer ) override;
+
+	/////////////////////////////////////////////////////////////////////////////////////
+	// ITr2CurveSetOwner
+	void PlayCurveSet( const std::string& name, const std::string& rangeName );
+	void StopCurveSet( const std::string& name );
+	void UpdateCurveSet( const std::string& name, Be::Time time );
+	float GetCurveSetDuration( const std::string& name ) const;
+	float GetRangeDuration( const std::string& name, const std::string& rangeName ) const;
 
 	//////////////////////////////////////////////////////////////////////////
 	// IEveFiringEffectElement
@@ -83,6 +101,9 @@ public:
 	void SetDisplay( bool display ) override;
 
 private:
+	void RunOnComponents( std::function<void( IEveSpaceObjectChild* )> func ) const;
+	float RunOnComponentsGetMax( std::function<float( IEveSpaceObjectChild* )> func ) const;
+
 	std::string m_name;
 
 	bool m_display;
