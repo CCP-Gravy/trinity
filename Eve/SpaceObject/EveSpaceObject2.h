@@ -365,6 +365,7 @@ public:
 	int GetClosestLocatorIndex( const Vector3* position, BlueSharedString locatorSetName );
 	unsigned int GetLocatorCount( BlueSharedString locatorSetName ) const;
 	bool GetLocatorPosition( Vector3* out, int index, bool inWorldSpace, BlueSharedString locatorSetName );
+	bool GetLocatorDirection( Vector3* out, int index, bool inWorldSpace, BlueSharedString locatorSetName );
 	int GetGoodLocatorIndex( const Vector3& position, BlueSharedString locatorSetName );
 	// Function to find closest locator without worrying about direction of locator
 	int GetCloseLocatorIndex( const Vector3& position, BlueSharedString locatorSetName );

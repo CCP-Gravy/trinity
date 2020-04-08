@@ -10,9 +10,11 @@ SeekTarget::SeekTarget( IRoot* lockobj ) :
 	m_seconds( 0.25f ),
 	m_exit( false ),
 	m_droneArrived( false ),
+	m_sortedLocators( false ),  
 	m_target( nullptr ),
 	m_tunnelBehavior( nullptr ),
-	m_fxBehavior( nullptr )
+	m_fxBehavior( nullptr ),
+	m_locatorSetName( "damage" )
 {
 }
 
@@ -22,12 +24,12 @@ SeekTarget::~SeekTarget()
 
 size_t SeekTarget::GetScratchMemorySize() const
 {
-	return sizeof( LocatorData );
+	return sizeof( SeekTargetData );
 }
 
 void SeekTarget::InitializeScratch( void* scratchMemory )
 {
-	*static_cast<LocatorData*>( scratchMemory ) = LocatorData();
+	*static_cast<SeekTargetData*>( scratchMemory ) = SeekTargetData();
 }
 
 std::vector<Vector3> SeekTarget::CalculateBehavior( std::vector<DroneAgent>& agents, void* scratchData, const float deltaTime,
@@ -45,20 +47,41 @@ std::vector<Vector3> SeekTarget::CalculateBehavior( std::vector<DroneAgent>& age
 		m_fxBehavior = group.GetBehaviorByName( "PlayFX" );
 	}
 
-	auto data = static_cast<LocatorData*>( scratchData );
+	auto data = static_cast<SeekTargetData*>( scratchData );
 	for( auto agent = agents.begin(); agent != agents.end(); ++agent, ++data )
 	{
 		// If drone does not have a picked locator, then pick one
 		if( agent->target == Vector3( 0, 0, 0 ) )
 		{
-			unsigned int count = m_target->GetDamageLocatorCount();
-			int rand = TriRandInt( count );
-			data->index = rand;
-			m_target->GetDamageLocatorDirection( &data->direction, data->index, true );
+			if( m_sortedLocators )
+			{
+				data->bucketId = agent->id % m_boundingBoxes.size();
+				auto bucket = m_locatorBucketIndices[data->bucketId];
+				data->locatorIndex = TriRandInt( int( bucket.size() ) );
+			}
+			else
+			{
+				unsigned int count = m_target->GetLocatorCount( m_locatorSetName );
+				int rand = TriRandInt( count );
+				data->locatorIndex = rand;
+			}
 		}
 
-		// Want to keep this updated because the ship might be moving (upon dock)
-		m_target->GetDamageLocatorPosition( &data->position, data->index, true );
+		Matrix targetWorldTransform;
+		m_target->GetLocalToWorldTransform( targetWorldTransform );
+
+		// Want to keep this updated because the ship might be moving (when docking)
+		if( m_sortedLocators )
+		{
+			int locatorIndex = m_locatorBucketIndices[data->bucketId][data->locatorIndex];
+			m_target->GetLocatorPosition( &data->position, locatorIndex, true, m_locatorSetName );
+			m_target->GetLocatorDirection( &data->direction, locatorIndex, true, m_locatorSetName );
+		}
+		else
+		{
+			m_target->GetLocatorPosition( &data->position, data->locatorIndex, true, m_locatorSetName );
+			m_target->GetLocatorDirection( &data->direction, data->locatorIndex, true, m_locatorSetName );
+		}
 
 		agent->target = data->position;
 		
@@ -138,7 +161,7 @@ std::vector<Vector3> SeekTarget::CalculateBehavior( std::vector<DroneAgent>& age
 	return m_todo;
 }
 
-void SeekTarget::SetTarget( ITriTargetable* target )
+void SeekTarget::SetTarget( EveSpaceObject2* target )
 {
 	m_target = target;
 }
@@ -167,6 +190,100 @@ void SeekTarget::ResetBehavior( )
 
 	m_exit = false;
 	m_droneArrived = false;
+}
+
+void SeekTarget::SplitBoundingBox()
+{
+	Vector3 mn, mx;
+	if( !m_target->GetLocalBoundingBox( mn, mx ) )
+	{
+		return;
+	}
+
+	// Get width, height and length of bounding box
+	Vector3 bb = mx - mn;
+
+	float largest = -std::numeric_limits<float>::max();
+	float secondLargest = -std::numeric_limits<float>::max();
+	int maxIndex = -1;
+
+	for( int i = 0; i < 3; ++i )
+	{
+		if( bb[i] > largest )
+		{
+			secondLargest = largest;
+			largest = bb[i];
+			maxIndex = i;
+		}
+		else if( bb[i] > secondLargest && bb[i] != largest )
+		{
+			secondLargest = bb[i];
+		}
+	}
+
+	if( maxIndex == -1 )
+	{
+		return;
+	}
+	
+	float desiredLength = largest;
+	int boxCount = 0;
+
+	Vector3 aabbMin = mn;
+	Vector3 aabbMax = mx;
+
+	while( desiredLength > secondLargest )
+	{
+		desiredLength *= 0.5;
+	}
+
+	boxCount = int( largest ) / int( desiredLength );
+	for( int i = 0; i < boxCount; ++i )
+	{
+		aabbMin[maxIndex] = ( i * desiredLength ) + mn[maxIndex];
+		aabbMax[maxIndex] = ( i + 1 ) * desiredLength + mn[maxIndex];
+		AxisAlignedBoundingBox aabb = AxisAlignedBoundingBox( aabbMin, aabbMax );
+		m_boundingBoxes.push_back( aabb );
+	}
+
+	m_locatorBucketIndices.resize( m_boundingBoxes.size() );
+
+	SortLocators();
+}
+
+void SeekTarget::SortLocators()
+{
+	auto locators = m_target->GetLocatorsForSet( m_locatorSetName );
+	if( !locators )
+	{
+		return;
+	}
+
+	for( int i = 0; i < m_locatorBucketIndices.size(); ++i )
+	{
+		for( int j = 0; j < int( locators->size() ); ++j )
+		{
+			if( m_boundingBoxes[i].IsPointInside( ( *locators )[j].position ) )
+			{
+				m_locatorBucketIndices[i].push_back( j );
+			}
+		}
+	}
+
+	// In case we have an empty bucket
+	for( int i = 0; i < m_locatorBucketIndices.size(); )
+	{
+		if( m_locatorBucketIndices[i].size() == 0 )
+		{
+			m_locatorBucketIndices.erase( m_locatorBucketIndices.begin() + i );
+		}
+		else
+		{
+			++i;
+		}
+	}
+
+	m_sortedLocators = true;
 }
 
 void SeekTarget::GetDebugOptions( Tr2DebugRendererOptions& options )

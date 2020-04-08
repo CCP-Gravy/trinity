@@ -4,21 +4,30 @@
 #include "Eve/SpaceObject/Children/EveChildBehaviorSystem.h"
 #include "IBehavior.h"
 #include "PlayFX.h"
+#include "Utilities/BoundingBox.h"
 
-struct LocatorData
+struct SeekTargetData
 {
-	LocatorData() :
-		index( -1 ),
+	SeekTargetData() :
+		bucketId( -1 ),
+		locatorIndex( -1 ),
 		timePassed( 0.f ),
 		position( 0, 0, 0 ),
 		direction( 0, 0, 0 )
 	{
 	}
 
-	int index;
+	int bucketId;
+	int locatorIndex;
 	float timePassed;
 	Vector3 position;
 	Vector3 direction;
+};
+
+struct LocatorData
+{
+	Vector3 position;
+	Quaternion direction;
 };
 
 BLUE_CLASS( SeekTarget ) :
@@ -38,21 +47,25 @@ public:
 	void GetDebugOptions( Tr2DebugRendererOptions& options );
 	void RenderDebugInfo( ITr2DebugRenderer2& renderer, std::vector<DroneAgent>& agents, Matrix& parentWorldLocation );
 	
-	void SetTarget( ITriTargetable* target );
+	void SetTarget( EveSpaceObject2* target );
 	void SetExit( bool value );
 	void SetBehaviorWeight( float value );
 	void ResetBehavior();
+	void SplitBoundingBox();
 
 private:
+	void SortLocators();
+
 	bool m_exit;
 	bool m_droneArrived;
+	bool m_sortedLocators;
 	float m_behaviorWeight;
 	float m_arrivedRadius;
 	float m_slowDownRadius;
 	float m_distanceFromShip;
 	float m_seconds;
 	Vector3 m_arrivalPoint; // debug
-	ITriTargetable* m_target;
+	EveSpaceObject2* m_target;
 
 	IBehavior* m_tunnelBehavior;
 	IBehavior* m_fxBehavior;
@@ -60,6 +73,13 @@ private:
 	std::vector<Vector3> m_todo;
 
 	BlueScriptCallback m_onFirstDroneArrivedCallback;
+
+	std::vector<AxisAlignedBoundingBox> m_boundingBoxes;
+	std::vector<std::vector<LocatorData>> m_locatorBuckets;
+
+	std::vector<std::vector<int>> m_locatorBucketIndices;
+	BlueSharedString m_locatorSetName;
+
 };
 
 TYPEDEF_BLUECLASS( SeekTarget );

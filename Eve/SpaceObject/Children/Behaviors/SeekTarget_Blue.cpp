@@ -17,7 +17,7 @@ const Be::ClassInfo* SeekTarget::ExposeToBlue()
 		MAP_ATTRIBUTE( "arrivedRadius", m_arrivedRadius, ":jessica-group: SeekTarget", Be::READWRITE )
 		MAP_ATTRIBUTE( "slowDownRadius", m_slowDownRadius, ":jessica-group: SeekTarget", Be::READWRITE )
 		MAP_ATTRIBUTE( "distanceFromShip", m_distanceFromShip, ":jessica-group: SeekTarget", Be::READWRITE )
-
+		MAP_ATTRIBUTE( "locatorSetName", m_locatorSetName, "The locatorSet name that repair drones seek to", Be::READWRITE )
 		MAP_ATTRIBUTE( "onFirstDroneArrivedCallback", m_onFirstDroneArrivedCallback, "A callback that is called when the first drone arrives", Be::READWRITE )
 
 		MAP_METHOD_AND_WRAP(
@@ -42,6 +42,12 @@ const Be::ClassInfo* SeekTarget::ExposeToBlue()
 			"ResetBehavior",
 			ResetBehavior,
 			"Reset seek target and play fx behavior for when players repair ship again.\n"
+			":param transforms: target" )
+
+		MAP_METHOD_AND_WRAP(
+			"SplitBoundingBox",
+			SplitBoundingBox,
+			"Splits bounding box into sub boxes if ship is large enough.\n"
 			":param transforms: target" )
 
 		EXPOSURE_END()

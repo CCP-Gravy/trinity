@@ -775,6 +775,11 @@ void BehaviorGroup::GetDebugOptions( Tr2DebugRendererOptions& options )
 	options.insert( "AgentsKDTree" );
 	options.insert( "Bounding Sphere" );
 	options.insert( "DebugBehaviors" );
+
+	for( auto group = m_behaviors.begin(); group != m_behaviors.end(); ++group )
+	{
+		( *group )->GetDebugOptions( options );
+	}
 }
 
 float BehaviorGroup::GetBoundingSphereRadius()

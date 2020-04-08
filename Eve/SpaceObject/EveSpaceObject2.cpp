@@ -2083,23 +2083,28 @@ bool EveSpaceObject2::GetImpactPosition( Vector3& out, int locator, const Vector
 
 bool EveSpaceObject2::GetDamageLocatorDirection( Vector3* out, int index, bool inWorldSpace )
 {
+	return GetLocatorDirection( out, index, inWorldSpace, DAMAGE_LOCATOR_SET_NAME );
+}
+
+bool EveSpaceObject2::GetLocatorDirection( Vector3* out, int index, bool inWorldSpace, BlueSharedString locatorSetName )
+{
 	if( index < 0 )
 	{
 		*out = Vector3( 0.f, 1.f, 0.f );
 		return false;
 	}
 
-	auto damageLocators = GetLocatorsForSet( DAMAGE_LOCATOR_SET_NAME );
-	if( !damageLocators || index >= int( damageLocators->size() ) )
+	auto locators = GetLocatorsForSet( locatorSetName );
+	if( !locators || index >= int( locators->size() ) )
 	{
 		*out = Vector3( 0.f, 1.f, 0.f );
 		return false;
 	}
 
-	const Locator& damageLocator = ( *damageLocators )[index];
+	const Locator& locator = ( *locators )[index];
 
 	Vector3 position, direction;
-	GetLocatorInObjectSpace( position, direction, damageLocator );
+	GetLocatorInObjectSpace( position, direction, locator );
 
 	if( inWorldSpace )
 	{
@@ -2109,6 +2114,7 @@ bool EveSpaceObject2::GetDamageLocatorDirection( Vector3* out, int index, bool i
 	{
 		*out = direction;
 	}
+
 	return true;
 }
 
