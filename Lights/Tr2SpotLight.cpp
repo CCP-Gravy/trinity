@@ -34,7 +34,7 @@ void Tr2SpotLight::RenderDebugInfo( ITr2DebugRenderer2& renderer, const Matrix& 
 	Vector3 innerEnd = Transform( Vector3( 0.0, 0.0, m_lightData.innerRadius * scaling ), lightRotation ).GetXYZ();
 	innerEnd = TransformCoord( innerEnd + m_lightData.position, translationMatrix );
 
-	Vector3 start = TransformCoord( m_lightData.position, translationMatrix );
+	Vector3 start = TransformCoord( m_lightData.position, worldMatrix );
 	float outerConeRadius = tan( TRI_2PI * m_lightData.outerAngle / 360.f ) * m_lightData.radius * scaling;
 	float innerConeRadius = tan( TRI_2PI * m_lightData.innerAngle / 360.f ) * m_lightData.innerRadius * scaling;
 	renderer.DrawCone( this, outerEnd, start, outerConeRadius, 10, Tr2DebugRenderer::Solid, Tr2DebugColor( selectedColor, baseColor ) );
