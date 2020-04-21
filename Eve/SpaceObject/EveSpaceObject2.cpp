@@ -696,9 +696,12 @@ void EveSpaceObject2::RenderDebugInfo( ITr2DebugRenderer2& renderer )
 
 	if( renderer.HasOption( this, "Lights" ) )
 	{
+		size_t boneCount = 0;
+		const granny_matrix_3x4* bones = nullptr;
+		GetBoneList( bones, boneCount );
 		for( auto it = m_lights.begin(); it != m_lights.end(); ++it )
 		{
-			( *it )->RenderDebugInfo( renderer, m_worldTransform );
+			( *it )->RenderDebugInfo( renderer, m_worldTransform, bones, boneCount );
 		}
 	}
 
@@ -3032,9 +3035,14 @@ void EveSpaceObject2::GetLights( Tr2LightManager& lightManager ) const
 	}
 
 	XMMATRIX worldTransform = m_worldTransform;
+	
+	size_t boneCount = 0;
+	const granny_matrix_3x4* bones = nullptr;
+	GetBoneList( bones, boneCount );
+
 	for( auto it = std::begin( m_lights ); it != std::end( m_lights ); ++it )
 	{
-		( *it )->AddLight( lightManager, worldTransform, 1.0f );
+		( *it )->AddLight( lightManager, worldTransform, 1.0f, bones, boneCount );
 		( *it )->SetBrightnessMultiplier( m_activationStrength );
 
 	}

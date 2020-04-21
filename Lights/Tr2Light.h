@@ -7,7 +7,7 @@
 
 #include "Tr2LightManager.h"
 #include "Tr2DebugRenderer.h"
-
+#include "Utilities/MatrixUtils.h"
 
 struct LightData {
 	LightData();
@@ -29,6 +29,7 @@ struct LightData {
 
 	// Textured light specifics
 	std::wstring texturePath;
+	int32_t boneIndex;
 };
 
 /*
@@ -49,14 +50,13 @@ public:
 	};
 
 	EXPOSE_TO_BLUE();
-
 	Tr2Light( IRoot* lockobj = nullptr );
-	void AddLight( Tr2LightManager& lightManager, CXMMATRIX transform, float scale );
+	void AddLight( Tr2LightManager& lightManager, CXMMATRIX transform, float scale, const granny_matrix_3x4* bones = nullptr, size_t boneCount = 0 );
 	void GetLight( Vector3& position, float& radius, Color& color );
 	void ChangeLightColor( Color c );
 
 	virtual void Update();
-	virtual void RenderDebugInfo( ITr2DebugRenderer2& renderer, const Matrix& worldMatrix );
+	virtual void RenderDebugInfo( ITr2DebugRenderer2& renderer, const Matrix& worldMatrix, const granny_matrix_3x4* bones = nullptr, size_t boneCount = 0 );
 	virtual void SetLightData( LightData& baseData );
 	void SetBrightnessMultiplier( float multi );
 

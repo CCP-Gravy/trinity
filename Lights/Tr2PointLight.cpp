@@ -14,13 +14,19 @@ Tr2PointLight::Tr2PointLight( IRoot* lockobj ):
 	m_type = POINT_LIGHT;
 }
 
-void Tr2PointLight::RenderDebugInfo( ITr2DebugRenderer2& renderer, const Matrix& worldMatrix ) 
+void Tr2PointLight::RenderDebugInfo( ITr2DebugRenderer2& renderer, const Matrix& worldMatrix, const granny_matrix_3x4* bones, size_t boneCount )
 {
 	auto baseColor = m_lightData.color * m_lightData.brightness;
 	baseColor.a = 0.1;
 	auto selectedColor = baseColor + Color( 0.0, 0.0, 0.0, 0.2 );
+
+	Matrix lightMatrix = IdentityMatrix();
+	if( m_lightData.boneIndex >= 0 && m_lightData.boneIndex < boneCount ) {
+		TriMatrixCopyFrom3x4( &lightMatrix, &bones[m_lightData.boneIndex] );
+	}
+    lightMatrix *= worldMatrix;
 	
-	renderer.DrawSphere( this, worldMatrix, m_lightData.position, m_lightData.radius, 10, Tr2DebugRenderer::Solid, Tr2DebugColor( selectedColor, baseColor ) );
-	renderer.DrawSphere( this, worldMatrix, m_lightData.position, m_lightData.innerRadius, 10, Tr2DebugRenderer::Solid, Tr2DebugColor( selectedColor, baseColor) );
+	renderer.DrawSphere( this, lightMatrix, m_lightData.position, m_lightData.radius, 10, Tr2DebugRenderer::Solid, Tr2DebugColor( selectedColor, baseColor ) );
+	renderer.DrawSphere( this, lightMatrix, m_lightData.position, m_lightData.innerRadius, 10, Tr2DebugRenderer::Solid, Tr2DebugColor( selectedColor, baseColor) );
 }
 

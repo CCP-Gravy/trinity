@@ -927,6 +927,7 @@ public:
 		std::wstring texturePath;
 		float innerAngle;
 		float outerAngle;
+		int boneIndex;
 		LIGHT_TYPE type;
 	} m_data;
 

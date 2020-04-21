@@ -640,6 +640,7 @@ EveSOFDataHullLightSetItem::EveSOFDataHullLightSetItem( IRoot* lockobj ) :
 	m_data.radius = 0.0f;
 	m_data.rotation = Quaternion( 0.f, 0.f, 0.f, 1.f );
 	m_data.texturePath = L"";
+	m_data.boneIndex = -1;
 	m_data.type = POINT_LIGHT;
 }
 

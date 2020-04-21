@@ -20,7 +20,8 @@ LightData::LightData() :
 	rotation( 0.0f, 0.0f, 0.0f, 1.0f ),
 	innerAngle( 0.0f ),
 	outerAngle( 0.0f ),
-	texturePath( L"" )
+	texturePath( L"" ),
+	boneIndex( -1 )
 {
 }
 
@@ -50,11 +51,18 @@ void Tr2Light::ChangeLightColor( Color c )
 	m_lightData.color = c;
 }
 
-void Tr2Light::AddLight( Tr2LightManager& lightManager, CXMMATRIX transform, float scale )
+void Tr2Light::AddLight( Tr2LightManager& lightManager, CXMMATRIX transform, float scale, const granny_matrix_3x4* bones, size_t boneCount )
 {
 	if( m_isDynamic )
 	{
 		this->Update();
+	}
+	XMMATRIX lightTransform = transform;
+
+	if( m_lightData.boneIndex >= 0 && m_lightData.boneIndex < boneCount ) {		
+		Matrix m = IdentityMatrix();
+		TriMatrixCopyFrom3x4( &m, &bones[m_lightData.boneIndex] );
+		lightTransform = XMMatrixMultiply( m, transform );
 	}
 	
 	Tr2LightManager::PerLightData data;
@@ -68,7 +76,7 @@ void Tr2Light::AddLight( Tr2LightManager& lightManager, CXMMATRIX transform, flo
 	data.color = ( Vector4( m_lightData.color ) * brightness ).GetXYZ();
 	data.radius = m_lightData.radius * scale;
 	data.innerRadius = m_lightData.innerRadius * scale;
-	data.position = Vector3( XMVector3TransformCoord( m_lightData.position, transform ) );
+	data.position = Vector3( XMVector3TransformCoord( m_lightData.position, lightTransform ) );
 	float outerAngle = 2.0f + cos(TRI_2PI * m_lightData.outerAngle / 360.0f); // we do this so we always have a direction, if we have a spotlight
 
 	Matrix lightRotation;
@@ -76,7 +84,7 @@ void Tr2Light::AddLight( Tr2LightManager& lightManager, CXMMATRIX transform, flo
 	{
 	case SPOT_LIGHT:
 		// rotate the direction
-		lightRotation = RotationMatrix( Normalize( m_lightData.rotation * RotationQuaternion( transform ) ) );
+		lightRotation = RotationMatrix( Normalize( m_lightData.rotation * RotationQuaternion( lightTransform ) ) );
 		data.direction = Transform( Vector4( 0.0, 0.0, -outerAngle, 0.0 ), lightRotation ).GetXYZ();
 		data.innerAngle = cos(TRI_2PI * m_lightData.innerAngle / 360.0f);
 		break;
@@ -115,7 +123,7 @@ void Tr2Light::Update()
 
 }
 
-void Tr2Light::RenderDebugInfo( ITr2DebugRenderer2& renderer, const Matrix& worldMatrix )
+void Tr2Light::RenderDebugInfo( ITr2DebugRenderer2& renderer, const Matrix& worldMatrix, const granny_matrix_3x4* bones, size_t boneCount )
 {
 
 }

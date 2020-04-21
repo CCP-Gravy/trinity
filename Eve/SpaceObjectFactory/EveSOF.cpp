@@ -1781,22 +1781,22 @@ void EveSOF::SetupLights( EveSpaceObject2Ptr spaceObject, const EveSOFDNAPtr dna
 
 			for( auto hlsi = hls->items.begin(); hlsi != hls->items.end(); ++hlsi )
 			{
-				auto lightSet = *hlsi;
+				auto lightSetItem = *hlsi;
 				Tr2LightPtr light;
 
-				if( lightSet.type == EveSOFDataHullLightSetItem::POINT_LIGHT )
+				if( lightSetItem.type == EveSOFDataHullLightSetItem::POINT_LIGHT )
 				{
 					Tr2PointLightPtr pointLight;
 					pointLight.CreateInstance();
 					light = pointLight;
 				}
-				else if( lightSet.type == EveSOFDataHullLightSetItem::TEXTURED_POINT_LIGHT )
+				else if( lightSetItem.type == EveSOFDataHullLightSetItem::TEXTURED_POINT_LIGHT )
 				{
 					Tr2TexturedPointLightPtr texuredPointLight;
 					texuredPointLight.CreateInstance();
 					light = texuredPointLight;
 				}
-				else if( lightSet.type == EveSOFDataHullLightSetItem::SPOT_LIGHT )
+				else if( lightSetItem.type == EveSOFDataHullLightSetItem::SPOT_LIGHT )
 				{
 					Tr2SpotLightPtr spotLight;
 					spotLight.CreateInstance();
@@ -1804,23 +1804,24 @@ void EveSOF::SetupLights( EveSpaceObject2Ptr spaceObject, const EveSOFDNAPtr dna
 				}
 				else 
 				{
-					CCP_LOGERR( "EveSOF::SetupLights: Invalid light set item type %s for hull %s", lightSet.type, dna->GetDnaString() );
+					CCP_LOGERR( "EveSOF::SetupLights: Invalid light set item type %s for hull %s", lightSetItem.type, dna->GetDnaString() );
 					continue;
 				}
 				
 				LightData data;
-				data.position = lightSet.position;
-				data.radius = lightSet.radius;
-				data.innerRadius = lightSet.innerRadius;
-				data.color = dna->GetColorSet()[lightSet.lightColor];
-				data.brightness = lightSet.brightness;
-				data.noiseAmplitude = lightSet.noiseAmplitude;
-				data.noiseFrequency = lightSet.noiseFrequency;
-				data.noiseOctaves = lightSet.noiseOctaves;
-				data.rotation = lightSet.rotation;
-				data.innerAngle = lightSet.innerAngle;
-				data.outerAngle = lightSet.outerAngle;
-				data.texturePath = lightSet.texturePath;
+				data.position = lightSetItem.position;
+				data.radius = lightSetItem.radius;
+				data.innerRadius = lightSetItem.innerRadius;
+				data.color = dna->GetColorSet()[lightSetItem.lightColor];
+				data.brightness = lightSetItem.brightness;
+				data.noiseAmplitude = lightSetItem.noiseAmplitude;
+				data.noiseFrequency = lightSetItem.noiseFrequency;
+				data.noiseOctaves = lightSetItem.noiseOctaves;
+				data.rotation = lightSetItem.rotation;
+				data.innerAngle = lightSetItem.innerAngle;
+				data.outerAngle = lightSetItem.outerAngle;
+				data.texturePath = lightSetItem.texturePath;
+				data.boneIndex = lightSetItem.boneIndex;
 				light->SetLightData( data );
 
 				spaceObject->AddLight( light );

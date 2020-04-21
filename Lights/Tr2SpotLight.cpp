@@ -17,24 +17,28 @@ Tr2SpotLight::Tr2SpotLight( IRoot* lockobj ):
 	m_type = SPOT_LIGHT;
 }
 
-void Tr2SpotLight::RenderDebugInfo( ITr2DebugRenderer2& renderer, const Matrix& worldMatrix )
+void Tr2SpotLight::RenderDebugInfo( ITr2DebugRenderer2& renderer, const Matrix& worldMatrix, const granny_matrix_3x4* bones, size_t boneCount  )
 {
 	auto baseColor = m_lightData.color * m_lightData.brightness;
 	baseColor.a = 0.1;
 	auto selectedColor = baseColor + Color( 0.0, 0.0, 0.0, 0.1 );
 	
-	auto lightRotation = RotationMatrix( Normalize( m_lightData.rotation * RotationQuaternion( worldMatrix ) ) );
-	auto translationMatrix = TranslationMatrix( worldMatrix.GetTranslation() );
-	float scaling = XMVectorGetX( XMVectorAdd( XMVector3LengthEst( worldMatrix.GetX() ),
-		XMVectorAdd( XMVector3LengthEst( worldMatrix.GetY() ), XMVector3LengthEst( worldMatrix.GetZ() ) ) ) ) / 3.f;
+	Matrix boneMatrix = IdentityMatrix();
+	if( m_lightData.boneIndex >= 0 && m_lightData.boneIndex < boneCount ) {
+		TriMatrixCopyFrom3x4( &boneMatrix, &bones[m_lightData.boneIndex] );
+	}
 
-	Vector3 outerEnd = Transform( Vector3( 0.0, 0.0, m_lightData.radius * scaling ), lightRotation ).GetXYZ();
-	outerEnd = TransformCoord( outerEnd + m_lightData.position, translationMatrix );
+	Matrix lightOffsetMatrix = boneMatrix * worldMatrix;	
+	Matrix lightMatrixWithRotation = RotationMatrix( Normalize( m_lightData.rotation ) ) * lightOffsetMatrix;
+	lightMatrixWithRotation.GetTranslation() = Vector3( 0, 0, 0 );
+	
+	float scaling = XMVectorGetX( XMVectorAdd( XMVector3LengthEst( lightOffsetMatrix.GetX() ),
+		XMVectorAdd( XMVector3LengthEst( lightOffsetMatrix.GetY() ), XMVector3LengthEst( lightOffsetMatrix.GetZ() ) ) ) ) / 3.f;
 
-	Vector3 innerEnd = Transform( Vector3( 0.0, 0.0, m_lightData.innerRadius * scaling ), lightRotation ).GetXYZ();
-	innerEnd = TransformCoord( innerEnd + m_lightData.position, translationMatrix );
+	Vector3 start = TransformCoord( m_lightData.position, lightOffsetMatrix );
+	Vector3 outerEnd = start + TransformCoord( Vector3( 0.0, 0.0, m_lightData.radius * scaling ), lightMatrixWithRotation );
+	Vector3 innerEnd = start + TransformCoord( Vector3( 0.0, 0.0, m_lightData.innerRadius * scaling ), lightMatrixWithRotation );
 
-	Vector3 start = TransformCoord( m_lightData.position, worldMatrix );
 	float outerConeRadius = tan( TRI_2PI * m_lightData.outerAngle / 360.f ) * m_lightData.radius * scaling;
 	float innerConeRadius = tan( TRI_2PI * m_lightData.innerAngle / 360.f ) * m_lightData.innerRadius * scaling;
 	renderer.DrawCone( this, outerEnd, start, outerConeRadius, 10, Tr2DebugRenderer::Solid, Tr2DebugColor( selectedColor, baseColor ) );

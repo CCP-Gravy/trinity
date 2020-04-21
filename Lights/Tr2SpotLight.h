@@ -18,7 +18,7 @@ public:
 
 	Tr2SpotLight( IRoot* lockobj = nullptr );
 
-	void RenderDebugInfo( ITr2DebugRenderer2& renderer, const Matrix& worldMatrix ) override;
+	void RenderDebugInfo( ITr2DebugRenderer2& renderer, const Matrix& worldMatrix, const granny_matrix_3x4* bones = nullptr, size_t boneCount = 0 ) override;
 };
 
 TYPEDEF_BLUECLASS( Tr2SpotLight );
