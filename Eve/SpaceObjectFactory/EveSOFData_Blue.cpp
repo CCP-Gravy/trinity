@@ -49,6 +49,7 @@ BLUE_REGISTER_ENUM_EX( "EveSOFDataLogoSetType", EveSOFDataLogoSet::LogoType, Eve
 
 Be::VarChooser EveSOFDataPlaneSetBlinkTypeChooser [] =
 {
+	{ "Static", BeCast( EveSOFDataBlinkType::TYPE_STATIC ), "Static, no blinking" },
 	{ "Blink", BeCast( EveSOFDataBlinkType::TYPE_BLINK ), "Regular blink" },
 	{ "FadeIn", BeCast( EveSOFDataBlinkType::TYPE_FADE_IN ), "Fade in" },
 	{ "FadeOut", BeCast( EveSOFDataBlinkType::TYPE_FADE_OUT ), "Fade out" },
@@ -281,9 +282,8 @@ const Be::ClassInfo* EveSOFDataHullPlaneSetItem::ExposeToBlue()
 		MAP_ATTRIBUTE( "boneIndex", m_boneIndex, ":jessica-widget: boneindex", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "groupIndex", m_groupIndex, "", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "maskMapAtlasIndex", m_maskMapAtlasIndex, "", Be::READWRITE | Be::PERSIST )
-		MAP_ATTRIBUTE( "rate", m_rate, "rate (Hz)", Be::READWRITE | Be::PERSIST )
-		MAP_ATTRIBUTE( "phase", m_phase, "phase (0.-1.)", Be::READWRITE | Be::PERSIST )
-		MAP_ATTRIBUTE( "dutyCycle", m_dutyCycle, "duty cycle (0.0 - 1.0) - blink on/off ratio (blinkMode:0 only)", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "blinkRate", m_rate, "rate (Hz)", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "blinkPhase", m_phase, "phase (0.-1.)", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE_WITH_CHOOSER( "blinkMode", m_blinkMode, "", Be::READWRITE | Be::PERSIST | Be::ENUM, EveSOFDataPlaneSetBlinkTypeChooser )
 
 	EXPOSURE_END()

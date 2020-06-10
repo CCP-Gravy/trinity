@@ -207,7 +207,8 @@ public:
 	// color type
 	enum BlinkType
 	{
-		TYPE_BLINK = 0,
+		TYPE_STATIC = 0,
+		TYPE_BLINK,
 		TYPE_FADE_IN,
 		TYPE_FADE_OUT,
 		TYPE_CYCLE
