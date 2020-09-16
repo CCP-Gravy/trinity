@@ -121,7 +121,7 @@ EveChildLineSet::EveChildLineSet( IRoot* lockobj ) :
 	m_exposedCurveSegments( 24 ),
 	m_type( LINE_RENDER ),
 	m_objType( CIRCLE ),
- 	m_scaleSegmentsByCompleteness( false ),
+	m_scaleSegmentsByCompleteness( false ),
 	m_additiveBatch( false ),
 	m_updateLineSet( true ),
 	m_scaleObjectsAtEndpoints( false )
@@ -793,6 +793,10 @@ void EveChildLineSet::Draw( ChildLineSetInstancingBatch* batch, Tr2RenderContext
 		return;
 	}
 	if( !m_vertexBuffer.IsValid() )
+	{
+		return;
+	}
+	if( m_actualSegments < 1 )
 	{
 		return;
 	}

@@ -47,6 +47,8 @@ void EveMultiEffect::Rebind( bool onlyUpdateBindings )
 	for( auto binding = m_bindings.begin(); binding != m_bindings.end(); ++binding )
 	{
 		( *binding )->Link();
+		const Be::Time time = 0;
+		( *binding )->Update( time );  
 	}
 
 	if( onlyUpdateBindings )

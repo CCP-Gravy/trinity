@@ -364,6 +364,8 @@ public:
 	// Generic locator functions
 	int GetClosestLocatorIndex( const Vector3* position, BlueSharedString locatorSetName );
 	unsigned int GetLocatorCount( BlueSharedString locatorSetName ) const;
+	Vector3 GetLocatorPositionFromSet( int index, bool inWorldSpace, BlueSharedString locatorSetName );
+	Vector3 GetLocatorRotationFromSet( int index, bool inWorldSpace, BlueSharedString locatorSetName );
 	bool GetLocatorPosition( Vector3* out, int index, bool inWorldSpace, BlueSharedString locatorSetName );
 	bool GetLocatorDirection( Vector3* out, int index, bool inWorldSpace, BlueSharedString locatorSetName );
 	int GetGoodLocatorIndex( const Vector3& position, BlueSharedString locatorSetName );

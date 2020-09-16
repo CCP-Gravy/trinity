@@ -1963,6 +1963,20 @@ bool EveSpaceObject2::GetDamageLocatorPosition( Vector3* out, int index, bool in
 	return GetLocatorPosition( out, index, inWorldSpace, DAMAGE_LOCATOR_SET_NAME );
 }
 
+Vector3 EveSpaceObject2::GetLocatorPositionFromSet( int index, bool inWorldSpace, BlueSharedString locatorSetName )
+{
+	Vector3 out;
+	GetLocatorPosition( &out, index, inWorldSpace, locatorSetName );
+	return out;
+}
+
+Vector3 EveSpaceObject2::GetLocatorRotationFromSet( int index, bool inWorldSpace, BlueSharedString locatorSetName )
+{
+	Vector3 out;
+	GetLocatorDirection( &out, index, inWorldSpace, locatorSetName );
+	return out;
+}
+
 bool EveSpaceObject2::GetLocatorPosition( Vector3* out, int index, bool inWorldSpace, BlueSharedString locatorSetName )
 {
 	if( index < 0 )

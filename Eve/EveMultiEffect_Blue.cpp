@@ -96,11 +96,13 @@ const Be::ClassInfo* EveMultiEffect::ExposeToBlue()
 			StartControllers,
 			"Starts the controllers\n"
 		)
-		
-		MAP_METHOD_AND_WRAP(
+	
+		MAP_METHOD_AND_WRAP_OPTIONAL_ARGS(  
 			"Rebind",
 			Rebind,
-			"Rebinds all bindings to parameters"
+			1,
+			"Rebinds all bindings to parameters\n"
+			":param onlyUpdateBindings: true to only update bindings, false to also update controller refs"
 		)
 		
 		EXPOSURE_END( );
