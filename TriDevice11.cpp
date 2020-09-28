@@ -91,17 +91,20 @@ void TriDevice::HandleRenderTick(  Be::Time realTime, Be::Time simTime )
 			{
 				extern unsigned long g_currentFrameCounter;
 
-				std::string str;
-				BeCrashes->SetCrashKeyValue( "gpuRemovedCount", ( str = std::to_string( s_deviceLostCount ) ).c_str() );
-				BeCrashes->SetCrashKeyValue( "gpuRemovedFrame", ( str = std::to_string( g_currentFrameCounter ) ).c_str() );
-				BeCrashes->SetCrashKeyValue( "gpuRemovedReason", ( str = std::to_string( hr ) ).c_str() );
+				wchar_t buffer[64];
+				swprintf( buffer, 64, L"%u", s_deviceLostCount );
+				BeCrashes->SetCrashKeyValueW( (wchar_t*)L"gpuRemovedCount", buffer );
+				swprintf( buffer, 64, L"%lu", g_currentFrameCounter );
+				BeCrashes->SetCrashKeyValueW( (wchar_t*)L"gpuRemovedFrame", buffer );
+				swprintf( buffer, 64, L"%u", unsigned( hr ) );
+				BeCrashes->SetCrashKeyValueW( (wchar_t*)L"gpuRemovedReason", buffer );
 				if( !marker.empty() )
 				{
-					BeCrashes->SetCrashKeyValue( "gpuRemovedMarker", marker.c_str() );
+					BeCrashes->SetCrashKeyValueW( (wchar_t*)L"gpuRemovedMarker", (wchar_t*)CA2W( marker.c_str() ) );
 				}
 				if( hasPageFault )
 				{
-					BeCrashes->SetCrashKeyValue( "gpuPageFaultResource", resourceDesc );
+					BeCrashes->SetCrashKeyValueW( (wchar_t*)L"gpuPageFaultResource", (wchar_t*)CA2W( resourceDesc ) );
 				}
 			}
 			ReleaseDeviceResources( TRISTORAGE_ALL );

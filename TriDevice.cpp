@@ -638,8 +638,9 @@ void TriDevice::OnTick( Be::Time realTime, Be::Time simTime, void* cookie )
 
 	if( BeCrashes )
 	{
-		std::string str = std::to_string( g_currentFrameCounter );
-		BeCrashes->SetCrashKeyValue( "frameCounter", str.c_str() );
+		wchar_t buffer[32];
+        swprintf( buffer, 32, L"%lu", g_currentFrameCounter );
+		BeCrashes->SetCrashKeyValueW( (wchar_t*)L"frameCounter", buffer );
 	}
 
 	Be::Time delta = simTime - m_simTime;
