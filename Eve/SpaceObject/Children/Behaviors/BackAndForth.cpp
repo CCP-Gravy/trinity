@@ -13,6 +13,7 @@ BackAndForth::BackAndForth( IRoot* lockobj ) :
 	m_seconds( 0.25f ),
 	m_fxBehavior( nullptr ),
 	m_locatorType( LOCAL_LOCATORS ),
+	m_priority( LEAST_PRIORITY ),
 	m_locatorSetName( "damage" ),
 	m_target( nullptr ),
 	m_parent( nullptr )
@@ -25,7 +26,7 @@ BackAndForth::~BackAndForth()
 
 int BackAndForth::GetProcessPriority()
 {
-	return LEAST_PRIORITY;
+	return m_priority;
 }
 
 std::string BackAndForth::GetBehaviorName()
@@ -84,7 +85,6 @@ std::vector<Vector3> BackAndForth::CalculateBehavior( std::vector<DroneAgent>& a
 				data->arrived = false;
 			}
 		}
-		/*
 		else if( m_locatorType == PARENT_LOCATORS )
 		{
 			if( m_parent == nullptr )
@@ -102,7 +102,7 @@ std::vector<Vector3> BackAndForth::CalculateBehavior( std::vector<DroneAgent>& a
 
 			GetParentLocatorPosition( data->locatorIndex, &data->locatorTarget, &data->locatorDirection );
 			data->arrived = false;
-		}*/
+		}
 		else if( m_locatorType == TARGET_LOCATORS )
 		{
 			if( data->arrived && m_target )

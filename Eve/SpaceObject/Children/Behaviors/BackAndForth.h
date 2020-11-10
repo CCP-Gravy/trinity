@@ -53,12 +53,14 @@ public:
 
 	void SetParent( IEveSpaceObject2 *parent );
 
-private:
+private:	
+	int m_priority;
+	int m_rand;
 	float m_arrivedRadius;
 	float m_slowDownRadius;
-	int m_rand;
 	float m_backAndForthWeight;
 	float m_seconds;
+
 	Vector3 m_arrivalPoint; //debugging
 
 	IBehavior* m_fxBehavior;
