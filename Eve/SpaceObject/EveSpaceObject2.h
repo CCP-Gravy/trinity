@@ -447,6 +447,7 @@ protected:
 	bool m_display;
 	bool m_allowLodSelection;
 	bool m_isPickable;
+	bool m_startControllersQueued;
 
 	Matrix m_worldTransform;
 	Matrix m_invWorldTransform;
