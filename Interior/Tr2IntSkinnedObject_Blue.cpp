@@ -12,6 +12,7 @@ const Be::ClassInfo* Tr2IntSkinnedObject::ExposeToBlue()
 		MAP_INTERFACE( ITr2Interior )
 		MAP_INTERFACE( IInitialize )
 		MAP_INTERFACE( ITr2Pickable )
+		MAP_INTERFACE( ITr2BoundingBox )
 		MAP_INTERFACE( INotify )
 		MAP_INTERFACE( IBluePlacementObserver )
 

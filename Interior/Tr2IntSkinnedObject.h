@@ -25,7 +25,8 @@ class Tr2IntSkinnedObject :
 	public IInitialize,
 	public Tr2SkinnedObject,
 	public ITr2Pickable, 
-	public IBluePlacementObserver
+	public IBluePlacementObserver,
+	public ITr2BoundingBox
 {
 public:
     EXPOSE_TO_BLUE();
