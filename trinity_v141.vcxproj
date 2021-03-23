@@ -3165,6 +3165,8 @@
     <ClInclude Include="Eve\SpaceObject\Utils\EveCustomMask.h" />
     <ClInclude Include="Eve\SpaceObject\Utils\EveLocator2.h" />
     <ClInclude Include="Eve\SpaceObject\Utils\EveLocatorSets.h" />
+    <ClInclude Include="Eve\SpaceObject\Utils\fxAttributes\EveCameraFxAttributes.h" />
+    <ClInclude Include="Eve\SpaceObject\Utils\fxAttributes\IEveFxAttribute.h" />
     <ClInclude Include="Eve\SpaceObjectFactory\EveSOF.h" />
     <ClInclude Include="Eve\SpaceObjectFactory\EveSOFData.h" />
     <ClInclude Include="Eve\SpaceObjectFactory\EveSOFDataMgr.h" />
@@ -3931,6 +3933,8 @@
     <ClCompile Include="Eve\SpaceObject\Utils\EveLocator2_Blue.cpp" />
     <ClCompile Include="Eve\SpaceObject\Utils\EveLocatorSets.cpp" />
     <ClCompile Include="Eve\SpaceObject\Utils\EveLocatorSets_Blue.cpp" />
+    <ClCompile Include="Eve\SpaceObject\Utils\fxAttributes\EveCameraFxAttributes.cpp" />
+    <ClCompile Include="Eve\SpaceObject\Utils\fxAttributes\EveCameraFxAttributes_Blue.cpp" />
     <ClCompile Include="Eve\SpaceObjectFactory\EveSOF.cpp" />
     <ClCompile Include="Eve\SpaceObjectFactory\EveSOFData.cpp" />
     <ClCompile Include="Eve\SpaceObjectFactory\EveSOFDataMgr.cpp" />

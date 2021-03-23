@@ -27,6 +27,8 @@ BLUE_DECLARE_VECTOR( Tr2Light );
 BLUE_DECLARE_INTERFACE( ITr2Controller );
 BLUE_DECLARE_IVECTOR( ITr2Controller );
 
+BLUE_DECLARE_INTERFACE( IEveFxAttribute );
+BLUE_DECLARE_IVECTOR( IEveFxAttribute );
 
 BLUE_CLASS( EveChildContainer ) :
 	public IEveSpaceObjectChild,
@@ -143,6 +145,7 @@ protected:
 	bool m_isAlwaysOn;
 	EveChildInheritPropertiesPtr m_inheritProperties;
 	Origin m_origin;
+	PIEveFxAttributeVector m_fxAttributes;
 };
 
 TYPEDEF_BLUECLASS( EveChildContainer );

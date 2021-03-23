@@ -16,6 +16,7 @@
 #include "Controllers/ITr2Controller.h"
 #include "Controllers/Tr2Controller.h"
 #include "Controllers/Tr2ControllerFloatVariable.h"
+#include "Eve/SpaceObject/Utils/fxAttributes/IEveFxAttribute.h"
 #include "ITr2SoundEmitterOwner.h"
 
 
@@ -27,6 +28,7 @@ EveChildContainer::EveChildContainer( IRoot* lockobj ) :
 	PARENTLOCK( m_lights ),
 	PARENTLOCK( m_transformModifiers ),
 	PARENTLOCK( m_controllers ),
+	PARENTLOCK( m_fxAttributes ),
 	m_controllerVariables( "EveChildContainer::m_controllerVariables" ),
 	m_displayFilter( SHADER_ALL ),
 	m_worldVelocity( 0, 0, 0 ),
@@ -282,6 +284,11 @@ void EveChildContainer::UpdateAsyncronous( EveUpdateContext& updateContext, cons
 	for( auto it = m_curveSets.begin(); it != m_curveSets.end(); it++ )
 	{
 		( *it )->Update( time, time );
+	}
+
+	for( auto it = m_fxAttributes.begin(); it != m_fxAttributes.end(); it++ )
+	{
+		( *it )->UpdateAsyncronous( updateContext, newParams );
 	}
 
 	if( params.spaceObjectParent && !params.childParent )
