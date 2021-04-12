@@ -4,8 +4,6 @@
 #include "Tr2GrannyStateRes.h"
 #include "Resources/TriGrannyRes.h"
 #include "Utilities/GeometryUtils.h"
-#define GSTATE_INTERNAL_HEADER 1
-#include "gstate_character_internal.h"
 
 
 Tr2GrannyStateRes::Tr2GrannyStateRes( IRoot* lockobj ):
@@ -233,28 +231,25 @@ void Tr2GrannyStateRes::Cleanup()
 	m_gStateAnimFiles.clear();
 }
 
-// WARNING:  The following method uses undocumented GState internals that may change.  Keep an eye out for
-//  changes that break it.
+
 const std::vector<std::string> Tr2GrannyStateRes::GetGStateAnimFileRefPaths() const
 {
 	std::vector<std::string> path_list;
 
 	gstate_character_info *character_info = GetCharacterInfo();
+	granny_int32x num_anim_sets = GStateGetNumAnimationSets( character_info );
 
-	for (int Idx = 0; Idx < character_info->AnimationSetCount; Idx++)
+	for ( int Idx = 0; Idx < num_anim_sets; Idx++ )
 	{
-		gstate::animation_set *CurrSet = character_info->AnimationSets[Idx];
-		for (	int Idx2 = 0; Idx2 < CurrSet->SourceFileReferenceCount; Idx2++ )
-		{
-			gstate::source_file_ref *ref = CurrSet->SourceFileReferences[Idx2];
-			path_list.push_back(ref->SourceFilename);
+		granny_int32x num_source_files = GStateGetNumSourceFileReferencesFromSetIndex( character_info, Idx );
+
+		for ( int ref_idx = 0; ref_idx < num_source_files; ref_idx++ ) {
+			path_list.push_back( std::string( GStateGetSourceFileReferenceFromIndex( character_info, Idx, ref_idx ) ) );
 		}
 	}
 
 	return path_list;
 }
-
-
 
 
 
