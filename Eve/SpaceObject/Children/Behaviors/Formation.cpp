@@ -9,7 +9,7 @@ Formation::Formation( IRoot* lockobj ):
 	m_formationPosition( 0, 0, 0 ),
 	m_lastFormationAcceleration(0,0,0),
 	m_maxFormationVelocityScaler( 0.85 ),
-	m_behaviorWeight( 5 ),
+	m_behaviorWeight( 300 ),
 	m_stubbornness( 3 ),
 	m_stubbornnessCounter( 0 ),
 	m_visionRange( 5 ),
@@ -55,7 +55,8 @@ bool Formation::InFormation()
 std::vector<Vector3> Formation::CalculateBehavior( std::vector<DroneAgent>& agents, void* scratchData, const float deltaTime,
 	BehaviorGroup& group, EveChildBehaviorSystem& system, const std::vector<std::vector<DroneAgent*>>& dronesInSearchRadius )
 {
-	
+	CCP_STATS_ZONE( __FUNCTION__ );
+
 	std::vector<Vector3> returnForces;
 
 	if ( m_frameCounter >= m_framesBetweenUpdates )

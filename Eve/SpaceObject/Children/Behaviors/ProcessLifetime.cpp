@@ -6,7 +6,7 @@ ProcessLifetime::ProcessLifetime( IRoot* lockobj ) :
 	PARENTLOCK( m_splineTunnels ),
 	m_firstAgentLifetime( 0 ), // Debug
 	m_returningAge( -1 ),
-	m_behaviorWeight( 15 ),
+	m_behaviorWeight( 900 ),
 	m_shouldReassignTunnelIDs( true ),
 	m_respawnAgentsOnDeath( true ),
 	m_exit( false ),
@@ -82,6 +82,8 @@ void ProcessLifetime::InitializeScratch( void* scratchMemory )
 std::vector<Vector3> ProcessLifetime::CalculateBehavior(std::vector<DroneAgent>& agents, void* scratchData, const float deltaTime,
                                                         BehaviorGroup& group, EveChildBehaviorSystem& system, const std::vector<std::vector<DroneAgent*>>& dronesInSearchRadius)
 {
+	CCP_STATS_ZONE( __FUNCTION__ );
+
 	if ( m_shouldReassignTunnelIDs )
 	{
 		ReassignTunnelIDsAndAddSystemTunnels( system );
@@ -112,7 +114,7 @@ std::vector<Vector3> ProcessLifetime::CalculateBehavior(std::vector<DroneAgent>&
 			{
 				data->hasUsedEntryTunnel = true;
 			}
-			else
+			else if( m_privateTunnels.size() > 0 )
 			{
 				if( ProcessTunnel( *drone, *m_privateTunnels[ data->assignedLifeTimeTunnel ], data->tunnelPoint, group.GetBoundingSphereRadius() ) )
 				{

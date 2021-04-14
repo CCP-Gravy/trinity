@@ -27,6 +27,7 @@ BehaviorGroup::BehaviorGroup( IRoot* lockobj ) :
 	m_boundingSphereRadius( 5.f ),
 	m_spawnPosition( 0.f, 0.f, 0.f ),
 	m_debugMode( false ),
+	m_createAgentTree( false ),
 	m_debugLodLevel( 0.f ),
 	m_debugIntensity( 0.f )
 {
@@ -327,13 +328,19 @@ void BehaviorGroup::SetCount( int count )
 	OnAgentCountChanged();
 }
 
+
+// --------------------------------------------------------------------------------------
+// Description:
+//   When we add or remove an agent we have to update buffers and the kd tree
+//	 The kd tree gets created in UpdateSyncronous
+// --------------------------------------------------------------------------------------
 void BehaviorGroup::OnAgentCountChanged()
 {
+	m_createAgentTree = true;
 	if( m_changeBufferVertexCount )
 	{
 		( m_changeBufferVertexCount )();
 	}
-	CreateAgentTree();
 
 	if( m_booster )
 	{
@@ -400,6 +407,8 @@ void BehaviorGroup::RemoveSpecificAgent( int index )
 	}
 
 	m_count--;
+
+	OnAgentCountChanged();
 }
 
 // --------------------------------------------------------------------------------------
@@ -494,6 +503,7 @@ void BehaviorGroup::UpdateAgents( const float dt, EveChildBehaviorSystem& system
 	}
 
 	auto bs = m_boundingSphereRadius * m_scale;
+
 	const std::vector<std::vector<std::vector<DroneAgent*>>>* dronesInRange = m_tree->FindDronesInRange( m_agents, ranges, bs );
 
 	//Calculate the behaviors
@@ -526,12 +536,12 @@ void BehaviorGroup::UpdateAgents( const float dt, EveChildBehaviorSystem& system
 		agent->lifetime += dt;
 
 		static const Vector3 zAxis( 0.f, 0.f, 1.f );
-		Vector3 test = agent->velocity - agent->acceleration;
 
-		agent->velocity += agent->acceleration;
+		agent->velocity += agent->acceleration * dt;
 		Vector3 facingDir = agent->velocity;
 		Vector3 interestPoint = Vector3();
 		TriVectorRotateQuaternion( &interestPoint, &zAxis, &agent->rotation );
+
 		Vector3 actualFacingDir = Lerp( interestPoint, facingDir, LengthSq( agent->velocity ) / max( 1.0f, m_maxVelocity * m_maxVelocity ) );
 		TriQuaternionRotationArc( &agent->rotation, &zAxis, &actualFacingDir );
 		agent->targetDirection = actualFacingDir;
@@ -544,7 +554,12 @@ void BehaviorGroup::UpdateAgents( const float dt, EveChildBehaviorSystem& system
 	// later on we could have the updateTree input dynamically adjust based on dt
 	// one of my ideas was input = max( const - dt , minimumUpdateFreq )
 	// this would make it update less often on big dt-s
-	m_tree->UpdateTree( 0.015 );
+	m_tree->UpdateTree( dt );
+}
+
+float BehaviorGroup::GetBlendModifier() const
+{
+	return 1.0f / max( 0.0001f, ( m_blendScreenSizeMax - m_blendScreenSizeMin ) );
 }
 
 // --------------------------------------------------------------------------------------
@@ -554,7 +569,7 @@ void BehaviorGroup::UpdateAgents( const float dt, EveChildBehaviorSystem& system
 void BehaviorGroup::UpdateVisibility( const TriFrustum& frustum, const Matrix& worldTransform )
 {
 	CCP_STATS_ZONE( __FUNCTION__ );
-
+	m_currentScreenSize = 0.0f;
 	// Check if an agent is visible and calculate the xfade value
 	for( auto agent = m_agents.begin(); agent != m_agents.end(); ++agent )
 	{
@@ -563,7 +578,7 @@ void BehaviorGroup::UpdateVisibility( const TriFrustum& frustum, const Matrix& w
 		{
 			float pixelSize = frustum.GetPixelSizeAccross( agentPosInWorld, m_boundingSphereRadius * m_scale );
 			agent->screenSize = pixelSize; // Store the screen size for each agent
-
+			m_currentScreenSize = max( m_currentScreenSize, pixelSize );
 			if( pixelSize >= m_blendScreenSizeMax )
 			{
 				agent->xfade = 0.0; // Render as mesh
@@ -575,7 +590,7 @@ void BehaviorGroup::UpdateVisibility( const TriFrustum& frustum, const Matrix& w
 			else
 			{
 				float s = 1.0;
-				agent->xfade = s - ( pixelSize - m_blendScreenSizeMin ) / ( m_blendScreenSizeMax - m_blendScreenSizeMin );
+				agent->xfade = s - ( pixelSize - m_blendScreenSizeMin ) * GetBlendModifier();
 			}
 			agent->isVisible = agent->screenSize >= m_renderThreshold;
 		}
@@ -585,41 +600,17 @@ void BehaviorGroup::UpdateVisibility( const TriFrustum& frustum, const Matrix& w
 		}
 	}
 
-	this->UpdateCurrentScreenSize();
-
 	m_frustum = frustum;
 	m_parentTransform = worldTransform;
 }
 
 // --------------------------------------------------------------------------------------
 // Description:
-//   Update the current screensize read-only attribute in Jessica using the first agent.
-// --------------------------------------------------------------------------------------
-void BehaviorGroup::UpdateCurrentScreenSize()
-{
-	if( !m_agents.empty() )
-	{
-		m_currentScreenSize = m_agents.begin()->screenSize;
-	}
-}
-
-// --------------------------------------------------------------------------------------
-// Description:
 //  Check if any of the agents are visible.
 // --------------------------------------------------------------------------------------
-bool BehaviorGroup::IsGroupVisible()
+bool BehaviorGroup::IsGroupVisible() const
 {
-	bool isAnyAgentVisible = false;
-
-	for( auto agent = m_agents.begin(); agent != m_agents.end(); ++agent )
-	{
-		if( agent->screenSize >= m_renderThreshold )
-		{
-			isAnyAgentVisible = true;
-			break;
-		}
-	}
-	return isAnyAgentVisible;
+	return m_currentScreenSize >= m_renderThreshold;
 }
 
 // --------------------------------------------------------------------------------------
@@ -634,11 +625,26 @@ void BehaviorGroup::GetInfoForBuffer( uint8_t* data, const Matrix& parentWorldLo
 	Matrix zeroMatrix = ScalingMatrix( Vector3( 0.0, 0.0, 0.0 ) );
 	unsigned int agentIndex = 0;
 
+	if( m_currentScreenSize == 0.0 )
+	{
+
+		for(auto agent = m_agents.begin(); agent != m_agents.end(); ++agent )
+		{
+			memcpy( data, &zeroMatrix, 12 * sizeof( float ) );
+			data += 12 * sizeof( float );
+
+			// boosters
+			memcpy( data, &zeroMatrix, 12 * sizeof( float ) );
+			data += 12 * sizeof( float );
+		}		
+		return;
+	}
+
 	for( auto agent = m_agents.begin(); agent != m_agents.end(); ++agent )
 	{
 		float LOD = m_debugMode ? m_debugLodLevel : ( *agent ).xfade;
 		Matrix agentTransform = TransformationMatrix( agentScale, agent->rotation, agent->position );
-		if( agent->isVisible )
+		if( agent->isVisible && m_display )
 		{
 			float LODmod = 0;
 			Matrix meshData = Matrix( zeroMatrix );
@@ -659,16 +665,15 @@ void BehaviorGroup::GetInfoForBuffer( uint8_t* data, const Matrix& parentWorldLo
 			if( m_booster != nullptr )
 			{
 				boosterPos.GetXYZ() = TransformCoord( m_booster->GetOffset() * LODmod, agentTransform );
-				boosterPos.w = 1.0f;
+				boosterPos.w = m_scale;
 				boosterQuaternion = agent->rotation;
 
 				float intensity = m_debugMode ? m_debugIntensity : Length( agent->velocity ) / max( 1.0f, m_maxVelocity );
 
 				if( LOD < 0.3 )
 				{
-					boosterPos.GetXYZ() = TransformCoord( m_booster->GetOffset(), agentTransform );
-					boosterPos.w = 1.0f;
-					boosterQuaternion = agent->rotation;
+					boosterPos.GetXYZ() = TransformCoord( m_booster->GetOffset() * m_scale, agentTransform );					
+
 					srand( agent->id );
 					boosterInfo.x = intensity;
 					boosterInfo.y = (float)rand() / (float)RAND_MAX; // random stuff
@@ -678,11 +683,12 @@ void BehaviorGroup::GetInfoForBuffer( uint8_t* data, const Matrix& parentWorldLo
 					if( LOD < 0.25 )
 					{
 						float lightScale = intensity * ( 1.0f - 4.0f * LOD ) * ( 2.0f * LOD + 1.0f ); // early scale down for lights
-						m_lightInfo[agentIndex] = Vector4( boosterPos.GetXYZ(), lightScale );
+						m_lightInfo[agentIndex] = Vector4( boosterPos.GetXYZ(), lightScale * m_scale );
 					}
 				}
+
 				auto m = agentTransform * parentWorldLocation;
-				m_booster->AddFlare( m, LOD, intensity, agentIndex, m_boundingSphereRadius * m_scale );
+				m_booster->AddFlare( m, LOD, intensity, agentIndex, m_boundingSphereRadius, m_scale );
 			}
 
 			memcpy( data, &boosterPos, 4 * sizeof( float ) );
@@ -700,9 +706,9 @@ void BehaviorGroup::GetInfoForBuffer( uint8_t* data, const Matrix& parentWorldLo
 			// boosters
 			memcpy( data, &zeroMatrix, 12 * sizeof( float ) );
 			data += 12 * sizeof( float );
-			if( m_booster != nullptr )
+			if( m_booster != nullptr && m_display )
 			{
-				m_booster->AddFlare( IdentityMatrix(), 0, 0, agentIndex, m_boundingSphereRadius * m_scale );
+				m_booster->AddFlare( IdentityMatrix(), 0, 0, agentIndex, 0, 0 );
 			}
 		}
 		agentIndex++;
@@ -793,6 +799,12 @@ void BehaviorGroup::UpdateAsyncronous( EveUpdateContext& updateContext )
 // --------------------------------------------------------------------------------------
 void BehaviorGroup::UpdateSyncronous( EveUpdateContext& updateContext, const EveChildUpdateParams& params )
 {
+	if( m_createAgentTree == true )
+	{
+		CreateAgentTree();
+		m_createAgentTree = false;
+	}
+
 	auto behavior = GetBehaviorByName( "PlayFX" );
 
 	if( behavior != nullptr )
@@ -813,7 +825,7 @@ void BehaviorGroup::UpdateSyncronous( EveUpdateContext& updateContext, const Eve
 	}
 }
 
- EveSpaceObject2* BehaviorGroup::GetParent()
+EveSpaceObject2* BehaviorGroup::GetParent()
 {
 	return m_parent;
 }
@@ -825,6 +837,7 @@ void BehaviorGroup::GetDebugOptions( Tr2DebugRendererOptions& options )
 	options.insert( "AgentsKDTree" );
 	options.insert( "Bounding Sphere" );
 	options.insert( "DebugBehaviors" );
+	options.insert( "AgentRotation" );
 
 	if( m_booster != nullptr )
 	{
@@ -890,7 +903,7 @@ void BehaviorGroup::AddQuadsToQuadRenderer( const TriFrustum& frustum, Tr2QuadRe
 {
 	CCP_STATS_ZONE( __FUNCTION__ );
 
-	if( m_booster && m_booster->GetDisplay() )
+	if( m_booster && m_booster->GetDisplay() && m_display && IsGroupVisible())
 	{
 		m_booster->AddQuadsToQuadRenderer( frustum, quadRenderer );
 	}
@@ -898,6 +911,10 @@ void BehaviorGroup::AddQuadsToQuadRenderer( const TriFrustum& frustum, Tr2QuadRe
 
 void BehaviorGroup::RenderDebugInfo( ITr2DebugRenderer2& renderer, Matrix& parentWorldLocation )
 {
+	if( !m_display )
+	{
+		return;
+	}
 	for( auto behavior = m_behaviors.begin(); behavior != m_behaviors.end(); ++behavior )
 	{
 		( *behavior )->RenderDebugInfo( renderer, m_agents, parentWorldLocation );
@@ -974,6 +991,15 @@ void BehaviorGroup::RenderDebugInfo( ITr2DebugRenderer2& renderer, Matrix& paren
 		{
 			Vector4 info = it->second;
 			m_booster->RenderLightDebug( renderer, this, TransformationMatrix( info.w * scale, iq, info.GetXYZ() ) * parentWorldLocation );
+		}
+	}
+
+	if( renderer.HasOption( this, "AgentRotation") ) 
+	{
+		for( auto it = m_agents.begin(); it != m_agents.end(); ++it)
+		{
+			Quaternion rot = it->rotation;
+			renderer.DrawAxis( this, TransformationMatrix( Vector3( 100, 100, 100 ), rot, it->position ) * parentWorldLocation, Tr2DebugRenderer::Wireframe );
 		}
 	}
 }

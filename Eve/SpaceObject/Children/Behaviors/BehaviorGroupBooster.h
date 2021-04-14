@@ -89,9 +89,8 @@ public:
 	void AddQuadsToQuadRenderer( const TriFrustum& frustum, Tr2QuadRenderer& quadRenderer ) const;
 
 	void AddLight( Tr2LightManager & lightManager, Vector3 position, float radiusModifier, int agentIndex, const Matrix& parentTransform );
-	void AddFlare( const Matrix& agentTransform, float lod, float intensity, unsigned int agentIndex, float shipBoundingSphereRadius );
+	void AddFlare( const Matrix& agentTransform, float lod, float intensity, unsigned int agentIndex, float shipBoundingSphereRadius, float groupScale );
 
-	
 	void RenderBoosterDebug( ITr2DebugRenderer2& renderer, Tr2DebugObjectReference owner, const Matrix& transform );
 	void RenderLightDebug( ITr2DebugRenderer2& renderer, Tr2DebugObjectReference owner, const Matrix& transform );
 
@@ -111,6 +110,7 @@ private:
 
 	void SetupBoosterEffect( Tr2EffectPtr effect );
 	void SetupQuads();
+	void AdjustFlareLists();
 		
 	Vector3 m_boosterOffset;
 	float m_lightRadius;
@@ -147,6 +147,10 @@ private:
 
 	TrackableStdVector<Quad> m_ambientFlares;
 	TrackableStdVector<Quad> m_haloFlares;
+
+	// the flare instances (which are copied to fill the vectors)
+	Quad m_ambientFlare;
+	Quad m_haloFlare;
 
 	unsigned int m_flareCount;
 

@@ -5,7 +5,7 @@
 FollowASpline::FollowASpline( IRoot* lockobj ) :
 	PARENTLOCK( m_splineTunnels ),
 	m_shouldReassignTunnelIDs( true ),
-	m_behaviorWeight( 10.f ),
+	m_behaviorWeight( 600.f ),
 	m_smoothPullFactor( 0.8 ),
 	m_cornerSmoothener( 0.8 ),
 	m_tunnelGroupType( OTHER_TUNNELS ),
@@ -199,6 +199,8 @@ void FollowASpline::InitializeScratch( void* scratchMemory )
 std::vector<Vector3> FollowASpline::CalculateBehavior(std::vector<DroneAgent>& agents, void* scratchData, const float deltaTime,
                                                       BehaviorGroup& group, EveChildBehaviorSystem& system, const std::vector<std::vector<DroneAgent*>>& dronesInSearchRadius)
 {
+	CCP_STATS_ZONE( __FUNCTION__ );
+
 	if ( m_frameCounter >= m_framesBetweenUpdates )
 	{
 		m_frameCounter = 0;

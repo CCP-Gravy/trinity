@@ -25,6 +25,7 @@ const Be::ClassInfo* SeekTarget::ExposeToBlue()
 		MAP_ATTRIBUTE( "onFirstDroneArrivedCallback", m_onFirstDroneArrivedCallback, "", Be::READWRITE )
 		MAP_ATTRIBUTE( "totalRepairTime", m_totalRepairTime, "", Be::READWRITE )
 		MAP_ATTRIBUTE( "secondsToTurn", m_seconds, "How long should it take for the drone to turn, higher number = slower turn", Be::READWRITE )
+		MAP_ATTRIBUTE( "firstSpawnAtRandomPlaces", m_firstSpawnAtRandomPlaces, "", Be::READWRITE | Be::PERSIST )
 
 		// Debugging purposes
 		MAP_ATTRIBUTE( "exit", m_exit, "set\n:jessica-group: Debugging", Be::READWRITE )

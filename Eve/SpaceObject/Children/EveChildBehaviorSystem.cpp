@@ -301,7 +301,6 @@ void EveChildBehaviorSystem::PassInTunnelFunctionsToBehaviorGroups()
 // EveChildMesh
 void EveChildBehaviorSystem::UpdateSyncronous( EveUpdateContext& updateContext, const EveChildUpdateParams& params )
 {
-	UpdateAgents( updateContext.GetDeltaT() );
 
 	// might be a better way to get these initialized but Iinitialize doesn't work
 	// since these need to be called after children are initialized so basically a single frame later...
@@ -323,6 +322,8 @@ void EveChildBehaviorSystem::UpdateSyncronous( EveUpdateContext& updateContext, 
 	{
 		( *it )->UpdateSyncronous( updateContext, params );
 	}
+
+	UpdateAgents( updateContext.GetDeltaT() );
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -342,8 +343,8 @@ void EveChildBehaviorSystem::UpdateBuffer( Tr2RenderContext& renderContext )
 	uint8_t *data;
 	Matrix WT = EveChildTransform::m_worldTransform;
 	CR_RETURN( m_vertexBuffer.MapForWriting( data, renderContext ) );
-	uint8_t I = 0;
-	uint8_t totalShipsSoFar = 0;
+	uint32_t I = 0;
+	uint32_t totalShipsSoFar = 0;
 	for ( auto it = begin( m_behaviorGroups ); it != end( m_behaviorGroups ); ++it )
 	{
 		(*it)->GetInfoForBuffer( data, WT );

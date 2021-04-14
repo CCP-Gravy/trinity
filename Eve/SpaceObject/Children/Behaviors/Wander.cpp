@@ -4,7 +4,7 @@
 #include "include/TriQuaternion.h"
 
 Wander::Wander(IRoot* lockobj) :
-	m_weightWander( 4.f ),
+	m_weightWander( 240.f ),
 	rand1(0.2),
 	rand2(0.8),
 	rand3(1.2),
@@ -25,7 +25,7 @@ int Wander::GetProcessPriority()
 std::vector<Vector3> Wander::CalculateBehavior(std::vector<DroneAgent>& agents, void* scratchData, const float deltaTime,
                                                BehaviorGroup& group, EveChildBehaviorSystem& system, const std::vector<std::vector<DroneAgent*>>& dronesInSearchRadius)
 {
-	// Looks good with inertia->maxRotationSpeed(0.7) & maxAcceleration(0.2) 
+	CCP_STATS_ZONE( __FUNCTION__ );
 
 	std::vector<Vector3> forceVectors;
 	for( auto agent = agents.begin(); agent != agents.end(); ++agent )

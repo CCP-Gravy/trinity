@@ -111,7 +111,9 @@ BehaviorGroupBooster::BehaviorGroupBooster( IRoot* lockobj ) :
 	m_displayHazeFlare( true ),
 	m_displayAmbientFlare( true ),
 	m_haloFlares( "BehaviorGroupBooster::m_haloFlares" ),
-	m_ambientFlares( "BehaviorGroupBooster::m_ambientFlares" )
+	m_ambientFlares( "BehaviorGroupBooster::m_ambientFlares" ),
+	m_ambientFlare( Quad() ),
+	m_haloFlare( Quad() )
 {
 	m_haloModifier.CreateInstance();
 }
@@ -127,6 +129,7 @@ bool BehaviorGroupBooster::Initialize()
 	{
 		InitializeHaloFlare();
 	}
+	SetupQuads();
 	return true;
 }
 
@@ -153,15 +156,12 @@ void BehaviorGroupBooster::InitializeHaloFlare()
 {
 	m_haloFlareHash = m_haloFlareEffect->GetHashValue();
 	Tr2QuadRenderer::Instance()->RegisterEffect( m_haloFlareHash, TRIBATCHTYPE_ADDITIVE, sizeof( Quad ), 1, GetQuadDefinition(), m_haloFlareEffect );
-
-	m_haloFlares.resize( m_flareCount );
 }
 
 void BehaviorGroupBooster::InitializeAmbientFlare()
 {
 	m_ambientFlareHash = m_ambientFlareEffect->GetHashValue();
 	Tr2QuadRenderer::Instance()->RegisterEffect( m_ambientFlareHash, TRIBATCHTYPE_ADDITIVE, sizeof( Quad ), 1, GetQuadDefinition(), m_ambientFlareEffect );
-	m_ambientFlares.resize( m_flareCount );
 }
 
 bool BehaviorGroupBooster::OnModified( Be::Var* value )
@@ -178,7 +178,7 @@ bool BehaviorGroupBooster::OnModified( Be::Var* value )
 			m_haloFlares.clear();
 		}
 	}
-	if( IsMatch( value, m_ambientFlareEffect ) )
+	else if( IsMatch( value, m_ambientFlareEffect ) )
 	{
 		if( m_ambientFlareEffect != nullptr )
 		{
@@ -210,23 +210,32 @@ void BehaviorGroupBooster::SetupQuads()
 	auto ambientTransform = TransformationMatrix( Vector3( 1.0f, 1.0f, 1.0f ), IdentityQuaternion(), m_ambientFlareOffset );
 	auto haloTransform = TransformationMatrix( m_haloFlareScale, IdentityQuaternion(), Vector3( 0.f, 0.f, 0.f ) );
 
-	Quad ambientFlare( IdentityMatrix(), ambientTransform, m_ambientFlareColor, 0.0f );
-	Quad haloFlare( IdentityMatrix(), haloTransform, m_haloFlareColor, 0.0f );
+	m_ambientFlare = Quad( IdentityMatrix(), ambientTransform, m_ambientFlareColor, 0.0f );
+	m_haloFlare = Quad( IdentityMatrix(), haloTransform, m_haloFlareColor, 0.0f );
 
 	// turn the halo correctly so it works with the halo modifier
 	m_haloMatrix = RotationMatrix( Quaternion( 0, 1, 0, 0 ) );
+	
+	AdjustFlareLists();
+}
 
-	for( unsigned int i = 0; i < m_flareCount; ++i )
+void BehaviorGroupBooster::AdjustFlareLists()
+{
+	bool createAmbientFlares = m_ambientFlareEffect != nullptr;
+	bool createHaloFlares = m_haloFlareEffect != nullptr;
+
+	if( !createAmbientFlares && !createHaloFlares )
 	{
-		if( createHaloFlares )
-		{
-			m_haloFlares[i] = Quad( haloFlare );
-		}
-		if( createAmbientFlares )
-		{
-			m_ambientFlares[i] = Quad( ambientFlare );
-		}
+		return;
 	}
+
+	if( m_flareCount == 0)
+	{
+		return;
+	}
+
+	m_ambientFlares.resize( m_flareCount, m_ambientFlare );
+	m_haloFlares.resize( m_flareCount, m_haloFlare );
 }
 
 bool BehaviorGroupBooster::GetDisplay() const
@@ -335,18 +344,7 @@ void BehaviorGroupBooster::CreateBuffer()
 void BehaviorGroupBooster::RebuildFlareBuffer( unsigned int count )
 {
 	m_flareCount = count;
-
-	if( m_haloFlareEffect != nullptr )
-	{
-		m_haloFlares.resize( count );
-	}
-	
-	if( m_ambientFlareEffect != nullptr )
-	{
-		m_ambientFlares.resize( count );
-	}
-
-	SetupQuads();
+	AdjustFlareLists();
 }
 
 Tr2EffectPtr BehaviorGroupBooster::GetEffect()
@@ -449,13 +447,15 @@ void BehaviorGroupBooster::AddLight( Tr2LightManager& lightManager, Vector3 posi
 	lightManager.AddPointLight( position, radiusModifier * m_lightRadius, color );
 }
 
-void BehaviorGroupBooster::AddFlare( const Matrix& agentTransform, float lod, float intensity, unsigned int agentIndex, float shipBoundingSphereRadius )
+void BehaviorGroupBooster::AddFlare( const Matrix& agentTransform, float lod, float intensity, unsigned int agentIndex, float shipBoundingSphereRadius, float groupScale )
 {
     // This is unlikely, but can happen during editing (importing a booster before it has been told how many flares there are)	
     if( m_flareCount == 0 )
 	{
 		return;
 	}
+
+	Matrix groupScaleMatrix = ScalingMatrix(groupScale, groupScale, groupScale);
 
 	if( m_haloFlareEffect && m_haloFlares.size() == m_flareCount )
 	{
@@ -466,7 +466,7 @@ void BehaviorGroupBooster::AddFlare( const Matrix& agentTransform, float lod, fl
 		
 		// offset the halo towards the center of the ship when we lod out
 		Vector3 modOffset = haloModification * m_haloFlareOffset;
-		auto offset = TranslationMatrix( modOffset );
+		auto offset = TranslationMatrix( modOffset ) * groupScaleMatrix; // scale the offset with the group so it moves further out with increasing groupScale
 
 		auto haloMatrix = m_haloModifier->ApplyTransform( m_haloMatrix * offset * agentTransform, 0, nullptr );		
 
@@ -488,11 +488,11 @@ void BehaviorGroupBooster::AddFlare( const Matrix& agentTransform, float lod, fl
 
 		float mod = ( 1.0f - lod ) * ( lod + 1.0f ) * ( lod - 1.0f ) * ( lod - 1.0f );
 		float scaledBrightness = ( 0.25f + 0.25f * intensity + 0.5f * mod * intensity ) * m_ambientFlareBrightness;
-		Vector3 nearScale = mod * m_ambientFlareScale;
-		float farScale = ( 1.0f - mod ) * shipBoundingSphereRadius * 2.0f;
+		Vector3 nearScale = mod * m_ambientFlareScale * groupScale;
+		float farScale = ( 1.0f - mod ) * shipBoundingSphereRadius * groupScale * 2.0f;
 		
 		// the further away from the camera, the closer the flare is to the center of the agent
-		Vector3 modOffset = mod * m_ambientFlareOffset; 
+		Vector3 modOffset = mod * m_ambientFlareOffset * groupScale; 
 
 		if( m_ambientFlareNoiseAmplitude != 0.f )
 		{

@@ -6,11 +6,13 @@
 
 struct DroneAgent
 {	
-	DroneAgent() :					
-		rotation( 0, 0, 0, 1 ),		
-		position( 0, 0, 0 ),		
+	DroneAgent() :
+		rotation( 0, 0, 0, 1 ),
+		position( 0, 0, 0 ),
 		acceleration( 0, 0, 0 ),
-		velocity( 0, 0, 0 ),		
+		accelerationLength( 0 ),
+		velocity( 0, 0, 0 ),
+		velocityLength( 0 ),
 		target( 0, 0, 0 ),
 		targetDirection( 0, 0, 0 ),
 		lifetime( 0.f ),
@@ -28,6 +30,8 @@ struct DroneAgent
 	Vector3 position;
 	Vector3 acceleration;
 	Vector3 velocity;
+	float accelerationLength;
+	float velocityLength;
 	Vector3 target;
 	Vector3 targetDirection;
 	int id;

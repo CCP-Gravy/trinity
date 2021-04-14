@@ -3,7 +3,7 @@
 #include "SeekTarget.h"
 
 SeekTarget::SeekTarget( IRoot* lockobj ) :
-	m_behaviorWeight( 20.f ),
+	m_behaviorWeight( 1200.f ),
 	m_arrivedRadius( 10.f ),
 	m_distFromOrigin( 10.f ),
 	m_slowDownRadius( 33.f ),
@@ -16,6 +16,7 @@ SeekTarget::SeekTarget( IRoot* lockobj ) :
 	m_droneArrived( false ),
 	m_sortedLocators( false ),
 	m_doneRepairing( false ),
+	m_firstSpawnAtRandomPlaces( false ),
 	m_target( nullptr ),
 	m_fxBehavior( nullptr ),
 	m_locatorSetName( "damage" ),
@@ -48,6 +49,8 @@ void SeekTarget::InitializeScratch( void* scratchMemory )
 
 std::vector<Vector3> SeekTarget::CalculateBehavior( std::vector<DroneAgent>& agents, void* scratchData, const float deltaTime, BehaviorGroup& group, EveChildBehaviorSystem& system, const std::vector<std::vector<DroneAgent*>>& dronesInSearchRadius )
 {
+	CCP_STATS_ZONE( __FUNCTION__ );
+
 	if( m_behaviorWeight <= 0 )
 	{
 		return m_todo;
@@ -70,6 +73,17 @@ std::vector<Vector3> SeekTarget::CalculateBehavior( std::vector<DroneAgent>& age
 
 	for( auto agent = agents.begin(); agent != agents.end(); ++agent, ++data )
 	{
+		// find an initial spawn position
+		// might have to move this to behaviorGroup for this to be used in other behaviors but this is just a test
+		if( !data->hasSpawned && m_firstSpawnAtRandomPlaces )
+		{
+			Vector3 spawnPos;
+			spawnPos = FindSpawnPoint();
+			group.m_spawnPosition = spawnPos;
+			agent->position = spawnPos;
+			data->hasSpawned = true;
+		}
+
 		if( m_totalRepairTime != -1.f && m_repairTimePassed >= m_totalRepairTime )
 		{
 			SetExit( true );
@@ -132,8 +146,9 @@ std::vector<Vector3> SeekTarget::CalculateBehavior( std::vector<DroneAgent>& age
 			}
 		}
 
+		// TODO: check out world pos!!!!!!
 		Matrix worldTransform = system.GetWorldTransform();
-		agent->target = XMVector3TransformCoord( data->position, worldTransform );
+		agent->target = data->position;
 
 		// If the direction is (0,0,0) it's pointing up but then the slowDown radius won't work
 		if( data->direction == Vector3( 0.0, 0.0, 0.0 ) )
@@ -294,6 +309,19 @@ void SeekTarget::SetupShipRepair()
 	m_exit = false;
 	m_droneArrived = false;
 	m_repair = true;
+}
+
+Vector3 SeekTarget::FindSpawnPoint()
+{
+	auto seekLocators = GetLocatorsForSet( m_locatorSetName );
+	if( seekLocators != NULL && seekLocators[0].size() > 0 )
+	{
+		int rand = TriRandInt( 0, (int)seekLocators->size() );
+		Vector3 pos = seekLocators[0][rand].position;
+		return pos;
+	}
+
+	return Vector3( 0, 0, 0 );
 }
 
 void SeekTarget::SplitBoundingBox()

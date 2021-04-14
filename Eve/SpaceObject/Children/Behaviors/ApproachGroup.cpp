@@ -4,7 +4,7 @@
 
 ApproachGroup::ApproachGroup( IRoot* lockobj ):
 	m_visionRange( 150 ),
-	m_behaviorWeight( 1 ),
+	m_behaviorWeight( 60 ),
 	m_frameCounter( 0 ),
 	m_framesBetweenUpdates( 83 ),
 	m_priority( LEAST_PRIORITY )

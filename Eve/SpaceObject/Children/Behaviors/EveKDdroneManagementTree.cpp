@@ -21,6 +21,8 @@ EveKDdroneManagementTree::~EveKDdroneManagementTree()
 
 void EveKDdroneManagementTree::CreateTree(std::vector<DroneAgent>& agents, size_t NumberOfBehaviors )
 {
+	CCP_STATS_ZONE( __FUNCTION__ );
+
 	if( agents.empty() )
 	{
 		return;
@@ -390,6 +392,8 @@ void EveKDdroneManagementTree::FindClosestAgentRecursive( const Vector3& pos, Ag
 const std::vector<std::vector<std::vector<DroneAgent*>>>* EveKDdroneManagementTree::FindDronesInRange( std::vector<DroneAgent>& agents,
 																		std::vector<float>& ranges, float& BehaviorGroupBoundingSphereRadius)
 {
+	CCP_STATS_ZONE( __FUNCTION__ );
+
 	std::vector<SearchRange> searchRanges;
 	int behaviorNumber = 0;
 	for ( auto r = ranges.begin(); r != ranges.end(); ++r )
@@ -412,9 +416,9 @@ const std::vector<std::vector<std::vector<DroneAgent*>>>* EveKDdroneManagementTr
 
 	
 
-	for ( int j = 0; j < behaviorNumber; j++ )
+	for ( int j = 0; j < behaviorNumber; ++j )
 	{
-		for ( unsigned int i = 0; i < agents.size(); i++ )
+		for ( unsigned int i = 0; i < agents.size(); ++i )
 		{
 			m_groupSearchReturnInfoBlock[ j ][ i ].clear();
 		}
@@ -440,7 +444,7 @@ void EveKDdroneManagementTree::SearchThroughTree( std::vector<std::vector<std::v
 											std::vector<DroneAgent>& agents, std::vector<SearchRange>& ranges, int& activeRange ) const
 {
 	int c = 0;
-	for ( auto agent = agents.begin(); agent != agents.end(); ++agent, c++ )
+	for ( auto agent = agents.begin(); agent != agents.end(); ++agent, ++c )
 	{
 		activeRange = 0;
 		SearchThroughTreeHelperFunction( closeAgents, node, *agent, ranges, activeRange, c );

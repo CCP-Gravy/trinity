@@ -60,7 +60,7 @@ public:
 	void UpdateSyncronous( EveUpdateContext & updateContext, const EveChildUpdateParams& params );
 	void UpdateAgents( const float dt, EveChildBehaviorSystem& system );
 	float AllTheSame();
-	bool IsGroupVisible();
+	bool IsGroupVisible() const;
 	void CreateVertexDeclaration();
 
 	void RegisterWithQuadRenderer( Tr2QuadRenderer& quadRenderer );
@@ -115,10 +115,11 @@ private:
 	void AddAgentsByCount( int count );
 	void RemoveAgentsByCount( int count );
 	void OnAgentCountChanged();
-	void UpdateCurrentScreenSize();
 	void SortBehaviorIndexes();
 	void ReleaseCachedData( BlueAsyncRes* );
 	void RebuildCachedData( BlueAsyncRes* );
+	float GetBlendModifier() const;
+
 
 	// Variables
 	BlueSharedString m_behaviorGroupName; 	// name to identify group
@@ -134,6 +135,7 @@ private:
 	std::function<void()> m_changeBufferVertexCount; // A reference to a function on the parent class
 	float m_maxVelocity; // Steering behavior characteristics
 	float m_boundingSphereRadius;
+	bool m_createAgentTree;
 
 	// Lod-ing
 	float m_scale; // Size Multiplier for the agent mesh

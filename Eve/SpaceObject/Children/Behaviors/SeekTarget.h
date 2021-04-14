@@ -17,7 +17,8 @@ struct SeekTargetData
 		timePassed( 0.f ),
 		position( 0, 0, 0 ),
 		direction( 0, 0, 0 ),
-		arrived( true )
+		arrived( true ),
+		hasSpawned( false )
 	{
 	}
 
@@ -27,6 +28,7 @@ struct SeekTargetData
 	Vector3 position;
 	Vector3 direction;
 	bool arrived;
+	bool hasSpawned;
 };
 
 struct LocatorData
@@ -91,6 +93,9 @@ private:
 	std::vector<std::vector<LocatorData>> m_locatorBuckets;
 	std::vector<std::vector<int>> m_locatorBucketIndices;
 	BlueSharedString m_locatorSetName;
+
+	bool m_firstSpawnAtRandomPlaces;
+	Vector3 SeekTarget::FindSpawnPoint();
 
 	/////////////////////////////////////////////////////////////////////////////////////
 	// locator sets

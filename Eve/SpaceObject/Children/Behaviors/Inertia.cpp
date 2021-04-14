@@ -5,7 +5,7 @@
 Inertia::Inertia( IRoot* lockobj ) :
 	m_minInertiaWeight( 0.1 ),
 	m_maxRotationSpeed( 3.14 ),
-	m_maxAcceleration( 1 ),
+	m_maxAcceleration( 60 ),
 	m_priority( LEAST_PRIORITY )
 {
 }
@@ -31,6 +31,8 @@ void Inertia::InitializeScratch( void* scratchMemory )
 
 std::vector<Vector3> Inertia::CalculateBehavior( std::vector<DroneAgent>& agents, void* scratchData, const float deltaTime, BehaviorGroup& group, EveChildBehaviorSystem& system, const std::vector<std::vector<DroneAgent*>>& dronesInSearchRadius )
 {
+	CCP_STATS_ZONE( __FUNCTION__ );
+
 	auto data = static_cast<InertiaData*>( scratchData );
 
 	std::vector<Vector3> force;
