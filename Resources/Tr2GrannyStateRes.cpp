@@ -11,7 +11,8 @@ Tr2GrannyStateRes::Tr2GrannyStateRes( IRoot* lockobj ):
 	m_data( nullptr ),
 	m_dataSize( 0 ),
 	m_memoryUsage( 0 ),
-	m_anim_bound( false )
+	m_anim_bound( false ),
+	m_callbackData()
 {
 }
 

@@ -14,6 +14,11 @@ struct GStateBindingCallbackData
 {
 	std::string gsf_path;
 	std::map<std::string, TriGrannyResPtr> *anim_map_pointer;
+	GStateBindingCallbackData() :
+		gsf_path( "" ),
+		anim_map_pointer( nullptr )
+	{
+	}
 };
 
 std::string GetFullAnimPath(std::string SourceFilenameString, std::string dir_path);
