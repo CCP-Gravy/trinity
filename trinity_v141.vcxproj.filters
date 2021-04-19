@@ -124,6 +124,9 @@
     <Filter Include="Source Files\Eve\SpaceObject\Children\LineSetPaths">
       <UniqueIdentifier>{2a6e3f45-d333-4692-a6c3-47950a08f3b3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Eve\SpaceObject\Utils\fxAttributes">
+      <UniqueIdentifier>{cffb3c09-f722-4bab-8126-8f6dc5168a0b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ALResultBlue.h">
@@ -4441,6 +4444,15 @@
     <ClInclude Include="Eve\SpaceObject\Children\LineSetPaths\EveLineChildContainer.h">
       <Filter>Source Files\Eve\SpaceObject\Children\LineSetPaths</Filter>
     </ClInclude>
+    <ClInclude Include="Eve\SpaceObject\Utils\fxAttributes\EveSpaceObjectFxAttributes.h">
+      <Filter>Source Files\Eve\SpaceObject\Utils\fxAttributes</Filter>
+    </ClInclude>
+    <ClInclude Include="Eve\SpaceObject\Utils\fxAttributes\IEveFxAttribute.h">
+      <Filter>Source Files\Eve\SpaceObject\Utils\fxAttributes</Filter>
+    </ClInclude>
+    <ClInclude Include="Eve\SpaceObject\Utils\fxAttributes\EveCameraFxAttributes.h">
+      <Filter>Source Files\Eve\SpaceObject\Utils\fxAttributes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Audio\Tr2AudioStretchAuto.cpp">
@@ -4492,6 +4504,18 @@
     </ClCompile>
     <ClCompile Include="Eve\SpaceObject\Children\LineSetPaths\EveLineChildContainer_Blue.cpp">
       <Filter>Source Files\Eve\SpaceObject\Children\LineSetPaths</Filter>
+    </ClCompile>
+    <ClCompile Include="Eve\SpaceObject\Utils\fxAttributes\EveSpaceObjectFxAttributes.cpp">
+      <Filter>Source Files\Eve\SpaceObject\Utils\fxAttributes</Filter>
+    </ClCompile>
+    <ClCompile Include="Eve\SpaceObject\Utils\fxAttributes\EveSpaceObjectFxAttributes_Blue.cpp">
+      <Filter>Source Files\Eve\SpaceObject\Utils\fxAttributes</Filter>
+    </ClCompile>
+    <ClCompile Include="Eve\SpaceObject\Utils\fxAttributes\EveCameraFxAttributes.cpp">
+      <Filter>Source Files\Eve\SpaceObject\Utils\fxAttributes</Filter>
+    </ClCompile>
+    <ClCompile Include="Eve\SpaceObject\Utils\fxAttributes\EveCameraFxAttributes_Blue.cpp">
+      <Filter>Source Files\Eve\SpaceObject\Utils\fxAttributes</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
