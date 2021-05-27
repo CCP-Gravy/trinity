@@ -182,7 +182,7 @@ void EveChildLineSet::GenerateManagedPoints()
 {
 	for( auto it = begin( m_lines ); it != end( m_lines ); ++it )
 	{
-		( *it )->GeneratePoints( m_worldTransform );
+		( *it )->GeneratePoints();
 	}
 
 	UpdateBoundingSphere();
@@ -373,7 +373,7 @@ void EveChildLineSet::UpdateBuffer( Tr2RenderContext& renderContext )
 
 	for( auto it = begin( m_lines ); it != end( m_lines ); ++it )
 	{
-		( *it )->UpdateBuffer( renderContext, data, m_worldTransform, m_stride );
+		( *it )->UpdateBuffer( renderContext, data, m_stride );
 	}
 
 	m_vertexBuffer.UnmapForWriting( renderContext );
