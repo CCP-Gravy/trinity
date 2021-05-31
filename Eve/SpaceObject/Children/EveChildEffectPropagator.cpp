@@ -238,7 +238,7 @@ void EveChildEffectPropagator::UpdateTriggerInterval( EveUpdateContext& updateCo
 	auto dt = updateContext.GetDeltaT();
 	m_playTime += dt;
 
-	if( m_stopAfterNumTriggers < 0.0 && m_playTime > (  m_stopAfterNumTriggers / m_frequency + m_effectDuration ) )
+	if( m_stopAfterNumTriggers != -1.0 && m_stopAfterNumTriggers < 0.0 && m_playTime > ( m_stopAfterNumTriggers / m_frequency + m_effectDuration ) )
 	{
 		Stop();
 		return;
