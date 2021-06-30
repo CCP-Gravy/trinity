@@ -9,7 +9,7 @@
 
 
 Tr2PPFilmGrainEffect::Tr2PPFilmGrainEffect( IRoot* lockobj ) :
-	m_intensity( 0.003f ),
+	m_intensity( 0.005f ),
 	m_colored( true ),
 	m_colorAmount( 0.6f ),
 	m_grainSize( 3.0f ),
