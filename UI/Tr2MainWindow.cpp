@@ -461,8 +461,13 @@ void Tr2MainWindow::SanitizeFullScreenResolution( Tr2MainWindowState::State& sta
 	unsigned count = 0;
 	Tr2VideoAdapterInfo::GetAdapterModeCount( state.adapter, BACK_BUFFER_FORMAT, count );
 
+	// Finding the best resolution, in order of priority:
+	// 1. exact match for the given width, height
+	// 2. the largest resolution that is smaller than given width, height
+	// 3. the smallest supported resolution
+
 	Tr2DisplayModeInfo bestMode = {};
-	Tr2DisplayModeInfo largestMode = {};
+	Tr2DisplayModeInfo smallestMode = {};
 
 	for( unsigned i = 0; i < count; ++i )
 	{
@@ -480,22 +485,15 @@ void Tr2MainWindow::SanitizeFullScreenResolution( Tr2MainWindowState::State& sta
 			// found exact match
 			return;
 		}
-		if( largestMode.width < mode.width || largestMode.height < mode.height )
+		if( smallestMode.width == 0 || smallestMode.width > mode.width || smallestMode.height > mode.height )
 		{
-			largestMode = mode;
+			smallestMode = mode;
 		}
-		if( state.width <= mode.width && state.height <= mode.height )
+		if( ( state.width == 0 || state.width >= mode.width ) && ( state.height == 0 || state.height >= mode.height ) )
 		{
-			if( bestMode.width == 0 )
+			if( bestMode.width == 0 || bestMode.width < mode.width || bestMode.height < mode.height )
 			{
 				bestMode = mode;
-			}
-			else
-			{
-				if( bestMode.width > mode.width || bestMode.height > mode.height )
-				{
-					bestMode = mode;
-				}
 			}
 		}
 	}
@@ -506,8 +504,8 @@ void Tr2MainWindow::SanitizeFullScreenResolution( Tr2MainWindowState::State& sta
 	}
 	else
 	{
-		state.width = largestMode.width;
-		state.height = largestMode.height;
+		state.width = smallestMode.width;
+		state.height = smallestMode.height;
 	}
 }
 
