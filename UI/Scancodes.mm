@@ -88,7 +88,7 @@ public:
 	
 	uint32_t operator[]( char c ) const
 	{
-		return m_keyForChar[int( c )];
+		return m_keyForChar[int( (uint8_t)c )];
 	}
 private:
 	uint32_t m_keyForChar[256];
