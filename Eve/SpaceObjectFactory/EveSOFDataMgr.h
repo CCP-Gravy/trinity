@@ -332,6 +332,7 @@ public:
 		std::string name;
 		std::wstring prefix;
 		Vector3 position;
+		Quaternion rotation;
 	};
 
 	struct HullData

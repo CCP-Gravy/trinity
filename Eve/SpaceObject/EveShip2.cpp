@@ -371,3 +371,13 @@ float EveShip2::GetMaxSpeed() const
 {
 	return m_maxSpeed;
 }
+
+float EveShip2::GetBoosterIntensity() const
+{
+	if ( m_boosters != nullptr )
+	{
+		return m_boosters->GetBoosterIntensity();
+	}
+
+	return 0.0f;
+}

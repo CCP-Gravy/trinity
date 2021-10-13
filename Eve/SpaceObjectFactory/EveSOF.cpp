@@ -1696,6 +1696,13 @@ void EveSOF::SetupAudio( EveSpaceObject2Ptr newObj, const EveSOFDNAPtr dna ) con
 		observer->m_name = cit->name;
 		observer->SetPosition( cit->position );
 
+		// Convert rotation to a front value
+		Vector3 front;
+		static const Vector3 zAxis( 0.f, 0.f, 1.f );
+		TriVectorRotateQuaternion( &front, &zAxis, &cit->rotation );
+
+		observer->SetFront( front );
+
 		IBluePlacementObserverPtr emitter;
 		BeClasses->CreateInstanceFromName( "AudEmitter", BlueInterfaceIID<IBluePlacementObserver>(), reinterpret_cast<void**>( &emitter.p ) );
 		if( !emitter )

@@ -23,6 +23,7 @@ public:
 	IBluePlacementObserver* GetObserver();
 	void SetObserver( IBluePlacementObserver* obs );
 	void SetPosition( Vector3 pos );
+	void SetFront( const Vector3& front );
 
 	// debug
 	void GetDebugOptions( Tr2DebugRendererOptions& options );

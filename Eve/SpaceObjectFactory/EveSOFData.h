@@ -1166,6 +1166,7 @@ public:
 	std::string m_name;
 	std::wstring m_prefix;
 	Vector3 m_position;
+	Quaternion m_rotation;
 };
 TYPEDEF_BLUECLASS( EveSOFDataHullSoundEmitter );
 BLUE_DECLARE_VECTOR( EveSOFDataHullSoundEmitter );

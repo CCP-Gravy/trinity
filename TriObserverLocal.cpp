@@ -37,6 +37,11 @@ void TriObserverLocal::SetPosition( Vector3 pos )
 	m_position = pos;
 }
 
+void TriObserverLocal::SetFront( const Vector3& front )
+{
+	m_front = front;
+}
+
 void TriObserverLocal::GetDebugOptions( Tr2DebugRendererOptions& options )
 {
 	if ( auto tmp = dynamic_cast< ITr2DebugRenderable* > ( m_observer.p ) )

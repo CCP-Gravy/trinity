@@ -73,7 +73,7 @@ namespace
 		{
 			return value;
 		}
-		
+
 		return defaultVal;
 	}
 
@@ -96,14 +96,14 @@ namespace
 		}
 		return animation->Duration;
 	}
-	
+
 	float Random( float min, float max)
 	{
 		float result = min + rand() % int( max - min );
 		return result;
 	}
 
-	float Mod( float number, float mod ) 
+	float Mod( float number, float mod )
 	{
 		if( mod == 0 )
 		{
@@ -176,6 +176,16 @@ namespace
 			return speed > 0 ? speed : 1;
 		}
 		return 1;
+	}
+
+	float BoosterIntensity()
+	{
+		if( EveShip2Ptr ship = BlueCastPtr( s_owner ) )
+		{
+			auto intensity = ship->GetBoosterIntensity();
+			return intensity > 0 ? intensity: 0;
+		}
+		return 0.0f;
 	}
 
 	bool IsValidVariableName( const char* name )
@@ -335,7 +345,7 @@ namespace
 			{
 				return 1;
 			}
-	
+
 			if ( arg2 < arg )
 			{
 				return 0;
@@ -347,7 +357,7 @@ namespace
 	float ServerTimeGreaterThan( float year, float month, float day, float hour, float minute, float second )
 	{
 		float ret = -1;
-		
+
 		ret = CompareTimeFloats( year, GetServerYear() );
 		if ( ret != -1 ) return ret;
 		ret = CompareTimeFloats( month, GetServerMonth() );
@@ -426,10 +436,11 @@ std::string Tr2ControllerExpression::CreateParser( const char* expression, Modif
 	m_expressionParser.DefineFun( "ShipSpeed", ShipSpeed, false );
 	m_expressionParser.DefineFun( "ShipMaxSpeed", ShipMaxSpeed, false );
 	m_expressionParser.DefineFun( "Random", Random, false );
-		
+	m_expressionParser.DefineFun( "ShipBoosterIntensity", BoosterIntensity, false );
+
 	// % operator should have the same priority as / and * (6)
 	// see here https://beltoforion.de/en/muparser/features.php#idDef2
-	m_expressionParser.DefineOprt( "%", Mod, 6 ); 
+	m_expressionParser.DefineOprt( "%", Mod, 6 );
 
 	m_expressionParser.DefineFun( "IsWeekend", IsWeekend, false );
 	m_expressionParser.DefineFun( "ServerYear", GetServerYear, false );
@@ -448,7 +459,7 @@ std::string Tr2ControllerExpression::CreateParser( const char* expression, Modif
 	{
 		( *modifyParser )( m_expressionParser );
 	}
-	
+
 	try
 	{
 		m_expressionParser.SetExpr( expression );
@@ -519,6 +530,7 @@ void Tr2ControllerExpression::GetExpressionTermInfo( std::vector<Tr2ExpressionTe
 	info.push_back( Tr2ExpressionTermInfo::StringFunction( "Controller", "IsAnimationPlaying", "name", "return 1 if the geometry animation in the given layer is playing; 0 otheriwise" ) );
 	info.push_back( Tr2ExpressionTermInfo::Function( "Controller", "ShipSpeed", "owning ship speed" ) );
 	info.push_back( Tr2ExpressionTermInfo::Function( "Controller", "ShipMaxSpeed", "owning ship maximum speed" ) );
+	info.push_back( Tr2ExpressionTermInfo::Function( "Controller", "ShipBoosterIntensity", "Owning ships boosters intensity" ) );
 	info.push_back( Tr2ExpressionTermInfo::Function( "Controller", "Random", "min", "max", "returns a random from 'min'-'max-1' " ) );
 
 	info.push_back( Tr2ExpressionTermInfo::Function( "DateTime", "IsWeekend", "is it the weekend (output: 1.0 = yes, 0.0 = no)" ) );

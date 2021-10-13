@@ -984,6 +984,7 @@ void EveSOFDataMgr::GenerateHullData( HullData& hd, EveSOFDataHullPtr srcData ) 
 		emitter.name = ( *cit )->m_name;
 		emitter.prefix = ( *cit )->m_prefix;
 		emitter.position = ( *cit )->m_position;
+		emitter.rotation = ( *cit )->m_rotation;
 		hd.soundEmitters.push_back( emitter );
 	}
 

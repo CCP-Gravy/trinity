@@ -863,8 +863,10 @@ EveSOFDataHullBoosterItem::EveSOFDataHullBoosterItem( IRoot* lockobj ) :
 {
 }
 
-EveSOFDataHullSoundEmitter::EveSOFDataHullSoundEmitter( IRoot* )
-	:m_position( Vector3(0.0, 0.0, 0.0) )
-{}
+EveSOFDataHullSoundEmitter::EveSOFDataHullSoundEmitter( IRoot* ): 
+	m_position( Vector3(0.0, 0.0, 0.0) ),
+	m_rotation( Quaternion( 0.f, 0.f, 0.f, 1.f ) )
+{
+}
 
 

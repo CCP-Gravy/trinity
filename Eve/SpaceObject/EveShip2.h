@@ -56,6 +56,8 @@ public:
 
     float GetKillCounterValue() const;
 	float GetMaxSpeed() const;
+	float GetBoosterIntensity() const;
+
 protected:
 	// keep track of some ship's speed (in m/s)
 	TriFloatPtr m_speed;
