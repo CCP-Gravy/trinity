@@ -2505,7 +2505,7 @@ void EveSpaceObject2::AddLocator( EveLocator2* newLocator )
 // Description:
 //   Add a new overlayEffect to the space object
 // --------------------------------------------------------------------------------
-void EveSpaceObject2::AddOverlayEffect( EveMeshOverlayEffect* newOverlayEffect )
+void EveSpaceObject2::AddOverlayEffect( EveMeshOverlayEffectPtr newOverlayEffect )
 {
     this->m_overlayEffects.Append( newOverlayEffect->GetRawRoot() );
 }
@@ -2514,7 +2514,7 @@ void EveSpaceObject2::AddOverlayEffect( EveMeshOverlayEffect* newOverlayEffect )
 // Description:
 //   Remove a specific overlayEffect from the space object
 // --------------------------------------------------------------------------------
-void EveSpaceObject2::RemoveOverlayEffect( EveMeshOverlayEffect* overlayEffectToRemove )
+void EveSpaceObject2::RemoveOverlayEffect( EveMeshOverlayEffectPtr overlayEffectToRemove )
 {
 	ssize_t index = m_overlayEffects.FindKey( overlayEffectToRemove->GetRawRoot() );
 	m_overlayEffects.Remove( index );
@@ -2921,13 +2921,6 @@ void EveSpaceObject2::UpdateCurveSet( const std::string& name, Be::Time time )
 			owner->UpdateCurveSet( name, time );
 		}
 	}
-    for( auto it = m_overlayEffects.begin(); it != m_overlayEffects.end(); it++ )
-    {
-        if( auto owner = dynamic_cast<ITr2CurveSetOwner*>( *it ) )
-        {
-            owner->UpdateCurveSet( name, time );
-        }
-    }
 }
 
 // --------------------------------------------------------------------------------
@@ -2965,13 +2958,6 @@ void EveSpaceObject2::PlayCurveSet( const std::string& name, const std::string& 
 			owner->PlayCurveSet( name, rangeName );
 		}
 	}
-    for( auto childIt = m_overlayEffects.begin(); childIt != m_overlayEffects.end(); childIt++ )
-    {
-        if( auto owner = dynamic_cast<ITr2CurveSetOwner*>( *childIt ) )
-        {
-            owner->PlayCurveSet( name, rangeName );
-        }
-    }
 }
 
 // --------------------------------------------------------------------------------
@@ -3001,13 +2987,6 @@ void EveSpaceObject2::StopCurveSet( const std::string& name )
 			owner->StopCurveSet( name );
 		}
 	}
-    for( auto childIt = m_overlayEffects.begin(); childIt != m_overlayEffects.end(); childIt++ )
-    {
-        if( auto owner = dynamic_cast<ITr2CurveSetOwner*>( *childIt ) )
-        {
-            owner->StopCurveSet( name );
-        }
-    }
 }
 
 // --------------------------------------------------------------------------------
@@ -3038,13 +3017,6 @@ float EveSpaceObject2::GetCurveSetDuration( const std::string& name ) const
 			maxDuration = max( maxDuration, owner->GetCurveSetDuration( name ) );
 		}
 	}
-    for( auto childIt = m_overlayEffects.begin(); childIt != m_overlayEffects.end(); childIt++ )
-    {
-        if( auto owner = dynamic_cast<ITr2CurveSetOwner*>( *childIt ) )
-        {
-            maxDuration = max( maxDuration, owner->GetCurveSetDuration( name ) );
-        }
-    }
 	return maxDuration;
 }
 
@@ -3073,13 +3045,6 @@ float EveSpaceObject2::GetRangeDuration( const std::string& name, const std::str
 			maxDuration = max( maxDuration, owner->GetRangeDuration( name, rangeName ) );
 		}
 	}
-    for( auto childIt = m_overlayEffects.begin(); childIt != m_overlayEffects.end(); childIt++ )
-    {
-        if( auto owner = dynamic_cast<ITr2CurveSetOwner*>( *childIt ) )
-        {
-            maxDuration = max( maxDuration, owner->GetRangeDuration( name, rangeName ) );
-        }
-    }
 	return maxDuration;
 }
 
