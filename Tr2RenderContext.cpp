@@ -460,7 +460,7 @@ void Tr2RenderContextBase::RenderBatchesSortedByEffect( ITriRenderBatchAccumulat
 #if TRINITY_PLATFORM_SUPPORTS_PARALLEL_CONTEXTS
 	size_t batchCount = batches->GetBatchCount();
 	extern bool g_useParallelEncoding;
-	if( g_useParallelEncoding && batchCount > 256 )
+	if( g_useParallelEncoding && batchCount > 256 && !Tr2GpuProfiler::GetProfiler().IsCapturing() )
 	{
 		const uint32_t coresCount = std::thread::hardware_concurrency();
 		uint32_t batchesPerEncoder = std::max( 32u, uint32_t( ( batchCount + coresCount ) / coresCount ) );
