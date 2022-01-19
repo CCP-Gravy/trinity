@@ -54,13 +54,10 @@ private:
 	bool ProcessBloom( Tr2PPBloomEffect* bloom, Tr2PPDynamicExposureEffect* dynamicExposure );
 	Tr2PostProcessRenderInfo::Texture RenderBloom( Tr2RenderTarget* dest, Tr2RenderContext & renderContext, Tr2PPBloomEffect * bloom );
 	Tr2EffectPtr m_bloomHighPassFilter;
-	Tr2EffectPtr m_bloomHorizontalBlur;
-	Tr2EffectPtr m_bloomVerticalBlur;
 
 	// godRays
 	bool ProcessGodRays( Tr2PPGodRaysEffect* godrays );
 	void RenderGodRays( Tr2RenderTarget* dest, Tr2RenderContext & renderContext, Tr2PPGodRaysEffect * godrays );
-	Tr2EffectPtr m_godRayDownSampleEffect;
 	Tr2EffectPtr m_godrayEffect;
 
 	// signal loss
@@ -83,15 +80,13 @@ private:
 
 	// depth of field
 	bool ProcessDepthOfField( Tr2RenderContext& renderContext, Tr2PPDepthOfFieldEffect* fx );
-	void RenderDepthOfField( Tr2RenderTarget* dest, Tr2RenderContext& renderContext, Tr2PPDepthOfFieldEffect* depthOfField );
-	Tr2EffectPtr m_depthOfFieldCoCShader;
-	Tr2EffectPtr m_depthOfFieldBokehForegroundBlurShader;
-	Tr2EffectPtr m_depthOfFieldBokehBackgroundBlurShader;
-	Tr2EffectPtr m_depthOfFieldBokehFillShader;
+	void RenderDepthOfField( Tr2RenderTarget* dest, Tr2RenderContext& renderContext, Tr2PPDepthOfFieldEffect* depthOfField );	
+	Tr2EffectPtr m_depthOfFieldCoCFarShader;
+	Tr2EffectPtr m_depthOfFieldCoCNearShader;
 	Tr2EffectPtr m_depthOfFieldBokehBlendShader;
-	Tr2EffectPtr m_depthOfFieldDepthDownsampleShader; 
-
-
+	Tr2EffectPtr m_depthOfFieldBokehBlurShader;
+	Tr2EffectPtr m_depthOfFieldBokehFillShader;
+	
 	// fidelityFX
 	bool ProcessFidelityFX( Tr2RenderContext& renderContext, Tr2PPFidelityFXEffect* fx );
 	Tr2PostProcessRenderInfo::Texture RenderFidelityFX( Tr2RenderTarget * src, Tr2RenderContext & renderContext, Tr2PPFidelityFXEffect * fx );
@@ -101,8 +96,6 @@ private:
 	bool ProcessFog( Tr2PPFogEffect* fog );
 	void RenderFog( Tr2RenderTarget* dest, Tr2RenderContext& renderContext, Tr2PPFogEffect* fog );
 	Tr2EffectPtr m_fogColorEffect;
-	Tr2EffectPtr m_fogHorizontalBlurEffect;
-	Tr2EffectPtr m_fogVerticalBlurEffect;
 	Tr2EffectPtr m_fogCompositeEffect;
 
 	// TAA
@@ -147,6 +140,13 @@ private:
     // General
 	PostProcessingQuality m_quality;
 
+	// Common
+	void Blur( Tr2RenderTarget* dest, Tr2RenderTarget* src, Tr2RenderContext& renderContext );
+	Tr2RenderTarget* DownSampleDepth( Tr2RenderContext& renderContext, float size = 0.5f );
+
+	Tr2EffectPtr m_downsampleDepthEffect;
+	Tr2EffectPtr m_blurBigVertical;
+	Tr2EffectPtr m_blurBigHorizontal;
 };
 
 TYPEDEF_BLUECLASS( TriStepRenderPostProcess );

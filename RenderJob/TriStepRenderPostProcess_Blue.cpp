@@ -25,9 +25,6 @@ const Be::ClassInfo* TriStepRenderPostProcess::ExposeToBlue()
 		MAP_ATTRIBUTE( "renderInfo", m_renderInfo, "The rendering information for the post process", Be::READWRITE )
 		MAP_PROPERTY( "renderTarget", GetRenderTarget, SetRenderTarget, "Gets/Sets the main rendertarget")
 		MAP_ATTRIBUTE( "bloomHighPassFilter", m_bloomHighPassFilter, "The bloom high pass effect", Be::READWRITE )
-		MAP_ATTRIBUTE( "bloomHorizontalBlur", m_bloomHorizontalBlur, "The bloom horizontal blur effect", Be::READWRITE )
-		MAP_ATTRIBUTE( "bloomVerticalBlur", m_bloomVerticalBlur, "The bloom vertical blur", Be::READWRITE )
-		MAP_ATTRIBUTE( "godRayDownSampleEffect", m_godRayDownSampleEffect, "The godray downsample effect", Be::READWRITE )
 		MAP_ATTRIBUTE( "godrayEffect", m_godrayEffect, "The godray effect", Be::READWRITE )
 		MAP_ATTRIBUTE( "signalLossEffect", m_signalLossEffect, "The signal loss effect", Be::READWRITE )
 		MAP_ATTRIBUTE( "tonemappingEffect", m_tonemappingEffect, "The tone mapping effect", Be::READWRITE )
@@ -35,17 +32,15 @@ const Be::ClassInfo* TriStepRenderPostProcess::ExposeToBlue()
 		MAP_ATTRIBUTE( "dynamicExposureMergeHistogramShader", m_dynamicExposureMergeHistogramShader, "The merge histogram effect", Be::READWRITE )
 		MAP_ATTRIBUTE( "dynamicExposureMeasureExposureShader", m_dynamicExposureMeasureExposureShader, "The measure exposure effect", Be::READWRITE )
 		MAP_ATTRIBUTE( "fogColorEffect", m_fogColorEffect, "The fog color effect", Be::READWRITE )
-		MAP_ATTRIBUTE( "fogHorizontalBlurEffect", m_fogHorizontalBlurEffect, "The fog horizontal blur effect", Be::READWRITE )
-		MAP_ATTRIBUTE( "fogVerticalBlurEffect", m_fogVerticalBlurEffect, "The fog vertical blur effect", Be::READWRITE )
 		MAP_ATTRIBUTE( "fogCompositeEffect", m_fogCompositeEffect, "The fog composite effect", Be::READWRITE )
 		MAP_ATTRIBUTE( "taaEffect", m_taaEffect, "The taa effect", Be::READWRITE )
 		MAP_ATTRIBUTE( "accumulationBuffer", m_accumulationBuffer, "The accumulation buffer", Be::READWRITE )
-		MAP_ATTRIBUTE( "depthOfFieldDepthDownsampleShader", m_depthOfFieldDepthDownsampleShader, "The velocity buffer", Be::READWRITE )
-		MAP_ATTRIBUTE( "depthOfFieldCoCShader", m_depthOfFieldCoCShader, "The velocity buffer", Be::READWRITE )
-		MAP_ATTRIBUTE( "depthOfFieldBokehForegroundBlurShader", m_depthOfFieldBokehForegroundBlurShader, "The velocity buffer", Be::READWRITE )
-		MAP_ATTRIBUTE( "depthOfFieldBokehBackgroundBlurShader", m_depthOfFieldBokehBackgroundBlurShader, "The velocity buffer", Be::READWRITE )
-		MAP_ATTRIBUTE( "depthOfFieldBokehFillShader", m_depthOfFieldBokehFillShader, "The velocity buffer", Be::READWRITE )
-		MAP_ATTRIBUTE( "depthOfFieldBokehBlendShader", m_depthOfFieldBokehBlendShader, "The velocity buffer", Be::READWRITE )
+		
+		MAP_ATTRIBUTE( "depthOfFieldCoCFarShader", m_depthOfFieldCoCFarShader, "The DoF far Circle of Confusion shader", Be::READWRITE);
+		MAP_ATTRIBUTE( "depthOfFieldCoCNearShader", m_depthOfFieldCoCNearShader, "The DoF near Circle of Confusion shader", Be::READWRITE );
+		MAP_ATTRIBUTE( "depthOfFieldBokehBlendShader", m_depthOfFieldBokehBlendShader, "The DoF bend shader", Be::READWRITE );
+		MAP_ATTRIBUTE( "depthOfFieldBokehBlurShader", m_depthOfFieldBokehBlurShader, "The bokeh blur shader", Be::READWRITE );
+		MAP_ATTRIBUTE( "depthOfFieldBokehFillShader", m_depthOfFieldBokehFillShader, "The bokeh fill shader", Be::READWRITE );
 
 		MAP_ATTRIBUTE_WITH_CHOOSER( "quality", m_quality, "The quality of the post process", Be::READWRITE | Be::ENUM | Be::NOTIFY, PostProcessQualityChooser )
 
