@@ -18,6 +18,13 @@ enum Tr2SpriteObjectBlendMode
 	TR2_SBM_ADDX2
 };
 
+enum class Tr2SpriteTarget
+{
+	COLOR = 1,
+	GLOW = 2,
+	COLOR_AND_GLOW = 3,
+};
+
 // Note that this enum must match constants in PixelShader.fxh
 enum Tr2SpriteObjectEffect
 {
@@ -99,5 +106,10 @@ enum Tr2Sprite2dTextureSettings
 extern Be::VarChooser Tr2Sprite2dRenderEffectChooser[];
 
 class TriRenderJob;
+
+inline uint8_t PackBlendMode( Tr2SpriteObjectBlendMode blendMode, Tr2SpriteTarget target )
+{
+	return blendMode | ( uint8_t( target ) << 3 );
+}
 
 #endif

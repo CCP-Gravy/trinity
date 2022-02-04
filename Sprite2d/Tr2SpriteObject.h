@@ -16,6 +16,7 @@ BLUE_DECLARE( Tr2Sprite2dPickingMask );
 extern Be::VarChooser Tr2SpriteObjectPickStateChooser[];
 extern Be::VarChooser Tr2SpriteObjectEffectChooser[];
 extern Be::VarChooser Tr2SpriteObjectBlendModeChooser[];
+extern Be::VarChooser Tr2SpriteTargetChooser[];
 
 class Tr2SpriteObjectBase :
 	public ITr2SpriteObject,
@@ -101,6 +102,7 @@ protected:
 protected:
 	Tr2SpriteObjectBlendMode m_blendMode;
 	Tr2SpriteObjectEffect m_spriteEffect;
+	Tr2SpriteTarget m_target;
 	Color m_color;
 	float m_depth;
 	Vector2 m_shadowOffset;

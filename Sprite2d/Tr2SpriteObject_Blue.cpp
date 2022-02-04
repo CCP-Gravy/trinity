@@ -22,6 +22,13 @@ Be::VarChooser Tr2SpriteObjectBlendModeChooser[] =
 	{ 0 }
 };
 
+Be::VarChooser Tr2SpriteTargetChooser[] = {
+	{ "COLOR", BeCast( int( Tr2SpriteTarget::COLOR ) ), "Render to color target" },
+	{ "GLOW", BeCast( int( Tr2SpriteTarget::GLOW ) ), "Render to glow target" },
+	{ "COLOR_AND_GLOW", BeCast( int( Tr2SpriteTarget::COLOR_AND_GLOW ) ), "Render both to color and glow targets" },
+	{ 0 }
+};
+
 Be::VarChooser Tr2SpriteObjectEffectChooser[] =
 {
 	{ "TR2_SFX_FILL",			BeCast( TR2_SFX_FILL ),			"No texture - simple fill" },
@@ -47,6 +54,7 @@ Be::VarChooser Tr2SpriteObjectEffectChooser[] =
 
 BLUE_REGISTER_ENUM( "Tr2SpriteObjectBlendMode", Tr2SpriteObjectBlendMode, Tr2SpriteObjectBlendModeChooser );
 BLUE_REGISTER_ENUM( "Tr2SpriteObjectEffect", Tr2SpriteObjectEffect, Tr2SpriteObjectEffectChooser );
+BLUE_REGISTER_ENUM_EX( "Tr2SpriteTarget", Tr2SpriteTarget, Tr2SpriteTargetChooser, ENUM_REG_ENUM_OBJECT_ON_MODULE );
 
 const Be::ClassInfo* Tr2SpriteObjectBase::ExposeToBlue()
 {
@@ -164,6 +172,13 @@ const Be::ClassInfo* Tr2SpriteObject::ExposeToBlue()
 			Be::READWRITE | Be::ENUM | Be::NOTIFY,
 			Tr2SpriteObjectBlendModeChooser
 		)
+
+		MAP_ATTRIBUTE_WITH_CHOOSER(
+			"spriteTarget",
+			m_target,
+			"Render target for the object: either color or glow target",
+			Be::READWRITE | Be::ENUM | Be::NOTIFY,
+			Tr2SpriteTargetChooser )
 
 		MAP_ATTRIBUTE_WITH_CHOOSER
 		(

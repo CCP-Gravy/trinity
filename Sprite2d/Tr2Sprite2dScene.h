@@ -79,6 +79,7 @@ public:
 	void SetSpriteEffect( Tr2SpriteObjectEffect sfx );
 	void SetTileMode( uint8_t tileMode );
 	void SetBlendmode( Tr2SpriteObjectBlendMode bm );
+	void SetSpriteTarget( Tr2SpriteTarget target );
 	void SetColor( const Color& color );
 	void SetAccumulatedAlpha( float a );
 	float GetAccumulatedAlpha() const;
@@ -199,6 +200,8 @@ private:
 
 	// Blend mode
 	Tr2SpriteObjectBlendMode m_blendMode;
+
+	Tr2SpriteTarget m_spriteTarget;
 
 	// Number of textures used by current sprite effect
 	int m_numTexturesUsed;

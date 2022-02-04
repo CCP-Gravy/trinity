@@ -60,6 +60,7 @@ Tr2Sprite2dScene::Tr2Sprite2dScene( IRoot* lockobj ) :
 	m_display( true ),
 	m_spriteEffect( TR2_SFX_FILL ),
 	m_blendMode( TR2_SBM_NONE ),
+	m_spriteTarget( Tr2SpriteTarget::COLOR ),
 	m_numTexturesUsed( 0 ),
 	m_isAntiAliased( false ),
 	m_translation( 0.0f, 0.0f, 0.0f ),
@@ -902,7 +903,7 @@ bool Tr2Sprite2dScene::PrepareSpriteVerts(
 			{
 				vertex.texCoord[1] = uv[1][i];
 			}
-			vertex.blendMode = m_blendMode;
+			vertex.blendMode = PackBlendMode( m_blendMode, m_spriteTarget );
 			vertex.spriteEffect = m_spriteEffect;
 			vertex.transformIndex = 0;
 			vertex.tileMode = m_tileMode;
@@ -973,7 +974,7 @@ bool Tr2Sprite2dScene::PrepareTriangleVerts( Tr2Sprite2dD3DVertex* destVerts, Tr
 			destVerts->texCoord[1] = curVertex->texCoord[1];
 		}
 
-		destVerts->blendMode = m_blendMode;
+		destVerts->blendMode = PackBlendMode( m_blendMode, m_spriteTarget );
 		destVerts->spriteEffect = m_spriteEffect;
 		destVerts->tileMode = m_tileMode;
 
@@ -1883,6 +1884,11 @@ void Tr2Sprite2dScene::ProcessVertices( Tr2Sprite2dD3DVertex* verticesSrc, unsig
 void Tr2Sprite2dScene::SetBlendmode( Tr2SpriteObjectBlendMode bm )
 {
 	m_blendMode = bm;
+}
+
+void Tr2Sprite2dScene::SetSpriteTarget( Tr2SpriteTarget target )
+{
+	m_spriteTarget = target;
 }
 
 //////////////////////////////////////////////////////////////////////////
