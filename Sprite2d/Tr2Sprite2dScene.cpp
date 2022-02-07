@@ -2117,9 +2117,13 @@ void Tr2Sprite2dScene::RunJobHelper( TriRenderJob* job )
 	// the job has finished.
 	renderContext.m_esm.PopDepthStencilBuffer();
 
+	renderContext.m_esm.PushRenderTarget( Tr2TextureAL(), 1 );
+
 	renderContext.m_esm.PushViewport();
 	job->Run( m_realTime, m_simTime );
 	renderContext.m_esm.PopViewport();
+
+	renderContext.m_esm.PopRenderTarget( 1 );
 
 	renderContext.m_esm.PushDepthStencilBuffer( Tr2TextureAL() );
 
