@@ -78,10 +78,11 @@ struct Tr2Sprite2dVertexBase
 struct Tr2Sprite2dD3DVertex : public Tr2Sprite2dVertexBase
 {
 	Tr2Sprite2dClipRect clipRect;
-	unsigned char transformIndex;
-	unsigned char blendMode;
-	unsigned char spriteEffect;
-	unsigned char tileMode;
+	float glowBrightness;
+	uint8_t transformIndex;
+	uint8_t blendMode;
+	uint8_t spriteEffect;
+	uint8_t tileMode;
 };
 
 BLUE_DECLARE( Tr2AtlasTexture );

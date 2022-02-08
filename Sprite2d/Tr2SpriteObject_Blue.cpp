@@ -180,6 +180,13 @@ const Be::ClassInfo* Tr2SpriteObject::ExposeToBlue()
 			Be::READWRITE | Be::ENUM | Be::NOTIFY,
 			Tr2SpriteTargetChooser )
 
+		MAP_ATTRIBUTE(
+			"glowBrightness",
+			m_glowBrightness,
+			"Full-screen glow effect brightness factor for this sprite object. See spriteTarget.",
+			Be::READWRITE | Be::NOTIFY
+		)
+
 		MAP_ATTRIBUTE_WITH_CHOOSER
 		(
 			"spriteEffect",

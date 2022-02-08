@@ -80,6 +80,7 @@ public:
 	void SetTileMode( uint8_t tileMode );
 	void SetBlendmode( Tr2SpriteObjectBlendMode bm );
 	void SetSpriteTarget( Tr2SpriteTarget target );
+	void SetGlowBrightness( float glowBrightness );
 	void SetColor( const Color& color );
 	void SetAccumulatedAlpha( float a );
 	float GetAccumulatedAlpha() const;
@@ -202,6 +203,7 @@ private:
 	Tr2SpriteObjectBlendMode m_blendMode;
 
 	Tr2SpriteTarget m_spriteTarget;
+	float m_glowBrightness;
 
 	// Number of textures used by current sprite effect
 	int m_numTexturesUsed;

@@ -742,7 +742,8 @@ int Tr2FontMeasurer::GetFontSize() const
 	return m_fontSize;
 }
 
-void Tr2FontMeasurer::PrepareSprites( Tr2Sprite2dScene* renderer, const Vector2& translation, const Color& color, Tr2SpriteObjectEffect sfx, Tr2SpriteObjectBlendMode blendMode, Tr2SpriteTarget target, bool dropShadow, const Vector2& shadowOffset, const Color& shadowColor, Tr2SpriteObjectEffect shadowSfx )
+void Tr2FontMeasurer::PrepareSprites( Tr2Sprite2dScene* renderer, const Vector2& translation, const Color& color, Tr2SpriteObjectEffect sfx, Tr2SpriteObjectBlendMode blendMode, Tr2SpriteTarget target, 
+	float glowBrightness, bool dropShadow, const Vector2& shadowOffset, const Color& shadowColor, Tr2SpriteObjectEffect shadowSfx )
 {
 	CCP_STATS_ZONE( __FUNCTION__ );
 
@@ -874,6 +875,7 @@ void Tr2FontMeasurer::PrepareSprites( Tr2Sprite2dScene* renderer, const Vector2&
 					Tr2Sprite2dD3DVertex& curVertex = m_vertices[spriteIx * 4 + i];
 
 					curVertex.color = finalColor;
+					curVertex.glowBrightness = glowBrightness;
 					curVertex.blendMode = PackBlendMode( blendMode, target );
 					curVertex.spriteEffect = currentSfx;
 					curVertex.transformIndex = 0;
@@ -982,6 +984,7 @@ void Tr2FontMeasurer::PrepareSprites( Tr2Sprite2dScene* renderer, const Vector2&
 					Tr2Sprite2dD3DVertex& curVertex = m_vertices[spriteIx * 4 + i];
 
 					curVertex.color = finalColor;
+					curVertex.glowBrightness = glowBrightness;
 					curVertex.blendMode = PackBlendMode( blendMode, target );
 					curVertex.spriteEffect = TR2_SFX_FILL;
 					curVertex.transformIndex = 0;

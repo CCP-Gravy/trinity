@@ -103,6 +103,7 @@ protected:
 	Tr2SpriteObjectBlendMode m_blendMode;
 	Tr2SpriteObjectEffect m_spriteEffect;
 	Tr2SpriteTarget m_target;
+	float m_glowBrightness;
 	Color m_color;
 	float m_depth;
 	Vector2 m_shadowOffset;

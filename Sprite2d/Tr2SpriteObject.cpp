@@ -157,6 +157,7 @@ Tr2SpriteObject::Tr2SpriteObject( IRoot* lockobj ) :
 	m_blendMode( TR2_SBM_NONE ),
 	m_spriteEffect( TR2_SFX_COPY ),
 	m_target( Tr2SpriteTarget::COLOR ),
+	m_glowBrightness( 1 ),
 	m_color( 1.0f, 1.0f, 1.0f, 1.0f ),
 	m_depth( 0.0f ),
 	m_shadowOffset( 0.0f, 0.0f ),
@@ -171,6 +172,7 @@ void Tr2SpriteObject::SetRegularRenderState( Tr2Sprite2dScene* renderer )
 {
 	renderer->SetBlendmode( m_blendMode );
 	renderer->SetSpriteTarget( m_target );
+	renderer->SetGlowBrightness( m_glowBrightness );
 	renderer->SetColor( m_color );
 	renderer->SetDepth( m_depth );
 }
@@ -181,6 +183,7 @@ void Tr2SpriteObject::SetGlowRenderState( Tr2Sprite2dScene* renderer )
 	c.a *= m_color.a;
 	renderer->SetBlendmode( TR2_SBM_ADDX2 );
 	renderer->SetSpriteTarget( m_target );
+	renderer->SetGlowBrightness( m_glowBrightness );
 	renderer->SetColor( c );
 	renderer->SetDepth( m_depth );
 }
@@ -191,6 +194,7 @@ void Tr2SpriteObject::SetShadowRenderState( Tr2Sprite2dScene* renderer )
 	c.a *= m_color.a;
 	renderer->SetBlendmode( m_blendMode );
 	renderer->SetSpriteTarget( m_target );
+	renderer->SetGlowBrightness( m_glowBrightness );
 	renderer->SetColor( c );
 	renderer->SetDepth( m_depth );
 }

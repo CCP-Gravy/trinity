@@ -91,7 +91,8 @@ void EveSprite2dBracketRenderer::GatherSprites( Tr2Sprite2dScene* renderer )
 			{
 				Tr2Sprite2dD3DVertex& v = vertices[spriteIx*4 + i];
 
-				v.blendMode = TR2_SBM_BLEND;
+				v.glowBrightness = 1;
+				v.blendMode = PackBlendMode( TR2_SBM_BLEND, Tr2SpriteTarget::COLOR );
 				v.spriteEffect = TR2_SFX_COPY;
 				v.transformIndex = 0;
 				v.clipRect = renderer->GetClipRectangle();

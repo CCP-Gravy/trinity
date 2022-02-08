@@ -61,6 +61,7 @@ Tr2Sprite2dScene::Tr2Sprite2dScene( IRoot* lockobj ) :
 	m_spriteEffect( TR2_SFX_FILL ),
 	m_blendMode( TR2_SBM_NONE ),
 	m_spriteTarget( Tr2SpriteTarget::COLOR ),
+	m_glowBrightness( 1.f ),
 	m_numTexturesUsed( 0 ),
 	m_isAntiAliased( false ),
 	m_translation( 0.0f, 0.0f, 0.0f ),
@@ -903,6 +904,7 @@ bool Tr2Sprite2dScene::PrepareSpriteVerts(
 			{
 				vertex.texCoord[1] = uv[1][i];
 			}
+			vertex.glowBrightness = m_glowBrightness;
 			vertex.blendMode = PackBlendMode( m_blendMode, m_spriteTarget );
 			vertex.spriteEffect = m_spriteEffect;
 			vertex.transformIndex = 0;
@@ -974,6 +976,7 @@ bool Tr2Sprite2dScene::PrepareTriangleVerts( Tr2Sprite2dD3DVertex* destVerts, Tr
 			destVerts->texCoord[1] = curVertex->texCoord[1];
 		}
 
+		destVerts->glowBrightness = m_glowBrightness;
 		destVerts->blendMode = PackBlendMode( m_blendMode, m_spriteTarget );
 		destVerts->spriteEffect = m_spriteEffect;
 		destVerts->tileMode = m_tileMode;
@@ -1216,6 +1219,9 @@ bool Tr2Sprite2dScene::OnPrepareResources()
 
 			// Clip rect
 			s_vertexDesc.Add( s_vertexDesc.FLOAT32_4, s_vertexDesc.TEXCOORD, 2 );
+
+			// Glow brightness
+			s_vertexDesc.Add( s_vertexDesc.FLOAT32_1, s_vertexDesc.TEXCOORD, 3 );
 
 			// Matrix index
 			s_vertexDesc.Add( s_vertexDesc.UBYTE_4, s_vertexDesc.BLENDINDICES );
@@ -1889,6 +1895,11 @@ void Tr2Sprite2dScene::SetBlendmode( Tr2SpriteObjectBlendMode bm )
 void Tr2Sprite2dScene::SetSpriteTarget( Tr2SpriteTarget target )
 {
 	m_spriteTarget = target;
+}
+
+void Tr2Sprite2dScene::SetGlowBrightness( float glowBrightness )
+{
+	m_glowBrightness = glowBrightness;
 }
 
 //////////////////////////////////////////////////////////////////////////

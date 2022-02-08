@@ -48,6 +48,7 @@ void Tr2Sprite2dTextObject::GatherSprites( Tr2Sprite2dScene* renderer )
 				m_spriteEffect,
 				m_blendMode,
 				m_target,
+				m_glowBrightness,
 				dropShadow,
 				m_shadowOffset,
 				m_shadowColor,
