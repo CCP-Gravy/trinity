@@ -1258,7 +1258,7 @@ void EveSpaceScene::BeginRender( Tr2RenderContext& renderContext )
 	{
 		CCP_STATS_SCOPED_TIME( gatherDynamicLights );
 
-		lightManager->Clear();
+		lightManager->Clear( renderContext );
 		lightManager->SetFrustum( frustum );
 
 		Tr2ParallelFor( Tr2BlockedRange<size_t>( 0, m_objects.size(), 20 ), [&] ( Tr2BlockedRange<size_t> range ) 

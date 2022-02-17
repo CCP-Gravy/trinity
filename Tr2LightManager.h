@@ -49,7 +49,7 @@ public:
 		float innerAngle;
 	};
 
-	void Clear();
+	void Clear( Tr2RenderContext& renderContext );
 	void SetFrustum( const TriFrustum& frustum );
 	void AddPointLight( const Vector3& position, float radius, const Color& color, float innerRadius=0.0f);
 	void AddLight( PerLightData& data );
@@ -75,9 +75,6 @@ private:
 	Tr2AddSafeGrowableBuffer<PerLightData> m_lightData;
 	Tr2GpuStructuredBufferPtr m_lightBuffer;
 	Tr2GpuStructuredBufferPtr m_indexBuffer;
-	
-	Tr2GpuStructuredBufferPtr m_emptyLightBuffer;
-	Tr2GpuStructuredBufferPtr m_emptyIndexBuffer;
 
 	Tr2GpuBufferPtr m_indexBufferCounter;
 	Tr2ConstantBufferAL m_perFrameData;

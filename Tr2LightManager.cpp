@@ -85,9 +85,6 @@ Tr2LightManager::Tr2LightManager( const char* effectPath )
 	m_lightBuffer.CreateInstance();
 	m_indexBuffer.CreateInstance();
 
-	m_emptyLightBuffer.CreateInstance();
-	m_emptyIndexBuffer.CreateInstance();
-
 	m_indexBufferCounter.CreateInstance();
 
 	m_lightBufferVariable.Register( "LightBuffer", m_lightBuffer );
@@ -138,10 +135,11 @@ void Tr2LightManager::SetVariableStore()
 	m_indexBufferVariable = m_indexBuffer;
 }
 
-void Tr2LightManager::Clear()
+void Tr2LightManager::Clear( Tr2RenderContext& renderContext )
 {
-	m_lightBufferVariable = m_emptyLightBuffer;
-	m_indexBufferVariable = m_emptyIndexBuffer;
+	m_lightBufferVariable = m_lightBuffer;
+	m_indexBufferVariable = m_indexBuffer;
+	ClearLightIndices( renderContext );
 	m_lightData.Clear();
 }
 
