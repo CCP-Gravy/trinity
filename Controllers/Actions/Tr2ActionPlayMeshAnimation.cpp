@@ -7,17 +7,34 @@
 #include "StdAfx.h"
 #include "Tr2ActionPlayMeshAnimation.h"
 #include "Controllers/Tr2Controller.h"
-#include "Eve/SpaceObject/EveSpaceObject2.h"
 #include "Tr2GrannyAnimation.h"
 
 
 Tr2ActionPlayMeshAnimation::Tr2ActionPlayMeshAnimation( IRoot* lockobj )
-	:m_loops( -1 ),
+	:m_controller( nullptr ),
+	m_destinationType( DestinationType::OWNER ),
 	m_playAction( ENQUEUE_PLAY ),
 	m_stopAction( ENQUEUE_STOP ),
+	m_loops( -1 ),
 	m_delay( 0 ),
-	m_speed( 1 )
+	m_speed( 1 ),
+	m_delayBinding( false )
 {
+}
+
+void Tr2ActionPlayMeshAnimation::Link( Tr2Controller& controller )
+{
+	m_controller = &controller;
+	if( !HasDelayedBinding() )
+	{
+		LinkDestination( controller );
+	}
+}
+
+void Tr2ActionPlayMeshAnimation::Unlink()
+{
+	m_controller = nullptr;
+	m_destination.Unlink();
 }
 
 void Tr2ActionPlayMeshAnimation::Start( Tr2Controller& controller )
@@ -26,7 +43,11 @@ void Tr2ActionPlayMeshAnimation::Start( Tr2Controller& controller )
 	{
 		return;
 	}
-	EveSpaceObject2Ptr owner = BlueCastPtr( controller.GetOwner() );
+	if( HasDelayedBinding() )
+	{
+		LinkDestination( controller );
+	}
+	ITr2GrannyAnimationOwnerPtr owner = BlueCastPtr( m_destinationType == DestinationType::OWNER ? controller.GetOwner() : m_destination.GetBoundObject() );
 	if( !owner )
 	{
 		return;
@@ -49,7 +70,7 @@ void Tr2ActionPlayMeshAnimation::Stop( Tr2Controller& controller )
 	{
 		return;
 	}
-	EveSpaceObject2Ptr owner = BlueCastPtr( controller.GetOwner() );
+	ITr2GrannyAnimationOwnerPtr owner = BlueCastPtr( m_destinationType == DestinationType::OWNER ? controller.GetOwner() : m_destination.GetBoundObject() );
 	if( !owner )
 	{
 		return;
@@ -74,5 +95,59 @@ void Tr2ActionPlayMeshAnimation::Stop( Tr2Controller& controller )
 		break;
 	default:
 		break;
+	}
+}
+
+bool Tr2ActionPlayMeshAnimation::OnModified( Be::Var* value )
+{
+	if( !m_controller )
+	{
+		return true;
+	}
+	if( IsMatch( value, m_destinationType ) || IsMatch( value, m_destination.m_path ) || IsMatch( value, m_destination.m_attribute ) || IsMatch( value, m_destination.m_object ) || IsMatch( value, m_delayBinding ) )
+	{
+		if( !HasDelayedBinding() )
+		{
+			LinkDestination( *m_controller );
+		}
+	}
+	return true;
+}
+
+void Tr2ActionPlayMeshAnimation::LinkDestination( const Tr2Controller& controller )
+{
+	if( m_destinationType == DestinationType::OWNER )
+	{
+		m_destination.Unlink();
+		return;
+	}
+	std::unordered_map<std::string, IRoot*> roots;
+	controller.GetBindingPathRoots( roots );
+	m_destination.Link( roots );
+}
+
+bool Tr2ActionPlayMeshAnimation::HasDelayedBinding() const
+{
+	return m_delayBinding && !m_destination.m_path.empty();
+}
+
+bool Tr2ActionPlayMeshAnimation::IsBindingValid() const
+{
+	if( m_destinationType == DestinationType::OWNER )
+	{
+		return true;
+	}
+	return m_destination.GetBoundObject() != nullptr;
+}
+
+IRootPtr Tr2ActionPlayMeshAnimation::GetDestination() const
+{
+	if( m_destinationType == DestinationType::OWNER )
+	{
+		return m_controller ? m_controller->GetOwner() : nullptr;
+	}
+	else
+	{
+		return m_destination.GetBoundObject();
 	}
 }
