@@ -19,8 +19,8 @@ public:
 	void Start( Tr2Controller& controller ) override;
 	void StartWithController( PyObject * controller );
 private:
-	std::string m_emitterName;
-	std::wstring m_soundEvent;
+	BlueSharedString m_emitterName;
+	BlueSharedString m_soundEvent;
 	bool m_bypassPrefix;
 };
 

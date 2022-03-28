@@ -22,7 +22,7 @@ void Tr2ActionPlaySound::Start( Tr2Controller& controller )
 	{
 		if( auto emitter = emitters->FindSoundEmitter( m_emitterName.c_str() ) )
 		{
-			emitter->SendEvent( m_soundEvent, m_bypassPrefix );
+			emitter->SendEvent( static_cast<const wchar_t*>(CA2W(m_soundEvent.c_str())), m_bypassPrefix );
 		}
 	}
 }

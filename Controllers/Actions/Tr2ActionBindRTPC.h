@@ -44,8 +44,8 @@ public:
 private:
 	bool IsAttrExpressionValid( const char* attributeName ) const;
 
-	std::string m_value;
-	std::string m_emitterName;
+	BlueSharedString m_value;
+	BlueSharedString m_emitterName;
 	std::wstring m_rtpcName;
 	ITriScalarFunctionPtr m_curve;
 
