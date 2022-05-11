@@ -653,7 +653,7 @@ void EveSpaceObject2::RenderDebugInfo( ITr2DebugRenderer2& renderer )
 			}
 		}
 
-		renderer.DrawBox( this, m_worldTransform, bounds.m_min, bounds.m_max, Tr2DebugRenderer::Wireframe, color );
+		renderer.DrawBox( this, m_worldTransform, bounds.m_min, bounds.m_max, Tr2DebugRenderer::Wireframe, Tr2DebugColor(color, 0xffff0000, 0xff00ff00, 0xffffff00) );
 	}
 
 	if( renderer.HasOption( GetRawRoot(), "Bounding Sphere" ) )
