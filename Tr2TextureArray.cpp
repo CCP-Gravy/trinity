@@ -41,8 +41,6 @@ Tr2TextureArrayElement Tr2TextureArray::AddElement( const ImageIO::HostBitmap& b
 
 	uint32_t index = uint32_t( m_elements.size() );
 
-	Tr2BitmapDimensions desc = bitmap;
-
 	for( size_t i = 0; i < m_elements.size(); ++i )
 	{
 		if( !m_elements[i].IsValid() )
@@ -58,17 +56,15 @@ Tr2TextureArrayElement Tr2TextureArray::AddElement( const ImageIO::HostBitmap& b
 	m_elements[index].CreateFromBitmapDimensions( bitmap );
 	memcpy( m_elements[index].GetRawData(), bitmap.GetRawData(), bitmap.GetRawDataSize() );
 
-	if( m_dimensions.GetType() == Tr2RenderContextEnum::TEX_TYPE_INVALID )
-	{
-		m_dimensions = Tr2BitmapDimensions(
-			desc.GetType(),
-			desc.GetFormat(),
-			desc.GetWidth(),
-			desc.GetHeight(),
-			desc.GetDepth(),
-			desc.GetTrueMipCount(),
-			uint32_t( ( m_elements.size() + m_increment - 1 ) / m_increment * m_increment ) );
-	}
+	m_dimensions = Tr2BitmapDimensions(
+		bitmap.GetType(),
+		bitmap.GetFormat(),
+		bitmap.GetWidth(),
+		bitmap.GetHeight(),
+		bitmap.GetDepth(),
+		bitmap.GetTrueMipCount(),
+		uint32_t( ( m_elements.size() + m_increment - 1 ) / m_increment * m_increment ) );
+
 	USE_MAIN_THREAD_RENDER_CONTEXT();
 	std::vector<Tr2SubresourceData> initialData;
 	Tr2SubresourceData filler;
