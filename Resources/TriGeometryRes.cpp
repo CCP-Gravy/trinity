@@ -272,6 +272,11 @@ int TriGeometryRes::GetLodIndexForScreenSize( unsigned int meshIx, float screenS
 	auto mesh = GetMeshData( meshIx );
 	if( mesh && !isinf( screenSize ) )
 	{
+		if( m_forceLod && m_forcedLodIndex > 0 )
+		{
+			return int( std::min( m_forcedLodIndex, uint32_t( mesh->m_lods.size() ) ) - 1 );
+		}
+
 		for( int i = static_cast<int>( mesh->m_lods.size() - 1 ); i >= 0; i-- )
 		{
 			if( mesh->m_lods[i].maxScreenSize >= screenSize )
@@ -1501,13 +1506,24 @@ bool TriGeometryRes::RenderAreas( float screenSize, unsigned int meshIx, unsigne
         return false;
     }
 
-	for( auto lod : pMesh->m_lods )
+	if( m_forceLod )
 	{
-		if( lod.maxScreenSize < screenSize )
+		if( !pMesh->m_lods.empty() && m_forcedLodIndex > 0 )
 		{
-			break;
+			auto lod = pMesh->m_lods[std::min( m_forcedLodIndex, uint32_t( pMesh->m_lods.size() ) ) - 1];
+			pMesh = m_meshLods[lod.meshIndex].get();
 		}
-		pMesh = m_meshLods[lod.meshIndex].get();
+	}
+	else
+	{
+		for( auto lod : pMesh->m_lods )
+		{
+			if( lod.maxScreenSize < screenSize )
+			{
+				break;
+			}
+			pMesh = m_meshLods[lod.meshIndex].get();
+		}
 	}
 
     if( areaIx >= pMesh->m_areas.size() )

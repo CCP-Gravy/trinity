@@ -45,6 +45,9 @@ const Be::ClassInfo* TriGeometryRes::ExposeToBlue()
 			"Gets the count of animations in this geometry resource"
 		)
 		MAP_ATTRIBUTE( "name", m_name, "Name for debugging/logging", Be::READWRITE )
+
+		MAP_ATTRIBUTE( "forceLod", m_forceLod, "Force geometry to use a specific LOD\n:jessica-group: Debug", Be::READWRITE )
+		MAP_ATTRIBUTE( "forcedLodIndex", m_forcedLodIndex, "LOD index to use when forceLod is on\n:jessica-group: Debug", Be::READWRITE )
 		
 		MAP_METHOD_AND_WRAP
 		(

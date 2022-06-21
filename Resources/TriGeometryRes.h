@@ -284,6 +284,9 @@ private:
 	granny_file* m_pGrannyFile;
 	granny_file_info* m_inMemoryInfo;
 
+	uint32_t m_forcedLodIndex = 0;
+	bool m_forceLod = false;
+
 private:
 	// Provide the functions that do the actual work of loading and preparing.
 	// The async management itself is done in TriAsyncLoadedResource.
