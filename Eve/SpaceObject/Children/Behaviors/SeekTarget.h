@@ -83,8 +83,6 @@ private:
 	std::vector<Vector3> m_arrivalPoints; // debug
 	EveSpaceObject2* m_target;
 
-	IBehavior* m_fxBehavior;
-
 	std::vector<Vector3> m_todo;
 
 	BlueScriptCallback m_onFirstDroneArrivedCallback;

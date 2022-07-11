@@ -18,7 +18,6 @@ SeekTarget::SeekTarget( IRoot* lockobj ) :
 	m_doneRepairing( false ),
 	m_firstSpawnAtRandomPlaces( false ),
 	m_target( nullptr ),
-	m_fxBehavior( nullptr ),
 	m_locatorSetName( "damage" ),
 	m_startTimer( false ),
 	m_parent( nullptr ),
@@ -61,11 +60,6 @@ std::vector<Vector3> SeekTarget::CalculateBehavior( std::vector<DroneAgent>& age
 	if( m_behaviorWeight <= 0 )
 	{
 		return m_todo;
-	}
-
-	if( m_fxBehavior == nullptr )
-	{
-		m_fxBehavior = group.GetBehaviorByName( "PlayFX" );
 	}
 
 	auto data = static_cast<SeekTargetData*>( scratchData );
@@ -222,7 +216,7 @@ std::vector<Vector3> SeekTarget::CalculateBehavior( std::vector<DroneAgent>& age
 			data->timePassed = 0.f;
 
 			// Start playing fx when slowing down
-			if( !agent->playFX && m_fxBehavior != nullptr )
+			if( !agent->playFX )
 			{
 				agent->fxStartTime = BeOS->GetActualTime();
 				agent->playFX = true;
@@ -316,11 +310,6 @@ void SeekTarget::ResetBehavior()
 
 void SeekTarget::SetupShipRepair()
 {
-	if( m_fxBehavior )
-	{
-		m_fxBehavior->UpdateState( false );
-	}
-
 	m_exit = false;
 	m_droneArrived = false;
 	m_repair = true;
