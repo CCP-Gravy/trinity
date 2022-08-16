@@ -610,16 +610,19 @@ void Tr2GpuParticleSystem::Sort( Tr2RenderContext& renderContext )
 	ON_BLOCK_EXIT( [&] { m_sortTimer.End( renderContext ); } );
 
 	Tr2Renderer::RunComputeShader( m_setSortParameters, 1, 1, 1, renderContext );
-	Tr2Renderer::RunComputeShaderIndirect( m_sort, *m_sortParameters, 0, renderContext );
-
-	if( m_maxParticles > 512 )
+	if( m_sortParameters && m_sortParameters->IsValid() )
 	{
-		uint32_t presorted = 512;
-		bool done = false;
-		while( !done )
+		Tr2Renderer::RunComputeShaderIndirect( m_sort, *m_sortParameters, 0, renderContext );
+
+		if( m_maxParticles > 512 )
 		{
-			done = SortIncremental( presorted, renderContext );
-			presorted *= 2;
+			uint32_t presorted = 512;
+			bool done = false;
+			while( !done )
+			{
+				done = SortIncremental( presorted, renderContext );
+				presorted *= 2;
+			}
 		}
 	}
 }
@@ -690,9 +693,12 @@ void Tr2GpuParticleSystem::Render( Tr2RenderContext& renderContext )
 
 void Tr2GpuParticleSystem::SubmitGeometry( Tr2RenderContext& renderContext )
 {
-	renderContext.SetTopology( Tr2RenderContextEnum::TOP_TRIANGLES );
-	renderContext.m_esm.ApplyVertexDeclaration( Tr2EffectStateManager::NULL_DECLARATION );
-	renderContext.DrawInstancedIndirect( *m_drawParameters, 0 );
+	if( m_drawParameters && m_drawParameters->IsValid() )
+	{
+		renderContext.SetTopology( Tr2RenderContextEnum::TOP_TRIANGLES );
+		renderContext.m_esm.ApplyVertexDeclaration( Tr2EffectStateManager::NULL_DECLARATION );
+		renderContext.DrawInstancedIndirect( *m_drawParameters, 0 );
+	}
 }
 
 // --------------------------------------------------------------------------------------
