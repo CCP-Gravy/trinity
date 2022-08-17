@@ -201,6 +201,15 @@ void Tr2RenderTarget::Attach( const Tr2TextureAL& renderTarget, IRoot* owner )
 
 // --------------------------------------------------------------------------------------
 // Description:
+//   Detaches this object from the attached AL render target.
+// --------------------------------------------------------------------------------------
+void Tr2RenderTarget::Detach()
+{
+	m_attachedOwner = nullptr;
+}
+
+// --------------------------------------------------------------------------------------
+// Description:
 //   Checks if the referenced AL render target is attached (with Attach method) or owned.  
 // Return Value:
 //   true if referenced AL render target is attached

@@ -454,6 +454,20 @@ const Be::ClassInfo* EveSpaceScene::ExposeToBlue()
 		)
 		MAP_ATTRIBUTE
 		(
+			"normalTexture",
+			m_normalMap,
+			".",
+			Be::READWRITE
+		)
+		MAP_ATTRIBUTE
+		(
+			"SSAO",
+			m_ssao,
+			".",
+			Be::READ
+		)
+		MAP_ATTRIBUTE
+		(
 			"distortionTexture",
 			m_distortionMap,
 			".",

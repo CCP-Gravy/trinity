@@ -3,6 +3,7 @@ project(trinity VERSION 1.0.0)
 find_package(muparser REQUIRED)
 find_package(libSquish REQUIRED)
 find_package(FidelityFX REQUIRED)
+find_package(CACAO REQUIRED)
 find_package(IntelTBB REQUIRED)
 
 set(_SOURCES
@@ -1372,6 +1373,9 @@ set(_SOURCES
     Tr2SolidSet.cpp
     Tr2SolidSet.h
     Tr2SolidSet_Blue.cpp
+    Tr2SSAO.cpp
+    Tr2SSAO.h
+    Tr2SSAO_Blue.cpp
     Tr2StreamingBitmapSaver.cpp
     Tr2StreamingBitmapSaver.h
     Tr2StreamingBitmapSaver_Blue.cpp
@@ -1504,6 +1508,7 @@ function(set_shared_trinity_properties target)
             muParser
             SQUISH::SQUISH
             AMD::FidelityFX
+            AMD::CACAO
             RadGameTools::Granny
             Intel::TBB
             CcpMath

@@ -55,6 +55,7 @@ BLUE_DECLARE( EveLensflare );
 BLUE_DECLARE_VECTOR( EveLensflare );
 BLUE_DECLARE( TriShadowMap );
 BLUE_DECLARE( Tr2RenderTarget );
+BLUE_DECLARE( Tr2SSAO );
 struct ShadowReceiver;
 BLUE_DECLARE( EveTransform );
 BLUE_DECLARE_VECTOR( EveTransform );
@@ -427,6 +428,10 @@ protected:
 	Tr2DepthStencilPtr m_depthMap;
 	Tr2Variable m_depthMapVar;
 	Tr2Variable m_depthMapMsaaVar;
+
+	TriVariable* m_ssaoMapHandle;
+	Tr2RenderTargetPtr m_normalMap;
+	Tr2SSAOPtr m_ssao;
 
 	Tr2RenderTargetPtr m_distortionMap;
 	Tr2RenderTargetPtr m_velocityMap;

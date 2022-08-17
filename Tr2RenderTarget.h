@@ -58,6 +58,7 @@ public:
 	virtual Tr2TextureAL* GetTexture();
 
 	void Attach( const Tr2TextureAL& renderTarget, IRoot* owner );
+	void Detach();
 	bool IsAttached() const;
 
 	bool IsValid() const;

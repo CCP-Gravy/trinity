@@ -36,6 +36,7 @@
 #include "Tr2ReflectionProbe.h"
 #include "VirtualCamera/EveVirtualCameraSystem.h"
 #include "Eve/EveEntity.h"
+#include "Tr2SSAO.h"
 
 using namespace Tr2RenderContextEnum;
 
@@ -150,6 +151,7 @@ EveSpaceScene::EveSpaceScene( IRoot* lockobj ) :
 	m_enableShadowDistanceTweak( true ),
 	m_shadowCameraDistance( 50.0f ),
 	m_updateContext( 0 ),
+	m_ssaoMapHandle( nullptr ),
 	m_envMapHandle( NULL ),
 	m_envMap1Var( "EnvMap1", m_envMap1 ),
 	m_envMap2Var( "EnvMap2", m_envMap2 ),
@@ -199,6 +201,7 @@ EveSpaceScene::EveSpaceScene( IRoot* lockobj ) :
 
 	// global textures
 	m_envMapHandle = GlobalStore().RegisterVariable( "EveSpaceSceneEnvMap", (ITr2TextureProvider*)nullptr );
+	m_ssaoMapHandle = GlobalStore().RegisterVariable( "SSAOMap", (ITr2TextureProvider*)nullptr );
 	
 	// Picking batches
 	m_pickingBatches = CCP_NEW( "EveSpaceScene/m_pickingBatches" ) TriRenderBatchAccumulator<>( allocator );
@@ -242,6 +245,7 @@ EveSpaceScene::EveSpaceScene( IRoot* lockobj ) :
 	m_cameraAttachmentParent.CreateInstance();
 	m_reflectionProbe.CreateInstance();
 	m_componentRegistry.CreateInstance();
+	m_ssao.CreateInstance();
 }
 
 IRoot* EveSpaceScene::GetCameraAttachments() const
@@ -270,6 +274,11 @@ void EveSpaceScene::ReleaseResources( TriStorage s )
 	if( m_envMapHandle )
 	{
 		m_envMapHandle->Clear();
+	}
+
+	if( m_ssaoMapHandle )
+	{
+		m_ssaoMapHandle->Clear();
 	}
 
 	if( ( s & TRISTORAGE_ALL ) == TRISTORAGE_ALL )
@@ -1974,22 +1983,35 @@ void EveSpaceScene::RenderDepthPass( Tr2RenderContext& renderContext )
 		renderContext.AddGpuMarker( __FUNCTION__ );
 		GPU_REGION( renderContext, "Depth Pass" );
 
+		Tr2EffectStateManager::RenderingMode renderingMode;
+		if( m_normalMap )
+		{
+			renderContext.m_esm.PushRenderTarget();
+			renderContext.m_esm.SetRenderTarget( 0, *m_normalMap );
+			renderContext.RenderPassHint( { Tr2LoadAction::CLEAR, Tr2StoreAction::STORE }, { Tr2LoadAction::CLEAR, Tr2StoreAction::STORE } );
+			renderContext.Clear( CLEARFLAGS_TARGET | CLEARFLAGS_ZBUFFER, 0, 0, 0 );
+			renderingMode = Tr2EffectStateManager::RM_OPAQUE;
+		}
+		else
+		{
 #if TRINITY_PLATFORM == TRINITY_METAL
-		renderContext.m_esm.PushRenderTarget();
-        Tr2TextureAL nullTex;
-        renderContext.SetRenderTarget( nullTex, 0 );
+			renderContext.m_esm.PushRenderTarget();
+			Tr2TextureAL nullTex;
+			renderContext.SetRenderTarget( nullTex, 0 );
 #endif
-		renderContext.RenderPassHint( {}, { Tr2LoadAction::CLEAR, Tr2StoreAction::STORE } );
+			renderContext.RenderPassHint( {}, { Tr2LoadAction::CLEAR, Tr2StoreAction::STORE } );
+			renderContext.Clear( CLEARFLAGS_ZBUFFER, 0, 0, 0 );
+			renderingMode = Tr2EffectStateManager::RM_DEPTH_ONLY;
+		}
 
-		renderContext.Clear( CLEARFLAGS_ZBUFFER, 0, 0, 0 );
 
 		ApplyPerFrameData( renderContext );
 
-		renderContext.m_esm.ApplyStandardStates( Tr2EffectStateManager::RM_DEPTH_ONLY );
+		renderContext.m_esm.ApplyStandardStates( renderingMode );
 		renderContext.RenderBatches( m_primaryBatches[TRIBATCHTYPE_OPAQUE], BlueSharedString( "Depth" ) );
-		renderContext.m_esm.ApplyStandardStates( Tr2EffectStateManager::RM_DEPTH_ONLY );
+		renderContext.m_esm.ApplyStandardStates( renderingMode );
 		renderContext.RenderBatches( m_primaryBatches[TRIBATCHTYPE_DEPTH], BlueSharedString( "Depth" ) );
-		
+
 		// Planet z areas and shadowed objects need special treatment
 		for( auto it = m_planets.begin(); it != m_planets.end(); ++it )
 		{
@@ -2010,20 +2032,38 @@ void EveSpaceScene::RenderDepthPass( Tr2RenderContext& renderContext )
 			GetDepthBatchesFromRenderables( visible, m_secondaryBatches );
 
 			FinalizeBatches( m_secondaryBatches );
-			renderContext.m_esm.ApplyStandardStates( Tr2EffectStateManager::RM_DEPTH_ONLY );
+			renderContext.m_esm.ApplyStandardStates( renderingMode );
 			renderContext.RenderBatches( m_secondaryBatches[TRIBATCHTYPE_OPAQUE], BlueSharedString( "Depth" ) );
-			renderContext.m_esm.ApplyStandardStates( Tr2EffectStateManager::RM_DEPTH_ONLY );
+			renderContext.m_esm.ApplyStandardStates( renderingMode );
 			renderContext.RenderBatches( m_secondaryBatches[TRIBATCHTYPE_DEPTH], BlueSharedString( "Depth" ) );
 			ClearBatches( m_secondaryBatches );
 
 			visible.clear();
 		}
-#if TRINITY_PLATFORM == TRINITY_METAL
-        renderContext.m_esm.PopRenderTarget();
+		if( m_normalMap )
+		{
+#if TRINITY_PLATFORM_SUPPORTS_RENDER_PASS_HINTS
+			renderContext.EndRenderPassHint();
 #endif
+			renderContext.m_esm.PopRenderTarget();
+		}
+		else
+		{
+#if TRINITY_PLATFORM == TRINITY_METAL
+			renderContext.m_esm.PopRenderTarget();
+#endif
+		}
 	}
 
 	renderContext.m_esm.EndManagedRendering();
+
+	if( m_ssao )
+	{
+		renderContext.SetReadOnlyDepth( true );
+		m_ssao->SetInputBuffers( m_depthMap, m_normalMap );
+		m_ssao->Filter( renderContext );
+		renderContext.SetReadOnlyDepth( false );
+	}
 }
 
 // --------------------------------------------------------------------------------------
@@ -2072,6 +2112,7 @@ void EveSpaceScene::RenderMainPass( Tr2RenderContext& renderContext, CullMode cu
                 if( m_primaryBatches[TRIBATCHTYPE_OPAQUE]->GetBatchCount() == 0 &&
                    m_primaryBatches[TRIBATCHTYPE_OPAQUE]->GetBatchCount() == 0 )
                 {
+                    renderContext.RenderPassHint( { }, { Tr2LoadAction::CLEAR, Tr2StoreAction::STORE }, { } );
                     Tr2PushPopRT rt( *m_velocityMap, renderContext, 1 );
                     renderContext.Clear( CLEARFLAGS_TARGET, 0, 0, 0, 1 );
                 }
@@ -2376,6 +2417,11 @@ void EveSpaceScene::UpdateVariableStore ()
 	m_nebulaIntensityVar = m_nebulaIntensity;
 	// the environment cubemap (aka nebula) is passed theough the global variable store
 	m_envMapHandle->SetValue( m_envMapTextureRes );
+
+	if( m_ssao )
+	{
+		m_ssaoMapHandle->SetValue( m_ssao->GetOutput() );
+	}
 }
 
 void EveSpaceScene::ClearVariableStore()
