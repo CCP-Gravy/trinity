@@ -415,12 +415,14 @@ const std::vector<std::vector<std::vector<DroneAgent*>>>* EveKDdroneManagementTr
 	std::sort( searchRanges.begin(), searchRanges.end(), compareRef() );
 
 	
-
-	for ( int j = 0; j < behaviorNumber; ++j )
+	if( !m_groupSearchReturnInfoBlock.empty() )
 	{
-		for ( unsigned int i = 0; i < agents.size(); ++i )
+		for( int j = 0; j < behaviorNumber; ++j )
 		{
-			m_groupSearchReturnInfoBlock[ j ][ i ].clear();
+			for( unsigned int i = 0; i < agents.size(); ++i )
+			{
+				m_groupSearchReturnInfoBlock[j][i].clear();
+			}
 		}
 	}
 

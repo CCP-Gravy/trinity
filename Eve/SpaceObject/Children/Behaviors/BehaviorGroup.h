@@ -87,6 +87,7 @@ public:
 	TriFrustum m_frustum;
 	Matrix m_parentTransform;
 	bool m_display;
+	bool m_update; // we can have static drones so in those cases we don't want to update the behaviors and kd tree
 	float m_estimatedPixelDiameter;
 	bool m_collectForces; // Bool toggle to skip bunch of calculations when debug is not being used
 
@@ -127,6 +128,7 @@ private:
 	BlueSharedString m_behaviorGroupName; // name to identify group
 	int32_t m_count; // Number of agents to spawn initially
 	int32_t m_actualCount; // Number of actual agents spawned for this system
+	bool m_updatedOnce; // We want to update the behaviors at least once so behaviors like SpawnDrones can populate the buffer
 	int m_groupIndex; // ID
 	Tr2MeshPtr m_mesh; // Instanced mesh
 	unsigned int m_cachedVD; // A cached Vertex Declaration to detect change

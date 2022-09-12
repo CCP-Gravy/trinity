@@ -17,6 +17,8 @@ BehaviorGroup::BehaviorGroup( IRoot* lockobj ) :
 	m_count( 0 ),
 	m_actualCount( 0 ),
 	m_display( true ),
+	m_update( true ),
+	m_updatedOnce( false ),
 	m_maxVelocity( 100 ),
 	m_changeBufferVertexCount( nullptr ),
 	m_parent( nullptr ),
@@ -384,7 +386,7 @@ void BehaviorGroup::RemoveAgent()
 		return;
 	}
 	// Removes a random agent
-	int rand = TriRandInt( m_agents.size() );
+	int rand = TriRandInt( int(m_agents.size()) );
 	RemoveSpecificAgent( rand );
 
 	OnAgentCountChanged();
@@ -490,9 +492,20 @@ void BehaviorGroup::UpdateAgents( const float dt, EveChildBehaviorSystem& system
 	// make sure the update isn't too big when e.g. a player resizes his window (in window mode)
 	float deltaTime = TriClamp( dt, 0.0, 0.1 );
 
-	if( m_agents.empty() )
+	if( m_updatedOnce )
 	{
-		return;
+		if( m_agents.empty() || !m_display || !m_update )
+		{
+			if( m_tree != nullptr )
+			{
+				m_tree = nullptr;
+			}
+			return;
+		}
+	}
+	if( m_tree == nullptr )
+	{
+		CreateAgentTree();
 	}
 
 	std::vector<float> ranges;
@@ -564,6 +577,9 @@ void BehaviorGroup::UpdateAgents( const float dt, EveChildBehaviorSystem& system
 	// one of my ideas was input = max( const - dt , minimumUpdateFreq )
 	// this would make it update less often on big dt-s
 	m_tree->UpdateTree( deltaTime );
+
+	// we always want to update the behaviors at least once, otherwise behaviors like SpawnDrones won't get to spawn the drones
+	m_updatedOnce = true;
 }
 
 float BehaviorGroup::GetBlendModifier() const
@@ -784,6 +800,11 @@ void BehaviorGroup::GetRenderables( std::vector<ITr2Renderable*>& renderables )
 // --------------------------------------------------------------------------------------
 void BehaviorGroup::UpdateAsyncronous( EveUpdateContext& updateContext )
 {
+	if( !m_update )
+	{
+		return;
+	}
+
 	if( m_playFXBehavior != nullptr )
 	{
 		m_playFXBehavior->UpdateAsyncronous( updateContext, m_frustum, m_parentTransform );
@@ -797,6 +818,10 @@ void BehaviorGroup::UpdateAsyncronous( EveUpdateContext& updateContext )
 // --------------------------------------------------------------------------------------
 void BehaviorGroup::UpdateSyncronous( EveUpdateContext& updateContext, const EveChildUpdateParams& params )
 {
+	if( !m_update )
+	{
+		return;
+	}
 	if( m_createAgentTree == true )
 	{
 		CreateAgentTree();

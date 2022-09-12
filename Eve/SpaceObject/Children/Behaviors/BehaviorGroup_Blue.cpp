@@ -13,6 +13,7 @@ const Be::ClassInfo* BehaviorGroup::ExposeToBlue()
 
 		MAP_ATTRIBUTE( "name", m_behaviorGroupName, "The name of this behavior group", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "display", m_display, "", Be::READWRITE | Be::PERSIST )
+		MAP_ATTRIBUTE( "update", m_update, "Toggle off for static behaviors", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "count", m_count, "Number of drones to spawn when loading up", Be::READWRITE | Be::PERSIST )
 		MAP_ATTRIBUTE( "actualCount", m_actualCount, "Number of drones to spawn when loading up", Be::READ )
 		MAP_ATTRIBUTE( "spawnPosition", m_spawnPosition, "Where the drones should spawn, leave as (0,0,0) if process priority behavior should control spawn pos", Be::READWRITE | Be::PERSIST )
