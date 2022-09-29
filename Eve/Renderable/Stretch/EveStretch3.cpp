@@ -62,23 +62,41 @@ bool EveStretch3::Initialize()
 		}
 	}
 
+	InitializeBindings();
+
+	return true;
+}
+
+IEveSpaceObject2* EveStretch3::GetSourceSpaceObject() const
+{
+	return m_sourceSpaceObject;		
+}
+
+void EveStretch3::SetSourceSpaceObject( IEveSpaceObject2* spaceObject )
+{
+	m_sourceSpaceObject = spaceObject;
+	InitializeBindings();
+}
+
+IEveSpaceObject2* EveStretch3::GetDestSpaceObject() const
+{
+	return m_destSpaceObject;
+}
+
+void EveStretch3::SetDestSpaceObject( IEveSpaceObject2* spaceObject )
+{
+	m_destSpaceObject = spaceObject;
+	InitializeBindings();
+}
+
+
+void EveStretch3::InitializeBindings()
+{
 	for( auto binding = m_dynamicBindings.begin(); binding != m_dynamicBindings.end(); ++binding )
 	{
 		( *binding )->SetOwner( this );
 		( *binding )->Link();
 	}
-
-	return true;
-}
-
-IEveSpaceObject2Ptr EveStretch3::GetSourceSpaceObject() const
-{
-	return m_sourceSpaceObject;
-}
-
-IEveSpaceObject2Ptr EveStretch3::GetDestSpaceObject() const
-{
-	return m_destSpaceObject;
 }
 
 void EveStretch3::Rebind( bool onlyUpdateBindings )
@@ -160,13 +178,13 @@ std::unordered_map<std::string, IRoot*> EveStretch3::GetParameterMap() const
 	}
 
 	parameterMap["Owner"] = this->GetRawRoot();
-	if( m_sourceSpaceObject )
+	if( !!m_sourceSpaceObject )
 	{
-		parameterMap["SourceSpaceObject"] = m_sourceSpaceObject->GetRootObject();
+		parameterMap["SourceSpaceObject"] = m_sourceSpaceObject;
 	}
-	if( m_destSpaceObject )
+	if( !!m_destSpaceObject )
 	{
-		parameterMap["DestSpaceObject"] = m_destSpaceObject->GetRootObject();
+		parameterMap["DestSpaceObject"] = m_destSpaceObject;
 	}
 
 	if( m_sourceObject )
@@ -219,14 +237,6 @@ bool EveStretch3::OnModified( Be::Var* value )
 				m_stretchModifier.CreateInstance();
 			}
 			m_stretchModifier->SetDest( m_dest );
-		}
-	}
-	else if( IsMatch( value, m_sourceSpaceObject ) || IsMatch( value, m_destSpaceObject ) )
-	{
-		for( auto binding = m_dynamicBindings.begin(); binding != m_dynamicBindings.end(); ++binding )
-		{
-			( *binding )->SetOwner( this );
-			( *binding )->Link();
 		}
 	}
 
@@ -327,7 +337,7 @@ void EveStretch3::UpdateSyncronous( EveUpdateContext& updateContext )
 	m_length->m_value = Length( directionVec );
 
 	EveChildUpdateParams params;
-	params.spaceObjectParent = m_sourceSpaceObject == nullptr ? static_cast<IEveSpaceObject2*>( this ) : m_sourceSpaceObject.p;
+	params.spaceObjectParent = !m_sourceSpaceObject ? static_cast<IEveSpaceObject2*>( this ) : (IEveSpaceObject2*)m_sourceSpaceObject;
 	params.childParent = nullptr;
 	params.boneCount = 0;
 	params.bones = nullptr;
@@ -356,7 +366,7 @@ void EveStretch3::UpdateSyncronous( EveUpdateContext& updateContext )
 	if( m_destObject )
 	{
 		params.localToWorldTransform = TranslationMatrix( m_destinationPosition );
-		params.spaceObjectParent = m_destSpaceObject == nullptr ? static_cast<IEveSpaceObject2*>( this ) : m_destSpaceObject.p;
+		params.spaceObjectParent = !m_destSpaceObject ? static_cast<IEveSpaceObject2*>( this ) : (IEveSpaceObject2*)m_destSpaceObject;
 		m_destObject->UpdateSyncronous( updateContext, params );
 	}
 }

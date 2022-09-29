@@ -47,8 +47,8 @@ public:
     EveStretch3( IRoot* lockobj = NULL );
 
     void Rebind( bool onlyUpdateBindings = 0 );
-    IEveSpaceObject2Ptr GetSourceSpaceObject() const;
-    IEveSpaceObject2Ptr GetDestSpaceObject() const;
+    IEveSpaceObject2* GetSourceSpaceObject() const;
+    IEveSpaceObject2* GetDestSpaceObject() const;
 
 	/////////////////////////////////////////////////////////////////////////////////////
 	// IInitialize
@@ -133,6 +133,10 @@ private:
 	void RunOnComponents( std::function<void( IEveSpaceObjectChild* )> func ) const;
 	float RunOnComponentsGetMax( std::function<float( IEveSpaceObjectChild* )> func ) const;
 
+	void SetSourceSpaceObject( IEveSpaceObject2 * spaceObject );
+	void SetDestSpaceObject( IEveSpaceObject2 * spaceObject );
+	void InitializeBindings();
+
 	std::string m_name;
 
 	bool m_display;
@@ -148,8 +152,8 @@ private:
 
 	EveChildModifierStretchPtr m_stretchModifier;
 
-	IEveSpaceObject2Ptr m_sourceSpaceObject;
-	IEveSpaceObject2Ptr m_destSpaceObject;
+	BlueWeakRef<IEveSpaceObject2> m_sourceSpaceObject;
+	BlueWeakRef<IEveSpaceObject2> m_destSpaceObject;
 
 	IEveSpaceObjectChildPtr m_sourceObject;
 	IEveSpaceObjectChildPtr m_destObject;
