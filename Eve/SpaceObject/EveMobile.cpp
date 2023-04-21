@@ -40,7 +40,7 @@ EveMobile::~EveMobile()
 bool EveMobile::Initialize()
 {
 	EveSpaceObject2::Initialize();
-	
+
 	// initialize the locator counts
 	ResetTurretLocatorCounter( true );
 
@@ -59,7 +59,7 @@ bool EveMobile::Initialize()
 void EveMobile::OnListModified( long event, ssize_t key, ssize_t key2, IRoot* value, const IList* theList )
 {
 	EveSpaceObject2::OnListModified( event, key, key2, value, theList );
-	if( (event & BELIST_LOADING) == 0  )
+	if( ( event & BELIST_LOADING ) == 0 )
 	{
 		switch( event & BELIST_EVENTMASK )
 		{
@@ -89,7 +89,7 @@ const Matrix* EveMobile::GetTurretTransform( unsigned int turretSetIndex ) const
 
 // --------------------------------------------------------------------------------
 // Description:
-//   Override base ::UpdateSyncronous() function, so we can update the turrets and 
+//   Override base ::UpdateSyncronous() function, so we can update the turrets and
 //   their positions (if they are attached to animated bones!)
 // --------------------------------------------------------------------------------
 void EveMobile::UpdateSyncronous( EveUpdateContext& updateContext )
@@ -105,7 +105,7 @@ void EveMobile::UpdateSyncronous( EveUpdateContext& updateContext )
 	for( auto it = m_turretSets.begin(); it != m_turretSets.end(); ++it )
 	{
 		// If the turretSet is in aggressive mode then update active turret counter
-		if( ( *it )->GetState() > EveTurretSet::STATE_TARGETING)
+		if( ( *it )->GetState() > EveTurretSet::STATE_TARGETING )
 		{
 			activeTurretCount++;
 		}
@@ -125,14 +125,14 @@ void EveMobile::UpdateSyncronous( EveUpdateContext& updateContext )
 					// set it
 					if( localMatrix )
 					{
-						(*it)->SetLocalTransform( turretIdx, localMatrix );
-						(*it)->UpdateTurretTransforms( GetTurretTransform( (*it)->GetSwarmID() ) );
+						( *it )->SetLocalTransform( turretIdx, localMatrix );
+						( *it )->UpdateTurretTransforms( GetTurretTransform( ( *it )->GetSwarmID() ) );
 					}
 				}
 			}
 		}
 		// call standard update function
-		(*it)->UpdateSyncronous( updateContext, GetTurretTransform( (*it)->GetSwarmID() ) );
+		( *it )->UpdateSyncronous( updateContext, GetTurretTransform( ( *it )->GetSwarmID() ) );
 
 		// next!
 		++locatorInfoIdx;
@@ -156,7 +156,7 @@ void EveMobile::UpdateTurretsAsyncronous( EveUpdateContext& updateContext )
 	// now prep to get the renderables
 	IEveSpaceObject2::ParentData pd;
 	memset( &pd, 0, sizeof( IEveSpaceObject2::ParentData ) );
-	
+
 	pd.transform = *GetTurretTransform( 0 );
 	pd.shipData = m_spaceObjectShipData;
 	pd.clipData = m_psData.clipData;
@@ -164,7 +164,7 @@ void EveMobile::UpdateTurretsAsyncronous( EveUpdateContext& updateContext )
 
 	for( auto it = m_turretSets.begin(); it != m_turretSets.end(); ++it )
 	{
-		(*it)->UpdateAsyncronous( updateContext, &pd );
+		( *it )->UpdateAsyncronous( updateContext, &pd );
 	}
 }
 
@@ -176,7 +176,7 @@ int EveMobile::GetActiveTurretCount() const
 void EveMobile::SetShaderOption( const BlueSharedString& name, const BlueSharedString& value )
 {
 	EveSpaceObject2::SetShaderOption( name, value );
-	for ( auto it = m_turretSets.begin(); m_turretSets.end() != it; ++it )
+	for( auto it = m_turretSets.begin(); m_turretSets.end() != it; ++it )
 	{
 		( *it )->SetShaderOption( name, value );
 	}
@@ -184,7 +184,7 @@ void EveMobile::SetShaderOption( const BlueSharedString& name, const BlueSharedS
 
 // --------------------------------------------------------------------------------
 // Description:
-//   Override base ::UpdateAsyncronous() function, so we can update the turrets and 
+//   Override base ::UpdateAsyncronous() function, so we can update the turrets and
 //   their positions (if they are attached to animated bones!)
 // --------------------------------------------------------------------------------
 void EveMobile::UpdateAsyncronous( EveUpdateContext& updateContext )
@@ -206,7 +206,7 @@ void EveMobile::UpdateVisibility( const TriFrustum& frustum, const Matrix& paren
 	// collect renderables of the turrets
 	for( auto it = m_turretSets.begin(); it != m_turretSets.end(); ++it )
 	{
-		(*it)->UpdateVisibility( frustum );
+		( *it )->UpdateVisibility( frustum );
 	}
 }
 // --------------------------------------------------------------------------------
@@ -226,7 +226,7 @@ void EveMobile::GetRenderables( std::vector<ITr2Renderable*>& renderables, Tr2Im
 	// collect renderables of the turrets
 	for( auto it = m_turretSets.begin(); it != m_turretSets.end(); ++it )
 	{
-		(*it)->GetRenderables( renderables, m_psData.shLightingCoefficients );
+		( *it )->GetRenderables( renderables, m_psData.shLightingCoefficients );
 	}
 }
 
@@ -238,16 +238,41 @@ void EveMobile::GetRenderables( std::vector<ITr2Renderable*>& renderables, Tr2Im
 // --------------------------------------------------------------------------------
 bool EveMobile::GetRenderablesCastingShadow( bool isSelf, const TriFrustumOrtho& frustum, std::vector<ITr2Renderable*>& renderables )
 {
+	if( !m_display )
+	{
+		return false;
+	}
 	if( EveSpaceObject2::GetRenderablesCastingShadow( isSelf, frustum, renderables ) )
 	{
 		for( auto it = m_turretSets.begin(); it != m_turretSets.end(); ++it )
 		{
 			// use the turretset's ::GetRenderablesCastingShadow() function cause we need the special "ortho" culling
-			(*it)->GetRenderablesCastingShadow( frustum, renderables );
+			( *it )->GetRenderablesCastingShadow( frustum, renderables );
 		}
 		return true;
 	}
 	return false;
+}
+
+// --------------------------------------------------------------------------------
+// Description:
+//   Go through all the frustums and if object is in an ortho frustum and not "behind" any camera frustum plane
+//  then we push back the frustum index and the shadowSize to the frustumInfo vector
+// --------------------------------------------------------------------------------
+void EveMobile::GatherShadowRenderables( std::vector<std::vector<ShadowCasterInfo>>& shadowCasters, TriFrustum* splitCameraFrustums, TriFrustumOrtho* shadowFrustums, const size_t arraySize, const unsigned int shadowMapSize, const Vector3 sunDir )
+{
+	if( !m_display )
+	{
+		return;
+	}
+
+	// get base object frustum indices so we can append to that list
+	EveSpaceObject2::GatherShadowRenderables( shadowCasters, splitCameraFrustums, shadowFrustums, arraySize, shadowMapSize, sunDir );
+
+	for( auto it = m_turretSets.begin(); it != m_turretSets.end(); ++it )
+	{
+		( *it )->GatherShadowRenderables( shadowCasters, splitCameraFrustums, shadowFrustums, arraySize, shadowMapSize, sunDir );
+	}
 }
 
 // --------------------------------------------------------------------------------
@@ -262,14 +287,14 @@ void EveMobile::RenderDebugInfo( ITr2DebugRenderer2& renderer )
 	// let the turrets render some debug info
 	for( auto it = m_turretSets.begin(); it != m_turretSets.end(); ++it )
 	{
-		(*it)->RenderDebugInfo( renderer );
+		( *it )->RenderDebugInfo( renderer );
 	}
 }
 
 void EveMobile::GetDebugOptions( Tr2DebugRendererOptions& options )
 {
 	EveSpaceObject2::GetDebugOptions( options );
-		
+
 	// Get the debug options from the turrets
 	for( auto it = m_turretSets.begin(); it != m_turretSets.end(); ++it )
 	{
@@ -278,7 +303,7 @@ void EveMobile::GetDebugOptions( Tr2DebugRendererOptions& options )
 }
 
 // --------------------------------------------------------------------------------
-void EveMobile::GetLights(Tr2LightManager& lightManager) const
+void EveMobile::GetLights( Tr2LightManager& lightManager ) const
 {
 	if( !m_display )
 	{
@@ -286,9 +311,9 @@ void EveMobile::GetLights(Tr2LightManager& lightManager) const
 	}
 
 	EveSpaceObject2::GetLights( lightManager );
-	for (auto it = m_turretSets.begin(); it != m_turretSets.end(); ++it )
+	for( auto it = m_turretSets.begin(); it != m_turretSets.end(); ++it )
 	{
-		(*it)->GetLights(lightManager);
+		( *it )->GetLights( lightManager );
 	}
 }
 
@@ -346,7 +371,7 @@ size_t EveMobile::GetTurretLocatorIndex( size_t turretSetIdx, size_t slotIdx ) c
 {
 	if( m_turretSetsLocatorInfo.size() > turretSetIdx )
 	{
-		if( m_turretSetsLocatorInfo[ turretSetIdx ].locatorIndices.size() > slotIdx )
+		if( m_turretSetsLocatorInfo[turretSetIdx].locatorIndices.size() > slotIdx )
 		{
 			return m_turretSetsLocatorInfo[turretSetIdx].locatorIndices[slotIdx];
 		}
@@ -365,11 +390,11 @@ unsigned int EveMobile::GetTurretLocatorCount()
 	unsigned int locatorsFoundB = 0;
 
 	auto n = static_cast<unsigned int>( m_locators.size() );
-	for( unsigned int i = 0; i < n ; ++i )
+	for( unsigned int i = 0; i < n; ++i )
 	{
-		const char* locatorName =  m_locators[i]->GetName();
+		const char* locatorName = m_locators[i]->GetName();
 		// EveMobile keeps multiple types of locator, so validate the name
-		ValidateTurretLocatorName( locatorName, locatorsFoundA, locatorsFoundB);
+		ValidateTurretLocatorName( locatorName, locatorsFoundA, locatorsFoundB );
 	}
 
 	if( m_animationUpdater && m_animationUpdater->m_skeleton )
@@ -378,10 +403,10 @@ unsigned int EveMobile::GetTurretLocatorCount()
 		{
 			const granny_bone& bone = m_animationUpdater->m_skeleton->Bones[boneIx];
 			ValidateTurretLocatorName( bone.Name, locatorsFoundA, locatorsFoundB );
-		}		
+		}
 	}
 
-	if( (locatorsFoundA != locatorsFoundB) && locatorsFoundB )
+	if( ( locatorsFoundA != locatorsFoundB ) && locatorsFoundB )
 	{
 		// Pairs don't match up. Note we do allow having only the 'a' locator (for drones)
 		return 0;
@@ -398,7 +423,7 @@ unsigned int EveMobile::GetTurretLocatorCount()
 }
 
 // --------------------------------------------------------------------------------
-bool EveMobile::GetLocalBoundingBox( Vector3 &min, Vector3 &max )
+bool EveMobile::GetLocalBoundingBox( Vector3& min, Vector3& max )
 {
 	bool res = EveSpaceObject2::GetLocalBoundingBox( min, max );
 	if( !res )
@@ -409,7 +434,7 @@ bool EveMobile::GetLocalBoundingBox( Vector3 &min, Vector3 &max )
 	Vector3 minBounds, maxBounds;
 	for( auto it = m_turretSets.begin(); it != m_turretSets.end(); ++it )
 	{
-		if( (*it)->GetLocalBoundingBox( minBounds, maxBounds ) )
+		if( ( *it )->GetLocalBoundingBox( minBounds, maxBounds ) )
 		{
 			BoundingBoxUpdate( min, max, minBounds, maxBounds );
 		}
@@ -440,18 +465,18 @@ void EveMobile::RebuildTurretPositions()
 	for( auto it = m_turretSets.begin(); it != m_turretSets.end(); ++it )
 	{
 		// turret knows unique name
-		std::string name = (*it)->GetLocatorName();
+		std::string name = ( *it )->GetLocatorName();
 
 		// prepare a new locatorInfo entry
 		TurretSetLocatorInfo locatorInfo;
 
 		bool turretInName = false;
-		
+
 		unsigned int locatorNumber = 0;
 
 		// Check whether this is a standard turret locator or a special case
 		size_t found = name.find( "_turret_" );
-		if( found!=std::string::npos )
+		if( found != std::string::npos )
 		{
 			turretInName = true;
 		}
@@ -499,12 +524,12 @@ void EveMobile::RebuildTurretPositions()
 			( *it )->SetShaderOption( BlueSharedString( "SPACE_OBJECT_CLIPPING" ), BlueSharedString( "SOC_ENABLED" ) );
 		}
 
-		if ( turretInName )
+		if( turretInName )
 		{
 			// For _turret_ locators we use the slot number to get a unique
 			// locator for the turret. This also applies to the case where we
 			// fall back to using _turret_ locators.
-			locatorNumber = (*it)->GetSlotNumber();
+			locatorNumber = ( *it )->GetSlotNumber();
 		}
 
 		char ln = '0' + locatorNumber;
@@ -526,7 +551,7 @@ void EveMobile::RebuildTurretPositions()
 
 			// try to find it, could be two different types: bone from granny or locator from jessica
 			unsigned int locatorIndex;
-			locatorInfo.type = DetermineLocatorType(locatorName.c_str(), locatorIndex);
+			locatorInfo.type = DetermineLocatorType( locatorName.c_str(), locatorIndex );
 
 			// found something?
 			if( locatorInfo.type != ELT_COUNT )
@@ -536,7 +561,7 @@ void EveMobile::RebuildTurretPositions()
 				// set it
 				if( localMatrix )
 				{
-					(*it)->SetLocalTransform( i, localMatrix );
+					( *it )->SetLocalTransform( i, localMatrix );
 				}
 				// add it to our locator entry
 				locatorInfo.locatorIndices.push_back( locatorIndex );
@@ -552,11 +577,11 @@ void EveMobile::RebuildTurretPositions()
 
 // --------------------------------------------------------------------------------
 // Description:
-//   Sets the current and total arguments with contents of the m_locatorCount for 
+//   Sets the current and total arguments with contents of the m_locatorCount for
 //   the name given.
 //   Returns false if name is not found.
 // SeeAlso:
-//   
+//
 // --------------------------------------------------------------------------------
 bool EveMobile::GetTurretLocatorCountingInfo( const char* name, unsigned int& current, unsigned int& total ) const
 {
@@ -581,19 +606,19 @@ bool EveMobile::GetTurretLocatorCountingInfo( const char* name, unsigned int& cu
 // --------------------------------------------------------------------------------
 void EveMobile::ResetTurretLocatorCounter( bool updateTotal )
 {
-	
+
 	for( auto it = m_locators.begin(); it != m_locators.end(); ++it )
 	{
-		std::string name = (*it)->GetName();
+		std::string name = ( *it )->GetName();
 		std::string prefix;
 
-		size_t found = name.rfind("_");
-		if( found!=std::string::npos )
+		size_t found = name.rfind( "_" );
+		if( found != std::string::npos )
 		{
 			prefix = name.substr( 0, found + 1 );
 
 			// Find the entry in the map
-			std::map<std::string, TurretLocatorCountingInfo>::iterator mapIt = m_turretLocatorCountingInfo.find(prefix);
+			std::map<std::string, TurretLocatorCountingInfo>::iterator mapIt = m_turretLocatorCountingInfo.find( prefix );
 			if( mapIt == m_turretLocatorCountingInfo.end() )
 			{
 				// Does not exist. Add it.
@@ -632,7 +657,7 @@ bool EveMobile::DisplayChildren() const
 	return ( m_activationStrength > 0.5f );
 }
 
-void EveMobile::RegisterWithQuadRenderer( Tr2QuadRenderer& quadRenderer ) 
+void EveMobile::RegisterWithQuadRenderer( Tr2QuadRenderer& quadRenderer )
 {
 	EveSpaceObject2::RegisterWithQuadRenderer( quadRenderer );
 	for( auto it = begin( m_turretSets ); it != end( m_turretSets ); ++it )

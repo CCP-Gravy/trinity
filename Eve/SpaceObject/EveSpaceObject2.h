@@ -234,6 +234,7 @@ public:
 	//////////////////////////////////////////////////////////////////////////////////////
 	// IEveShadowCaster
 	virtual bool GetRenderablesCastingShadow( bool isSelf, const TriFrustumOrtho& frustum, std::vector<ITr2Renderable*>& renderables );
+	void GatherShadowRenderables( std::vector<std::vector<ShadowCasterInfo>>& shadowCasters, TriFrustum* splitCameraFrustums, TriFrustumOrtho* shadowFrustums, const size_t arraySize, const unsigned int shadowMapSize, const Vector3 sunDir );
 	virtual bool IsShadowReceiveEnabled();
 
 	//////////////////////////////////////////////////////////////////////////////////////
@@ -248,7 +249,7 @@ public:
 	// ITr2Renderable
 	virtual bool HasTransparentBatches();
 	virtual void GetBatches( ITriRenderBatchAccumulator* batches, TriBatchType batchType, const Tr2PerObjectData* perObjectData, Tr2RenderReason reason = TR2RENDERREASON_NORMAL );
-	virtual void GetShadowBatches( ITriRenderBatchAccumulator* batches, const Tr2PerObjectData* perObjectData );
+	virtual void GetShadowBatches( ITriRenderBatchAccumulator* batches, const Tr2PerObjectData* perObjectData, float shadowPixelSize );
 	virtual float GetSortValue();
 	virtual Tr2PerObjectData* GetPerObjectData( ITriRenderBatchAccumulator* accumulator );
 	virtual bool IsVisible( const TriFrustum& frustum ) const;
@@ -529,7 +530,6 @@ protected:
 	// Estimated pixel diameter, based on bounding sphere of the geometry. Only
 	// valid if we're inside the frustum.
 	float m_estimatedPixelDiameter;
-	float m_estimatedPixelDiameterInShadow;
 	float m_estimatedPixelDiameterWithChildren;
 	
 	Tr2GrannyAnimationPtr m_animationUpdater;

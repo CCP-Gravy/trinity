@@ -93,7 +93,6 @@ public:
 	bool GetInstanceBufferBoundingBox( unsigned int bufferIndex, Vector3& minBounds, Vector3& maxBounds ) const;
 	bool HasTransparentBatches();
 	float GetSortValue();
-	void GetShadowBatches( ITriRenderBatchAccumulator* batches, const Tr2PerObjectData* perObjectData );
 	Tr2PerObjectData* GetPerObjectData( ITriRenderBatchAccumulator* accumulator );
 
 	//////////////////////////////////////////////////////////////////////////////////////

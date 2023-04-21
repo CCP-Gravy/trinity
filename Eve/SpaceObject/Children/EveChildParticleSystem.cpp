@@ -194,7 +194,7 @@ void EveChildParticleSystem::GetBatches( ITriRenderBatchAccumulator* batches, Tr
 	}
 }
 
-void EveChildParticleSystem::GetShadowBatches( ITriRenderBatchAccumulator* batches, const Tr2PerObjectData* perObjectData )
+void EveChildParticleSystem::GetShadowBatches( ITriRenderBatchAccumulator* batches, const Tr2PerObjectData* perObjectData, float shadowPixelSize )
 {
 	if( m_display && m_mesh )
 	{

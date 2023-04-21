@@ -1242,6 +1242,9 @@ set(_SOURCES
     Tr2DebugRenderer.cpp
     Tr2DebugRenderer.h
     Tr2DebugRenderer_Blue.cpp
+    Tr2Denoiser.cpp
+    Tr2Denoiser.h
+    Tr2Denoiser_Blue.cpp
     Tr2DepthStencil.cpp
     Tr2DepthStencil.h
     Tr2DepthStencil_Blue.cpp
@@ -1392,6 +1395,9 @@ set(_SOURCES
     Tr2ScalingTool.cpp
     Tr2ScalingTool.h
     Tr2ScalingTool_Blue.cpp
+    Tr2ShadowMap.cpp
+    Tr2ShadowMap.h
+    Tr2ShadowMap_Blue.cpp
     Tr2ShLightingManager.cpp
     Tr2ShLightingManager.h
     Tr2ShLightingManager_Blue.cpp
@@ -1503,9 +1509,6 @@ set(_SOURCES
     TriSettings.h
     TriSettings_Blue.cpp
     TriSettingsRegistrar.h
-    TriShadowMap.cpp
-    TriShadowMap.h
-    TriShadowMap_Blue.cpp
     TriUtil.h
     TriValueBinding.cpp
     TriValueBinding.h

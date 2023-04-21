@@ -105,7 +105,8 @@ public:
 	// INotify
 	bool OnModified( Be::Var * val );
 
-	void py__init__( EveSpaceScene* scene, Tr2RenderTarget* source );
+	void py__init__( EveSpaceScene * scene, Tr2RenderTarget * source, Tr2RenderTarget* opaque_source );
+
 private:
 
 	// bloom
@@ -159,9 +160,11 @@ private:
 	// TAA
 	bool ProcessTaa( Tr2PPTaaEffect* taa );
 	void RenderTaa( Tr2RenderTarget* dest, Tr2RenderContext& renderContext, Tr2PPTaaEffect* taa );
-	Tr2EffectPtr m_taaEffect;
-	Tr2RenderTargetPtr m_accumulationBuffer;
 	Tr2RenderTargetPtr m_velocityBuffer;
+	Tr2EffectPtr m_taaEffect, m_taaCopyEffect;
+	Tr2RenderTargetPtr m_accumulationBuffer0, m_accumulationBuffer1 ;
+	Tr2RenderTargetPtr m_opaqueColorBuffer;
+	int m_currentAccumulationBuffer;
 
 	// film grain
 	bool ProcessFilmGrain( Tr2PPFilmGrainEffect* filmGrain );

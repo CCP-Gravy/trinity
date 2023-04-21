@@ -141,10 +141,6 @@ void EveChildQuad::GetBatches( ITriRenderBatchAccumulator* batches, TriBatchType
 {
 }
 
-void EveChildQuad::GetShadowBatches( ITriRenderBatchAccumulator* batches, const Tr2PerObjectData* perObjectData )
-{
-}
-
 float EveChildQuad::GetSortValue()
 {
 	Vector3 d = Tr2Renderer::GetViewPosition() - m_worldTransform.GetTranslation();

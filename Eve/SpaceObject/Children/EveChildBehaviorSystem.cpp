@@ -497,15 +497,6 @@ bool EveChildBehaviorSystem::HasTransparentBatches()
 
 // --------------------------------------------------------------------------------
 // Description:
-//   No shadows here
-// --------------------------------------------------------------------------------
-void EveChildBehaviorSystem::GetShadowBatches( ITriRenderBatchAccumulator* batches,
-	const Tr2PerObjectData* perObjectData )
-{
-}
-
-// --------------------------------------------------------------------------------
-// Description:
 //   No transparency, no sorting
 // --------------------------------------------------------------------------------
 float EveChildBehaviorSystem::GetSortValue()

@@ -26,7 +26,6 @@ enum TR2SHADERMODEL
 
 class TriSettings;
 class Tr2LineGraph;
-class TriShadowMap;
 class TriPoolAllocator;
 class TriViewport;
 

@@ -225,7 +225,7 @@ TriStepRenderPostProcess::~TriStepRenderPostProcess(void)
 	m_scene = nullptr;
 }
 
-void TriStepRenderPostProcess::py__init__(EveSpaceScene* scene, Tr2RenderTarget* source)
+void TriStepRenderPostProcess::py__init__(EveSpaceScene* scene, Tr2RenderTarget* source, Tr2RenderTarget* opaque_source)
 {
 	if (scene == nullptr)
 	{
@@ -237,6 +237,7 @@ void TriStepRenderPostProcess::py__init__(EveSpaceScene* scene, Tr2RenderTarget*
 	m_scene->SetupTAA(m_velocityBuffer, 0, TAA_NONE);
 
 	SetRenderTarget( source );
+	m_opaqueColorBuffer = opaque_source;
 }
 
 void SetDirtyIfNotNull(Tr2PPEffect *effect)
@@ -352,7 +353,7 @@ TriStepResult TriStepRenderPostProcess::Execute( Be::Time realTime, Be::Time sim
 		m_sceneDirty = false; 
 	}
 
-    // Always resolve (if no msaa then we copy)
+    // Always copy
 	auto nonMsaaSource = m_renderInfo->GetTempTexture();
 	sourceBuffer->GetRenderTarget().Resolve( *nonMsaaSource, renderContext );
 	
@@ -1016,30 +1017,16 @@ bool TriStepRenderPostProcess::ProcessFilmGrain( Tr2PPFilmGrainEffect* filmGrain
 
 
 			//shared parameters
-			if( filmGrain->m_compare )
-			{
-				m_grainShader->SetOption( BlueSharedString( "TECHNIQUE" ), BlueSharedString( "TECHNIQUE_COMPARE" ) );
-			}
-			else
-			{
-				m_grainShader->SetOption( BlueSharedString( "TECHNIQUE" ), BlueSharedString( filmGrain->m_useNewTechnique ? "TECHNIQUE_NEW" : "TECHNIQUE_OLD" ) );
-			}
 			m_grainShader->SetParameter( BlueSharedString( "GrainColorAmount" ), filmGrain->m_colored ? filmGrain->m_colorAmount : 0.0f );
 			m_grainShader->SetParameter( BlueSharedString( "InputTexture" ), PLACEHOLDER );
 
-			//old parameters
-			m_grainShader->SetParameter( BlueSharedString( "OldGrainSize" ), filmGrain->m_oldGrainSize );
-			m_grainShader->SetParameter( BlueSharedString( "OldGrainIntensity" ), filmGrain->m_oldIntensity );
-			m_grainShader->SetParameter( BlueSharedString( "OldGrainLuminanceExponent" ), filmGrain->m_oldLuminanceExponent );
-
-			//new parameters
-			float threshold = 1.0f - filmGrain->m_newGrainDensity;
-			float edge = 1.0f / ( filmGrain->m_newGrainContrast * filmGrain->m_newGrainSize );
-			m_grainShader->SetParameter( BlueSharedString( "NewGrainSize" ), filmGrain->m_newGrainSize );
-			m_grainShader->SetParameter( BlueSharedString( "NewGrainIntensity" ), filmGrain->m_newIntensity );
-			m_grainShader->SetParameter( BlueSharedString( "NewGrainThreshold" ), threshold );
-			m_grainShader->SetParameter( BlueSharedString( "NewGrainEdge" ), edge );
-			m_grainShader->SetParameter( BlueSharedString( "NewBrightnessModifier" ), filmGrain->m_newBrightnessModifier );
+			float threshold = 1.0f - filmGrain->m_grainDensity;
+			float edge = 1.0f / ( filmGrain->m_grainContrast * filmGrain->m_grainSize );
+			m_grainShader->SetParameter( BlueSharedString( "GrainSize" ), filmGrain->m_grainSize );
+			m_grainShader->SetParameter( BlueSharedString( "GrainIntensity" ), filmGrain->m_intensity );
+			m_grainShader->SetParameter( BlueSharedString( "GrainThreshold" ), threshold );
+			m_grainShader->SetParameter( BlueSharedString( "GrainEdge" ), edge );
+			m_grainShader->SetParameter( BlueSharedString( "BrightnessModifier" ), filmGrain->m_brightnessModifier );
 			m_grainShader->AddResourceTexture2D( BlueSharedString( "NoiseTexture" ), "res:/texture/global/film_grain_noise.png" );
 			
 			m_grainShader->EndUpdate();
@@ -1294,69 +1281,108 @@ bool TriStepRenderPostProcess::ProcessTaa(Tr2PPTaaEffect* taa)
 {
 	if (taa && taa->IsActive())
 	{
-		if( m_taaEffect == nullptr || m_accumulationBuffer == nullptr || m_velocityBuffer == nullptr )
+		if( 
+				m_velocityBuffer == nullptr || m_taaEffect == nullptr || m_taaCopyEffect == nullptr || m_accumulationBuffer0 == nullptr || m_accumulationBuffer1 == nullptr
+		)
 		{
+
 			auto source = m_renderInfo->GetSourceBuffer();
-
-			m_accumulationBuffer.CreateInstance();
-			m_accumulationBuffer->Create(source->GetWidth(), source->GetHeight(), 1, source->GetFormat());
-			m_accumulationBuffer->SetName( "AccumulationBuffer" );
-
-			m_taaEffect.CreateInstance();
-			m_taaEffect->StartUpdate();
-			m_taaEffect->SetEffectPathName("res:/Graphics/Effect/Managed/Space/PostProcess/TAA.fx");
-			m_taaEffect->SetParameter( BlueSharedString( "BlitCurrent" ), PLACEHOLDER );
-			m_taaEffect->SetParameter(BlueSharedString("LastFrame"), m_accumulationBuffer);
 
 			m_velocityBuffer.CreateInstance();
 			m_velocityBuffer->SetName( "VelocityMap" );
-			m_velocityBuffer->Create(source->GetWidth(), source->GetHeight(), 1, Tr2RenderContextEnum::PIXEL_FORMAT_R16G16_FLOAT, source->GetMsaaType(), 0);
+			m_velocityBuffer->Create( source->GetWidth(), source->GetHeight(), 1, Tr2RenderContextEnum::PIXEL_FORMAT_R16G16_FLOAT, source->GetMsaaType(), 0 );
 
-			if (source->GetMsaaType() > 1)
-			{
-				m_taaEffect->SetParameter(BlueSharedString("VelocityMapMSAA"), m_velocityBuffer);
-				m_taaEffect->SetParameter(BlueSharedString("VelocityMap"), m_renderInfo->GetBlackTexture());
-			}
-			else
-			{
-				m_taaEffect->SetParameter(BlueSharedString("VelocityMap"), m_velocityBuffer);
-				m_taaEffect->SetParameter(BlueSharedString("VelocityMapMSAA"), m_renderInfo->GetBlackTexture());
-			}
+			m_accumulationBuffer0.CreateInstance();
+			m_accumulationBuffer0->Create( source->GetWidth(), source->GetHeight(), 1, Tr2RenderContextEnum::PIXEL_FORMAT_R16G16B16A16_UNORM );
+			m_accumulationBuffer0->SetName( "m_accumulationBuffer0" );
 
-			m_taaEffect->SetParameter(BlueSharedString("BlendingParams0"), taa->m_blendParams0);
-			m_taaEffect->SetParameter(BlueSharedString("BlendingParams1"), taa->m_blendParams1);
-			m_taaEffect->SetParameter(BlueSharedString("BlendingParams2"), taa->m_blendParams2);
-			m_taaEffect->SetParameter(BlueSharedString("DistanceParams"), taa->m_distanceParams);
-			m_taaEffect->SetParameter(BlueSharedString("EnhancementParams"), taa->m_enhancementParams);
-			m_taaEffect->EndUpdate();
+			m_accumulationBuffer1.CreateInstance();
+			m_accumulationBuffer1->Create( source->GetWidth(), source->GetHeight(), 1, Tr2RenderContextEnum::PIXEL_FORMAT_R16G16B16A16_UNORM );
+			m_accumulationBuffer1->SetName( "m_accumulationBuffer1" );
 
-			m_scene->SetupTAA(m_velocityBuffer, 0.5f, TAA_3X);
-			taa->SetDirty( false );
-		}
-		else if( taa->IsDirty() )
-		{
+			m_taaEffect.CreateInstance();
 			m_taaEffect->StartUpdate();
-			m_taaEffect->SetParameter( BlueSharedString( "BlendingParams0" ), taa->m_blendParams0 );
-			m_taaEffect->SetParameter( BlueSharedString( "BlendingParams1" ), taa->m_blendParams1 );
-			m_taaEffect->SetParameter( BlueSharedString( "BlendingParams2" ), taa->m_blendParams2 );
-			m_taaEffect->SetParameter( BlueSharedString( "DistanceParams" ), taa->m_distanceParams );
-			m_taaEffect->SetParameter( BlueSharedString( "EnhancementParams" ), taa->m_enhancementParams );
+			m_taaEffect->SetEffectPathName( "res:/Graphics/Effect/Managed/Space/PostProcess/TAA.fx" );
+			m_taaEffect->SetParameter( BlueSharedString( "BlitCurrent" ), PLACEHOLDER );
+			m_taaEffect->SetParameter( BlueSharedString( "LastFrame" ), PLACEHOLDER );
+			m_taaEffect->SetParameter( BlueSharedString( "VelocityMap" ), m_velocityBuffer );
 			m_taaEffect->EndUpdate();
 
-			m_scene->SetupTAA( m_velocityBuffer, 0.5f, TAA_3X );
+			m_taaCopyEffect.CreateInstance();
+			m_taaCopyEffect->StartUpdate(); 
+			m_taaCopyEffect->SetEffectPathName( "res:/Graphics/Effect/Managed/Space/PostProcess/TAACopy.fx" );
+			m_taaCopyEffect->SetParameter( BlueSharedString( "AccumulationBuffer" ), PLACEHOLDER );
+			m_taaCopyEffect->EndUpdate();
+
+
+			m_currentAccumulationBuffer = -1;
+
+			taa->SetDirty( true );
+		}
+		
+		if( taa->IsDirty() )
+		{
+
+			m_taaEffect->StartUpdate();
+
+			m_taaEffect->SetParameter( BlueSharedString( "EarlyOutThreshold" ), taa->m_earlyOutThreshold );
+
+
+			int quality = taa->m_quality;
+			BlueSharedString quality_option;
+			if( quality <= 1 )
+			{
+				quality_option = BlueSharedString( "QUALITY_LOW" );
+			}
+			else if( quality == 2 )
+			{
+				quality_option = BlueSharedString( "QUALITY_MEDIUM" );
+			}
+			else //if( quality >= 3 )
+			{
+				quality_option = BlueSharedString( "QUALITY_HIGH" );
+			}
+			m_taaEffect->SetOption( BlueSharedString( "QUALITY" ), quality_option );
+
+
+			if(taa->m_showMotionVectors)
+			{
+				m_taaEffect->SetOption( BlueSharedString( "DEBUG" ), BlueSharedString( "DEBUG_SHOW_MOTION_VECTORS" ) );
+			}
+			else if( taa->m_showEarlyOutMask )
+			{
+				m_taaEffect->SetOption( BlueSharedString( "DEBUG" ), BlueSharedString( "DEBUG_SHOW_EARLY_OUT_MASK" ) );
+			}
+			else 
+			{
+				m_taaEffect->SetOption( BlueSharedString( "DEBUG" ), BlueSharedString( "DEBUG_NONE" ) );
+			}
+
+			m_taaEffect->EndUpdate();
+
+			m_currentAccumulationBuffer = -1;
+
 			taa->SetDirty( false );
 		}
+
+		m_scene->SetupTAA( m_velocityBuffer, 1.0f, TAA_4X );
 	}
 	else
 	{
-		if (m_taaEffect != nullptr || m_accumulationBuffer != nullptr || m_velocityBuffer != nullptr)
+		if( m_velocityBuffer != nullptr || m_taaEffect != nullptr || m_taaCopyEffect != nullptr || m_accumulationBuffer0 != nullptr || m_accumulationBuffer1 != nullptr )
 		{
-			m_taaEffect = nullptr;
-			m_accumulationBuffer = nullptr;
+
 			m_velocityBuffer = nullptr;
-			m_scene->SetupTAA(m_velocityBuffer, 0, TAA_NONE);
+
+			m_taaEffect = nullptr;
+			m_taaCopyEffect = nullptr;
+			m_accumulationBuffer0 = nullptr;
+			m_accumulationBuffer1 = nullptr;
 		}
+
+		m_scene->SetupTAA( m_velocityBuffer, 0, TAA_NONE );
 	}
+
 	return taa && taa->IsActive();
 }
 
@@ -1369,12 +1395,42 @@ void TriStepRenderPostProcess::RenderTaa( Tr2RenderTarget* dest, Tr2RenderContex
 
 	m_scene->GetPostProcessPSBuffer()->ApplyBuffer(renderContext);
 
-	auto temp = m_renderInfo->GetTempTexture();
-	DrawInto( *temp, Tr2LoadAction::DONT_CARE, *dest, renderContext );
+	Tr2RenderTarget* input;
+	Tr2RenderTarget* output;
+	bool inputValid = true;
 
-	m_taaEffect->SetParameter( BlueSharedString( "BlitCurrent" ), temp );
-	DrawInto( *dest, Tr2LoadAction::DONT_CARE, m_taaEffect, renderContext );
-	DrawInto( *m_accumulationBuffer, Tr2LoadAction::DONT_CARE, *dest, renderContext );
+	if( m_currentAccumulationBuffer == 0 )
+	{
+		input = m_accumulationBuffer0;
+		output = m_accumulationBuffer1;
+		m_currentAccumulationBuffer = 1;
+	}
+	else if( m_currentAccumulationBuffer == 1 )
+	{
+		input = m_accumulationBuffer1;
+		output = m_accumulationBuffer0;
+		m_currentAccumulationBuffer = 0;
+	}
+	else 
+	{
+		inputValid = false;
+		input = m_renderInfo->GetBlackTexture();
+		output = m_accumulationBuffer0;
+		m_currentAccumulationBuffer = 0;
+	}
+
+	m_taaEffect->SetParameter( BlueSharedString( "CurrentFrame" ), dest );
+	m_taaEffect->SetParameter( BlueSharedString( "CurrentFrameOpaque" ), m_opaqueColorBuffer );
+	m_taaEffect->SetParameter( BlueSharedString( "AccumulationBuffer" ), input );
+
+	//m_taaEffect2->SetParameter( BlueSharedString( "InputValid" ), (uint32_t)(inputValid ? 1 : 0)  );
+
+	DrawInto( *output, Tr2LoadAction::DONT_CARE, m_taaEffect, renderContext );
+
+
+	m_taaCopyEffect->SetParameter( BlueSharedString( "AccumulationBuffer" ), output );
+
+	DrawInto( *dest, Tr2LoadAction::DONT_CARE, m_taaCopyEffect, renderContext );
 }
 
 bool TriStepRenderPostProcess::ProcessDepthOfField( Tr2RenderContext& renderContext, Tr2PPDepthOfFieldEffect* fx )

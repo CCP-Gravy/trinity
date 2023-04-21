@@ -40,6 +40,7 @@ static const double UNINITIALIZED_POSITION = std::numeric_limits<double>::infini
 
 CCP_STATS_DECLARE( eveLowDetailObjects, "Trinity/EveSpaceObject2/lowDetailObjects", true, CST_COUNTER_LOW, "Number of objects rendered in low detail per frame." );
 CCP_STATS_DECLARE( eveHighDetailObjects, "Trinity/EveSpaceObject2/highDetailObjects", true, CST_COUNTER_LOW, "Number of objects rendered in high detail per frame." );
+CCP_STATS_DECLARE( objectsCulledCount, "Trinity/EveSpaceObject2/objectsCulledCount", true, CST_COUNTER_LOW, "How many times are we culling out an object per frame." );
 
 float g_secondaryLightingRadiusCutoffFactor = 0.3f;
 TRI_REGISTER_SETTING( "secondaryLightingRadiusCutoffFactor", g_secondaryLightingRadiusCutoffFactor );
@@ -203,7 +204,7 @@ EveSpaceObject2::EveSpaceObject2( IRoot* lockobj ) :
 	m_controllers.SetNotify( this );
 	m_lights.SetNotify( this );
 	m_effectChildren.SetNotify( this );
-    m_overlayEffects.SetNotify( this );
+	m_overlayEffects.SetNotify( this );
 
 	SetControllerVariable( "DirtLevel", m_dirtLevel );
 	SetControllerVariable( "ActivationStrength", m_spaceObjectShipData.y );
@@ -223,7 +224,7 @@ EveSpaceObject2::~EveSpaceObject2()
 
 bool EveSpaceObject2::Initialize()
 {
-		m_allowLodSelection = true;
+	m_allowLodSelection = true;
 	if( m_mesh )
 	{
 		PrepareForAnimation();
@@ -307,39 +308,39 @@ void EveSpaceObject2::OnListModified( long event, ssize_t key, ssize_t key2, IRo
 			break;
 		}
 	}
-    else if( list == &m_overlayEffects && ( event & BELIST_LOADING ) == 0 )
-    {
-        switch( event & BELIST_EVENTMASK )
-        {
-            case BELIST_INSERTED:
-                if( ITr2ControllerOwnerPtr child = BlueCastPtr( value ) )
-                {
-                    for( auto it = begin( m_controllerVariables ); it != end( m_controllerVariables ); ++it )
-                    {
-                        child->SetControllerVariable( it->first.c_str(), it->second );
-                    }
-                }
-                break;
-            default:
-                break;
-        }
-    }
+	else if( list == &m_overlayEffects && ( event & BELIST_LOADING ) == 0 )
+	{
+		switch( event & BELIST_EVENTMASK )
+		{
+		case BELIST_INSERTED:
+			if( ITr2ControllerOwnerPtr child = BlueCastPtr( value ) )
+			{
+				for( auto it = begin( m_controllerVariables ); it != end( m_controllerVariables ); ++it )
+				{
+					child->SetControllerVariable( it->first.c_str(), it->second );
+				}
+			}
+			break;
+		default:
+			break;
+		}
+	}
 
-	if( list == &m_effectChildren && (event & BELIST_EVENTMASK) == BELIST_INSERTED )
+	if( list == &m_effectChildren && ( event & BELIST_EVENTMASK ) == BELIST_INSERTED )
 	{
 		if( m_inheritProperties )
 		{
-			if( IEveInheritPropertiesOwnerPtr obj = BlueCastPtr( value) )
+			if( IEveInheritPropertiesOwnerPtr obj = BlueCastPtr( value ) )
 			{
 				obj->SetInheritProperties( m_inheritProperties->GetProperties() );
 			}
 		}
 	}
-	else if( list == &m_lights && (event & BELIST_EVENTMASK) == BELIST_INSERTED  )
+	else if( list == &m_lights && ( event & BELIST_EVENTMASK ) == BELIST_INSERTED )
 	{
 		if( m_inheritProperties )
 		{
-			if( IEveInheritPropertiesOwnerPtr light = BlueCastPtr( value) )
+			if( IEveInheritPropertiesOwnerPtr light = BlueCastPtr( value ) )
 			{
 				light->SetInheritProperties( m_inheritProperties->GetProperties() );
 			}
@@ -432,7 +433,7 @@ void EveSpaceObject2::UpdateSyncronous( EveUpdateContext& updateContext )
 		params.spaceObjectParent = this;
 		params.childParent = nullptr;
 		params.ownerMaxSpeed = m_maxSpeed;
-        params.activationStrength = m_activationStrength;
+		params.activationStrength = m_activationStrength;
 		params.localToWorldTransform = worldTransform;
 
 		Tr2GrannyAnimationUtils::GetBoneList( m_animationUpdater, params.bones, params.boneCount );
@@ -461,7 +462,6 @@ void EveSpaceObject2::UpdateSyncronous( EveUpdateContext& updateContext )
 			m_secondaryLightingSphereRadius = pow( boxVolume / 4.f * 3.f / TRI_PI, 1.0f / 3.0f );
 		}
 	}
-
 }
 
 void EveSpaceObject2::UpdateAsyncronous( EveUpdateContext& updateContext )
@@ -537,7 +537,7 @@ void EveSpaceObject2::UpdateAsyncronous( EveUpdateContext& updateContext )
 		params.spaceObjectParent = this;
 		params.childParent = nullptr;
 		params.ownerMaxSpeed = m_maxSpeed;
-        params.activationStrength = m_activationStrength;
+		params.activationStrength = m_activationStrength;
 		params.localToWorldTransform = worldTransform;
 
 		Tr2GrannyAnimationUtils::GetBoneList( m_animationUpdater, params.bones, params.boneCount );
@@ -848,7 +848,7 @@ void EveSpaceObject2::RenderDebugInfo( ITr2DebugRenderer2& renderer )
 					Tr2DebugObjectReference( &locators, uint32_t( i ) ),
 					Vector3( XMVector3TransformCoord( position, m_worldTransform ) ),
 					Vector3( XMVector3TransformNormal( Vector3( 0, 1, 0 ), Matrix( XMMatrixRotationQuaternion( rotation ) ) * m_worldTransform ) ),
-					min(m_boundingSphereRadius * m_modelScale / 50.f, 100.0f),
+					min( m_boundingSphereRadius * m_modelScale / 50.f, 100.0f ),
 					8,
 					Tr2DebugRenderer::Lit,
 					color );
@@ -943,8 +943,8 @@ void EveSpaceObject2::GetBatches( ITriRenderBatchAccumulator* batches, TriBatchT
 	{
 		for( auto it = begin( m_attachments ); it != end( m_attachments ); ++it )
 		{
-			( *it )->GetBatches( batches, batchType, perObjectData, reason);
-		}																				
+			( *it )->GetBatches( batches, batchType, perObjectData, reason );
+		}
 	}
 
 	auto meshScreenSize = m_allowLodSelection ? m_estimatedPixelDiameter / g_eveSpaceSceneLODFactor : std::numeric_limits<float>::max();
@@ -975,7 +975,7 @@ void EveSpaceObject2::GetBatches( ITriRenderBatchAccumulator* batches, TriBatchT
 }
 
 
-void EveSpaceObject2::GetShadowBatches( ITriRenderBatchAccumulator* batches, const Tr2PerObjectData* perObjectData )
+void EveSpaceObject2::GetShadowBatches( ITriRenderBatchAccumulator* batches, const Tr2PerObjectData* perObjectData, float shadowPixelSize )
 {
 	if( !m_shadowEffect )
 	{
@@ -992,17 +992,12 @@ void EveSpaceObject2::GetShadowBatches( ITriRenderBatchAccumulator* batches, con
 	TriGeometryRes* geomRes = m_mesh->GetGeometryResource();
 	int meshIx = m_mesh->GetMeshIndex();
 
-	auto meshScreenSize = m_allowLodSelection ? m_estimatedPixelDiameter / g_eveSpaceSceneLODFactor : std::numeric_limits<float>::max();
+	auto meshScreenSize = shadowPixelSize;
 
-	for( Tr2MeshAreaVector::iterator it = areas->begin(); it != areas->end(); ++it )
+
+	auto& opaqueAreaBlocks = m_overlayMeshAreaBlocks[EveMeshOverlayEffect::TYPE_OPAQUEONLY];
+	for( auto& areaBlock : opaqueAreaBlocks )
 	{
-		Tr2MeshArea* area = *it;
-		auto material = area->GetMaterialInterface();
-
-		if( !area->GetDisplay() || !area->IsCastingShadows() || !material )
-		{
-			continue;
-		}
 		TriGeometryBatch* batch = batches->Allocate<TriGeometryBatch>();
 		// Note that this can fail if the accumulator can't add more batches!
 		if( batch )
@@ -1010,8 +1005,7 @@ void EveSpaceObject2::GetShadowBatches( ITriRenderBatchAccumulator* batches, con
 			batch->SetShaderMaterial( m_shadowEffect );
 			batch->SetPerObjectData( perObjectData );
 			batch->SetGeometryResource( geomRes );
-			batch->SetMeshParameters( meshIx, area->GetIndex(), area->GetCount(), meshScreenSize );
-
+			batch->SetMeshParameters( meshIx, areaBlock.m_startIndex, areaBlock.m_count, meshScreenSize );
 			batches->Commit( batch );
 		}
 	}
@@ -1342,13 +1336,13 @@ void EveSpaceObject2::PushChildrenAndDecalRenderables( std::vector<ITr2Renderabl
 	// are decals visible?
 	if( DisplayDecals() && m_mesh && m_isMeshVisible )
 	{
-			TriGeometryResPtr geometryRes = m_mesh->GetGeometryResource();
-			if( geometryRes )
+		TriGeometryResPtr geometryRes = m_mesh->GetGeometryResource();
+		if( geometryRes )
+		{
+			// runn over every decal and update it
+			for( EveSpaceObjectDecalVector::const_iterator it = m_decals.begin(); it != m_decals.end(); ++it )
 			{
-				// runn over every decal and update it
-				for( EveSpaceObjectDecalVector::const_iterator it = m_decals.begin(); it != m_decals.end(); ++it )
-				{
-					// now prep to get the renderables
+				// now prep to get the renderables
 				( *it )->GetRenderables( renderables, geometryRes, m_estimatedPixelDiameter / g_eveSpaceSceneLODFactor );
 			}
 		}
@@ -1448,10 +1442,10 @@ void EveSpaceObject2::UpdateVisibility( const TriFrustum& frustum, const Matrix&
 		}
 	}
 
-	for ( auto it = m_observers.begin(); it != m_observers.end(); ++it )
+	for( auto it = m_observers.begin(); it != m_observers.end(); ++it )
 	{
 		IBluePlacementObserver* obs = ( *it )->GetObserver();
-		if ( auto emitter = dynamic_cast<ITr2AudEmitter*>( obs ) )
+		if( auto emitter = dynamic_cast<ITr2AudEmitter*>( obs ) )
 		{
 			emitter->SetVisibility( m_isVisible );
 		}
@@ -1481,12 +1475,12 @@ void EveSpaceObject2::UpdateVisibility( const TriFrustum& frustum, const Matrix&
 	{
 		auto size = frustum.GetPixelSizeAccrossEst( m_boundingSphereWorldCenter, m_boundingSphereWorldRadius );
 		m_mesh->UseWithScreenSize( size );
-}
+	}
 }
 
 bool EveSpaceObject2::IsVisible( const TriFrustum& frustum ) const
 {
-	return frustum.IsSphereVisible( m_boundingSphereWorldCenter, m_boundingSphereWorldRadius ) && 
+	return frustum.IsSphereVisible( m_boundingSphereWorldCenter, m_boundingSphereWorldRadius ) &&
 		frustum.GetPixelSizeAccrossEst( m_boundingSphereWorldCenter, m_boundingSphereWorldRadius ) >= g_eveSpaceSceneVisibilityThreshold;
 }
 
@@ -1595,7 +1589,7 @@ void EveSpaceObject2::AddQuadsToQuadRenderer( const TriFrustum& frustum, Tr2Quad
 // --------------------------------------------------------------------------------
 bool EveSpaceObject2::GetRenderablesCastingShadow( bool isSelf, const TriFrustumOrtho& frustum, std::vector<ITr2Renderable*>& renderables )
 {
-	if( !m_display )
+	if( !m_display || !m_mesh )
 	{
 		return false;
 	}
@@ -1609,6 +1603,61 @@ bool EveSpaceObject2::GetRenderablesCastingShadow( bool isSelf, const TriFrustum
 		}
 	}
 	return false;
+}
+
+// --------------------------------------------------------------------------------
+// Description:
+//   Go through all the frustums and if object is in an ortho frustum and not "behind" any camera frustum plane
+//  then we push back the frustum index and the shadowSize to the sortedShadowCasters vector
+// --------------------------------------------------------------------------------
+void EveSpaceObject2::GatherShadowRenderables( std::vector<std::vector<ShadowCasterInfo>>& shadowCasters, TriFrustum* splitCameraFrustums, TriFrustumOrtho* shadowFrustums, const size_t arraySize, const unsigned int shadowMapSize, const Vector3 sunDir )
+{
+	if( !m_display )
+	{
+		return;
+	}
+
+	float shadowSize = 0.0f;
+
+	if( m_boundingSphereWorldRadius > 0.0f )
+	{
+ 		for( size_t i = 0; i < arraySize; ++i )
+		{
+			bool inView = true;
+			if( shadowFrustums[i].IsSphereVisibleAndInsideNearPlane( m_boundingSphereWorldCenter, m_boundingSphereWorldRadius ) )
+			{	
+				for( unsigned int j = 0; j < 6; ++j )
+				{ 
+					// first check if sun direction is perpendicular of the plane
+					float d = DotNormal( splitCameraFrustums[i].m_planes[j], sunDir );
+					// if it's not perpendicular then check if the object is "behind" the plane
+					if( d < 0 )
+					{
+						auto val = DotCoord( splitCameraFrustums[i].m_planes[j], -m_boundingSphereWorldCenter );
+						if( DotCoord( splitCameraFrustums[i].m_planes[j], m_boundingSphereWorldCenter ) < -m_boundingSphereWorldRadius )
+						{
+							CCP_STATS_INC( objectsCulledCount );
+							inView = false;
+						}
+					}
+				}
+				if( inView )
+				{
+					// if the object is in frustum
+					shadowSize = shadowFrustums[i].GetPixelSize( Vector4( m_boundingSphereWorldCenter, m_boundingSphereWorldRadius ), shadowMapSize );
+					
+					// if the shadow pixel size is too small don't bother to render it into the split
+					if( shadowSize > 15.f )
+					{
+						ShadowCasterInfo s;
+						s.renderable = this;
+						s.shadowSize = shadowSize;
+						shadowCasters[i].push_back( s );
+					}
+				}
+			}
+		}
+	}
 }
 
 void EveSpaceObject2::SetMesh( Tr2MeshBase* mesh )
@@ -1759,14 +1808,14 @@ bool EveSpaceObject2::OnModified( Be::Var* val )
 		m_oldClipSphereFactor = m_clipSphereFactor;
 		SetControllerVariable( "ClipSphereFactor", m_clipSphereFactor );
 	}
-	else if( IsMatch( val, m_reflectionMode) || IsMatch( val, m_display ) )
+	else if( IsMatch( val, m_reflectionMode ) || IsMatch( val, m_display ) )
 	{
 		ReRegister();
 	}
 	else if( IsMatch( val, m_name ) )
 	{
 		if( m_impactOverlay )
-		{ 
+		{
 			m_impactOverlay->SetSeed( CcpHashFNV1( m_name.c_str(), m_name.length() ) );
 		}
 	}
@@ -1785,9 +1834,9 @@ bool EveSpaceObject2::GetBoundingSphere( Vector4& sphere, BoundingSphereQuery qu
 	if( query == EVE_BOUNDS_NORMAL || !DisplayChildren() )
 	{
 		return true;
-	} 
+	}
 
-	Vector4 childBounds; 
+	Vector4 childBounds;
 	for( auto it = m_children.begin(); it != m_children.end(); it++ )
 	{
 		if( ( *it )->GetBoundingSphere( childBounds, query ) )
@@ -2385,33 +2434,33 @@ void EveSpaceObject2::GetLocalToWorldTransform( Matrix& transform ) const
 
 void EveSpaceObject2::FreezeHighDetailMesh()
 {
-		m_allowLodSelection = false;
+	m_allowLodSelection = false;
 }
 
 void EveSpaceObject2::PrepareForAnimation()
 {
-		// If this is the first time we see a mesh we set up a callback on the geometry resource
-		// file load to check for possible animations. If the file has animations we set up
-		// the data structures for animation playback.
-		auto geometryRes = m_mesh->GetGeometryResource();
-		if( geometryRes && geometryRes != m_geometryResFromMesh )
+	// If this is the first time we see a mesh we set up a callback on the geometry resource
+	// file load to check for possible animations. If the file has animations we set up
+	// the data structures for animation playback.
+	auto geometryRes = m_mesh->GetGeometryResource();
+	if( geometryRes && geometryRes != m_geometryResFromMesh )
+	{
+		// We might be loading, still. The AddNotifyTarget below will trigger a callback
+		// once the loading is done. If the geometry resource has already loaded we get the callback
+		// immediately. Further initialization that relies on the granny file being in
+		// memory happens in the callback (RebuildCachedData)
+		if( m_geometryResFromMesh )
 		{
-			// We might be loading, still. The AddNotifyTarget below will trigger a callback
-			// once the loading is done. If the geometry resource has already loaded we get the callback
-			// immediately. Further initialization that relies on the granny file being in
-			// memory happens in the callback (RebuildCachedData)
-			if( m_geometryResFromMesh )
-			{
-				m_geometryResFromMesh->RemoveNotifyTarget( this );
-			}
-			m_geometryResFromMesh = geometryRes;
-
-			m_animationUpdater->SetUseMeshBinding( true );
-			m_animationUpdater->SetSharedGeometryRes( m_geometryResFromMesh );
-
-			m_geometryResFromMesh->AddNotifyTarget( this );
+			m_geometryResFromMesh->RemoveNotifyTarget( this );
 		}
+		m_geometryResFromMesh = geometryRes;
+
+		m_animationUpdater->SetUseMeshBinding( true );
+		m_animationUpdater->SetSharedGeometryRes( m_geometryResFromMesh );
+
+		m_geometryResFromMesh->AddNotifyTarget( this );
 	}
+}
 
 // --------------------------------------------------------------------------------
 // Description:
@@ -2530,7 +2579,7 @@ void EveSpaceObject2::AddLocator( EveLocator2* newLocator )
 // --------------------------------------------------------------------------------
 void EveSpaceObject2::AddOverlayEffect( EveMeshOverlayEffectPtr newOverlayEffect )
 {
-    this->m_overlayEffects.Append( newOverlayEffect->GetRawRoot() );
+	this->m_overlayEffects.Append( newOverlayEffect->GetRawRoot() );
 }
 
 // --------------------------------------------------------------------------------
@@ -3133,7 +3182,7 @@ void EveSpaceObject2::GetLights( Tr2LightManager& lightManager ) const
 
 	size_t boneCount = 0;
 	const granny_matrix_3x4* bones = nullptr;
-	Tr2GrannyAnimationUtils::GetBoneList( m_animationUpdater,  bones, boneCount );
+	Tr2GrannyAnimationUtils::GetBoneList( m_animationUpdater, bones, boneCount );
 
 	for( auto it = std::begin( m_lights ); it != std::end( m_lights ); ++it )
 	{
@@ -3166,12 +3215,12 @@ bool EveSpaceObject2::IsPickable() const
 //    Registers itself and its children with the scene registration container.
 //    This is so we don't have to traverse the tree every frame
 // --------------------------------------------------------------------------------
-void EveSpaceObject2::RegisterComponents( )
+void EveSpaceObject2::RegisterComponents()
 {
 	auto registry = this->GetComponentRegistry();
-	if(registry && m_display)
+	if( registry && m_display )
 	{
-		if(EntityComponents::ShouldReflect(m_reflectionMode) )
+		if( EntityComponents::ShouldReflect( m_reflectionMode ) )
 		{
 			registry->RegisterComponent( ComponentType::REFLECTION_RENDERABLE, this, this->m_state );
 		}
@@ -3193,7 +3242,7 @@ void EveSpaceObject2::RegisterComponents( )
 void EveSpaceObject2::UnRegisterComponents()
 {
 	auto registry = this->GetComponentRegistry();
-	if(registry)
+	if( registry )
 	{
 		for( auto it = begin( m_effectChildren ); it != end( m_effectChildren ); ++it )
 		{
@@ -3221,7 +3270,7 @@ void EveSpaceObject2::GetPickingBatches( ITriRenderBatchAccumulator* batches, Tr
 		GetBatches( batches, TRIBATCHTYPE_OPAQUE, perObjectData );
 		// We also get stuff from overlay so that some effects (like cloaking) can be pickable
 		GetBatchesFromOverlayVector( batches, perObjectData, TRIBATCHTYPE_TRANSPARENT, m_mesh );
-		GetBatchesFromOverlayVector( batches, perObjectData, TRIBATCHTYPE_ADDITIVE , m_mesh);
+		GetBatchesFromOverlayVector( batches, perObjectData, TRIBATCHTYPE_ADDITIVE, m_mesh );
 	}
 	if( ( pickTypes & PICK_TYPE_TRANSPARENT ) != 0 )
 	{
@@ -3293,10 +3342,10 @@ void EveSpaceObject2::SetControllerVariable( const char* name, float value )
 		auto child = *it;
 		child->SetControllerVariable( name, value );
 	}
-    for( auto it = begin( m_overlayEffects ); it != end( m_overlayEffects ); ++it )
-    {
-        ( *it )->SetControllerVariable( name, value );
-    }
+	for( auto it = begin( m_overlayEffects ); it != end( m_overlayEffects ); ++it )
+	{
+		( *it )->SetControllerVariable( name, value );
+	}
 }
 
 void EveSpaceObject2::HandleControllerEvent( const char* name )
@@ -3307,12 +3356,12 @@ void EveSpaceObject2::HandleControllerEvent( const char* name )
 	}
 	for( auto it = begin( m_effectChildren ); it != end( m_effectChildren ); ++it )
 	{
-        ( *it )->HandleControllerEvent( name );
+		( *it )->HandleControllerEvent( name );
 	}
-    for( auto it = begin( m_overlayEffects ); it != end( m_overlayEffects ); ++it )
-    {
-        ( *it )->HandleControllerEvent( name );
-    }
+	for( auto it = begin( m_overlayEffects ); it != end( m_overlayEffects ); ++it )
+	{
+		( *it )->HandleControllerEvent( name );
+	}
 }
 
 void EveSpaceObject2::StartControllers()
@@ -3326,9 +3375,9 @@ void EveSpaceObject2::StartControllers()
 		auto child = *it;
 		child->StartControllers();
 	}
-    for( auto it = begin( m_overlayEffects ); it != end( m_overlayEffects ); ++it )
+	for( auto it = begin( m_overlayEffects ); it != end( m_overlayEffects ); ++it )
 	{
-        ( *it )->StartControllers();
+		( *it )->StartControllers();
 	}
 }
 
@@ -3448,13 +3497,13 @@ int EveSpaceObject2::GetLastUsedMeshLod() const
 	return m_mesh->GetGeometryResource()->GetLodIndexForScreenSize( unsigned( m_mesh->GetMeshIndex() ), meshScreenSize );
 }
 
-void EveSpaceObject2::SetProceduralContainerVariable( const char *name, float value )
+void EveSpaceObject2::SetProceduralContainerVariable( const char* name, float value )
 {
-    for( auto it = m_effectChildren.begin(); it != m_effectChildren.end(); it++ )
-    {
-        auto child = *it;
-        child->SetProceduralContainerVariable( name, value );
-    }
+	for( auto it = m_effectChildren.begin(); it != m_effectChildren.end(); it++ )
+	{
+		auto child = *it;
+		child->SetProceduralContainerVariable( name, value );
+	}
 }
 
 void EveSpaceObject2::SetInheritProperties( const Color* colorSet )
@@ -3467,7 +3516,7 @@ void EveSpaceObject2::SetInheritProperties( const Color* colorSet )
 
 	for( auto it = m_effectChildren.begin(); it != m_effectChildren.end(); it++ )
 	{
-		if( IEveInheritPropertiesOwnerPtr cast = BlueCastPtr(*it) )
+		if( IEveInheritPropertiesOwnerPtr cast = BlueCastPtr( *it ) )
 		{
 			cast->SetInheritProperties( m_inheritProperties->GetProperties() );
 		}

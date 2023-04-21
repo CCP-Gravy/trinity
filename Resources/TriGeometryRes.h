@@ -176,7 +176,7 @@ public:
 
 	// Render multiple consecutive areas, starting at 'areaIx'
 	bool RenderAreas( unsigned int meshIx, unsigned int areaIx, unsigned int areaCount, Tr2RenderContext& renderContext, bool reversed = false );
-	bool RenderAreas( float screenSize, unsigned int meshIx, unsigned int areaIx, unsigned int areaCount, Tr2RenderContext& renderContext, bool reversed = false );
+	bool RenderAreas( float screenSize, unsigned int meshIx, unsigned int areaIx, unsigned int areaCount, Tr2RenderContext& renderContext, bool reversed = false, bool buildReversed = true );
 
 	void RebuildCachedData();
 	

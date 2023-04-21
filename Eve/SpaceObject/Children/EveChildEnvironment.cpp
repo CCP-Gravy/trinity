@@ -165,11 +165,6 @@ void EveChildEnvironment::GetBatches( ITriRenderBatchAccumulator* batches, TriBa
 
 }
 
-void EveChildEnvironment::GetShadowBatches( ITriRenderBatchAccumulator* batches, const Tr2PerObjectData* perObjectData )
-{
-
-}
-
 float EveChildEnvironment::GetSortValue()
 {
 	return 0.0f;

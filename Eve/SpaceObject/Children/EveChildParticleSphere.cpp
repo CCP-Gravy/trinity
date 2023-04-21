@@ -172,11 +172,6 @@ void EveChildParticleSphere::GetBatches( ITriRenderBatchAccumulator* batches, Tr
 }
 
 // -----------------------------------------------------------------------------
-void EveChildParticleSphere::GetShadowBatches( ITriRenderBatchAccumulator*, const Tr2PerObjectData* )
-{
-}
-
-// -----------------------------------------------------------------------------
 bool EveChildParticleSphere::HasTransparentBatches()
 {
 	if( !m_mesh || !m_particleSystem )

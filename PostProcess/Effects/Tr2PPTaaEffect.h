@@ -20,11 +20,11 @@ public:
 	Tr2PPTaaEffect( IRoot* lockobj = NULL );
 	~Tr2PPTaaEffect();
 
-	const Vector4 m_blendParams0;
-	const Vector4 m_blendParams1;
-	const Vector4 m_blendParams2;
-	const Vector4 m_distanceParams;
-	const Vector4 m_enhancementParams;
+	int m_quality;
+	bool m_applyMipBias;
+	bool m_showMotionVectors;
+	bool m_showEarlyOutMask;
+	float m_earlyOutThreshold;
 };
 
 TYPEDEF_BLUECLASS( Tr2PPTaaEffect );

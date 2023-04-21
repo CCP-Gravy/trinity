@@ -392,14 +392,6 @@ void EveChildBulletStorm::GetBatches( ITriRenderBatchAccumulator* batches, TriBa
 
 // --------------------------------------------------------------------------------
 // Description:
-//   No shadows here
-// --------------------------------------------------------------------------------
-void EveChildBulletStorm::GetShadowBatches( ITriRenderBatchAccumulator* batches, const Tr2PerObjectData* perObjectData )
-{
-}
-
-// --------------------------------------------------------------------------------
-// Description:
 //   No transparency, no sorting
 // --------------------------------------------------------------------------------
 float EveChildBulletStorm::GetSortValue()

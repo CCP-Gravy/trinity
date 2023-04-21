@@ -256,7 +256,7 @@ void EveChildMesh::GetBatches( ITriRenderBatchAccumulator* batches, TriBatchType
 	}
 }
 
-void EveChildMesh::GetShadowBatches( ITriRenderBatchAccumulator* batches, const Tr2PerObjectData* perObjectData )
+void EveChildMesh::GetShadowBatches( ITriRenderBatchAccumulator* batches, const Tr2PerObjectData* perObjectData, float shadowPixelSize )
 {
 	// TODO: Figure out what we want to do with shadows
 	// Fix asap <Logi 27. aug 2015>

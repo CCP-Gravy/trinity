@@ -21,6 +21,9 @@
 #include "PostProcess/Tr2PostProcess2.h"
 #include "Include/ITr2NamedPredicate.h"
 #include "Eve/EveComponentRegistry.h"
+#include "Tr2Variable.h"
+#include "TriFrustumOrtho.h"
+#include "Tr2ShadowMap.h"
 
 class TriProjection;
 class TriView;
@@ -37,7 +40,7 @@ extern float g_eveSpaceObjectResourceUnloadingTimeThreshold;
 // turret firing effects, or light glows as they may be more noticeable from afar.
 extern float g_eveSpaceSceneVisibilityThreshold;
 
-// Object itself renders with low detail geometry (if available) if estimated pixel 
+// Object itself renders with low detail geometry (if available) if estimated pixel
 // diameter is above this threshold. Note that attachments may still render, in particular
 // turret firing effects, or light glows as they may be more noticeable from afar.
 extern float g_eveSpaceSceneLowDetailThreshold;
@@ -47,16 +50,16 @@ extern float g_eveSpaceSceneHighDetailThreshold;
 // Setting for what reflection mode is used
 extern int g_eveReflectionMode;
 
+struct ShadowReceiver;
 
 BLUE_DECLARE( TriFrustum );
 BLUE_DECLARE( Tr2Effect );
 BLUE_DECLARE_INTERFACE( ITr2TextureProvider );
 BLUE_DECLARE( EveLensflare );
 BLUE_DECLARE_VECTOR( EveLensflare );
-BLUE_DECLARE( TriShadowMap );
+BLUE_DECLARE( Tr2ShadowMap );
 BLUE_DECLARE( Tr2RenderTarget );
 BLUE_DECLARE( Tr2SSAO );
-struct ShadowReceiver;
 BLUE_DECLARE( EveTransform );
 BLUE_DECLARE_VECTOR( EveTransform );
 BLUE_DECLARE( EveDistanceField );
@@ -75,8 +78,17 @@ BLUE_DECLARE( Tr2ReflectionProbe );
 BLUE_DECLARE( EvePlanet );
 BLUE_DECLARE_VECTOR( EvePlanet );
 BLUE_DECLARE( EveVirtualCameraSystem );
+BLUE_DECLARE( Tr2GpuBuffer );
+BLUE_DECLARE( Tr2GpuStructuredBuffer );
 
-enum TAASampling { TAA_NONE=0, TAA_RANDOM=1, TAA_2X=2, TAA_3X=3, TAA_4X=4 };
+enum TAASampling
+{
+	TAA_NONE = 0,
+	TAA_RANDOM = 1,
+	TAA_2X = 2,
+	TAA_3X = 3,
+	TAA_4X = 4
+};
 
 BLUE_CLASS( EveSpaceScene ) :
 	public ITr2Scene,
@@ -95,40 +107,39 @@ public:
 
 	static bool IsMeshUnloadingEnabled();
 
-	IRoot* PickObject( int x, int y, TriProjection* proj,  TriView* view, TriViewport* viewport, 
-		Be::OptionalWithDefaultValue<Tr2PickTypes, PICK_TYPE_PICKING | PICK_TYPE_OPAQUE> filter );	// for use by python, uses default immediate context
+	IRoot* PickObject( int x, int y, TriProjection* proj, TriView* view, TriViewport* viewport, Be::OptionalWithDefaultValue<Tr2PickTypes, PICK_TYPE_PICKING | PICK_TYPE_OPAQUE> filter ); // for use by python, uses default immediate context
 	IRoot* PickObjectAndArea( int x, int y, TriProjection* proj, TriView* view, TriViewport* viewport, unsigned int& areaID, Tr2PickTypes pickTypes, Tr2RenderContext& renderContext );
 
 	//////////////////////////////////////////////////////////////////////////////////////
 	// ITr2Scene
 	virtual void Update( Be::Time realTime, Be::Time simTime );
 	virtual void Render( Tr2RenderContext& renderContext );
-	virtual void RenderDebugInfo( Tr2RenderContext& renderContext );
+	virtual void RenderDebugInfo( Tr2RenderContext & renderContext );
 
-	RenderPassResult RenderPass( PassType pass, Tr2RenderContext& renderContext );
+	RenderPassResult RenderPass( PassType pass, Tr2RenderContext & renderContext );
 	void RenderMainPass( Tr2RenderContext & renderContext, Tr2RenderContextEnum::CullMode cullmode = Tr2RenderContextEnum::CULLMODE_CW );
-	void RenderDepthPass( Tr2RenderContext& renderContext );
-	void RenderBackgroundPass( Tr2RenderContext& renderContext );
-	void RenderReflectionPass( Tr2RenderContext& renderContext );
-	void BeginRender( Tr2RenderContext& renderContext );
-	void EndRender( Tr2RenderContext& renderContext );
-	void Render3DUI( Tr2RenderContext& renderContext );
-	void PopulateAndApplyPerFrameData( Tr2RenderContext& renderContext );
+	void RenderDepthPass( Tr2RenderContext & renderContext );
+	void RenderBackgroundPass( Tr2RenderContext & renderContext );
+	void RenderReflectionPass( Tr2RenderContext & renderContext );
+	void BeginRender( Tr2RenderContext & renderContext );
+	void EndRender( Tr2RenderContext & renderContext );
+	void Render3DUI( Tr2RenderContext & renderContext );
+	void PopulateAndApplyPerFrameData( Tr2RenderContext & renderContext );
 
-	void GatherBatches( Tr2RenderContext& renderContext );
+	void GatherBatches( Tr2RenderContext & renderContext );
 
 	//////////////////////////////////////////////////////////////////////////////////////
 	// IInitialize
 	bool Initialize();
-	
+
 	//////////////////////////////////////////////////////////////////////////
 	// INotify
-	bool OnModified( Be::Var* val );
+	bool OnModified( Be::Var * val );
 
 	//////////////////////////////////////////////////////////////////////////
 	// IListNotify
 	void OnListModified(
-		long event,		// BLUELISTEVENT values
+		long event, // BLUELISTEVENT values
 		ssize_t key,
 		ssize_t key2,
 		IRoot* value,
@@ -161,9 +172,12 @@ public:
 	typedef std::map<TriBatchType, ITriRenderBatchAccumulator*> BatchMap;
 
 	Tr2ShLightingManagerPtr GetShLightingManager() const;
-	void SetShLightingManager( Tr2ShLightingManager* manager );
+	void SetShLightingManager( Tr2ShLightingManager * manager );
 
-	IEveSpaceObject2Vector& Objects() { return m_objects; }
+	IEveSpaceObject2Vector& Objects()
+	{
+		return m_objects;
+	}
 	Tr2PostProcess2Ptr GetPostProcess();
 	Tr2ShaderBufferPtr GetPostProcessPSBuffer();
 	void SetupTAA( Tr2RenderTargetPtr velocityMap, float pixelOffsetScale, TAASampling sampling );
@@ -179,17 +193,13 @@ protected:
 	};
 	FrameData m_frameData;
 
-
+	
 	// Per-frame vertex constants for rendering shadows
 	struct ShadowPerFrameVSData
 	{
 		Matrix ViewProjectionMat;
-		Matrix ViewMat;
-
-		Vector2 CameraRange;
-		float padding[2];
 	};
-
+	
 	// Per-frame pixel constants for rendering scene
 	struct SunData
 	{
@@ -234,8 +244,14 @@ protected:
 		// MiscData
 		float Time;
 		float SceneMipLodBias;
-		float unused3;
+		float FrameCounter;
 		float GammaBrightness;
+
+		// Cascaded shadow maps
+		Vector4 ShadowMapValues[4]; // x = zFar value[0], y = zFar value[1], z = zFar value[2], w = zFar value[3]..etc
+		Matrix ShadowMatrixVal[SHADOW_FRUSTUM_COUNT];
+		Vector4 SplitInfo;
+		Matrix ProjectionInverseMat;
 	};
 	double m_viewProjectLastD[16];
 	Matrix m_viewProjectLast;
@@ -255,7 +271,7 @@ protected:
 		// pass sun data to vertexshader, so certain lighting-calculations can be done per-vertex and not per-pixel
 		SunData Sun;
 		Vector3 FogFactors;
-		float   pad;
+		float pad;
 		// pass resolution to vertexshader, can be usefull in some crazy shaders
 		Vector2 TargetResolution;
 		// pass fov x and y
@@ -274,66 +290,48 @@ protected:
 		Vector3 OriginShift;
 		float DeltaT;
 	};
+
 	PostProcessPSData m_postProcessPSData;
 	Tr2ShaderBufferPtr m_postProcessPSBuffer;
 	void UpdatePostProcessPSData();
 
-	void PopulatePerFrameVSData( PerFrameVSData &data, Tr2RenderContext& renderContext );
-	void PopulatePerFramePSData( PerFramePSData &data, Tr2RenderContext& renderContext );
-	void ApplyPerFrameData( Tr2RenderContext& renderContext );
+	void PopulatePerFrameVSData( PerFrameVSData & data, Tr2RenderContext & renderContext );
+	void PopulatePerFramePSData( PerFramePSData & data, Tr2RenderContext & renderContext );
+	void ApplyPerFrameData( Tr2RenderContext & renderContext );
 
-	void GetShadowCasterRenderables( 
-		IEveSpaceObject2* objectOfInterest,
-		IEveShadowCaster* objectOfInterestShadowCaster,
-		const std::vector<IEveShadowCaster*>& allShadowCasters,
-		std::vector<ITr2Renderable*>& shadowRenderables,
-		std::vector<IEveShadowCaster*>& debugShadowCasters );
-	void PrepareShadowMap( 
-		IEveSpaceObject2* objectOfInterest, 
-		const std::vector<ITr2Renderable*>& shadowRenderables,
-		const std::vector<IEveShadowCaster*>& debugShadowCasters,
-		Tr2RenderContext& renderContext );
-	void GetAllShadowCasters( std::vector<IEveShadowCaster*>& allShadowCasters );
-	void EnableShadowRendering(bool _turnOn);
+	void UpdatePlanets( EveUpdateContext & updateContext );
+	void RenderPlanets( Tr2RenderContext & renderContext );
 
-	void UpdatePlanets( EveUpdateContext& updateContext );
-	void RenderPlanets( Tr2RenderContext& renderContext );
-
-	void RenderDistortion( Tr2RenderContext& renderContext );
+	void RenderDistortion( Tr2RenderContext & renderContext );
 
 	Matrix SetupPlanetViewMatrix();
 
-	void SetNoShadow();
+	void GetPickingResults( Tr2PickBuffer & pickBuffer, Tr2RenderContext & renderContext, unsigned short& objId, unsigned short& areaId, float& depth );
+	void DecodeBufferPixel( const void* pBuffer, unsigned short& objId, unsigned short& areaId, float& depth ) const;
 
-	void GetPickingResults( Tr2PickBuffer& pickBuffer, Tr2RenderContext& renderContext, 
-							unsigned short& objId, 
-		                    unsigned short& areaId, float& depth );
-	void DecodeBufferPixel( const void* pBuffer, unsigned short& objId, unsigned short& areaId,
-		                    float& depth ) const;
-
-	// Batch gathering and preparation	
+	// Batch gathering and preparation
 	void GetAllBatchesFromRenderables( std::vector<ITr2Renderable*> & objectRenderables, Tr2RenderableSortList & objectsWithTransparencies, BatchMap & batches, Tr2RenderReason reason = TR2RENDERREASON_NORMAL );
 	void GetOpaqueBatchesFromRenderables( std::vector<ITr2Renderable*> & objectRenderables, BatchMap & batches, Tr2RenderReason reason = TR2RENDERREASON_NORMAL );
 	void GetDepthBatchesFromRenderables( std::vector<ITr2Renderable*> & objectRenderables, BatchMap & batches, Tr2RenderReason reason = TR2RENDERREASON_NORMAL );
 	void GetTransparentBatchesFromRenderables( std::vector<ITr2Renderable*> & objectRenderables, Tr2RenderableSortList & objectsWithTransparencies, BatchMap & batches, Tr2RenderReason reason = TR2RENDERREASON_NORMAL );
-	void PrepareTransparentBatch( Tr2RenderableSortList& objectsWithTransparencies, BatchMap& batches, Tr2RenderReason reason = TR2RENDERREASON_NORMAL );
-	
+	void PrepareTransparentBatch( Tr2RenderableSortList & objectsWithTransparencies, BatchMap & batches, Tr2RenderReason reason = TR2RENDERREASON_NORMAL );
+
 	// Batch rendering
-	void RenderObjectsReceivingShadows( std::vector<ShadowReceiver>& objectReceivingShadows, bool renderShadows, Tr2RenderContext& renderContext );
-	void RenderOpaqueBatches( BatchMap& batches, Tr2RenderContext& renderContext );
-	void RenderTransparentBatches( BatchMap& batches, Tr2RenderContext& renderContext );
+	void RenderOpaqueBatches( BatchMap & batches, Tr2RenderContext & renderContext );
+	void RenderTransparentBatches( BatchMap & batches, Tr2RenderContext & renderContext );
+	void RenderTransparentBatches2( BatchMap & batches, Tr2RenderContext & renderContext, bool pass );
 	bool RenderDistortionBatches( BatchMap& batches, Tr2RenderContext& renderContext );
 
 	// Utility rendering functions
-	void RenderBatch(		ITriRenderBatchAccumulator* batch, 
-							Tr2EffectStateManager::RenderingMode rm, 
-							Tr2RenderContext &renderContext );
+	void RenderBatch( ITriRenderBatchAccumulator * batch,
+					  Tr2EffectStateManager::RenderingMode rm,
+					  Tr2RenderContext & renderContext );
 
-	void RenderRenderables( const std::vector<ITr2Renderable*> &renderables, 
-							ITriRenderBatchAccumulator* batch, 
-							TriBatchType batchType, 
+	void RenderRenderables( const std::vector<ITr2Renderable*>& renderables,
+							ITriRenderBatchAccumulator* batch,
+							TriBatchType batchType,
 							Tr2EffectStateManager::RenderingMode rm,
-							Tr2RenderContext &renderContext,
+							Tr2RenderContext& renderContext,
 							Tr2RenderReason reason = TR2RENDERREASON_NORMAL );
 
 	void UpdateSceneFromScript( Be::Time time );
@@ -344,40 +342,25 @@ protected:
 	bool m_display;
 	bool m_update;
 	bool m_enableShadows;
-	bool m_selfShadowOnly;
 	bool m_displayShadowMap;
 	bool m_backgroundRenderingEnabled;
-	bool m_debugShowShadowCasters;
-	bool m_enableShadowObb;
-	bool m_enableShadowDistanceTweak;
-	unsigned int m_displayShadowMapMipLevel;
-	float m_shadowFadeThreshold;
-	float m_shadowThreshold;
-	
-	// To help avoid horrible performance in degenerate situations we
-	// put a hard limit on the number of shadow maps drawn per frame.
-	uint32_t m_shadowReceiverMaxCount;
-
-	// To help avoid horrible performance in degenerate situations we
-	// put a hard limit on the number of shadow casters drawn into
-	// each shadow map.
-	uint32_t m_shadowCasterMaxCount;
-	float m_shadowCameraDistance;
+	TriFrustumOrtho m_shadowFrustums[SHADOW_FRUSTUM_COUNT];
+	TriFrustum m_cameraFrustums[SHADOW_FRUSTUM_COUNT];
 
 	float m_planetScale;
 	float m_planetCameraScale;
 
-	// main shadow map
-	TriShadowMapPtr m_shadowMap;
+	//cascaded shadow map
+	Tr2ShadowMapPtr m_cascadedShadowMap;
 
-	PIEveSpaceObject2Vector	m_backgroundObjects;
-	PEvePlanetVector		m_planets;
+	PIEveSpaceObject2Vector m_backgroundObjects;
+	PEvePlanetVector m_planets;
 	PIEveSpaceObject2Vector m_objects;
 	PIEveSpaceObject2Vector m_uiObjects;
-	IEveSpaceObject2Ptr		m_warpTunnel;
-	PTriCurveSetVector		m_curveSets;
-	PEveLensflareVector		m_lensflares;
-	EveUpdateContext		m_updateContext;
+	IEveSpaceObject2Ptr m_warpTunnel;
+	PTriCurveSetVector m_curveSets;
+	PEveLensflareVector m_lensflares;
+	EveUpdateContext m_updateContext;
 	PEveDistanceFieldVector m_distanceFields;
 
 	// Primary batches, gathered in BeginRender and
@@ -386,9 +369,10 @@ protected:
 	// Secondary batches used to render planets, stars, shadowed objects
 	// and so forth. Should be finalized and cleared each time they're used.
 	BatchMap m_secondaryBatches;
-	
+
 	// Utility batches.
-	ITriRenderBatchAccumulator* m_shadowBatches;
+	std::vector<TriPoolAllocator> m_shadowAllocators;
+	std::vector<std::unique_ptr<ITriRenderBatchAccumulator>> m_shadowBatches;
 	ITriRenderBatchAccumulator* m_pickingBatches;
 
 	Tr2EffectPtr m_backgroundEffect;
@@ -414,7 +398,6 @@ protected:
 	std::string m_lowQualityNebulaMixResPath;
 	ITr2TextureProviderPtr m_lowQualityNebulaMix;
 
-	Tr2Variable m_shadowLightnessVar;
 	Tr2Variable m_envMap1Var;
 	Tr2Variable m_envMap2Var;
 
@@ -424,10 +407,12 @@ protected:
 	Tr2Variable m_envMapTransformVar;
 	Tr2Variable m_reflectionMapTransformVar;
 	Tr2Variable m_suncVecVar;
-		
+	
+	Tr2RenderTargetPtr m_colorMap;
+	Tr2RenderTargetPtr m_opaqueColorMap;
 	Tr2DepthStencilPtr m_depthMap;
 	Tr2Variable m_depthMapVar;
-	Tr2Variable m_depthMapMsaaVar;
+
 
 	TriVariable* m_ssaoMapHandle;
 	Tr2RenderTargetPtr m_normalMap;
@@ -478,7 +463,7 @@ private:
 	{
 		return m_updateContext.GetGpuParticleSystem();
 	}
-	void SetGpuParticleSystem( Tr2GpuParticleSystem* ps )
+	void SetGpuParticleSystem( Tr2GpuParticleSystem * ps )
 	{
 		m_updateContext.SetGpuParticleSystem( ps );
 	}
@@ -488,13 +473,18 @@ private:
 	Be::Time m_updateTime;
 	EveSpaceObject2Ptr m_egoBall;
 
-	Tr2ConstantBufferAL	m_perFrameVSBuffer;
-	Tr2ConstantBufferAL	m_perFramePSBuffer;
-	Tr2ConstantBufferAL	m_shadowPerFrameVSBuffer;
+	Tr2ConstantBufferAL m_perFrameVSBuffer;
+	Tr2ConstantBufferAL m_perFramePSBuffer;
+	Tr2ConstantBufferAL m_shadowPerFrameVSBuffer;
+
+	// Cascaded shadows
+	void GetShadowCasters( std::vector<std::vector<ShadowCasterInfo>> & shadowCasters );
+	void SetupCascadedShadows( Tr2RenderContext & renderContext );
+	void DisableShadows();
 
 	// Picking
-	void SetupTransformsForPicking( float fx, float fy, TriProjection* proj,  TriView* view, TriViewport* viewport, Tr2RenderContext& renderContext );
-	void GetPickingObjectsToRender( std::vector<ITr2Renderable*>& pickableRenderObjects );
+	void SetupTransformsForPicking( float fx, float fy, TriProjection* proj, TriView* view, TriViewport* viewport, Tr2RenderContext& renderContext );
+	void GetPickingObjectsToRender( std::vector<ITr2Renderable*> & pickableRenderObjects );
 
 	Tr2PickBuffer m_pickBuffer;
 	EveStarfieldPtr m_starfield;
@@ -508,8 +498,8 @@ private:
 			FULL_SCREEN_QUAD_OVERLAY,
 		};
 
-		VisualizerEffect()
-			:type( PIXEL_SHADER_REPLACEMENT )
+		VisualizerEffect() :
+			type( PIXEL_SHADER_REPLACEMENT )
 		{
 		}
 
@@ -522,30 +512,28 @@ private:
 	void UpdateVariableStore();
 	void ClearVariableStore();
 
-	void ClearBatches( BatchMap& batches );
-	void FinalizeBatches( BatchMap& batches );
+	void ClearBatches( BatchMap & batches );
+	void FinalizeBatches( BatchMap & batches );
 
 	virtual void ReleaseResources( TriStorage s );
 	virtual bool OnPrepareResources();
 
-	void UpdateShLighting( 
-		const std::vector<ShadowReceiver>& objectsReceivingShadow, 
+	void UpdateShLighting(
 		const std::vector<IEveSpaceObject2*>& objectsNotReceivingShadow );
 
-	void UpdateQuadRenderer( 
+	void UpdateQuadRenderer(
 		const TriFrustum& frustum,
-		const std::vector<ShadowReceiver>& objectsReceivingShadow, 
 		const std::vector<IEveSpaceObject2*>& objectsNotReceivingShadow,
 		Tr2RenderContext& renderContext );
 
-	void UpdateQuadRenderer( 
+	void UpdateQuadRenderer(
 		const TriFrustum& frustum,
 		PIEveSpaceObject2Vector& objects,
 		Tr2RenderContext& renderContext );
 
 	Tr2QuadRenderer* GetQuadRenderer() const;
 
-	void UpdateImpostors( Tr2RenderContext& renderContext );
+	void UpdateImpostors( Tr2RenderContext & renderContext );
 
 	enum BackgroundRenderingReason
 	{
@@ -553,7 +541,7 @@ private:
 		BACKGROUND_RENDER_REFLECTION,
 	};
 
-	void RenderBackgroundPassObjects( Tr2RenderContext& renderContext, BackgroundRenderingReason reason );
+	void RenderBackgroundPassObjects( Tr2RenderContext & renderContext, BackgroundRenderingReason reason );
 
 	Tr2ShLightingManagerPtr m_shLightingManager;
 
@@ -565,12 +553,10 @@ private:
 
 	float m_taaPixelOffsetScale;
 
-	size_t m_msaaSamples;
-
 	bool m_hasBackgroundDistortionBatches;
 	bool m_hasForegroundDistortionBatches;
 
-	void TAAOffset( Tr2RenderContext& renderContext );
+	void TAAOffset( Tr2RenderContext & renderContext );
 
 	Tr2ImpostorManagerPtr m_impostorManager;
 
@@ -592,6 +578,14 @@ private:
 	EveComponentRegistryPtr m_componentRegistry;
 
 	bool m_dynamicObjectReflectionEnabled;
+
+	std::vector<std::vector<ShadowCasterInfo>> m_shadowCasters;
+	ShadowMap::SplitSetup m_splitSetup[SHADOW_FRUSTUM_COUNT];
+
+	// Cascaded shadow debugging
+	bool m_freezeFrustum;
+	Matrix m_shadowView;
+
 };
 
 TYPEDEF_BLUECLASS( EveSpaceScene );
@@ -607,10 +601,7 @@ TYPEDEF_BLUECLASS( EveSpaceScene );
 //	allocator - allocator to use
 //	batchTypes, batchTypeCount - which batches to query
 //  reason - Why do we need the renderabes (either normal or reflections)
-void GetBatchesFromRenderables(	ITr2Renderable** objectRenderables, const unsigned renderableCount, 
-								Tr2RenderableSortList* objectsWithTransparencies, 
-								EveSpaceScene::BatchMap& batches, 
-								const TriBatchType* batchTypes, const unsigned batchTypeCount, Tr2RenderReason reason = TR2RENDERREASON_NORMAL );
+void GetBatchesFromRenderables( ITr2Renderable** objectRenderables, const unsigned renderableCount, Tr2RenderableSortList* objectsWithTransparencies, EveSpaceScene::BatchMap& batches, const TriBatchType* batchTypes, const unsigned batchTypeCount, Tr2RenderReason reason = TR2RENDERREASON_NORMAL );
 
 
 #endif // EveSpaceScene_H

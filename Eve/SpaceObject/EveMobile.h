@@ -54,7 +54,7 @@ public:
 	//////////////////////////////////////////////////////////////////////////////////////
 	// IEveShadowCaster - overriding EveSpaceObject2 implementations
 	bool GetRenderablesCastingShadow( bool isSelf, const TriFrustumOrtho& frustum, std::vector<ITr2Renderable*>& renderables ) override;
-
+	void GatherShadowRenderables( std::vector<std::vector<ShadowCasterInfo>>& shadowCasters, TriFrustum* splitCameraFrustums, TriFrustumOrtho* shadowFrustums, const size_t arraySize, const unsigned int shadowMapSize, const Vector3 sunDir );
 	/////////////////////////////////////////////////////////////////////////////////////
 	// IListNotify
 	void OnListModified( long event, ssize_t key, ssize_t key2, IRoot* value, const IList* theList ) override;

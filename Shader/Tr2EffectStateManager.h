@@ -143,6 +143,7 @@ public:
 	void SetupContextResources();
 	void AssignFrom( const Tr2EffectStateManager& other );
 
+	void UpdateRenderTargetViewport( unsigned width, unsigned height );
 private:
 	friend class Tr2EffectRes;
 	friend class Tr2LowLevelShader;
@@ -206,7 +207,6 @@ private:
 
 	Tr2Variable m_viewportSizeVar;
 
-	void UpdateRenderTargetViewport( unsigned width, unsigned height );
 	void SetupViewport();
 
 

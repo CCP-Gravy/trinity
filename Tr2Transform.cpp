@@ -273,7 +273,7 @@ void Tr2Transform::GetBatches( ITriRenderBatchAccumulator* batches,
 	}
 }
 
-void Tr2Transform::GetShadowBatches( ITriRenderBatchAccumulator* batches, const Tr2PerObjectData* perObjectData )
+void Tr2Transform::GetShadowBatches( ITriRenderBatchAccumulator* batches, const Tr2PerObjectData* perObjectData, float shadowPixelSize )
 {
 	if( m_display && m_mesh )
 	{

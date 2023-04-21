@@ -1488,7 +1488,7 @@ bool TriGeometryRes::RenderAreas( unsigned int meshIx, unsigned int areaIx, unsi
 	return RenderAreas( std::numeric_limits<float>::max(), meshIx, areaIx, areaCount, renderContext, reversed );
 }
 
-bool TriGeometryRes::RenderAreas( float screenSize, unsigned int meshIx, unsigned int areaIx, unsigned int areaCount, Tr2RenderContext& renderContext, bool reversed )
+bool TriGeometryRes::RenderAreas( float screenSize, unsigned int meshIx, unsigned int areaIx, unsigned int areaCount, Tr2RenderContext& renderContext, bool reversed, bool buildReversed )
 {
     if( !m_isGood )
     {
@@ -1551,7 +1551,10 @@ bool TriGeometryRes::RenderAreas( float screenSize, unsigned int meshIx, unsigne
 		renderContext.m_esm.ApplyStreamSource( 0, pMesh->m_vertexBuffer, 0, pMesh->m_bytesPerVertex );
 		if( reversed )
 		{
-			ReverseIndexBuffer( *pMesh, renderContext );
+			if( buildReversed )
+			{
+				ReverseIndexBuffer( *pMesh, renderContext );
+			}
 			renderContext.m_esm.ApplyIndexBuffer( pMesh->m_reversedIndexBuffer );
 		}
 		else

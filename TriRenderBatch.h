@@ -179,6 +179,7 @@ public:
 		m_areaCount = areaCount;
 		m_screenSize = screenSize;
 		m_reversed = reversed;
+		m_performedSyncronousSubmit = false;
 		if( reversed )
 		{
 			// Reversing an index buffer may involved reading it back from GPU memory
@@ -232,6 +233,7 @@ protected:
     unsigned int m_areaCount;
 	float m_screenSize;
 	bool m_reversed;
+	bool m_performedSyncronousSubmit;
 };
 
 // --------------------------------------------------------------------------------------

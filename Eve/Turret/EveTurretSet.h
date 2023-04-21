@@ -132,7 +132,7 @@ public:
 	// ITr2Renderable
 	bool HasTransparentBatches() override;
 	void GetBatches( ITriRenderBatchAccumulator* batches, TriBatchType batchType, const Tr2PerObjectData* perObjectData, Tr2RenderReason reason = TR2RENDERREASON_NORMAL ) override;
-	void GetShadowBatches( ITriRenderBatchAccumulator* batches, const Tr2PerObjectData* perObjectData ) override;
+	void GetShadowBatches( ITriRenderBatchAccumulator * batches, const Tr2PerObjectData* perObjectData, float shadowPixelSize ) override;
 	float GetSortValue() override;
 	Tr2PerObjectData* GetPerObjectData( ITriRenderBatchAccumulator* accumulator ) override;
 
@@ -175,6 +175,9 @@ public:
 	void GetRenderables( std::vector<ITr2Renderable*>& renderables, const Vector4* shLighting );
 	void GetRenderablesCastingShadow( const TriFrustumOrtho& frustum, std::vector<ITr2Renderable*>& renderables );
 
+	// shadows
+	void GatherShadowRenderables( std::vector<std::vector<ShadowCasterInfo>>& shadowCasters, TriFrustum* splitCameraFrustums, TriFrustumOrtho* shadowFrustums, const size_t arraySize, const unsigned int shadowMapSize, const Vector3 sunDir );
+	
 	// rebuild the bounding sphere size
 	void RebuildBoundingSphere();
 	// disable LODing

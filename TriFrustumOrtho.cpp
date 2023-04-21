@@ -57,3 +57,18 @@ bool TriFrustumOrtho::IsSphereVisibleAndInsideNearPlane( const Vector3& center, 
 
 	return true;
 }
+
+float TriFrustumOrtho::GetPixelSize( Vector4 sphere, uint16_t textureSize )
+{
+	Vector4 d = sphere;
+	float frustumWidth = m_boundsMax.x - m_boundsMin.x;
+	float frustumHeight = m_boundsMax.y - m_boundsMin.y;
+
+	float dx = ( d.w * 2 ) / frustumWidth;
+	float dy = ( d.w * 2 ) / frustumHeight;
+
+	float larger = std::max( dx, dy );
+
+	float shadowPixelSize = ( larger * textureSize );
+	return shadowPixelSize;
+}

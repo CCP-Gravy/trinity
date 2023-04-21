@@ -43,7 +43,6 @@ public:
 	/////////////////////////////////////////////////////////////////////////////////////
 	// ITr2Renderable
 	void GetBatches( ITriRenderBatchAccumulator* batches, TriBatchType batchType, const Tr2PerObjectData* perObjectData, Tr2RenderReason reason = TR2RENDERREASON_NORMAL );
-	void GetShadowBatches( ITriRenderBatchAccumulator* batches, const Tr2PerObjectData* perObjectData );
 	bool HasTransparentBatches();
 	float GetSortValue();
 	Tr2PerObjectData* GetPerObjectData( ITriRenderBatchAccumulator* accumulator );

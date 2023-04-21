@@ -55,7 +55,7 @@ void EveSwarmRenderable::GetBatches( ITriRenderBatchAccumulator* batches, TriBat
 	}
 }
 
-void EveSwarmRenderable::GetShadowBatches( ITriRenderBatchAccumulator* batches, const Tr2PerObjectData* perObjectData )
+void EveSwarmRenderable::GetShadowBatches( ITriRenderBatchAccumulator* batches, const Tr2PerObjectData* perObjectData, float shadowPixelSize )
 {
 	if( !m_shadowEffect )
 	{

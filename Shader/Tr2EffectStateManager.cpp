@@ -920,9 +920,6 @@ bool Tr2EffectStateManager::SetRenderTarget( unsigned int index, const Tr2Textur
 			// don't use rt.GetWidth/Height, rt may be nullRT
 			UpdateRenderTargetViewport( width, height );
 		}
-		else {
-			CCP_LOGERR( "Could not update viewport for render target index 0, GetRenderTargetSize failed" );
-		}
 	}
 
 	return true;
