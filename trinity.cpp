@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 
-#include "blue/include/Blue.h"
+#include <Blue.h>
 #ifdef TRINITYBUILD
 
 //Blue interfaces

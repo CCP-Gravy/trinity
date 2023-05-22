@@ -5,7 +5,7 @@
 #include "granny.h"
 #include "Include/ITr2AnimationUpdater.h"
 #include "GrannyBoneOffset.h"
-#include "blue/include/BlueAsyncRes.h"
+#include <BlueAsyncRes.h>
 
 class Tr2GrannyAnimation;
 

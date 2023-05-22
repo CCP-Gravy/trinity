@@ -7,7 +7,7 @@
 #include "StdAfx.h"
 #include "Tr2StreamingBitmapSaver.h"
 #include "Tr2RenderTarget.h"
-#include "ImageIO/Tr2TgaHandler.h"
+#include <Tr2TgaHandler.h>
 
 // --------------------------------------------------------------------------------------
 // Description:

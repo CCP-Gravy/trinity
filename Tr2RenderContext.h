@@ -10,7 +10,7 @@
 
 BLUE_DECLARE( Tr2RenderContext );
 
-#include "TrinityAL/ITr2RenderContextEvents.h"
+#include <ITr2RenderContextEvents.h>
 #include "Shader/Tr2EffectStateManager.h"
 #include "Shader/Tr2EffectDescription.h"
 

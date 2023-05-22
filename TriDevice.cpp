@@ -8,7 +8,7 @@
 #include "Curves/TriCurveSet.h"
 #include "Include/TriMath.h"
 
-#include "Blue/Include/IBlueCallbackMan.h"
+#include <IBlueCallbackMan.h>
 
 #ifdef _WIN32
 #include "winuser.h"

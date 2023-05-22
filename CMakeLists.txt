@@ -1,4 +1,22 @@
+cmake_minimum_required(VERSION 3.16)
 project(trinity VERSION 1.0.0)
+
+if(NOT DEFINED ENV{CCP_EVE_PERFORCE_BRANCH_PATH})
+    message(FATAL_ERROR "Missing required environment variable CCP_EVE_PERFORCE_BRANCH_PATH")
+elseif(NOT IS_ABSOLUTE $ENV{CCP_EVE_PERFORCE_BRANCH_PATH})
+    message(FATAL_ERROR "CCP_EVE_PERFORCE_BRANCH_PATH needs to be an absolute path")
+elseif(NOT EXISTS $ENV{CCP_EVE_PERFORCE_BRANCH_PATH})
+    message(FATAL_ERROR "CCP_EVE_PERFORCE_BRANCH_PATH is pointing at a non-existing location $ENV{CCP_EVE_PERFORCE_BRANCH_PATH}")
+elseif(NOT IS_DIRECTORY $ENV{CCP_EVE_PERFORCE_BRANCH_PATH})
+    message(FATAL_ERROR "CCP_EVE_PERFORCE_BRANCH_PATH needs to be a directory")
+else()
+    message(STATUS "Using CCP_EVE_PERFORCE_BRANCH_PATH located at $ENV{CCP_EVE_PERFORCE_BRANCH_PATH}")
+endif()
+
+file(TO_CMAKE_PATH "$ENV{CCP_EVE_PERFORCE_BRANCH_PATH}" BRANCH_ROOT_DIR)
+list(INSERT CMAKE_MODULE_PATH 0 ${BRANCH_ROOT_DIR}/cmake)
+include(CcpGlobalSettings)
+include(CcpPackageConfigHelpers)
 
 find_package(libSquish REQUIRED)
 find_package(FidelityFX REQUIRED)
@@ -1534,8 +1552,21 @@ if(CMAKE_GENERATOR STREQUAL "Xcode" OR CMAKE_GENERATOR MATCHES "Visual Studio.*"
     )
 endif()
 
+find_package(Freetype REQUIRED NO_CMAKE_PATH)
+find_package(Granny REQUIRED NO_CMAKE_PATH)
+find_package(PDM REQUIRED NO_CMAKE_PATH)
+find_package(PNG REQUIRED NO_CMAKE_PATH)
+find_package(Blue REQUIRED NO_CMAKE_PATH)
+find_package(CcpMath REQUIRED NO_CMAKE_PATH)
+find_package(ImageIO REQUIRED NO_CMAKE_PATH)
+find_package(JPEG REQUIRED NO_CMAKE_PATH)
+find_package(CcpParser REQUIRED NO_CMAKE_PATH)
+
 # utility function that sets properties shared between all trinity targets
 function(set_shared_trinity_properties target)
+    #Needs png.h but isn't linked to png
+    target_include_directories(${target} PUBLIC "$<TARGET_PROPERTY:PNG::PNG,INTERFACE_INCLUDE_DIRECTORIES>")
+
     target_link_libraries(${target}
         PRIVATE
             ImageIO
@@ -1585,6 +1616,31 @@ function(set_shared_trinity_properties target)
     )
 
     add_trinity_dev_debug_flags(${target})
+
+    # Provide an install target iff this is the top level project only
+    if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+        # Install rule to ensure that our runtime and linker files are in the expected, platform-specific folders
+        install(
+            TARGETS ${target}
+            EXPORT ${target}Targets
+            CONFIGURATIONS ${CMAKE_CONFIGURATION_TYPES}
+            LIBRARY DESTINATION lib/${CCP_PLATFORM}/${CCP_ARCHITECTURE}/${CCP_TOOLSET}/
+            ARCHIVE DESTINATION lib/${CCP_PLATFORM}/${CCP_ARCHITECTURE}/${CCP_TOOLSET}/
+            RUNTIME DESTINATION bin/${CCP_PLATFORM}/${CCP_ARCHITECTURE}/${CCP_TOOLSET}/
+        )
+        # Install rule for available public headers
+        install(FILES ${PUBLIC_HEADER_FILES} DESTINATION include)
+
+        configure_ccp_vendor_config_file(
+            TARGET ${target}
+            DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/${target}Config.cmake"
+            DEPENDENCIES ""
+        )
+
+        install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${target}Config.cmake DESTINATION .)
+
+    endif()
+
 endfunction()
 
 #[[
@@ -1598,6 +1654,8 @@ target_compile_definitions(trinity_stub
         TRINITY_PLATFORM=TRINITY_STUB
         TRINITYNAME=_trinity_stub
 )
+
+find_package(TrinityAL_stub REQUIRED NO_CMAKE_PATH)
 target_link_libraries(trinity_stub PRIVATE TrinityAL_stub)
 set_shared_trinity_properties(trinity_stub)
 endif()
@@ -1609,6 +1667,8 @@ if(WIN32)
             TRINITY_PLATFORM=TRINITY_DIRECTX11
             TRINITYNAME=_trinity_dx11
     )
+    find_package(NvidiaAftermath REQUIRED)#Required for dx11
+    find_package(TrinityAL_dx11 REQUIRED NO_CMAKE_PATH)
     target_link_libraries(trinity_dx11 PRIVATE TrinityAL_dx11)
     set_shared_trinity_properties(trinity_dx11)
 
@@ -1618,6 +1678,7 @@ if(WIN32)
             TRINITY_PLATFORM=TRINITY_DIRECTX12
             TRINITYNAME=_trinity_dx12
     )
+    find_package(TrinityAL_dx12 REQUIRED NO_CMAKE_PATH)
     target_link_libraries(trinity_dx12 PRIVATE TrinityAL_dx12)
     set_shared_trinity_properties(trinity_dx12)
 elseif(APPLE)
@@ -1629,6 +1690,7 @@ elseif(APPLE)
             TRINITYNAME=_trinity_metal
     )
     set_shared_trinity_properties(trinity_metal)
+    find_package(trinity_metal REQUIRED NO_CMAKE_PATH)
     target_link_libraries(trinity_metal
         PRIVATE
             TrinityAL_metal

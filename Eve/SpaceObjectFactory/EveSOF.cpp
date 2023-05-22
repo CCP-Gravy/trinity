@@ -54,7 +54,7 @@
 #include "Lights/Tr2SpotLight.h"
 #include "Lights/ITr2LightOwner.h"
 #include "Utilities/BoundingSphere.h"
-#include "blue/BlueObjectMetadata.h"
+#include <BlueObjectMetadata.h>
 
 namespace
 {

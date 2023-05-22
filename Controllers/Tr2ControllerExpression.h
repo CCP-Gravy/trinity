@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "ccpparser.h"
+#include <ccpparser.h>
 
 
 BLUE_DECLARE( Tr2StateMachine );

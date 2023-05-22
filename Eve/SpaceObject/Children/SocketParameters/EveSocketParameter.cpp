@@ -10,7 +10,7 @@
 #include "TriValueBinding.h"
 
 #if BLUE_WITH_PYTHON
-#include "CcpUtils/PyCpp.h"
+#include <BluePyCpp.h>
 #endif
 
 

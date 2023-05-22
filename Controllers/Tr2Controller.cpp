@@ -10,7 +10,7 @@
 #include "Tr2ControllerFloatVariable.h"
 #include "Tr2ControllerEventHandler.h"
 #include "Include/ITr2Updateable.h"
-#include "blue/Include/ScopedBlockTrap.h"
+#include <ScopedBlockTrap.h>
 
 
 CCP_STATS_DECLARE( controllerUpdateTime, "Trinity/Controllers/UpdateTime", true, CST_TIME, "Cumulative per-frame time for controller update" );
