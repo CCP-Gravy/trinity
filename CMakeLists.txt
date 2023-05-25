@@ -24,6 +24,46 @@ find_package(FidelityFX_FSR REQUIRED)
 find_package(CACAO REQUIRED)
 find_package(IntelTBB REQUIRED)
 
+set(PUBLIC_HEADER_FILES
+    Include/IEveBallpark.h
+    Include/IEveReferencePoint.h
+    Include/ITr2AnimationUpdater.h
+    Include/ITr2AudioEmitter.h
+    Include/ITr2BoundingBox.h
+    Include/ITr2DebugRenderer.h
+    Include/ITr2DebugRenderer2.h
+    Include/ITr2GpuBuffer.h
+    Include/ITr2InstanceData.h
+    Include/ITr2Interior.h
+    Include/ITr2MultiPassScene.h
+    Include/ITr2NamedPredicate.h
+    Include/ITr2Scene.h
+    Include/ITr2Updateable.h
+    Include/ITr2ValueBinding.h
+    Include/ITriColor.h
+    Include/ITriConstants.h
+    Include/ITriCurveLength.h
+    Include/ITriDevice.h
+    Include/ITriDuration.h
+    Include/ITriEffectParameter.h
+    Include/ITriFunction.h
+    Include/ITriMatrix.h
+    Include/ITriObserverLocal.h
+    Include/ITriQuaternion.h
+    Include/ITriTargetable.h
+    Include/ITriTextureRes.h
+    Include/ITriVector.h
+    Include/Point.h
+    Include/Rect.h
+    Include/Tr2Curve.h
+    Include/Tr2WindowHandle.h
+    Include/TriColor.h
+    Include/TriMath.h
+    Include/TriMath.h
+    Include/TriQuaternion.h
+    Include/TriVector.h
+)
+
 set(_SOURCES
     Audio/ITr2AudEmitter.h
     Audio/ITr2Audio.h
