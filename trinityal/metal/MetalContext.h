@@ -41,6 +41,7 @@ public:
 	void DestroyConstantBuffer( void* buffer );
 
 	id<MTLDevice>        GetDevice();
+    id<MTLCommandQueue>  GetCommandQueue();
 
 	MTLSamplerDescriptor* CreateSamplerDescriptor();
 	void DestroySamplerDescriptor(MTLSamplerDescriptor* samplerDescriptor);
