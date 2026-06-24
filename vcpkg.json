@@ -172,6 +172,19 @@
         }
       ]
     },
+    "webgpu": {
+      "description": "Create WebGPU targets backed by native Dawn",
+      "supports": "windows & x64",
+      "dependencies": [
+        {
+          "name": "dawn",
+          "default-features": false,
+          "features": [
+            "d3d12"
+          ]
+        }
+      ]
+    },
     "with-granny": {
       "description": "Include Granny support",
       "dependencies": [

@@ -18,6 +18,7 @@ else()
     if(WIN32)
         option(BUILD_DX11 "Build dx11." OFF)
         option(BUILD_DX12 "Build dx12." OFF)
+        option(BUILD_WEBGPU "Build WebGPU via native Dawn." OFF)
     elseif(APPLE)
         option(BUILD_METAL "Build Metal." OFF)
     endif()
@@ -32,6 +33,10 @@ else()
 
     if (BUILD_METAL)
         list(APPEND VCPKG_MANIFEST_FEATURES "metal")
+    endif()
+
+    if (BUILD_WEBGPU)
+        list(APPEND VCPKG_MANIFEST_FEATURES "webgpu")
     endif()
 
     if (BUILD_SHADER_COMPILER)

@@ -2017,6 +2017,20 @@ if(WIN32)
         set_shared_trinity_properties(${TRINITY_DX12_TARGET_NAME} carbon-trinity-dx12)
     endif()
 
+    if (BUILD_WEBGPU)
+
+        set(TRINITY_WEBGPU_TARGET_NAME trinity_webgpu)
+
+        ccp_add_library(${TRINITY_WEBGPU_TARGET_NAME} SHARED)
+        target_compile_definitions(${TRINITY_WEBGPU_TARGET_NAME}
+            PRIVATE
+                TRINITY_PLATFORM=TRINITY_WEBGPU
+                TRINITYNAME=_trinity_webgpu
+        )
+        target_link_libraries(${TRINITY_WEBGPU_TARGET_NAME} PRIVATE TrinityAL_webgpu)
+        set_shared_trinity_properties(${TRINITY_WEBGPU_TARGET_NAME} carbon-trinity-webgpu)
+    endif()
+
 elseif(APPLE)
     if(BUILD_METAL)
         enable_language(OBJCXX)

@@ -7,6 +7,12 @@
   "registries": [
     {
       "kind": "git",
+      "repository": "https://github.com/microsoft/vcpkg.git",
+      "baseline": "031f4afe03be385aee354f15be6e6b1fe57497c7",
+      "packages": ["dawn"]
+    },
+    {
+      "kind": "git",
       "repository": "git@github.com:ccpgames/carbon-vcpkg-registry.git",
       "baseline": "57a05b5fd6add43ed9f5965d1a27417b11bd8c15",
       "packages": ["carbon-pdmprotowrapper",

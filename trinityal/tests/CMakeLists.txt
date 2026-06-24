@@ -262,6 +262,21 @@ if(WIN32)
 
     endif()
 
+    if (BUILD_WEBGPU)
+        ccp_add_executable(TrinityALTest_webgpu ${_SOURCES})
+        target_link_libraries(TrinityALTest_webgpu PRIVATE TrinityAL_webgpu)
+        target_compile_definitions(TrinityALTest_webgpu PRIVATE TRINITY_PLATFORM=TRINITY_WEBGPU)
+        set_shared_trinityaltest_properties(TrinityALTest_webgpu)
+
+        add_custom_command(
+            TARGET TrinityALTest_webgpu POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_RUNTIME_DLLS:TrinityALTest_webgpu> $<TARGET_FILE_DIR:TrinityALTest_webgpu>
+            COMMAND_EXPAND_LISTS
+        )
+
+        set_target_properties(TrinityALTest_webgpu PROPERTIES FOLDER "Tests")
+    endif()
+
 endif()
 
 

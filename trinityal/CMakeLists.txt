@@ -481,6 +481,20 @@ if(WIN32)
         set_shared_trinityal_properties(dx12)
     endif()
 
+    if (BUILD_WEBGPU)
+
+        if (BUILD_FOR_PYTHON_2)
+            message(FATAL_ERROR "The WebGPU/Dawn target is only wired for the vcpkg manifest build.")
+        else()
+            find_package(dawn CONFIG REQUIRED)
+        endif()
+
+        ccp_add_library(TrinityAL_webgpu STATIC)
+        target_compile_definitions(TrinityAL_webgpu PUBLIC TRINITY_PLATFORM=TRINITY_WEBGPU)
+        target_link_libraries(TrinityAL_webgpu PUBLIC dawn::webgpu_dawn)
+        set_shared_trinityal_properties(webgpu)
+    endif()
+
 elseif(APPLE)
     
     if(BUILD_METAL)

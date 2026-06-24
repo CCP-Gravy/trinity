@@ -10,6 +10,7 @@
 #define TRINITY_STUB		5
 #define TRINITY_DIRECTX12	6
 #define TRINITY_METAL       10
+#define TRINITY_WEBGPU      11
 
 #ifndef TRINITY_PLATFORM
 #	error TRINITY_PLATFORM must be set
@@ -81,6 +82,16 @@
 #define TRINITY_PLATFORM_SYMBOL metal
 #define TRINITY_PLATFORM_SYMBOL_SUFFIX Metal
 #define TRINITY_PLATFORM_NAME "metal"
+
+#elif TRINITY_PLATFORM == TRINITY_WEBGPU
+
+// The first WebGPU milestone builds as a distinct Dawn-linked target, but
+// reuses the stub AL surface until the Dawn backend owns each resource type.
+#undef TRINITY_STUB
+#define TRINITY_STUB TRINITY_WEBGPU
+#define TRINITY_PLATFORM_SYMBOL stub
+#define TRINITY_PLATFORM_SYMBOL_SUFFIX Stub
+#define TRINITY_PLATFORM_NAME "webgpu"
 
 #else
 
